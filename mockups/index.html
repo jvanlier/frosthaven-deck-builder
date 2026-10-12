@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Frosthaven deck builder — design mockups</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:24px;background:#eee;color:#222}
+h1{margin:0 0 4px}p{margin:0 0 18px;color:#555}
+.controls{margin-bottom:16px;display:flex;gap:8px}.controls button{padding:6px 12px;border-radius:6px;border:1px solid #bbb;background:#fff;cursor:pointer}.controls button.on{background:#222;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.col h2{margin:0 0 2px;font-size:18px}.col small{display:block;color:#666;margin-bottom:8px;min-height:36px}
+iframe{width:100%;height:760px;border:1px solid #ccc;border-radius:12px;background:#fff}
+.phone iframe{width:390px;height:780px}
+</style></head><body>
+<h1>Design mockups</h1><p>All three use the same sample build. Each one is interactive: switch levels, try the level-up (pick, then tap deck cards to drop), and open a card. Click a title to open it full screen.</p>
+<div class="controls"><button id="d" class="on">Desktop-ish</button><button id="p">Phone (390px)</button></div>
+<div class="grid" id="g">
+  <div class="col"><h2><a href="a-glacier.html">A · Glacier</a></h2><small>Dark, icy and image-first. App-style bottom tabs, level pills, sticky 12-card strip during level-up.</small><iframe src="a-glacier.html"></iframe></div>
+  <div class="col"><h2><a href="b-field-notes.html">B · Field Notes</a></h2><small>Light, editorial, list-first. Sidebar level timeline, guidance inline, motivations as a journal, 3-step level-up wizard.</small><iframe src="b-field-notes.html"></iframe></div>
+  <div class="col"><h2><a href="c-tabletop.html">C · Tabletop</a></h2><small>Board-game feel. Campaign track for levels 1–9, fanned hand, "offering" level-up, Gantt-style chronicle overview.</small><iframe src="c-tabletop.html"></iframe></div>
+</div>
+<script>
+d.onclick = () => { g.className = "grid"; d.className = "on"; p.className = ""; };
+p.onclick = () => { g.className = "grid phone"; p.className = "on"; d.className = ""; };
+</script></body></html>

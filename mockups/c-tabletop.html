@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C · Tabletop</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wood:#2a1d15;--wood2:#3a281c;--felt:#1f2a26;--gold:#d9a84e;--gold2:#f3d48a;--txt:#f1e7d6;--mut:#b8a68c;--line:#5a4430;--ok:#8fcf7a;--warn:#f0a94b;--bad:#e46c5a;--ice:#8ecae6}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:"Source Sans 3",system-ui,sans-serif;color:var(--txt);min-height:100vh;
+  background:radial-gradient(ellipse at 50% 0%,#2e3d37 0%,var(--felt) 60%,#121a17 100%);}
+button{font:inherit;color:inherit;cursor:pointer}
+.cinzel{font-family:Cinzel,serif;letter-spacing:.06em}
+header{background:linear-gradient(180deg,var(--wood2),var(--wood));border-bottom:3px solid var(--gold);box-shadow:0 6px 20px #0009;padding:12px 18px 0}
+.hrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hrow h1{font-family:Cinzel,serif;font-size:22px;margin:0;color:var(--gold2)}
+.hrow .sub{color:var(--mut);font-size:14px}
+.spacer{flex:1}
+.menu{display:flex;gap:4px}
+.menu button{border:1px solid var(--line);background:#0003;border-radius:6px;padding:6px 12px;font-family:Cinzel,serif;font-size:13px;letter-spacing:.05em}
+.menu button.on{background:var(--gold);color:var(--wood);border-color:var(--gold)}
+.track{display:flex;align-items:center;justify-content:space-between;max-width:760px;margin:14px auto 0;padding:0 8px 16px;position:relative}
+.track:before{content:"";position:absolute;left:24px;right:24px;top:22px;height:4px;background:repeating-linear-gradient(90deg,var(--gold) 0 10px,transparent 10px 16px);opacity:.5}
+.medal{position:relative;z-index:1;width:46px;height:46px;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.medal i{width:44px;height:44px;display:grid;place-items:center;font-style:normal;font-family:Cinzel,serif;font-weight:800;font-size:18px;clip-path:polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%);background:var(--line);color:var(--mut)}
+.medal.have i{background:linear-gradient(180deg,var(--gold2),var(--gold));color:var(--wood)}
+.medal.on i{background:linear-gradient(180deg,#fff,var(--ice));color:#0b2533;box-shadow:0 0 0 3px var(--ice)}
+.medal.on{filter:drop-shadow(0 0 10px var(--ice))}
+.medal.next i{background:#0005;color:var(--gold2);outline:2px dashed var(--gold)}
+.medal small{font-size:10px;color:var(--mut);white-space:nowrap}
+main{max-width:1200px;margin:0 auto;padding:22px 16px 60px}
+.banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.banner h2{font-family:Cinzel,serif;margin:0;font-size:24px}
+.seal{font-size:12px;font-weight:700;padding:4px 10px;border-radius:4px;background:#0004;border:1px solid}
+.seal.ok{color:var(--ok)}.seal.warn{color:var(--warn)}
+.btn{border:1px solid var(--gold);background:#0003;color:var(--gold2);border-radius:6px;padding:9px 16px;font-family:Cinzel,serif;font-weight:600;letter-spacing:.05em}
+.btn.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));color:var(--wood);border-color:var(--gold2);box-shadow:0 4px 14px #d9a84e55}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.toggle{border:1px solid var(--line);background:#0003;border-radius:6px;padding:8px 12px}
+.toggle[aria-pressed=true]{border-color:var(--ice);color:var(--ice)}
+/* fanned hand */
+.hand{position:relative;height:400px;margin:10px auto 0;max-width:1100px}
+.hand .card{position:absolute;bottom:90px;left:50%;width:170px;border:0;background:none;padding:0;transform-origin:50% 140%;transition:transform .2s,z-index 0s}
+.hand .card img{width:100%;border-radius:10px;box-shadow:0 10px 24px #000b;display:block;border:1px solid #0006}
+.hand .card:hover,.hand .card:focus-visible{z-index:50!important;transform:var(--t) translateY(-60px) scale(1.12)!important}
+.hand .new:after{content:"NEW";position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--ice);color:#0b2533;font-weight:800;font-size:11px;padding:2px 8px;border-radius:99px}
+.guides{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:18px}
+.gcard{display:grid;grid-template-columns:64px 1fr;gap:10px;background:#0003;border:1px solid var(--line);border-radius:10px;padding:10px}
+.gcard img{width:64px;border-radius:5px}.gcard p{margin:4px 0 0;font-size:14px;color:var(--mut);line-height:1.4}
+.ledger{margin-top:30px;background:linear-gradient(180deg,#efe2c6,#e2d0ab);color:#3a2a1a;border-radius:6px;padding:18px 22px;box-shadow:0 10px 30px #0008;position:relative}
+.ledger h3{font-family:Cinzel,serif;margin:0 0 10px}
+.ledger .ln{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:8px 0;border-top:1px solid #3a2a1a22}
+.ledger .k{font-family:Cinzel,serif;font-weight:800;font-size:12px}.k.add,.k.pick{color:#2f6b2a}.k.drop{color:#9c2f22}
+.ledger em{color:#7a6650}
+.ledger .nn{background:none;border:0;padding:0;color:#7a6650;text-decoration:underline dotted}
+@media(max-width:700px){
+  .hand{height:auto;display:flex;overflow-x:auto;gap:10px;scroll-snap-type:x mandatory;padding:20px 4px}
+  .hand .card{position:relative;left:auto;bottom:auto;transform:none!important;flex:0 0 60%;scroll-snap-align:center}
+  .track{overflow-x:auto;gap:8px}.menu{width:100%;overflow-x:auto}
+}
+/* level-up */
+.table{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.zone{border:2px dashed #d9a84e66;border-radius:14px;padding:14px;background:#0002}
+.zone h3{font-family:Cinzel,serif;margin:0 0 10px;color:var(--gold2);font-size:16px;display:flex;align-items:center;gap:10px}
+.instr{font-family:"Source Sans 3";font-size:15px;font-weight:700;padding:4px 12px;border-radius:99px;background:#0005}
+.instr.warn{color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}.instr.ok{color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}.instr.info{color:var(--ice);box-shadow:inset 0 0 0 1px var(--ice)}
+.row{display:flex;gap:8px;overflow-x:auto;padding:14px 4px 6px}
+.row .card{flex:0 0 92px;border:0;background:none;padding:0;position:relative;transition:transform .15s}
+.row .card img{width:100%;border-radius:7px;display:block;box-shadow:0 4px 10px #0008}
+.row .card:hover{transform:translateY(-6px)}
+.row .card.dropped{transform:translateY(14px) rotate(-4deg);opacity:.5}
+.row .card.dropped:before{content:"DISCARD";position:absolute;inset:40% -4px auto;z-index:1;text-align:center;background:var(--bad);color:#fff;font-weight:800;font-size:11px;letter-spacing:.1em;transform:rotate(-12deg)}
+.row .new:after{content:"NEW";position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--ice);color:#0b2533;font-weight:800;font-size:10px;padding:1px 6px;border-radius:99px}
+.offer{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;padding:10px}
+.offer .cand{width:220px;border:0;background:none;padding:0;position:relative;transition:transform .2s}
+.offer .cand img{width:100%;border-radius:12px;box-shadow:0 14px 30px #000b}
+.offer .cand:hover{transform:translateY(-6px) rotate(-1deg)}
+.offer .cand[aria-pressed=true]{transform:translateY(-10px)}
+.offer .cand[aria-pressed=true] img{box-shadow:0 0 0 4px var(--gold2),0 0 40px #f3d48a99}
+.offer .cand[aria-pressed=true]:after{content:"✦ CHOSEN ✦";position:absolute;bottom:-26px;left:0;right:0;text-align:center;font-family:Cinzel,serif;font-weight:800;color:var(--gold2)}
+.offer.small .cand{width:120px}
+.bar{display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+textarea{width:100%;background:#fff9ee;border:1px solid #3a2a1a44;border-radius:6px;padding:8px;font:inherit;color:#3a2a1a;min-height:54px}
+/* overview gantt */
+.gantt{background:#0003;border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.gr{display:grid;grid-template-columns:190px repeat(var(--n),minmax(70px,1fr));align-items:center;min-height:30px}
+.gr.hd{font-family:Cinzel,serif;color:var(--gold2);position:sticky;top:0}
+.gr.hd button{border:0;background:none;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:4px}
+.gr .nm{font-size:14px;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gr .nm small{color:var(--mut)}
+.gsec{font-family:Cinzel,serif;color:var(--mut);font-size:12px;margin:12px 0 4px;border-bottom:1px solid var(--line)}
+.seg{height:16px;position:relative;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.seg.d{background:linear-gradient(180deg,var(--gold2),var(--gold));color:var(--wood)}
+.seg.p{height:4px;background:var(--line)}
+.seg.d.s{border-radius:8px 0 0 8px}.seg.d.e{border-radius:0 8px 8px 0}.seg.d.s.e{border-radius:8px}
+.mk{position:absolute;font-size:12px;font-weight:800;padding:0 4px;border-radius:4px;background:var(--wood);color:var(--gold2);border:1px solid var(--gold);top:-9px}
+.mk.drop{color:var(--bad);border-color:var(--bad)}.mk.note{right:2px;left:auto;top:auto;background:none;border:0;color:var(--ice)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);font-size:13px;margin:6px 0 14px}
+dialog{border:3px solid var(--gold);background:var(--wood);color:var(--txt);border-radius:14px;padding:20px;max-width:760px;width:calc(100% - 24px)}
+dialog::backdrop{background:#000c}
+.dlg{display:grid;grid-template-columns:280px 1fr;gap:20px}.dlg img{width:100%;border-radius:12px}
+@media(max-width:640px){.dlg{grid-template-columns:1fr}.row{flex-wrap:wrap;gap:5px;overflow:visible}.row .card{flex-basis:calc((100% - 25px)/6)}.menu button{padding:5px 8px;font-size:11px}.hrow h1{font-size:18px}.banner h2{font-size:19px}.offer .cand{width:44%}.offer.small .cand{width:28%}}
+</style></head><body>
+<header>
+  <div class="hrow"><h1>Snowdancer</h1><span class="sub">“Freeze control” · began at level 3</span><span class="spacer"></span>
+    <span class="sub" style="color:var(--ok)">● saved</span>
+    <div class="menu" id="menu"></div></div>
+  <div class="track" id="track"></div>
+</header>
+<main id="main"></main>
+<dialog id="dlg"></dialog>
+<script src="cards.js"></script><script src="data.js"></script>
+<script>
+let screen = location.hash.slice(1) || "deck", L = MAX, showG = false;
+const $ = s => document.querySelector(s);
+const img = id => `<img src="${C[id].img}" alt="${esc(C[id].name)}, level ${C[id].level}">`;
+function chrome() {
+  $("#menu").innerHTML = [["deck", "Hand"], ["levelup", "Level up"], ["overview", "Chronicle"], ["notes", "Ledger"]].map(([k, n]) => `<button class="${screen === k ? "on" : ""}" data-s="${k}">${n}</button>`).join("");
+  $("#track").innerHTML = [...Array(9)].map((_, i) => { const l = i + 1, have = LEVELS.includes(l);
+    const cls = have ? `have ${l === L && screen === "deck" ? "on" : ""}` : l === MAX + 1 ? `next ${screen === "levelup" ? "on" : ""}` : "";
+    const lab = l < BUILD.startLevel ? "—" : have ? (changes(l).start ? "start" : C[changes(l).pick].name.split(" ")[0]) : l === MAX + 1 ? "level up" : "";
+    return `<button class="medal ${cls}" ${have ? `data-l="${l}"` : l === MAX + 1 ? `data-s="levelup"` : "disabled"} aria-label="Level ${l}"><i>${l}</i><small>${esc(lab)}</small></button>`; }).join("");
+}
+function fan(ids, newIds) {
+  const n = ids.length, spread = Math.min(70, 1000 / n);
+  return `<div class="hand">${ids.map((id, i) => { const k = i - (n - 1) / 2, t = `translateX(calc(-50% + ${k * spread}px)) rotate(${k * 4}deg) translateY(${Math.abs(k) * Math.abs(k) * 2}px)`;
+    return `<button class="card ${newIds.includes(id) ? "new" : ""}" data-c="${id}" style="--t:${t};transform:${t};z-index:${i}">${img(id)}</button>`; }).join("")}</div>`;
+}
+function ledger(l, title) {
+  const c = changes(l), rows = [];
+  if (c.start) { BUILD.startPicks.forEach(p => rows.push(["pick", `Level ${p.forLevel} pick`, p.cardId, motivation(l, p.cardId, "add")]));
+    pool(l).filter(id => !deck(l).includes(id)).forEach(id => rows.push(["exclude", "Left behind", id, motivation(l, id, "exclude")])); }
+  else { c.added.forEach(a => rows.push(["add", a === c.pick ? "Chosen" : "Returned", a, motivation(l, a, "add")])); c.dropped.forEach(d => rows.push(["drop", "Discarded", d, motivation(l, d, "drop")])); }
+  return `<div class="ledger"><h3>${title || (c.start ? "The starting hand" : `Level ${l}`)}</h3>${rows.map(([k, lab, id, m]) => `<div class="ln"><span class="k ${k}">${lab.toUpperCase()}</span><div><b>${esc(C[id].name)}</b> — ${m ? `<em>${esc(m)}</em>` : `<button class="nn">add note</button>`}</div></div>`).join("")}</div>`;
+}
+function deckScreen() {
+  const d = deck(L), c = changes(L);
+  return `<div class="banner"><h2>Hand at level ${L}</h2><span class="seal ${d.length === HAND ? "ok" : "warn"}">${d.length === HAND ? "✔ COMPLETE" : "◐ INCOMPLETE"} ${d.length}/${HAND}</span><span class="spacer"></span>
+    <button class="toggle" id="tg" aria-pressed="${showG}">📜 Show guidance</button><button class="btn">Edit</button>${L === MAX ? `<button class="btn primary" data-s="levelup">Level up ⟶ ${MAX + 1}</button>` : ""}</div>
+    ${showG ? `<div class="guides">${d.map(id => `<button class="gcard" data-c="${id}" style="text-align:left;color:inherit">${img(id)}<div><b>${esc(C[id].name)}</b> <small style="color:var(--mut)">${C[id].init}</small><p>${esc(BUILD.guidance[id] || "No guidance yet")}</p></div></button>`).join("")}</div>` : fan(d, c.added)}
+    ${ledger(L)}`;
+}
+function levelupScreen() {
+  const ins = LU.instruction(), w = LU.working();
+  return `<div class="banner"><h2>Level ${LU.from} ⟶ ${LU.to}</h2><span class="spacer"></span><button class="btn" id="reset">Reset</button><button class="btn primary" ${ins.tone === "ok" ? "" : "disabled"}>Seal it</button></div>
+  <div class="table">
+    <div class="zone" style="position:sticky;top:0;z-index:3;background:#1f2a26f2"><h3>Your hand <span class="instr ${ins.tone}">${ins.text}</span></h3>
+      <div class="row">${w.map(id => `<button class="card ${LU.dropped.includes(id) ? "dropped" : ""} ${id === LU.pick || LU.extra.includes(id) ? "new" : ""}" data-drop="${id}" aria-label="Toggle discard ${esc(C[id].name)}">${img(id)}</button>`).join("")}</div></div>
+    <div class="zone"><h3>The offering · level ${LU.to}</h3><div class="offer">${LU.newly().map(id => `<button class="cand" data-pick="${id}" aria-pressed="${LU.pick === id}">${img(id)}</button>`).join("")}</div>
+      <h3 style="margin-top:34px;color:var(--mut)">Passed over before</h3><div class="offer small">${LU.earlier().map(id => `<button class="cand" data-pick="${id}" aria-pressed="${LU.pick === id}">${img(id)}</button>`).join("")}</div></div>
+    ${LU.pick ? ledgerInputs() : ""}
+    <details class="zone"><summary class="cinzel" style="cursor:pointer;color:var(--gold2)">Return more cards from your pool…</summary><div class="row">${LU.swapIns().map(id => `<button class="card" data-extra="${id}">${img(id)}</button>`).join("")}</div></details>
+  </div>`;
+}
+function ledgerInputs() {
+  return `<div class="ledger"><h3>Notes for the ledger <small style="font-family:'Source Sans 3';font-weight:400">(optional)</small></h3>
+    <div class="ln"><span class="k add">CHOSEN</span><div><b>${esc(C[LU.pick].name)}</b><textarea placeholder="Why this one?"></textarea></div></div>
+    ${LU.dropped.map(id => `<div class="ln"><span class="k drop">DISCARDED</span><div><b>${esc(C[id].name)}</b><textarea placeholder="Why let it go?"></textarea></div></div>`).join("")}</div>`;
+}
+function overviewScreen() {
+  const groups = ["1", "X", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const row = id => `<div class="gr" style="--n:${LEVELS.length}"><div class="nm">${esc(C[id].name)} <small>${C[id].init}</small></div>${LEVELS.map((l, i) => { const s = cellState(id, l);
+    const prev = i > 0 && cellState(id, LEVELS[i - 1]).inDeck, next = i < LEVELS.length - 1 && cellState(id, LEVELS[i + 1]).inDeck;
+    const mk = s.picked ? `<span class="mk">★</span>` : s.added ? `<span class="mk">+</span>` : s.dropped ? `<span class="mk drop">−</span>` : "";
+    return `<div class="seg ${s.inDeck ? "d" : s.inPool ? "p" : ""} ${s.inDeck && !prev ? "s" : ""} ${s.inDeck && !next ? "e" : ""}" title="${s.inDeck ? "In hand" : s.inPool ? "In pool" : "Not owned"}">${mk}${s.note ? `<span class="mk note">✎</span>` : ""}</div>`; }).join("")}</div>`;
+  return `<div class="banner"><h2>Chronicle</h2></div>
+  <div class="legend"><span><b style="color:var(--gold)">▬</b> in hand</span><span><b style="color:var(--line)">—</b> in pool only</span><span>blank = not owned</span><span>★ chosen · + returned · − discarded · <span style="color:var(--ice)">✎</span> note</span></div>
+  <div class="gantt"><div class="gr hd" style="--n:${LEVELS.length}"><div>Card</div>${LEVELS.map(l => `<div style="text-align:center"><button data-l="${l}">Level ${l}</button><div style="font-family:'Source Sans 3';font-size:11px;color:var(--mut)">${changes(l).start ? "start" : `${changes(l).dropped.length} swap(s)`}</div></div>`).join("")}</div>
+  ${groups.map(g => `<div class="gsec">LEVEL ${g}</div>` + sortIds(CARDS.filter(c => c.level === g).map(c => c.id)).map(row).join("")).join("")}</div>`;
+}
+function notesScreen() { return `<div class="banner"><h2>The Ledger</h2></div>` + LEVELS.map(l => ledger(l)).join(""); }
+function openCard(id) {
+  const ms = Object.entries(BUILD.motivations).filter(([k]) => k.split("|")[1] === id);
+  $("#dlg").innerHTML = `<div class="dlg">${img(id)}<div><h2 class="cinzel" style="margin:0;color:var(--gold2)">${esc(C[id].name)}</h2><div style="color:var(--mut)">Level ${C[id].level} · Initiative ${C[id].init}</div>
+    <h4 class="cinzel">Guidance</h4><textarea style="min-height:110px">${esc(BUILD.guidance[id] || "")}</textarea>
+    <h4 class="cinzel">From the ledger</h4>${ms.map(([k, t]) => { const [l, , kind] = k.split("|"); return `<p><b>${kind.toUpperCase()} · L${l}</b> — <i>${esc(t || "—")}</i></p>`; }).join("") || "<i>Nothing written yet</i>"}
+    <button class="btn" onclick="dlg.close()">Close</button></div></div>`;
+  $("#dlg").showModal();
+}
+function render() { location.hash = screen; chrome(); $("#main").innerHTML = { deck: deckScreen, levelup: levelupScreen, overview: overviewScreen, notes: notesScreen }[screen](); }
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t || t.disabled) return; const d = t.dataset;
+  if (d.l) { L = +d.l; screen = "deck"; } else if (d.s) screen = d.s; else if (t.id === "tg") showG = !showG;
+  else if (t.id === "reset") LU.reset(); else if (d.pick) LU.choose(d.pick); else if (d.drop) LU.toggleDrop(d.drop); else if (d.extra) LU.addExtra(d.extra);
+  else if (d.c) return openCard(d.c); else return;
+  render();
+});
+render();
+</script></body></html>
