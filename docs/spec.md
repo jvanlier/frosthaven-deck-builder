@@ -1,62 +1,65 @@
 # Frosthaven Deck Builder — Specification
 
-Status: draft v1 · Owner: jvanlier
+Status: draft v2 · Owner: jvanlier
 
 ## 1. Purpose
 
-A personal web app for planning Frosthaven character "decks" (the hand of ability
-cards you bring into a scenario) across levels 1–9, and for recording *why* each card
-was picked, dropped or never used.
+A personal web app for planning Frosthaven character "decks" (the hand of ability cards
+brought into a scenario) across levels 1–9, and for recording *why* cards were picked,
+dropped or left out, plus per-build guidance on how to play each card.
 
-Single user. Works on phone and desktop with shared persistent storage across devices.
-No authentication, authorization or multi-user support in v1 (see §9).
+Single user, personal use. Self-hosted on a Raspberry Pi on the home network, reached
+only via VPN, used from phone and desktop with shared server-side storage. No
+authentication, authorization or multi-user support.
 
-## 2. Game rules the app enforces
+## 2. Game rules
 
 Sources: [Frosthaven Rule Book](https://pikdonker.github.io/frosthaven-rule-book/)
 (p.4–5 Creating a Character, p.34 Ability Cards, p.62–63 Level Up, p.65 Create a
-Character, p.70 Character Respeccing), [Frosthaven FAQ](https://cephalofairgames.github.io/frosthaven-faq/).
+Character), [Frosthaven FAQ](https://cephalofairgames.github.io/frosthaven-faq/).
 
 ### 2.1 Terminology
 
-| Term     | Meaning                                                              | App term |
-|----------|----------------------------------------------------------------------|----------|
-| **Pool** | All ability cards the character owns and may choose from.            | Pool     |
-| **Hand** | The cards brought into a scenario. Size = the character's hand size. | Deck     |
+| Term     | Meaning                                                                       |
+|----------|-------------------------------------------------------------------------------|
+| **Pool** | All ability cards the character owns at a level and may choose from.          |
+| **Deck** | The hand: the `handSize` cards brought into a scenario, chosen from the pool. |
 
-In this spec, **deck** means the hand of `handSize` cards picked from the pool for a
-given level. The UI uses "Deck" for this. The pool is shown as a separate concept.
-
-### 2.2 Rules
+### 2.2 Rules the app enforces
 
 - **R1 Starting pool.** At level 1 the pool contains all level 1 and all level X cards.
   Level X cards count as level 1 for all purposes.
-- **R2 One card per level-up.** Each level-up from L−1 to L adds **exactly one** card to
-  the pool. That card must be of level ≤ L and not already in the pool. Example: at
-  level 3 you may take either level 3 card, or the level 2 card you skipped.
-- **R3 Picks are permanent.** Pool additions can't be undone within a build. (The
-  optional *Respeccing* variant is out of scope; to explore alternatives, fork the build
-  instead. See §4.6.)
-- **R4 Starting above level 1.** A character created at level N starts at level 1 and
-  levels up immediately (prosperity leveling) to N. So it still makes N−1 pool picks,
-  one per level 2..N, and each pick follows R2 for its own level.
-- **R5 Deck size.** A deck has exactly `handSize` cards, all from the current pool.
-  Level-up doesn't increase hand size.
-- **R6 Deck changes are free.** In the game the hand can be re-chosen before every
-  scenario, so changing a deck never violates a rule. That's why "swap out more than one
-  card" at level-up is allowed (§4.4).
+- **R2 One pick per level.** Reaching level L adds exactly one card to the pool. It must
+  be of level ≤ L and not already in the pool. Example: at level 3 the pick is either
+  level 3 card or the level 2 card skipped earlier.
+- **R3 Starting above level 1.** A character created at level N levels up from 1 to N
+  immediately (prosperity leveling), so it makes one pick for each level 2..N, each
+  following R2 for its own level.
+- **R4 Deck size.** A deck has exactly `handSize` cards, all from the pool at that level.
 
-Consequence (for validation and display): at level L the pool has
-`|L1| + |LX| + (L−1)` cards, and for K ≥ 2 at most `L − K + 1` pool cards can be of
-level ≥ K.
-Validating R2 per level enforces this automatically.
+### 2.3 Rules deliberately *not* enforced
+
+- **Permanence of picks.** By the rules as written, a level-up pick is permanent. The app
+  allows revising any pick or deck at any level, at any time. Enforcing permanence is
+  left to the player at the table.
+- **Deck changes** are free in the game (the hand is re-chosen before every scenario).
+  Swapping more than one card at a level-up is therefore normal, not a rule violation.
+
+### 2.4 Enforcement style
+
+**Soft enforcement:**
+- Pick and add options only ever offer cards that are valid at that moment.
+- An incomplete deck (fewer than `handSize` cards) can be saved. It gets an
+  **incomplete** badge.
+- A level whose stored changes became invalid because of an edit at an earlier level is
+  flagged **invalid** (§5.2). It stays saved until fixed.
 
 ## 3. Content: characters and cards
 
 ### 3.1 Supported characters
 
-v1: **Snowdancer** only (class code `SD`), hand size **11**. Character data lives in a
-static, data-driven file so more classes can be added later without code changes.
+v1: **Snowdancer** only (class code `SD`), hand size **11**. Character data is static and
+data-driven, so more classes can be added without code changes.
 
 ```ts
 type CardLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | "X";
@@ -66,7 +69,7 @@ interface Card {
   name: string;        // "Cold Snap"
   level: CardLevel;
   initiative: number;
-  image: string;       // path relative to image base URL
+  image: string;       // path under /cards, e.g. "SD/fh-cold-snap.jpeg"
 }
 
 interface Character {
@@ -81,16 +84,20 @@ interface Character {
 
 - Source: <https://www.gloomhavencards.com/fh/characters/SD>, a client-rendered app
   backed by [cmlenius/gloomhaven-card-browser](https://github.com/cmlenius/gloomhaven-card-browser).
-  - Metadata: `data/character-abilities/frosthaven.json` (filter on `/SD/` in `image`;
-    skip the `sd-back` entry with level `-`).
-  - Images: `https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/images/images/{image}`,
-    e.g. `.../character-ability-cards/frosthaven/SD/fh-cold-snap.jpeg`.
-- A one-off script (`scripts/import-cards`) generates `src/data/characters/SD.json`.
-  The output is committed, and the script is re-run only when needed.
-- **Images are hot-linked, not committed.** The artwork is © Cephalofair Games and this
-  is personal use. Store the image path in card data. Keep the base URL in one constant
-  so it can be swapped for a mirror or cache later.
-- Card back (`fh-sd-back.jpeg`) can serve as a placeholder while images load.
+  - Metadata: `data/character-abilities/frosthaven.json` (`main` branch). Filter on
+    `/SD/` in `image` and skip the `sd-back` entry (level `-`).
+  - Images: `https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/images/images/{image}`.
+- A one-off script `scripts/import-cards.ts`:
+  - downloads metadata and images,
+  - writes `src/shared/data/characters/SD.json` and `public/cards/SD/*.jpeg` (including
+    the card back, used as an image placeholder).
+  - The output is **committed**, so the app has no runtime dependency on external hosts.
+- **Attribution** goes in the README and an in-app "About" view:
+  - Card artwork and text © Cephalofair Games, used for personal, non-commercial
+    purposes.
+  - Card data and images sourced via cmlenius/gloomhaven-card-browser.
+  - The repo is public. If Cephalofair asks, remove the images (or make the repo
+    private).
 
 ### 3.3 Snowdancer card list (30 cards)
 
@@ -111,243 +118,301 @@ interface Character {
 
 ## 4. Functional requirements
 
-### 4.1 Character selection
+Visual design and styling are out of scope for this document (next session). The
+requirements below describe behavior and what must be visible, not layout or styling.
 
-- **F1** Show a character picker. v1 lists only Snowdancer. With one character, the app
-  may auto-select it, but the picker must still exist.
+### 4.1 Hierarchy
 
-### 4.2 Builds
+Character → 1..n named builds → one deck per level (start level..9). There are no deck
+variants within a level.
 
-- **F2** A character has 1+ named builds. Create, rename and delete (with confirmation).
-- **F3** On creation the user picks the build's **start level** (1–9). Levels below the
-  start level don't exist in that build and are never asked for.
-- **F4** **Fork build at level L.** Copies all level entries `< L` (picks, decks,
-  motivations) into a new named build. This is the only way to "change" a locked pick
-  (R3), and is also useful for comparing alternative plans.
+### 4.2 Character selection
 
-### 4.3 Initial deck (start level)
+- **F1** A character picker. v1 lists only Snowdancer and may auto-select it.
 
-- **F5** If start level N > 1, the user first makes the pool picks for levels 2..N. Each
-  pick is shown as its own slot ("Level 2 pick", "Level 3 pick", …) with only valid
-  options per R2/R4. Each pick can have a motivation (§4.7, kind `add`).
-- **F6** The user then picks `handSize` cards from the pool at level N. Show a counter
-  (e.g. `9 / 11`) and disallow selecting more than `handSize`.
-- **F7** After the deck is complete, prompt (non-blocking) for an **exclusion
-  motivation** for every card of level ≤ N that isn't in the deck. That covers pool cards
-  left out and, for N > 1, cards not picked into the pool. List these cards with an
-  empty text field each. The user can skip and fill them in later.
+### 4.3 Builds
 
-### 4.4 Level-up (L → L+1) — optimized happy path
+- **F2** Create, rename, copy and delete (with confirmation) builds.
+- **F3** On creation the user chooses a **start level** (1–9). Levels below it don't
+  exist in the build and are never asked for. The start level can't be changed later;
+  copy the build instead.
+- **F4** **Copy build** deep-copies everything: levels, picks, decks, motivations and
+  guidance. The user names the copy.
 
-Available when level L exists in the build and L < 9. Creates level L+1, which starts
-as a copy of deck L.
+### 4.4 Start level
 
-1. **Current deck at a glance.** A compact strip or grid showing all `handSize` cards of
-   deck L, visible for the whole flow without scrolling on phone and desktop. Tapping a
-   card enlarges it.
-2. **Pick new pool card (R2).** Show candidates:
+- **F5** For start level N > 1: one pick slot per level 2..N ("Level 2 pick", …). Each
+  slot offers only options valid per R2/R3 given the other slots.
+- **F6** Select up to `handSize` cards from the pool for the starting deck, with a counter
+  (`9 / 11`). Selecting more than `handSize` isn't possible.
+
+### 4.5 Level-up (L → L+1): happy path
+
+Available from the deck view of the highest existing level when L < 9. It is also used,
+pre-filled, to **revise** an existing level-up (§4.6).
+
+1. **Current deck at a glance.** All cards of deck L stay visible together for the
+   whole flow, on phone and desktop. Tapping a card enlarges it.
+2. **Pick a new pool card (R2).** Candidates:
    - **Newly unlocked**: the level L+1 cards, shown first and prominently.
    - **Earlier, not yet picked**: unpicked cards of level 2..L, in a secondary section.
-   Choosing one is required. Optional "Why this card?" field (motivation kind `add`).
-3. **Add to deck.** By default the picked card goes into the deck, making it
-   `handSize + 1`. The app shows a clear instruction: **"Remove 1 card — your deck has
-   12/11."**
-4. **Drop one card.** The user taps one of the 12 cards (including the new one, which
-   means "add to pool only, keep deck as-is"). Optional "Why does this card go?" field
-   (motivation kind `drop`).
-5. **Done.** Save is enabled only when the deck has exactly `handSize` cards.
+3. **Added to deck by default.** The deck is now `handSize + 1`, and the app shows a
+   clear instruction: **"Remove 1 card — 12 / 11"**.
+4. **Drop one card.** Any of the 12 can be dropped. Dropping the newly picked card means
+   "add to pool only".
+5. **Done.**
 
-**Extra swaps (secondary path).** A "Swap more cards" action lets the user add any other
-pool card not currently in the deck, then remove one, repeated as needed. Each
-added/dropped card gets its own motivation field. Dropped cards stay in the pool and can
-come back at any later level.
+**Swap more cards (secondary path).** Add any other pool card not in the deck, then drop
+one, repeated as needed. Dropped cards stay in the pool and can return at any later
+level.
 
-**Planning ahead.** Level-ups can be chained to build levels up to 9 before they are
-reached in the campaign (see lock state, §4.5).
+**Optional motivation fields** sit next to the picked, added and dropped cards (§4.8).
+The app never prompts for them and never blocks on them.
 
-### 4.5 Lock state (permanence)
+**Planning ahead.** Level-ups can be chained up to level 9 at any time.
 
-- **F8** Each level entry is `planned` or `locked`. Locking means "I actually reached
-  this level in the campaign". The user locks a level explicitly ("Mark level as
-  reached"). Levels lock in order: the start level first, then L only if L−1 is locked.
-- **F9** A locked level's pool pick(s) can't be changed (R3). Its **deck can still be
-  edited** (R6).
-- **F10** A planned level's pick can be changed. Then re-validate all later levels. Any
-  later level whose pick is now invalid (e.g. same card picked twice) or whose deck
-  references a card no longer in the pool is flagged **invalid**. The user must resolve
-  it, either by editing or by deleting that level and everything after it.
-- **F11** Only the highest level of a build can be deleted, and only if it's planned.
-  Deleting cascades to its motivations.
+### 4.6 Revising earlier choices
 
-### 4.6 Views
+- **F7** Any level can be edited at any time: the start picks, the start deck, and any
+  later pick, added card or dropped card. Editing a level-up reopens the §4.5 flow,
+  pre-filled.
+- **F8** Edits **propagate** to later levels, because later levels store only their own
+  changes (§5.2). Later levels whose changes no longer apply are flagged **invalid**, with
+  the specific problem. Each problem has a one-tap fix: remove that change, or choose a
+  replacement.
+- **F9** Only the highest level can be deleted. Deleting a level also deletes its
+  motivations.
 
-- **F12 Deck view (character, build, level).** The main screen. Shows the `handSize`
-  cards as images, sorted by level then initiative. Includes:
-  - level switcher (prev/next and direct select among existing levels),
-  - badges: `locked`/`planned`, `invalid`,
-  - a **"Show guidance"** toggle that reveals each card's guidance text below or over it.
-    Individual cards can also be expanded on tap.
-  - this level's changes: picked card, added and dropped cards, with their motivations.
-- **F13 Build overview (all levels at once).** A matrix: rows = cards (grouped by card
-  level), columns = build levels. Each cell shows one of: *in deck* ●, *in pool, not in
-  deck* ○, *not in pool* (blank). It also marks *picked into pool here* (★), *added* (+)
-  and *dropped* (−). Cells with a motivation show an indicator, and tapping one opens it.
-  A per-level summary row shows the pick and the swap count. Tapping a column header
-  opens that level's deck view.
-- **F14 Pool view** per level (secondary). All pool cards, with deck membership shown.
+### 4.7 Views
 
-### 4.7 Motivations
+- **F10 Deck view (build, level).** The main screen:
+  - The deck's cards as images, sorted by card level, then initiative.
+  - A level switcher (previous/next, and a direct choice among existing levels).
+  - Badges: **incomplete**, **invalid**.
+  - A **"Show guidance"** toggle that reveals each card's guidance with the card. A
+    single card can also be expanded on tap.
+  - This level's changes (pick, added, dropped) with their motivations.
+  - Entry points: level up, edit this level, overview, motivations.
+- **F11 Build overview.** A matrix:
+  - Rows = all cards, grouped by card level. Columns = the build's levels.
+  - Each cell shows one of: *in deck*, *in pool but not in deck*, *not in pool*.
+  - Markers for *picked here*, *added here* and *dropped here*, plus an indicator for
+    cells that have a motivation. Tapping the indicator opens the motivation.
+  - A per-level summary shows the pick and the number of swaps.
+  - Tapping a column header opens that deck view.
+- **F12 Card detail.** Opens from anything that shows the card. Shows a large image,
+  editable guidance for this build, and all of this build's motivations about this card.
 
-Three kinds, all free text (plain text or Markdown, rendered safely, never raw HTML):
+### 4.8 Motivations
 
-| Kind      | Attached to              | Question                                                      |
-|-----------|--------------------------|---------------------------------------------------------------|
-| `exclude` | build, start level, card | Why was this card never a good fit for the build?             |
-| `add`     | build, level, card       | Why is this card the best choice? (pool pick and/or deck add) |
-| `drop`    | build, level, card       | Why is this the worst card, why does it have to go?           |
+All optional, free text, stored per build:
 
-- **F15** Motivations can be entered inline during deck creation and level-up, and edited
-  at any time afterwards.
-- **F16 Motivations view** per build. Grouped as: *Never picked* (exclude), then per
-  level *Added* / *Dropped*. Each entry shows the card thumbnail and inline-editable text.
-  Filter: "only missing motivations". Store and show `updatedAt` so the user can see
-  when an opinion was last revised.
-- **F17 Card detail** (from any view): large image, guidance, and all motivations about
-  this card across the build's levels.
-- **F18** If a change means a motivation no longer applies (e.g. a different card is now
+| Kind      | Key                      | Meaning                                                                                                                            |
+|-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `exclude` | build, start level, card | Why this card was never a good fit for the build. Available for every card of level ≤ start level that's not in the starting deck. |
+| `add`     | build, level, card       | Why this card is the best choice: the pool pick and/or a card added to the deck at this level.                                     |
+| `drop`    | build, level, card       | Why this is the worst card and has to go.                                                                                          |
+
+- **F13** Where motivations can be entered:
+  - inline wherever the subject appears (level-up flow, deck view changes, card detail),
+  - in the starting-deck view, a collapsed "Not in deck" section with an optional note
+    per card.
+  - A missing motivation is shown as a subtle "add note" affordance, never as a warning.
+- **F14 Motivations view** per build, to inspect and revise:
+  - Grouped as *Not in starting deck*, then per level *Picked / Added* and *Dropped*.
+  - Each entry shows a thumbnail and inline-editable text with its `updatedAt`.
+  - Only motivations that currently apply are listed.
+- **F15** If an edit means a motivation no longer applies (e.g. a different card is now
   dropped), keep it in storage but hide it. It reappears if the same change is made
-  again. No UI for orphaned motivations in v1.
+  again.
+- **F16** Text is plain text or Markdown, rendered safely (never raw HTML).
 
-### 4.8 Card guidance
+### 4.9 Card guidance
 
-- **F19** One free-text guidance note per card per character: how to use it, when to
-  play top/bottom, combos. It's shared across all builds, since card advice usually
-  doesn't depend on the build.
-- **F20** Editable from card detail. Shown in deck view behind the "Show guidance"
-  toggle (F12).
+- **F17** One free-text guidance note per **build × card**: how to use it, when to play
+  top/bottom, combos. Edited in card detail, shown in the deck view behind "Show
+  guidance" (F10). Rendering follows F16.
 
-### 4.9 Remember last position
+### 4.10 Remember last position
 
-- **F21** Store `{ characterId, buildId, level }` in `localStorage` on navigation. On app
-  start, open that deck view. Fall back to the build list if the build or level no longer
-  exists. Per device, not synced.
+- **F18** Store `{ characterId, buildId, level }` in `localStorage` on navigation, per
+  device and not synced. On app start, open that deck view. Fall back to the build list
+  if the build or level no longer exists.
 
-### 4.10 Backup
+### 4.11 Backup
 
-- **F22** Export all user data as a JSON file, and import it (replaces all data, after
-  confirmation and schema validation). This is a cheap safety net for the single-document
-  storage model.
+- **F19** Export all user data as a JSON file. Import replaces all data, after
+  confirmation and schema validation.
 
-## 5. Data model (user data)
+## 5. Data model
 
-All user data is one JSON document.
+### 5.1 Stored (user data, one JSON document)
 
 ```ts
 interface AppData {
   schemaVersion: 1;
-  revision: number;                 // incremented by server on every save
+  revision: number;                    // set by the server, +1 per save
   builds: Build[];
-  motivations: Motivation[];
-  guidance: Record<string, Record<string, Guidance>>; // characterId -> cardId -> note
 }
 
 interface Build {
-  id: string;                       // uuid
-  characterId: string;              // "SD"
+  id: string;                          // uuid
+  characterId: string;                 // "SD"
   name: string;
-  startLevel: number;               // 1..9
-  levels: LevelEntry[];             // contiguous, startLevel..max, sorted
+  startLevel: number;                  // 1..9
+  startPicks: Pick[];                  // one per level 2..startLevel (empty if 1)
+  startDeck: string[];                 // cardIds, ≤ handSize
+  levelUps: LevelUp[];                 // levels startLevel+1..max, contiguous, sorted
+  motivations: Motivation[];
+  guidance: Record<string, Note>;      // cardId -> note
   createdAt: string; updatedAt: string; // ISO 8601
 }
 
-interface LevelEntry {
-  level: number;                    // 1..9
-  status: "planned" | "locked";
-  // Pool picks made to reach this level. Start level N: picks for 2..N (empty if N=1).
-  // Any later level: exactly one pick, for this level.
-  picks: { forLevel: number; cardId: string }[];
-  deck: string[];                   // cardIds, length === handSize when complete
+interface Pick { forLevel: number; cardId: string | null }  // null = not chosen yet
+
+interface LevelUp {
+  level: number;
+  pick: string | null;                 // cardId added to the pool at this level
+  added: string[];                     // cardIds entering the deck vs. previous level
+  dropped: string[];                   // cardIds leaving the deck vs. previous level
 }
 
 interface Motivation {
-  buildId: string;
   level: number;
   cardId: string;
   kind: "exclude" | "add" | "drop";
   text: string;
   updatedAt: string;
-}                                   // unique key: (buildId, level, cardId, kind)
+}                                      // unique per build: (level, cardId, kind)
 
-interface Guidance { text: string; updatedAt: string }
+interface Note { text: string; updatedAt: string }
 ```
 
-Derived (never stored): pool at level L = L1 ∪ LX ∪ all picks up to L. Added at L =
-`deck[L] \ deck[L−1]`. Dropped at L = `deck[L−1] \ deck[L]`.
+### 5.2 Derived (never stored), the rules engine
 
-### 5.1 Rules engine
+Decks are computed by replaying changes:
 
-A pure, UI-independent TypeScript module with unit tests. It exposes:
-`poolAt(build, level)`, `pickOptions(build, level)`, `validateBuild(build) → Issue[]`,
-`diff(build, level) → { added, dropped }`. Every rule in §2 and F8–F11 must have tests.
+- `pool(start)` = L1 ∪ LX ∪ `startPicks`. `pool(L)` = `pool(L−1)` ∪ {`pick(L)`}.
+- `deck(start)` = `startDeck`. `deck(L)` = (`deck(L−1)` \ `dropped(L)`) ∪ `added(L)`.
+- Editing a deck in the UI stores the normalized diff against the previous level's deck:
+  `added = new \ prev`, `dropped = prev \ new`.
 
-## 6. Storage and sync
+Validation issues per level:
+
+| Issue                                                  | Severity   |
+|--------------------------------------------------------|------------|
+| Missing pick                                           | incomplete |
+| Deck size < `handSize`                                 | incomplete |
+| Deck size > `handSize`                                 | invalid    |
+| Pick of level > L, or a card already in the pool       | invalid    |
+| Added card not in `pool(L)`, or already in `deck(L−1)` | invalid    |
+| Dropped card not in `deck(L−1)`                        | invalid    |
+| Unknown cardId                                         | invalid    |
+
+During replay, invalid operations are skipped so every deck stays well-defined. They are
+reported, never silently deleted.
+
+The engine is a pure TypeScript module in `src/shared/` with unit tests covering every
+rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOptions`,
+`addOptions`, `validateBuild` and `applyDeckEdit`.
+
+## 6. Storage, API and sync
 
 - **Server is the source of truth.** The whole `AppData` document is loaded on start and
-  saved as a whole (it's small: well under 100 KB).
-- **Saves** are debounced (~1 s) after changes. A status indicator shows *Saved*,
-  *Saving…* or *Unsaved / error (retry)*. Warn on page unload while changes are unsaved.
-- **Concurrency**: optimistic. `PUT` sends the last known `revision`. If the server's
-  revision is newer it responds `409`, and the app shows "Changed on another device —
-  reload" without merging. Overwriting newer data silently is not allowed.
-- **Server-side validation**: reject payloads that aren't valid JSON matching the schema
-  (shape/types, size cap e.g. 1 MB). This applies even without auth.
-- Offline editing is out of scope. If the backend is unreachable, show an error state.
+  saved as a whole (it's small, well under 100 KB).
+- **API**
+  - `GET /api/data` → `200 AppData`. Returns an empty document with `revision: 0` if no
+    file exists yet.
+  - `PUT /api/data` with body `{ baseRevision, data }`:
+    - If `baseRevision` equals the stored revision: `200 { revision }`.
+    - Otherwise: `409 { revision }`.
+  - `GET /api/health` → `200`.
+- **Server-side validation**: the same zod schema as the client. Reject malformed or
+  oversized payloads (cap 1 MB) with `400`/`413`.
+- **Client saves** are debounced (~1 s). A status indicator shows *Saved*, *Saving…* or
+  *Error (retry)*. Warn on page unload while changes are unsaved.
+- **On 409**: show "Changed on another device — reload". Never merge or overwrite
+  silently.
+- **Persistence on disk** (`DATA_DIR`, default `/data`):
+  - `appdata.json`, written atomically: write a temp file, fsync, rename.
+  - Before each save, the current file is copied to
+    `backups/appdata-<timestamp>-r<revision>.json`. Only the latest 20 are kept.
+  - Getting data off the Pi (the Pi runs on an SSD) is configured on the host, outside
+    the app.
+- No offline editing. If the server is unreachable, show an error state.
 
-## 7. Technical approach (recommended)
+## 7. Technical approach
 
-- **Frontend**: Vite + React + TypeScript SPA, responsive (phone-first for the deck view).
-  Routing via URL so views are linkable: `/c/:characterId/b/:buildId/l/:level`,
-  `/…/overview`, `/…/motivations`.
-- **Hosting + API**: Cloudflare Pages (static) + one Pages Function `GET/PUT /api/data`
-  storing the document in Workers KV. Free tier, no server to maintain. Auth can be added
-  later with Cloudflare Access without code changes.
-  - Alternative if preferred: any host with a tiny JSON endpoint (e.g. Firebase/Supabase).
-    The app only depends on the `GET/PUT /api/data` contract.
-- **Tests**: Vitest for the rules engine and data validation.
-- **Accessibility**: card images have `alt` = card name + level. All actions are keyboard
-  reachable, and selection state is never conveyed by color alone.
+- **Language**: TypeScript end to end. The zod schema, card data and rules engine are
+  shared by client and server.
+- **Frontend**: Vite + React + TypeScript, React Router. Routes:
+  - `/` (resume last position or build list)
+  - `/c/:characterId` (builds)
+  - `/c/:characterId/b/:buildId/l/:level` (deck view)
+  - `…/b/:buildId/l/:level/level-up`
+  - `…/b/:buildId/overview`
+  - `…/b/:buildId/motivations`
+  - `/about`
+- **Backend**: Hono on Node (`@hono/node-server`). It serves the `/api/*` routes above
+  and the built static frontend (with SPA fallback to `index.html`).
+- **Tests**: Vitest (rules engine, schema, storage write/backup/409 logic).
+- **Repo layout**: one package.
+  ```
+  src/client/   src/server/   src/shared/{schema,rules,data}/
+  public/cards/SD/   scripts/import-cards.ts
+  Dockerfile   docker-compose.yml   docs/
+  ```
+- **Deployment (Raspberry Pi, arm64)**
+  - **`Dockerfile`**, multi-stage, on `node:22-alpine`:
+    - The build stage runs `npm ci` and `npm run build`, producing `dist/client` and
+      `dist/server`.
+    - The runtime stage gets production deps and `dist` only, runs as the non-root
+      `node` user, and has `EXPOSE 8080`, `VOLUME /data` and a `HEALTHCHECK` on
+      `/api/health`.
+    - It runs `CMD ["node", "dist/server/index.js"]`.
+  - **`docker-compose.yml`**: one service, `restart: unless-stopped`, port mapping (e.g.
+    `8080:8080`), and the volume `./data:/data`. Env vars: `PORT`, `DATA_DIR`.
+  - Built and run on the Pi with `docker compose up -d --build`.
+  - Reachable only on the LAN/VPN, so no TLS or auth in the app.
+- **Accessibility**:
+  - Card images have `alt` = card name and level.
+  - All actions are keyboard reachable.
+  - State (in deck / dropped / invalid) is never conveyed by color alone.
 
 ## 8. Acceptance scenarios
 
-1. Create build "Freeze control", start level 1 → choose 11 of 14 cards → prompted for 3
-   exclusion motivations → deck view shows 11 cards.
-2. Create build at start level 3 → asked for a level 2 pick (options: Birds in a Tempest,
-   Tornado) and a level 3 pick (options: the remaining level 2 card plus Cold Snap and
-   Polar Vortex) → choose 11 of 16 pool cards.
-3. Level-up 3 → 4: current deck visible, level 4 cards shown first, earlier unpicked
-   cards shown secondary. Pick Biting Frost → "Remove 1 card (12/11)" → drop one → save.
-   Takes ≤ 4 taps excluding motivation typing.
-4. Level-up with extra swaps: pick + drop, then bring back a previously dropped pool card
-   and drop another → overview shows 2 adds and 2 drops at that level.
-5. Locked level: the pick can't be changed, the deck can still be edited. "Fork at level"
-   creates a copy to explore an alternative.
-6. Changing a planned level's pick to a card already picked later flags the later level
-   as invalid.
-7. Reopening the app on the same device opens the last viewed build and level.
-8. Data created on desktop is visible on phone after reload. Concurrent edits produce a
-   409 conflict message instead of data loss.
-9. "Show guidance" reveals guidance under every card in the deck view.
+1. Create build "Freeze control" at start level 1 and choose 11 of 14 cards. A
+   collapsed "Not in deck" section offers optional notes for the other 3.
+2. Create a build at start level 3:
+   - The level 2 slot offers Birds in a Tempest and Tornado.
+   - The level 3 slot offers the other level 2 card, Cold Snap and Polar Vortex.
+   - Then choose 11 of 16 pool cards.
+3. Level-up 3 → 4: deck 3 stays visible and the level 4 cards are shown first. Pick
+   Biting Frost → "Remove 1 card — 12 / 11" → drop one → done. That takes ≤ 4 taps
+   without typing.
+4. Extra swaps: pick and drop, then bring back an earlier dropped pool card and drop
+   another. The overview shows 2 added and 2 dropped at that level.
+5. With levels 3–6 planned, change the level 4 pick:
+   - Levels 5–6 update automatically.
+   - If level 5 picked the card now picked at level 4, level 5 is flagged invalid with a
+     fix action.
+6. Edit the starting deck to drop a card that level 5 also drops. Level 5 is flagged
+   invalid. After the "remove change" fix, that drop's motivation is hidden, not deleted.
+7. Save a starting deck with 9 / 11 cards. It shows **incomplete** and is still stored.
+8. "Show guidance" reveals this build's guidance for every card in the deck view. A copy
+   of the build has the same guidance, which can then be edited independently.
+9. Reopen the app on the same device: it opens the last viewed build and level.
+10. Data edited on desktop shows on phone after reload. A stale save from another device
+    gets the 409 message, and no data is lost.
+11. After 25 saves, `data/backups/` holds exactly the 20 most recent backups.
 
 ## 9. Out of scope (v1)
 
-Authentication / multi-user · characters other than Snowdancer · respeccing variant ·
-perks, attack modifier decks, items, enhancements · offline editing · motivation/guidance
-history · build-specific guidance overrides.
-
-## 10. Open questions
-
-- Should guidance also allow a per-build override (F19 currently makes it global per
-  card)?
-- Should there be an "unlock latest level" escape hatch for mis-clicks, or is fork
-  enough?
-- Confirm hosting choice (Cloudflare Pages + KV recommended).
+- Authentication / multi-user / TLS.
+- Characters other than Snowdancer.
+- Situational deck variants (planned later).
+- Changing a build's start level.
+- Perks, attack modifiers, items, enhancements.
+- Offline editing.
+- Motivation/guidance history.
+- Visual design (next session).
