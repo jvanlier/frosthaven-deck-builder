@@ -218,23 +218,44 @@ function LevelUpEditor({
       "(prefers-reduced-motion: reduce)",
     ).matches;
     heading.focus({ preventScroll: true });
-    const header = document.querySelector<HTMLElement>(".app-header");
-    const status = document.querySelector<HTMLElement>(".level-up-status");
-    const stickyBottom =
-      (header?.getBoundingClientRect().bottom ?? 0) +
-      (status?.getBoundingClientRect().height ?? 0);
-    const targetTop = Math.max(
-      0,
-      heading.getBoundingClientRect().top + window.scrollY - stickyBottom - 16,
-    );
-    window.scrollTo({
-      top: targetTop,
-      behavior: reducedMotion ? "auto" : "smooth",
-    });
+
+    // Picking adds the note field and card before the deck, so calculate the
+    // destination after React has committed the new layout. Keep the whole
+    // heading between the sticky editor controls and fixed bottom navigation.
     requestAnimationFrame(() => {
-      if (Math.abs(heading.getBoundingClientRect().top - 16) > 32) {
-        window.scrollTo({ top: targetTop, behavior: "auto" });
+      const headingBox = heading.getBoundingClientRect();
+      const stickyBottom = Math.max(
+        0,
+        ...Array.from(
+          document.querySelectorAll<HTMLElement>(
+            ".app-header, .save-feedback, .level-up-status",
+          ),
+        ).map((element) => element.getBoundingClientRect().bottom),
+      );
+      const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
+      const visibleBottom = Math.min(
+        window.innerHeight,
+        bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
+      );
+      const safeTop = stickyBottom + 16;
+      const safeBottom = visibleBottom - 16;
+      if (safeBottom <= safeTop) {
+        return;
       }
+
+      let targetTop = window.scrollY;
+      if (headingBox.top < safeTop) {
+        targetTop += headingBox.top - safeTop;
+      } else if (headingBox.bottom > safeBottom) {
+        targetTop += headingBox.bottom - safeBottom;
+      }
+      if (targetTop === window.scrollY) {
+        return;
+      }
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: reducedMotion ? "auto" : "smooth",
+      });
     });
   }
 

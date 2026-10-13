@@ -248,6 +248,19 @@ test("scrolls and moves focus to the deck after a mobile pick", async ({
         (await deckHeading.boundingBox())?.y ?? Number.POSITIVE_INFINITY,
     )
     .toBeLessThan(568);
+  await expect
+    .poll(async () => {
+      const headingBox = await deckHeading.boundingBox();
+      const bottomTabs = await page
+        .getByRole("navigation", { name: "Primary navigation" })
+        .boundingBox();
+      return (
+        (headingBox?.y ?? 568) +
+        (headingBox?.height ?? 0) -
+        (bottomTabs?.y ?? 0)
+      );
+    })
+    .toBeLessThanOrEqual(0);
 });
 
 test("keeps extra swaps open, notes stable and new cards undroppable", async ({
