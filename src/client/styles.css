@@ -249,6 +249,14 @@ h2 {
   margin-bottom: 2.5rem;
 }
 
+.build-list-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: 60rem;
+}
+
 .page-intro > p:last-child,
 .content-card p,
 .empty-card p,
@@ -284,21 +292,58 @@ h2 {
   list-style: none;
 }
 
-.build-list a {
+.build-list-item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 1.15rem 1.25rem;
   border: 1px solid #2c617b;
   border-radius: 0.75rem;
-  color: #f7fcff;
   background: #0a2233;
+}
+
+.build-list-item > a {
+  display: grid;
+  flex: 1;
+  gap: 0.25rem;
+  color: #f7fcff;
   text-decoration: none;
 }
 
-.build-list a:hover {
+.build-list-item > a:hover {
+  color: #b7eaff;
+}
+
+.build-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.build-actions button,
+.secondary-button {
+  border-color: #477b94;
+  color: #d7eef8;
+  background: #173b55;
+  font-size: 0.85rem;
+}
+
+.build-actions button:hover,
+.secondary-button:hover {
   border-color: #8fd9f4;
-  background: #103249;
+  color: #07131f;
+  background: #b7eaff;
+}
+
+.danger-button {
+  border-color: #ffb2a8;
+  color: #fff8f5;
+  background: #7a302c;
+}
+
+.danger-button:hover {
+  background: #a4473f;
 }
 
 .build-list span {
@@ -307,6 +352,65 @@ h2 {
 
 .button-link {
   display: inline-block;
+}
+
+.form-dialog {
+  width: min(92vw, 30rem);
+  padding: 0;
+  border: 1px solid #6eabc5;
+  border-radius: 0.8rem;
+  color: #ecf7ff;
+  background: #07131f;
+  box-shadow: 0 1rem 4rem rgb(0 0 0 / 60%);
+}
+
+.form-dialog::backdrop {
+  background: rgb(0 0 0 / 78%);
+}
+
+.form-dialog form {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.form-dialog h2 {
+  margin: 0;
+}
+
+.form-dialog label {
+  display: grid;
+  gap: 0.4rem;
+  color: #b8d3e1;
+  font-weight: 700;
+}
+
+.form-dialog input,
+.form-dialog select {
+  width: 100%;
+  border: 1px solid #477b94;
+  border-radius: 0.4rem;
+  padding: 0.7rem;
+  color: #ecf7ff;
+  background: #0a2233;
+  font: inherit;
+}
+
+.form-dialog input:focus-visible,
+.form-dialog select:focus-visible {
+  outline: 3px solid #f9d875;
+  outline-offset: 2px;
+}
+
+.form-error {
+  margin: 0;
+  color: #ffb2a8;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: end;
+  gap: 0.6rem;
 }
 
 .save-feedback {
@@ -407,6 +511,134 @@ h2 {
   color: #496c7d;
   font-size: 0.82rem;
   text-align: center;
+}
+
+.starting-editor {
+  max-width: 78rem;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.save-hint,
+.section-description,
+.pick-waiting {
+  color: #8aaabd;
+}
+
+.editor-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #2c617b;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-heading h2,
+.pick-heading h3 {
+  margin-bottom: 0;
+}
+
+.editor-count {
+  color: #f9d875;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.pick-list {
+  display: grid;
+  gap: 2rem;
+}
+
+.pick-section {
+  padding-top: 1.5rem;
+  border-top: 1px solid #244c62;
+}
+
+.pick-section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.pick-section.active {
+  padding: 1.25rem;
+  border: 1px solid #477b94;
+  border-radius: 0.75rem;
+  background: rgb(10 34 51 / 58%);
+}
+
+.pick-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.selected-pick {
+  margin: 0;
+  color: #b8d3e1;
+}
+
+.issue-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 1rem 0;
+  padding: 0;
+  color: #ffdb91;
+  list-style: none;
+}
+
+.issue-invalid {
+  color: #ffb2a8;
+}
+
+.exclusions details {
+  padding: 1rem 1.25rem;
+  border: 1px solid #2c617b;
+  border-radius: 0.75rem;
+  background: rgb(10 34 51 / 70%);
+}
+
+.exclusions summary {
+  cursor: pointer;
+  color: #f7fcff;
+  font-weight: 750;
+}
+
+.exclusions p {
+  color: #b8d3e1;
+}
+
+.exclusion-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exclusion-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #244c62;
+}
+
+.exclusion-list small {
+  color: #8aaabd;
 }
 
 .card-grid {
@@ -589,6 +821,30 @@ h2 {
   .page-content,
   .shell {
     padding-top: 2.5rem;
+  }
+
+  .build-list-intro,
+  .editor-toolbar,
+  .section-heading,
+  .build-list-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .build-list-intro > button {
+    align-self: start;
+  }
+
+  .build-actions {
+    width: 100%;
+  }
+
+  .build-actions button {
+    flex: 1;
+  }
+
+  .editor-toolbar {
+    gap: 0.6rem;
   }
 
   .save-feedback {

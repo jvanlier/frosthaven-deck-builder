@@ -1,7 +1,9 @@
+import { z } from "zod";
 import {
   buildNameSchema,
   buildSchema,
   cardIdSchema,
+  MAX_OPERATION_ENTRIES,
   identifierSchema,
   levelSchema,
   motivationKey,
@@ -77,6 +79,57 @@ export function createBuild(
     guidance: {},
     createdAt: timestamp,
     updatedAt: timestamp,
+  });
+}
+
+export function setStartPick(
+  build: Build,
+  forLevel: number,
+  cardId: string | null,
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  const slotLevel = levelSchema.parse(forLevel);
+  const nextCardId = cardId === null ? null : cardIdSchema.parse(cardId);
+  const pickIndex = build.startPicks.findIndex(
+    (pick) => pick.forLevel === slotLevel,
+  );
+  if (pickIndex === -1) {
+    throw new Error(`No starting pick slot exists for level ${slotLevel}`);
+  }
+  if (build.startPicks[pickIndex]?.cardId === nextCardId) {
+    return build;
+  }
+
+  const startPicks = build.startPicks.map((pick, index) =>
+    index === pickIndex ? { ...pick, cardId: nextCardId } : { ...pick },
+  );
+  return buildSchema.parse({
+    ...build,
+    startPicks,
+    updatedAt: getNow(options),
+  });
+}
+
+export function setStartDeck(
+  build: Build,
+  cardIds: readonly string[],
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  const startDeck = z
+    .array(cardIdSchema)
+    .max(MAX_OPERATION_ENTRIES)
+    .parse([...cardIds]);
+  if (
+    startDeck.length === build.startDeck.length &&
+    startDeck.every((cardId, index) => cardId === build.startDeck[index])
+  ) {
+    return build;
+  }
+
+  return buildSchema.parse({
+    ...build,
+    startDeck,
+    updatedAt: getNow(options),
   });
 }
 

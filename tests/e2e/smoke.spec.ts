@@ -34,6 +34,21 @@ const fullFixtureData = {
     },
   ],
 };
+const startThreeFixtureData = {
+  ...fixtureData,
+  builds: [
+    {
+      ...fixtureData.builds[0],
+      id: "123e4567-e89b-42d3-a456-426614174001",
+      name: "Starting three",
+      startLevel: 3,
+      startPicks: [
+        { forLevel: 2, cardId: "birds-in-a-tempest" },
+        { forLevel: 3, cardId: "tornado" },
+      ],
+    },
+  ],
+};
 
 test("loads the deck builder shell and health status", async ({ page }) => {
   await page.goto("/");
@@ -106,6 +121,12 @@ test("renders contextual build navigation from stored build data", async ({
 
   await expect(page.getByText("Freeze control")).toBeVisible();
   await expect(page.getByText("Level 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Deck view is not available yet" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Open starting editor" }),
+  ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
   await expect(page.getByRole("link", { name: "Level up" })).toHaveAttribute(
     "href",
     `/c/SD/b/${fixtureBuildId}/l/1/level-up`,
@@ -248,5 +269,339 @@ test("fits the compact layout and exposes attribution", async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Attribution" }),
+  ).toBeVisible();
+});
+
+test("creates a starting build, caps the hand, and restores it after reload", async ({
+  page,
+}) => {
+  let persisted = { ...fixtureData, builds: [] as typeof fixtureData.builds };
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Create build" }).click();
+  const dialog = page.getByRole("dialog", { name: "Create build" });
+  await dialog.getByRole("button", { name: "Create build" }).click();
+  await expect(dialog.getByRole("alert")).toHaveText(
+    "Enter a name from 1 to 100 characters.",
+  );
+  await dialog.getByLabel("Build name").fill("Freeze control");
+  await dialog.getByRole("button", { name: "Create build" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Freeze control" }),
+  ).toBeVisible();
+
+  for (const name of [
+    "Blizzard",
+    "Chilling Impact",
+    "Cold Therapy",
+    "Cross Winds",
+    "Enticing Breeze",
+    "Frigid Growth",
+    "Gathering Force",
+    "Lifting Gust",
+    "Nature's Breath",
+  ]) {
+    await page
+      .getByRole("button", { name: `Add ${name} to starting deck` })
+      .click();
+  }
+  await expect(page.getByText("9 / 11 cards")).toBeVisible();
+  await expect
+    .poll(async () => persisted.builds[0]?.startDeck.length ?? 0, {
+      timeout: 5_000,
+    })
+    .toBe(9);
+  await page.reload();
+  await expect(page.getByText("9 / 11 cards")).toBeVisible();
+
+  for (const name of ["Snowball", "Whiteout"]) {
+    await page
+      .getByRole("button", { name: `Add ${name} to starting deck` })
+      .click();
+  }
+  await expect(page.getByText("11 / 11 cards")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Add Blinding Vortex to starting deck" }),
+  ).toBeDisabled();
+
+  await expect
+    .poll(async () => persisted.builds[0]?.startDeck.length ?? 0, {
+      timeout: 5_000,
+    })
+    .toBe(11);
+  await page.reload();
+  await expect(page.getByText("11 / 11 cards")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Freeze control" }),
+  ).toBeVisible();
+});
+
+test("renames, copies, and confirms build deletion", async ({ page }) => {
+  let persisted = fixtureData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto("/");
+  const original = page.locator("li").filter({ hasText: "Freeze control" });
+  await original.getByRole("button", { name: "Rename" }).click();
+  const renameDialog = page.getByRole("dialog", { name: "Rename build" });
+  await renameDialog.getByLabel("Build name").fill("Cold control");
+  await renameDialog.getByRole("button", { name: "Rename build" }).click();
+  await expect(page.getByText("Cold control", { exact: true })).toBeVisible();
+
+  const renamed = page.locator("li").filter({ hasText: "Cold control" });
+  await renamed.getByRole("button", { name: "Copy" }).click();
+  const copyDialog = page.getByRole("dialog", { name: "Copy build" });
+  await copyDialog.getByLabel("Build name").fill("Independent copy");
+  await copyDialog.getByRole("button", { name: "Copy build" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Independent copy" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Add Blizzard to starting deck" })
+    .click();
+  await expect
+    .poll(async () =>
+      persisted.builds.map((build) => [build.name, build.startDeck]),
+    )
+    .toEqual([
+      ["Cold control", []],
+      ["Independent copy", ["blizzard"]],
+    ]);
+  await page.getByRole("link", { name: "Back to builds" }).click();
+  await expect(
+    page.getByText("Independent copy", { exact: true }),
+  ).toBeVisible();
+
+  const copied = page.locator("li").filter({ hasText: "Independent copy" });
+  await renamed.getByRole("button", { name: "Delete" }).click();
+  const deleteDialog = page.getByRole("dialog", { name: "Delete build?" });
+  await deleteDialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("Cold control", { exact: true })).toBeVisible();
+  await renamed.getByRole("button", { name: "Delete" }).click();
+  await page
+    .getByRole("dialog", { name: "Delete build?" })
+    .getByRole("button", { name: "Delete build" })
+    .click();
+  await expect(page.getByText("Cold control", { exact: true })).toHaveCount(0);
+  await expect(copied).toBeVisible();
+});
+
+test("copies a higher starting level with its pick slots intact", async ({
+  page,
+}) => {
+  let persisted = startThreeFixtureData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto("/");
+  await page.locator("li").getByRole("button", { name: "Copy" }).click();
+  const copyDialog = page.getByRole("dialog", { name: "Copy build" });
+  await copyDialog.getByLabel("Build name").fill("Higher copy");
+  await copyDialog.getByRole("button", { name: "Copy build" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Higher copy" }),
+  ).toBeVisible();
+  await expect(page.locator(".pick-section")).toHaveCount(2);
+  await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
+  await expect(
+    page.locator(".pick-section").nth(1).getByRole("status"),
+  ).toHaveText("Picked");
+  await expect
+    .poll(async () => {
+      const build = persisted.builds.find(
+        (candidate) => candidate.name === "Higher copy",
+      );
+      return [build?.startLevel, build?.startPicks.length];
+    })
+    .toEqual([3, 2]);
+});
+
+test("pauses open build dialogs after a save failure", async ({ page }) => {
+  let releaseSave!: () => void;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ...fixtureData, builds: [] }),
+      });
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      releaseSave = resolve;
+    });
+    await route.fulfill({ status: 503, body: "unavailable" });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Create build" }).click();
+  const createDialog = page.getByRole("dialog", { name: "Create build" });
+  await createDialog.getByLabel("Build name").fill("Pending build");
+  await createDialog.getByRole("button", { name: "Create build" }).click();
+  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page.getByRole("button", { name: "Create build" }).click();
+  await expect.poll(() => Boolean(releaseSave)).toBe(true);
+  releaseSave();
+  await expect(page.getByRole("alert")).toContainText("Error saving");
+  await expect(
+    page
+      .getByRole("dialog", { name: "Create build" })
+      .getByRole("button", { name: "Create build" }),
+  ).toBeDisabled();
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test("preserves a later starting pick while surfacing an earlier conflict", async ({
+  page,
+}) => {
+  let persisted = startThreeFixtureData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${startThreeFixtureData.builds[0].id}/l/3/start`);
+  await page
+    .locator(".pick-section")
+    .first()
+    .getByRole("button", { name: "Change pick" })
+    .click();
+  await page.getByRole("button", { name: "Pick Tornado" }).click();
+  await expect(page.locator(".pick-section").nth(1)).toContainText("Picked");
+  await expect(page.locator(".pick-section").nth(1)).toContainText("Tornado");
+  await expect(page.getByText("is already in the pool")).toBeVisible();
+  await expect
+    .poll(async () => {
+      const build = persisted.builds[0];
+      return [build?.startPicks[0]?.cardId, build?.startPicks[1]?.cardId];
+    })
+    .toEqual(["tornado", "tornado"]);
+});
+
+test("offers sequential legal picks for a higher starting level", async ({
+  page,
+}) => {
+  let persisted: {
+    schemaVersion: 1;
+    revision: number;
+    builds: Array<{ startPicks: Array<{ cardId: string | null }> }>;
+  } = { schemaVersion: 1, revision: 0, builds: [] };
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Create build" }).click();
+  const dialog = page.getByRole("dialog", { name: "Create build" });
+  await dialog.getByLabel("Build name").fill("Prosperity three");
+  await dialog.getByLabel("Start level").selectOption("3");
+  await dialog.getByRole("button", { name: "Create build" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Level 2 pick" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Birds in a Tempest" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Tornado" }),
+  ).toBeVisible();
+  await page.getByText("Not in starting deck (18)").click();
+  await expect(page.getByText("Cold Snap", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect
+    .poll(async () =>
+      persisted.builds[0]?.startPicks.map((pick) => pick.cardId),
+    )
+    .toEqual(["birds-in-a-tempest", null]);
+  await page.reload();
+  await expect(page.locator(".pick-section").first()).toContainText(
+    "Picked: Birds in a Tempest",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Level 3 pick" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Tornado" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Cold Snap" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Polar Vortex" }),
   ).toBeVisible();
 });
