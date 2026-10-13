@@ -126,6 +126,75 @@ test("renders contextual build navigation from stored build data", async ({
   );
 });
 
+test("keeps saving feedback below a populated mobile header while scrolling", async ({
+  page,
+}) => {
+  let releasePut!: () => void;
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(fullFixtureData),
+      });
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      releasePut = resolve;
+    });
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/9/__test/save-feedback`);
+  await page.getByRole("button", { name: "Trigger pending save" }).click();
+  const feedback = page.locator(".save-feedback");
+  await expect(feedback).toHaveText("Saving…");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect
+    .poll(async () => (await feedback.boundingBox())?.y ?? -1)
+    .toBeGreaterThanOrEqual(
+      (await page.locator(".app-header").boundingBox())!.height - 1,
+    );
+  releasePut();
+});
+
+test("keeps error and conflict feedback below the mobile header", async ({
+  page,
+}) => {
+  for (const [name, response] of [
+    ["error", { status: 503, body: "unavailable" }],
+    ["conflict", { status: 409, body: JSON.stringify({ revision: 1 }) }],
+  ] as const) {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.route("**/api/data", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(fullFixtureData),
+        });
+        return;
+      }
+      await route.fulfill({ status: response.status, body: response.body });
+    });
+    await page.goto(`/c/SD/b/${fixtureBuildId}/l/9/__test/save-feedback`);
+    await page.getByRole("button", { name: "Trigger pending save" }).click();
+    const feedback = page.locator(`.save-feedback.${name}`);
+    await expect(feedback).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect
+      .poll(async () => (await feedback.boundingBox())?.y ?? -1)
+      .toBeGreaterThanOrEqual(
+        (await page.locator(".app-header").boundingBox())!.height - 1,
+      );
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  }
+});
+
 test("keeps contextual level navigation within a narrow viewport", async ({
   page,
 }) => {
@@ -138,6 +207,7 @@ test("keeps contextual level navigation within a narrow viewport", async ({
     }),
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/9`);
+  await page.getByRole("link", { name: "9", exact: true }).waitFor();
 
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),

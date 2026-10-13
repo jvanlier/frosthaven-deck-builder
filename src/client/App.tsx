@@ -67,7 +67,13 @@ export default function App() {
         <Route path="/" element={<BuildList />} />
         <Route path="/about" element={<AboutView />} />
         {import.meta.env.DEV ? (
-          <Route path="/__test/cards" element={<CardPreview />} />
+          <>
+            <Route path="/__test/cards" element={<CardPreview />} />
+            <Route
+              path="/c/:characterId/b/:buildId/l/:level/__test/save-feedback"
+              element={<SaveFeedbackPreview />}
+            />
+          </>
         ) : null}
         <Route path="/c/:characterId" element={<BuildList />} />
         <Route
@@ -232,6 +238,37 @@ function CardPreview() {
         disabled={(card) => card.id === "paused-preview-card" && paused}
         onAction={(card) => setSelected(card.name)}
       />
+    </main>
+  );
+}
+
+function SaveFeedbackPreview() {
+  const { data, canMutate, updateData } = useAppData();
+
+  return (
+    <main
+      className="page-content"
+      aria-labelledby="save-feedback-preview-heading"
+    >
+      <section className="page-intro">
+        <p className="eyebrow">Component preview</p>
+        <h1 id="save-feedback-preview-heading">Save feedback</h1>
+        <button
+          type="button"
+          disabled={!canMutate || data === null}
+          onClick={() => {
+            if (data !== null) {
+              updateData((current) => ({
+                ...current,
+                revision: current.revision + 1,
+              }));
+            }
+          }}
+        >
+          Trigger pending save
+        </button>
+      </section>
+      <div aria-hidden="true" style={{ minHeight: "150vh" }} />
     </main>
   );
 }
