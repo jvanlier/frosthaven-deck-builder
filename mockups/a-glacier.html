@@ -67,6 +67,8 @@ nav.tabs button span{font-size:20px}nav.tabs button.on{color:var(--ice)}
 .zoom{position:absolute;z-index:3;right:8px;top:8px;width:36px;height:36px;border-radius:10px;border:1px solid #ffffff33;background:#03111fcc;color:#fff;font-size:18px;display:grid;place-items:center;backdrop-filter:blur(4px)}
 .zoom:hover,.zoom:focus-visible{background:var(--ice2);color:#03111f}
 .card.picked img{outline:3px solid var(--ice);outline-offset:2px;box-shadow:0 0 0 7px #38bdf833,0 0 40px #38bdf855}
+.card.added img{outline:3px solid var(--ice);outline-offset:2px;box-shadow:0 0 0 7px #38bdf833,0 0 40px #38bdf855}
+.card.added:before{content:"\2713 Added";position:absolute;z-index:1;top:-11px;left:50%;transform:translateX(-50%);background:var(--ice);color:#03111f;font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px}
 .card.picked:before{content:"\2713 Picked";position:absolute;z-index:1;top:-11px;left:50%;transform:translateX(-50%);background:var(--ice);color:#03111f;font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px}
 #zoomdlg{max-width:none;width:auto;background:transparent;border:0;overflow:visible}
 #zoomdlg img{display:block;height:min(82vh,900px);max-width:92vw;object-fit:contain;border-radius:18px;box-shadow:0 20px 60px #000}
@@ -150,7 +152,7 @@ const ACT = { pick: "data-pick", drop: "data-drop", extra: "data-extra" };
 function actionLabel(id, kind) {
   if (kind === "pick") return LU.pick === id ? "Unpick" : "Pick this card";
   if (kind === "drop") return LU.dropped.includes(id) ? "Keep in deck" : "Drop this card";
-  return "Add to deck";
+  return LU.extra.includes(id) ? "Remove from deck" : "Add to deck";
 }
 // Notes typed during the flow survive re-renders; the swap section remembers being open.
 const notes = {}; let swapOpen = false;
@@ -179,9 +181,9 @@ function levelupScreen() {
         LU.pick === id ? slot(id, "pick", "picked", "", why(id, "add")) : slot(id, "pick")).join("")}</div></div>`).join("")}
     </section><section id="lu-deck">
       <div class="group"><h2>Your deck · ${LU.count()} / ${HAND}</h2>
-      <div class="grid">${w.map(id => { const dr = LU.dropped.includes(id), extra = LU.extra.includes(id);
-        return slot(id, "drop", dr ? "dropped" : "", isNew(id) ? `<span class="tag new">NEW</span>` : "", dr ? why(id, "drop") : extra ? why(id, "add") : ""); }).join("")}</div></div>
-      <div class="group"><details id="swap" ${swapOpen ? "open" : ""}><summary>Swap more cards from the pool…</summary><div class="grid">${LU.swapIns().map(id => slot(id, "extra")).join("")}</div></details></div>
+      <div class="grid">${w.map(id => { const dr = LU.dropped.includes(id);
+        return slot(id, "drop", dr ? "dropped" : "", isNew(id) ? `<span class="tag new">NEW</span>` : "", dr ? why(id, "drop") : ""); }).join("")}</div></div>
+      <div class="group"><details id="swap" ${swapOpen ? "open" : ""}><summary>Swap more cards from the pool…</summary><div class="grid">${LU.swapIns().map(id => LU.extra.includes(id) ? slot(id, "extra", "added", "", why(id, "add")) : slot(id, "extra")).join("")}</div></details></div>
     </section></div>`;
 }
 function overviewScreen() {

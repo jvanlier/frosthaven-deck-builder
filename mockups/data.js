@@ -75,8 +75,11 @@ const LU = {
   count() { return this.working().length - this.dropped.length; },
   choose(id) { this.dropped = this.dropped.filter(x => x !== this.pick); this.pick = this.pick === id ? null : id; },
   toggleDrop(id) { this.dropped = this.dropped.includes(id) ? this.dropped.filter(x => x !== id) : [...this.dropped, id]; },
-  swapIns() { return sortIds(pool(this.from).filter(id => !this.base().includes(id) && !this.extra.includes(id))); },
-  addExtra(id) { this.extra.push(id); },
+  swapIns() { return sortIds(pool(this.from).filter(id => !this.base().includes(id))); },
+  addExtra(id) { // toggle: tapping an added card again takes it back out
+    if (this.extra.includes(id)) { this.extra = this.extra.filter(x => x !== id); this.dropped = this.dropped.filter(x => x !== id); }
+    else this.extra.push(id);
+  },
   reset() { this.pick = null; this.extra = []; this.dropped = []; },
   instruction() {
     const n = this.count();
