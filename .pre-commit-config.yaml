@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+  - repo: local
+    hooks:
+      - id: eslint-staged-source
+        name: ESLint (staged source)
+        entry: npx --no-install eslint --max-warnings=0
+        language: system
+        types_or: [ts, tsx]
+        files: ^(src|tests|scripts)/
+      - id: prettier-staged-source
+        name: Prettier (staged source)
+        entry: npx --no-install prettier --check
+        language: system
+        files: ^(src|tests|scripts|.*\.(json|css|html|js|mjs|ts|tsx|yaml|yml))$
+        exclude: ^(docs/mockup|dist|node_modules)/

@@ -1,0 +1,83 @@
+:root {
+  color: #ecf7ff;
+  background: #07131f;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top, #173b55 0, transparent 42rem), #07131f;
+}
+
+.shell {
+  width: min(100% - 2rem, 60rem);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 4rem 0;
+}
+
+.hero {
+  max-width: 42rem;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: #8fd9f4;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 1rem;
+  color: #f7fcff;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  line-height: 0.98;
+}
+
+.intro {
+  color: #b8d3e1;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+}
+
+.status-card {
+  max-width: 34rem;
+  margin-top: 5rem;
+  padding: 2rem;
+  border: 1px solid #2c617b;
+  border-radius: 1rem;
+  background: rgb(10 34 51 / 85%);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 22%);
+}
+
+.status-card h2 {
+  margin-bottom: 0.75rem;
+  color: #f7fcff;
+}
+
+.status-card p {
+  color: #b8d3e1;
+  line-height: 1.6;
+}
+
+.health {
+  margin-bottom: 0;
+  color: #9af0c2 !important;
+  font-weight: 700;
+}
