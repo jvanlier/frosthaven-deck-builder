@@ -1,6 +1,6 @@
 # Frosthaven Deck Builder — Specification
 
-Status: draft v2 · Owner: jvanlier
+Status: draft v3 · Owner: jvanlier
 
 ## 1. Purpose
 
@@ -76,6 +76,7 @@ interface Character {
   id: string;          // "SD"
   name: string;        // "Snowdancer"
   handSize: number;    // 11 (not in source data, set manually)
+  icon: string;        // class icon path under /icons, e.g. "SD.png" (set manually)
   cards: Card[];
 }
 ```
@@ -92,9 +93,11 @@ interface Character {
   - writes `src/shared/data/characters/SD.json` and `public/cards/SD/*.jpeg` (including
     the card back, used as an image placeholder).
   - The output is **committed**, so the app has no runtime dependency on external hosts.
+- **Class icon**: `public/icons/SD.png`, a white-on-transparent glyph so it can be tinted.
+  It isn't part of the card data source; copy it from `docs/mockup/snowdancer-icon.png`.
 - **Attribution** goes in the README and an in-app "About" view:
-  - Card artwork and text © Cephalofair Games, used for personal, non-commercial
-    purposes.
+  - Card artwork, text and class icons © Cephalofair Games, used for personal,
+    non-commercial purposes.
   - Card data and images sourced via cmlenius/gloomhaven-card-browser.
   - The repo is public. If Cephalofair asks, remove the images (or make the repo
     private).
@@ -118,8 +121,8 @@ interface Character {
 
 ## 4. Functional requirements
 
-Visual design and styling are out of scope for this document (next session). The
-requirements below describe behavior and what must be visible, not layout or styling.
+The requirements below describe behavior and what must be visible. The visual direction
+is set by the design mockup (§4.12).
 
 ### 4.1 Hierarchy
 
@@ -151,23 +154,52 @@ variants within a level.
 Available from the deck view of the highest existing level when L < 9. It is also used,
 pre-filled, to **revise** an existing level-up (§4.6).
 
-1. **Current deck at a glance.** All cards of deck L stay visible together for the
-   whole flow, on phone and desktop. Tapping a card enlarges it.
-2. **Pick a new pool card (R2).** Candidates:
+The screen has a sticky **status bar** and groups of cards, each separated by a visible
+divider. On wide screens the candidate groups and the deck sit side by side; on narrow
+screens they're stacked, and picking a card scrolls to the deck.
+
+- **Status bar** (always visible): the current instruction with the deck counter, Reset
+  and Done. Done is only enabled at exactly `handSize` cards.
+- **Your deck**: the cards of deck L plus the cards added in this flow.
+- **Pick** and **Swap more** candidates (below).
+
+All cards in the flow are shown at full readable size (§4.12), so the whole deck is not
+necessarily on screen at once.
+
+1. **Pick a new pool card (R2).** Candidates:
    - **Newly unlocked**: the level L+1 cards, shown first and prominently.
    - **Earlier, not yet picked**: unpicked cards of level 2..L, in a secondary section.
-3. **Added to deck by default.** The deck is now `handSize + 1`, and the app shows a
-   clear instruction: **"Remove 1 card — 12 / 11"**.
-4. **Drop one card.** Any of the 12 can be dropped. Dropping the newly picked card means
-   "add to pool only".
-5. **Done.**
+   - The picked card stays in place, marked *Picked*. Tapping it again un-picks it, and
+     tapping another candidate changes the pick.
+2. **Added to deck.** The pick always enters the deck, marked **NEW**. The deck is now
+   `handSize + 1`, and the status bar shows **"Remove 1 card — 12 / 11"**.
+3. **Drop one card.** Tap a deck card to drop it, and tap it again to keep it. Dropped
+   cards stay in place, marked *Dropped*.
+   - Cards that are **NEW** (picked or added in this flow) can't be dropped. Undo them
+     where they were chosen instead.
+   - So a pick always enters the deck at its own level. It can be dropped at a later
+     level.
+4. **Done.**
 
-**Swap more cards (secondary path).** Add any other pool card not in the deck, then drop
-one, repeated as needed. Dropped cards stay in the pool and can return at any later
-level.
+**Swap more cards (secondary path).** A collapsible "Swap more cards from the pool"
+section lists every pool card that isn't in deck L. It behaves like the pick sections:
+- Tapping a card adds it to the deck (NEW) and marks it *Added* in place. Tapping it
+  again removes it.
+- Then drop a card from the deck, repeated as needed.
+- The section stays open until the user closes it.
+- Dropped cards stay in the pool and can return at any later level.
 
-**Optional motivation fields** sit next to the picked, added and dropped cards (§4.8).
-The app never prompts for them and never blocks on them.
+**Optional motivation fields** (§4.8) are shown **on the card they're about**, as a note
+box over the lower part of the card:
+- "Why X?" on the picked card and on each *Added* card in the candidate sections.
+- "Why drop X?" on each dropped deck card.
+
+NEW cards in the deck don't get a second note box. The app never prompts for these notes
+and never blocks on them. Typed text is kept while the user keeps editing in the flow.
+
+**Enlarge.** Every card has an enlarge button (🔍) that shows the card at near full screen
+height, with the card's current action (e.g. *Drop this card*) and Close. In this flow, a
+tap on a card always performs its action; enlarging is never a long-press.
 
 **Planning ahead.** Level-ups can be chained up to level 9 at any time.
 
@@ -189,8 +221,8 @@ The app never prompts for them and never blocks on them.
   - The deck's cards as images, sorted by card level, then initiative.
   - A level switcher (previous/next, and a direct choice among existing levels).
   - Badges: **incomplete**, **invalid**.
-  - A **"Show guidance"** toggle that reveals each card's guidance with the card. A
-    single card can also be expanded on tap.
+  - A **"Show guidance"** toggle that reveals each card's guidance with the card. Tapping
+    a card opens card detail (F12).
   - This level's changes (pick, added, dropped) with their motivations.
   - Entry points: level up, edit this level, overview, motivations.
 - **F11 Build overview.** A matrix:
@@ -214,7 +246,8 @@ All optional, free text, stored per build:
 | `drop`    | build, level, card       | Why this is the worst card and has to go.                                                                                          |
 
 - **F13** Where motivations can be entered:
-  - inline wherever the subject appears (level-up flow, deck view changes, card detail),
+  - inline wherever the subject appears: in the level-up flow, on the card itself (§4.5);
+    in the deck view's changes; in card detail.
   - in the starting-deck view, a collapsed "Not in deck" section with an optional note
     per card.
   - A missing motivation is shown as a subtle "add note" affordance, never as a warning.
@@ -244,6 +277,23 @@ All optional, free text, stored per build:
 - **F19** Export all user data as a JSON file. Import replaces all data, after
   confirmation and schema validation.
 
+### 4.12 Visual design
+
+The visual direction is the clickable mockup in [`docs/mockup/`](mockup/README.md). It's a
+design reference with sample data, not code to reuse. Its key decisions:
+
+- **Look:** dark, icy, image-first.
+  - Header: the character's class icon (from `Character.icon`), the build name and the
+    level switcher. Never show a class abbreviation like "SD".
+  - Bottom tabs: Deck, Level up, Overview, Notes.
+- **One card size everywhere** cards are shown as cards (deck view, level-up, swap):
+  - 220 px wide on desktop, two per row on phones. Readable without extra action.
+  - Thumbnails in lists (changes, motivations) are the only exception.
+- **Enlarge** is always an explicit button (🔍) on the card, never a long-press.
+- **Groups of cards** (e.g. the sections of the level-up flow) are separated by a visible
+  divider.
+- **No permanent save indicator** in the header (§6).
+
 ## 5. Data model
 
 ### 5.1 Stored (user data, one JSON document)
@@ -272,7 +322,7 @@ interface Pick { forLevel: number; cardId: string | null }  // null = not chosen
 
 interface LevelUp {
   level: number;
-  pick: string | null;                 // cardId added to the pool at this level
+  pick: string | null;                 // cardId added to the pool at this level; always also in `added`
   added: string[];                     // cardIds entering the deck vs. previous level
   dropped: string[];                   // cardIds leaving the deck vs. previous level
 }
@@ -305,6 +355,7 @@ Validation issues per level:
 | Deck size < `handSize`                                 | incomplete |
 | Deck size > `handSize`                                 | invalid    |
 | Pick of level > L, or a card already in the pool       | invalid    |
+| Pick not in `added(L)` (a pick always enters the deck) | invalid    |
 | Added card not in `pool(L)`, or already in `deck(L−1)` | invalid    |
 | Dropped card not in `deck(L−1)`                        | invalid    |
 | Unknown cardId                                         | invalid    |
@@ -329,7 +380,8 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
   - `GET /api/health` → `200`.
 - **Server-side validation**: the same zod schema as the client. Reject malformed or
   oversized payloads (cap 1 MB) with `400`/`413`.
-- **Client saves** are debounced (~1 s). A status indicator shows *Saved*, *Saving…* or
+- **Client saves** are debounced (~1 s) after every change, with no save button. Nothing
+  is shown while everything is saved; a small status appears only for *Saving…* and
   *Error (retry)*. Warn on page unload while changes are unsaved.
 - **On 409**: show "Changed on another device — reload". Never merge or overwrite
   silently.
@@ -359,8 +411,8 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 - **Repo layout**: one package.
   ```
   src/client/   src/server/   src/shared/{schema,rules,data}/
-  public/cards/SD/   scripts/import-cards.ts
-  Dockerfile   docker-compose.yml   docs/
+  public/cards/SD/   public/icons/SD.png   scripts/import-cards.ts
+  Dockerfile   docker-compose.yml   docs/ (spec, design mockup)
   ```
 - **Deployment (Raspberry Pi, arm64)**
   - **`Dockerfile`**, multi-stage, on `node:22-alpine`:
@@ -387,11 +439,14 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
    - The level 2 slot offers Birds in a Tempest and Tornado.
    - The level 3 slot offers the other level 2 card, Cold Snap and Polar Vortex.
    - Then choose 11 of 16 pool cards.
-3. Level-up 3 → 4: deck 3 stays visible and the level 4 cards are shown first. Pick
-   Biting Frost → "Remove 1 card — 12 / 11" → drop one → done. That takes ≤ 4 taps
-   without typing.
-4. Extra swaps: pick and drop, then bring back an earlier dropped pool card and drop
-   another. The overview shows 2 added and 2 dropped at that level.
+3. Level-up 3 → 4: the status bar stays visible and the level 4 cards are shown first.
+   Pick Biting Frost → "Remove 1 card — 12 / 11" → drop one → done. That takes ≤ 4
+   taps without typing. Biting Frost is marked NEW in the deck and can't be dropped.
+4. Extra swaps: pick and drop, then bring back an earlier dropped pool card from "Swap
+   more" and drop another.
+   - The returned card stays in the swap section, marked *Added*, with its "Why…?" note
+     on the card. The section stays open.
+   - The overview shows 2 added and 2 dropped at that level.
 5. With levels 3–6 planned, change the level 4 pick:
    - Levels 5–6 update automatically.
    - If level 5 picked the card now picked at level 4, level 5 is flagged invalid with a
@@ -415,4 +470,3 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 - Perks, attack modifiers, items, enhancements.
 - Offline editing.
 - Motivation/guidance history.
-- Visual design (next session).
