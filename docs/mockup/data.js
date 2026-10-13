@@ -1,4 +1,5 @@
-// Shared sample data + tiny rules engine for all three mockups (not production code).
+// MOCKUP ONLY: hard-coded sample build + a throwaway mini rules engine. Not production code;
+// the real engine will live in src/shared/rules per docs/spec.md §5.2.
 const C = Object.fromEntries(CARDS.map(c => [c.id, c]));
 const HAND = 11;
 const lvlNum = c => (c.level === "X" ? 1 : +c.level);
@@ -74,7 +75,9 @@ const LU = {
   working() { return sortIds([...this.base(), ...(this.pick ? [this.pick] : []), ...this.extra]); },
   count() { return this.working().length - this.dropped.length; },
   choose(id) { this.dropped = this.dropped.filter(x => x !== this.pick); this.pick = this.pick === id ? null : id; },
-  toggleDrop(id) { this.dropped = this.dropped.includes(id) ? this.dropped.filter(x => x !== id) : [...this.dropped, id]; },
+  isNew(id) { return id === this.pick || this.extra.includes(id); },
+  toggleDrop(id) { if (this.isNew(id)) return; // cards new this level can't be dropped
+    this.dropped = this.dropped.includes(id) ? this.dropped.filter(x => x !== id) : [...this.dropped, id]; },
   swapIns() { return sortIds(pool(this.from).filter(id => !this.base().includes(id))); },
   addExtra(id) { // toggle: tapping an added card again takes it back out
     if (this.extra.includes(id)) { this.extra = this.extra.filter(x => x !== id); this.dropped = this.dropped.filter(x => x !== id); }
