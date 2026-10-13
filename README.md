@@ -51,6 +51,21 @@ On Linux machines that also need Playwright's system packages, use
 The production build writes the browser bundle to `dist/client` and the
 Node server to `dist/server/index.js`.
 
+### Catalog import
+
+The committed Snowdancer catalog and all runtime artwork are local. To refresh
+those generated files from the pinned upstream source, run:
+
+```sh
+npm run import:cards
+```
+
+The importer validates the complete 30-card catalog before downloading assets
+and writes the catalog, card back, class icon, and a source manifest only after
+the transaction is ready. `src/shared/data/characters/source-manifest.json`
+records the upstream revisions and SHA-256 checksums used for the committed
+files. Do not add an external runtime asset dependency.
+
 Behavior-changing pull requests follow test-first delivery: record the initial
 failing test command and its expected reason, then record the passing targeted
 and canonical checks after implementation. Do not replace a real smoke test
