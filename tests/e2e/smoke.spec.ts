@@ -227,6 +227,22 @@ test("scrolls and moves focus to the deck after a mobile pick", async ({
   const deckHeading = page.getByRole("heading", { name: "Your deck" });
   await expect(deckHeading).toBeFocused();
   await expect
+    .poll(async () => {
+      const headingBox = await deckHeading.boundingBox();
+      const stickyBottom = await page
+        .locator(".app-header, .level-up-status")
+        .evaluateAll((elements) =>
+          Math.max(
+            ...elements.map(
+              (element) =>
+                (element as HTMLElement).getBoundingClientRect().bottom,
+            ),
+          ),
+        );
+      return (headingBox?.y ?? Number.POSITIVE_INFINITY) - stickyBottom;
+    })
+    .toBeGreaterThan(0);
+  await expect
     .poll(
       async () =>
         (await deckHeading.boundingBox())?.y ?? Number.POSITIVE_INFINITY,

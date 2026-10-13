@@ -218,9 +218,14 @@ function LevelUpEditor({
       "(prefers-reduced-motion: reduce)",
     ).matches;
     heading.focus({ preventScroll: true });
+    const header = document.querySelector<HTMLElement>(".app-header");
+    const status = document.querySelector<HTMLElement>(".level-up-status");
+    const stickyBottom =
+      (header?.getBoundingClientRect().bottom ?? 0) +
+      (status?.getBoundingClientRect().height ?? 0);
     const targetTop = Math.max(
       0,
-      heading.getBoundingClientRect().top + window.scrollY - 16,
+      heading.getBoundingClientRect().top + window.scrollY - stickyBottom - 16,
     );
     window.scrollTo({
       top: targetTop,
