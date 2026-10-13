@@ -736,7 +736,7 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
       .getByRole("dialog", { name: "Create build" })
       .getByRole("button", { name: "Create build" }),
   ).toBeDisabled();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/c\/SD$/);
 });
 
 test("preserves a later starting pick while surfacing an earlier conflict", async ({
