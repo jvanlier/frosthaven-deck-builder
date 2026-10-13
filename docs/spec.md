@@ -1,9 +1,10 @@
 # Frosthaven Deck Builder — Specification
 
-Status: v4 · implementation decisions agreed · Owner: jvanlier
+Status: v5 · single-ticket autonomous delivery agreed · Owner: jvanlier
 
-Implementation sequence, GitHub issues and mandatory test-first workflow:
-[`implementation-plan.md`](implementation-plan.md).
+Implementation sequence and GitHub issues: [`implementation-plan.md`](implementation-plan.md).
+Resolved agent-facing contracts and edge cases: [`agent-contracts.md`](agent-contracts.md).
+Mandatory test-first, review and authorized merge policy: [`../AGENTS.md`](../AGENTS.md).
 
 ## 1. Purpose
 
@@ -169,7 +170,10 @@ screens they're stacked, and picking a card scrolls to the deck.
 - Every change, including unfinished or temporarily overfull level-ups and inline notes,
   autosaves. There is no separate draft model. Done finishes editing; it is not a save
   button. Reset restores this editor's choices and notes to their entry state, without
-  reverting unrelated build data. Reset changes also autosave.
+  reverting unrelated build data. Reset changes also autosave. The entry snapshot is
+  in memory only; reload/reopen establishes a new baseline from the persisted state.
+  For a newly appended level, Reset retains its null-pick/empty-diff level rather than
+  deleting it. A full valid level counts as complete even before Done is clicked.
 - **Your deck**: the cards of deck L plus the cards added in this flow.
 - **Pick** and **Swap more** candidates (below).
 
@@ -215,6 +219,9 @@ tap on a card always performs its action; enlarging is never a long-press.
 play. Appending a new level requires every existing level to be complete and valid.
 Existing levels always remain viewable and repairable. An unfinished appended level
 is saved and can be reopened; the Level up tab resumes it rather than appending another.
+“Unfinished” means a stored level with validation issues, not a separate completion flag.
+An unfinished starting level opens its starting editor; broken earlier history routes to
+its reported problems instead of appending.
 
 ### 4.6 Revising earlier choices
 
@@ -365,7 +372,8 @@ Decks are computed by replaying changes:
 - `pool(start)` = L1 ∪ LX ∪ `startPicks`. `pool(L)` = `pool(L−1)` ∪ {`pick(L)`}.
 - `deck(start)` = `startDeck`. `deck(L)` = (`deck(L−1)` \ `dropped(L)`) ∪ `added(L)`.
 - Editing a deck in the UI stores the normalized diff against the previous level's deck:
-  `added = new \ prev`, `dropped = prev \ new`.
+  `added = new \ prev`, `dropped = prev \ new`. If existing records are invalid, normalize
+  only the valid editable subset and retain unresolved records until targeted repair.
 
 Validation issues per level:
 
@@ -429,6 +437,11 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
     concurrent requests with the same base revision cannot both succeed.
   - Corrupt storage, failed writes and failed backup creation produce explicit errors;
     never reset corrupt data to an empty document or silently skip a backup.
+  - Finish required backup pruning and temp-file fsync before rename. Failures before
+    replacement preserve the preceding file. Once rename succeeds, a directory-fsync,
+    process or response failure can leave an unacknowledged committed save; retain its
+    predecessor backup and never promise rollback. Reread disk for subsequent revisions.
+    Client Retry with the old revision can then produce the standard 409 recovery flow.
   - Getting data off the Pi (the Pi runs on an SSD) is configured on the host, outside
     the app.
 - No offline editing. If the server is unreachable, show an error state.
@@ -436,7 +449,8 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 ## 7. Technical approach
 
 - **Language**: TypeScript end to end. The zod schema, card data and rules engine are
-  shared by client and server.
+  shared by client and server. UUID generation must work on plain LAN HTTP, using
+  `crypto.getRandomValues` for a UUID-v4 fallback when `crypto.randomUUID` is unavailable.
 - **Frontend**: Vite + React + TypeScript, React Router. Routes:
   - `/` (resume last position or build list)
   - `/c/:characterId` (builds)
@@ -476,7 +490,10 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
     - It runs `CMD ["node", "dist/server/index.js"]`.
   - **`docker-compose.yml`**: one service, `restart: unless-stopped`, port mapping (e.g.
     `8080:8080`), and the volume `./data:/data`. Env vars: `PORT`, `DATA_DIR`.
-  - Built and run on the Pi with `docker compose up -d --build`.
+  - The user can build and run on the Pi with `docker compose up -d --build`.
+  - Delivery acceptance uses automated arm64 container/Compose verification and operating
+    instructions. Actual home Pi deployment, SSH access and network changes are a separate
+    task, not an implementation-agent prerequisite.
   - Reachable only on the LAN/VPN, so no TLS or auth in the app.
 - **Accessibility**:
   - Card images have `alt` = card name and level.
@@ -524,3 +541,5 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 - Motivation/guidance history.
 - Re-basing a copied build onto a different start level.
 - Markdown formatting, offline persistence, custom blocked-label automation.
+- Hosted agent-dispatch infrastructure or automatic ticket-selection loops.
+- Live Pi deployment, SSH/network changes and manual user-sign-off gates.

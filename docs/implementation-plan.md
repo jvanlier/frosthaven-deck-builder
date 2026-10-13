@@ -6,6 +6,11 @@ planning change.
 - Product specification: [`spec.md`](spec.md).
 - Visual reference: [`mockup/README.md`](mockup/README.md), not production code.
 - Tracking issue: [#3](https://github.com/jvanlier/frosthaven-deck-builder/issues/3).
+- Execution/merge policy: [`../AGENTS.md`](../AGENTS.md).
+- Shared ownership and resolved edge cases: [`agent-contracts.md`](agent-contracts.md).
+
+**One assigned ticket per agent.** The maintainer manages dispatch and the loop. Agents
+may finish, review and merge their own verified PRs, but do not select the next ticket.
 
 ## 1. Delivery order and dependencies
 
@@ -32,7 +37,8 @@ Every row is a native sub-issue of #3. Each prerequisite is also a native GitHub
 
 After A, catalog and schema work can proceed in parallel; then rules and server work.
 After F, backup and deployment work can proceed alongside the main user-flow sequence.
-After I, repairs and notes can proceed in parallel.
+After I, repairs and notes can proceed in parallel. These are scheduling opportunities
+for the maintainer, not instructions for an agent to take multiple tickets.
 
 The API explicitly depends on the catalog because it validates supported character IDs.
 Do not duplicate catalog constants to evade this dependency.
@@ -66,8 +72,18 @@ criteria and the following definition of done:
    CI checks must pass before merge. Preserve error handling, trust-boundary validation,
    security checks and accessibility.
 
-Use task branches and PRs. Documentation-only changes do not need artificial tests;
-executable configuration and container changes still require smoke-check evidence.
+Use task branches and draft PRs. Run a separate read-only automated review pass and
+resolve its findings. Agents are authorized to mark their assigned PR ready and
+squash-merge when all applicable checks pass for the exact final head SHA, using a SHA
+guard and without bypasses or human approval. Confirm merge, assigned-issue closure and
+main CI, then stop. Missing/pending/failed/cancelled or unexpectedly skipped checks are
+not success. An infrastructure/authentication failure is an explicit blocker, not a
+reason to weaken the gate.
+
+Documentation-only changes do not need artificial tests; executable configuration and
+container changes still require smoke-check evidence. The pre-CI documentation PR may
+merge after executable document/link/dependency checks and the separate review pass.
+The bootstrap implementation PR itself must establish and pass real GitHub Actions CI.
 
 ### Feedback from the first PR
 
@@ -105,6 +121,12 @@ release audit; it does not introduce CI or the first browser tests.
   the regular mutation/save queue; it cannot revert unrelated data.
 - Append a new level only when every existing level is complete and valid. Existing
   levels remain viewable and repairable. The Level up tab resumes unfinished work.
+- Completion is derived from validation, not a stored Done flag. Reset's baseline is
+  scoped to the current session; reopening uses the persisted current state. Reset of a
+  new level retains that level with its initial null-pick/empty-diff state.
+- Assign downstream acceptance to its owning ticket: starting exclusion-note editing
+  belongs to K, and overview swap counts to L, not to G/I's merge gates. See the contracts
+  for precise feature boundaries and safe temporary entry-point behavior.
 
 ### Notes
 
@@ -148,6 +170,9 @@ release audit; it does not introduce CI or the first browser tests.
   the current server revision—not the imported revision—as the concurrency token.
 - Missing storage alone initializes an empty document. Corrupt storage, backup failure
   and write failure produce explicit errors instead of resets or skipped backups.
+- Pre-replacement failures preserve the old file. Post-rename fsync/response failures
+  can leave a committed but unacknowledged revision; retain the backup, reread disk and
+  use the existing pending-memory/Retry/409 recovery flow without promising rollback.
 
 ### Implementation and deployment
 
@@ -155,8 +180,13 @@ release audit; it does not introduce CI or the first browser tests.
 - Plain CSS, native dialogs and minimal React state; no additional UI/state framework.
 - Local runtime artwork, icons and fonts/resources; no dependency on upstream hosts.
 - One npm package, built frontend plus executable `dist/server/index.js`.
-- Non-root `node:22-alpine` image, `/data` SSD bind mount, health check and arm64
-  deployment. Document mount ownership rather than using root/world-writable access.
+- Non-root `node:22-alpine` image, `/data` SSD bind mount, health check and automated
+  arm64 container verification. Document mount ownership rather than using root/world-
+  writable access. Completion is deployable packaging and instructions, not live Pi
+  installation, SSH credentials, networking changes or edits to personal data.
+- Browser/keyboard/accessibility verification is executable and agent-run, with evidence;
+  there is no physical-device or manual human approval gate. No agent-dispatch service is
+  being built; each agent stops after its single assigned ticket.
 - Single user, Snowdancer only, LAN/VPN only. No auth, TLS, offline persistence,
   additional classes, deck variants, re-basing, Markdown or note-history UI in v1.
 
