@@ -101,6 +101,23 @@ const deckFixtureData = {
   ],
 };
 
+const invalidDeckFixtureData = {
+  ...deckFixtureData,
+  builds: [
+    {
+      ...deckFixtureData.builds[0],
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: [],
+          dropped: ["whiteout"],
+        },
+      ],
+    },
+  ],
+};
+
 const lastPositionStorageKey = "frosthaven-deck-builder:last-position";
 
 test("loads the deck builder shell and health status", async ({ page }) => {
@@ -221,8 +238,19 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
     page.getByRole("heading", { name: "Deck: Freeze control" }),
   ).toBeVisible();
   const deckCardNames = page.locator(".deck-card-list .card-name");
-  await expect(deckCardNames.first()).toHaveText("Cold Therapy");
-  await expect(deckCardNames.nth(10)).toHaveText("Birds in a Tempest");
+  await expect(deckCardNames).toHaveText([
+    "Cold Therapy",
+    "Snowball",
+    "Lifting Gust",
+    "Chilling Impact",
+    "Cross Winds",
+    "Frigid Growth",
+    "Blizzard",
+    "Enticing Breeze",
+    "Gathering Force",
+    "Nature's Breath",
+    "Birds in a Tempest",
+  ]);
   await expect(page.getByText("11 / 11 cards", { exact: true })).toBeVisible();
   await expect(page.getByText("Level 2 changes")).toBeVisible();
   await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
@@ -258,6 +286,25 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   ).toBeVisible();
 });
 
+test("renders invalid badges and specific replay validation messages", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(invalidDeckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Picked card birds-in-a-tempest must be added to the deck", {
+      exact: true,
+    }),
+  ).toBeVisible();
+});
+
 test("switches between stored levels with previous, next and direct navigation", async ({
   page,
 }) => {
@@ -289,6 +336,20 @@ test("resumes the last valid deck position and safely falls back for invalid sto
       body: JSON.stringify(deckFixtureData),
     }),
   );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page).toHaveURL(/\/l\/2$/);
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
+  await expect(page).toHaveURL(`/c/SD`);
+  await expect(
+    page.getByRole("heading", { name: "Your builds" }),
+  ).toBeVisible();
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
+  await page.getByRole("link", { name: "Back to builds" }).click();
+  await expect(page).toHaveURL(`/c/SD`);
+
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
   await expect(page).toHaveURL(/\/l\/2$/);
   await expect(
