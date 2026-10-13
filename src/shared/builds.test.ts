@@ -5,7 +5,9 @@ import {
   deleteBuild,
   generateUuid,
   motivationKey,
+  appendLevelUp,
   renameBuild,
+  setLevelUp,
   setStartDeck,
   setStartPick,
   upsertMotivation,
@@ -77,6 +79,60 @@ describe("build mutations", () => {
     expect(withDeck.startPicks).toEqual(withPick.startPicks);
     expect(setStartPick(withDeck, 2, "birds-in-a-tempest")).toBe(withDeck);
     expect(() => setStartPick(build, 1, "blizzard")).toThrow();
+  });
+
+  it("appends an empty next level and updates only its build timestamp", () => {
+    const build = createBuild(
+      { characterId: "SD", name: "Original", startLevel: 1 },
+      options,
+    );
+    const appended = appendLevelUp(build, { now: () => secondTime });
+
+    expect(appended.levelUps).toEqual([
+      { level: 2, pick: null, added: [], dropped: [] },
+    ]);
+    expect(appended.startDeck).toEqual([]);
+    expect(appended.updatedAt).toBe(secondTime);
+    expect(() => appendLevelUp(appended)).not.toThrow();
+    expect(
+      appendLevelUp(appended, { now: () => secondTime }).levelUps,
+    ).toHaveLength(2);
+    expect(() => appendLevelUp({ ...build, startLevel: 9 })).toThrow();
+  });
+
+  it("replaces one level-up without changing later operations or unrelated fields", () => {
+    const build = createBuild(
+      { characterId: "SD", name: "Original", startLevel: 1 },
+      options,
+    );
+    const withLevels = appendLevelUp(
+      appendLevelUp(build, { now: () => secondTime }),
+      { now: () => secondTime },
+    );
+    const updated = setLevelUp(
+      withLevels,
+      2,
+      {
+        pick: "birds-in-a-tempest",
+        added: ["birds-in-a-tempest"],
+        dropped: ["blizzard"],
+      },
+      { now: () => secondTime },
+    );
+
+    expect(updated.levelUps[0]).toEqual({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["blizzard"],
+    });
+    expect(updated.levelUps[1]).toEqual(withLevels.levelUps[1]);
+    expect(updated.name).toBe(build.name);
+    expect(updated.createdAt).toBe(build.createdAt);
+    expect(updated.updatedAt).toBe(secondTime);
+    expect(() =>
+      setLevelUp(build, 3, { pick: null, added: [], dropped: [] }),
+    ).toThrow();
   });
 
   it("renames only when the trimmed name changes and updates the build timestamp", () => {

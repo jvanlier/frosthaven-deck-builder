@@ -10,11 +10,12 @@ import {
   motivationKindSchema,
   noteTextSchema,
   type Build,
+  type LevelUp,
   type MotivationKind,
 } from "./schema/index.js";
 
 export { motivationKey } from "./schema/index.js";
-export type { Build, MotivationKind } from "./schema/index.js";
+export type { Build, LevelUp, MotivationKind } from "./schema/index.js";
 
 export interface CreateBuildInput {
   characterId: string;
@@ -129,6 +130,60 @@ export function setStartDeck(
   return buildSchema.parse({
     ...build,
     startDeck,
+    updatedAt: getNow(options),
+  });
+}
+
+export function appendLevelUp(
+  build: Build,
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  const nextLevel = build.startLevel + build.levelUps.length + 1;
+  if (nextLevel > 9) {
+    throw new Error("A build cannot have a level above 9");
+  }
+  return buildSchema.parse({
+    ...build,
+    levelUps: [
+      ...build.levelUps.map(cloneLevelUp),
+      { level: nextLevel, pick: null, added: [], dropped: [] },
+    ],
+    updatedAt: getNow(options),
+  });
+}
+
+export function setLevelUp(
+  build: Build,
+  level: number,
+  levelUp: Pick<LevelUp, "pick" | "added" | "dropped">,
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  const targetLevel = levelSchema.parse(level);
+  const levelIndex = build.levelUps.findIndex(
+    (candidate) => candidate.level === targetLevel,
+  );
+  if (levelIndex === -1) {
+    throw new Error(`No level-up exists for level ${targetLevel}`);
+  }
+
+  const nextLevelUp = {
+    level: targetLevel,
+    pick: levelUp.pick === null ? null : cardIdSchema.parse(levelUp.pick),
+    added: z
+      .array(cardIdSchema)
+      .max(MAX_OPERATION_ENTRIES)
+      .parse(levelUp.added),
+    dropped: z
+      .array(cardIdSchema)
+      .max(MAX_OPERATION_ENTRIES)
+      .parse(levelUp.dropped),
+  };
+  const levelUps = build.levelUps.map((candidate, index) =>
+    index === levelIndex ? nextLevelUp : cloneLevelUp(candidate),
+  );
+  return buildSchema.parse({
+    ...build,
+    levelUps,
     updatedAt: getNow(options),
   });
 }
@@ -303,6 +358,14 @@ function resolveMotivationLevel(
     throw new Error("A level is required for a non-initial motivation");
   }
   return levelSchema.parse(input.level);
+}
+
+function cloneLevelUp(levelUp: LevelUp): LevelUp {
+  return {
+    ...levelUp,
+    added: [...levelUp.added],
+    dropped: [...levelUp.dropped],
+  };
 }
 
 function getNow(options: Pick<BuildMutationOptions, "now">): string {

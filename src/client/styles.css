@@ -514,8 +514,118 @@ h2 {
 }
 
 .starting-editor,
-.deck-view {
+.deck-view,
+.level-up-editor {
   max-width: 78rem;
+}
+
+.level-up-status {
+  position: sticky;
+  z-index: 3;
+  top: var(--header-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  margin: -1rem 0 2rem;
+  padding: 1rem;
+  border: 1px solid #477b94;
+  border-radius: 0.75rem;
+  background: rgb(7 19 31 / 96%);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 24%);
+}
+
+.level-up-status h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+}
+
+.level-up-instruction {
+  margin: 0.35rem 0 0;
+  color: #b8d3e1;
+}
+
+.level-up-counter {
+  color: #f9d875;
+  white-space: nowrap;
+}
+
+.level-up-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.level-up-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 2rem;
+}
+
+.level-up-group {
+  min-width: 0;
+}
+
+.level-up-deck {
+  grid-column: 1 / -1;
+}
+
+.level-up-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.level-up-candidate,
+.level-up-deck-card {
+  min-width: 0;
+}
+
+.motivation-input {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  color: #b8d3e1;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.motivation-input textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #477b94;
+  border-radius: 0.4rem;
+  padding: 0.6rem;
+  color: #ecf7ff;
+  background: #0a2233;
+  font: inherit;
+  line-height: 1.4;
+}
+
+.motivation-input textarea:focus-visible {
+  outline: 3px solid #f9d875;
+  outline-offset: 2px;
+}
+
+.swap-group {
+  grid-column: 1 / -1;
+}
+
+.swap-group details {
+  padding: 1rem 1.25rem;
+  border: 1px solid #2c617b;
+  border-radius: 0.75rem;
+  background: rgb(10 34 51 / 70%);
+}
+
+.swap-group summary {
+  cursor: pointer;
+  color: #f7fcff;
+  font-weight: 750;
+}
+
+.swap-group .level-up-card-grid {
+  margin-top: 1rem;
 }
 
 .deck-intro {
@@ -1107,6 +1217,25 @@ h2 {
 
   .save-feedback {
     top: var(--header-height);
+  }
+
+  .level-up-status {
+    grid-template-columns: 1fr auto;
+    margin-top: -0.5rem;
+  }
+
+  .level-up-status .level-up-actions {
+    grid-column: 1 / -1;
+    justify-content: end;
+  }
+
+  .level-up-groups {
+    display: block;
+  }
+
+  .level-up-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
   .bottom-tabs {
