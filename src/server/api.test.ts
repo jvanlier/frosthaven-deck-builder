@@ -15,6 +15,7 @@ import {
   createDataStore,
   RevisionConflictError,
   StorageError,
+  type DataStore,
   type DataStoreFileSystem,
 } from "./storage";
 import { appDataSchema, type AppData } from "../shared/schema";
@@ -292,10 +293,53 @@ describe("revision-safe data API", () => {
     );
   });
 
+  it("treats a lost response after a durable save as a stale retry", async () => {
+    const dataDir = await newDataDir();
+    const realStore = createDataStore({ dataDir });
+    await realStore.put(0, dataWithName("Original"));
+    const losingStore: DataStore = {
+      get: () => realStore.get(),
+      put: async (baseRevision, data) => {
+        const result = await realStore.put(baseRevision, data);
+        throw new Error(`response lost after revision ${result.revision}`);
+      },
+    };
+    const app = createApp({ dataDir, store: losingStore });
+
+    const lostResponse = await put(app, 1, dataWithName("Committed"));
+    expect(lostResponse.status).toBe(500);
+    const authoritative = await app.request("/api/data");
+    expect(await authoritative.json()).toMatchObject({
+      revision: 2,
+      builds: [{ name: "Committed" }],
+    });
+    const backups = await readdir(join(dataDir, "backups"));
+    expect(backups).toHaveLength(1);
+    expect(
+      JSON.parse(await readFile(join(dataDir, "backups", backups[0]!), "utf8")),
+    ).toMatchObject({ revision: 1 });
+
+    const staleRetry = await put(app, 1, dataWithName("Committed"));
+    expect(staleRetry.status).toBe(409);
+    expect(await staleRetry.json()).toEqual({ revision: 2 });
+  });
+
   it("preserves the current document for backup, fsync, rename, prune, and permission failures", async () => {
     const dataDir = await newDataDir();
     const app = createApp({ dataDir });
     expect((await put(app, 0, dataWithName("Original"))).status).toBe(200);
+    const expectCurrent = async (revision: number, name: string) => {
+      expect(await createDataStore({ dataDir }).get()).toMatchObject({
+        revision,
+        builds: [{ name }],
+      });
+      const currentFiles = await readdir(dataDir);
+      expect(
+        currentFiles.some((file) => file.startsWith(".appdata.json.")),
+      ).toBe(false);
+      const backupFiles = await readdir(join(dataDir, "backups"));
+      expect(backupFiles.some((file) => file.includes(".tmp"))).toBe(false);
+    };
 
     const backupFailure: DataStoreFileSystem = {
       ...nodeFs,
@@ -309,6 +353,7 @@ describe("revision-safe data API", () => {
         dataWithName("Backup failure"),
       ),
     ).rejects.toBeInstanceOf(StorageError);
+    await expectCurrent(1, "Original");
 
     const fsyncFailure: DataStoreFileSystem = {
       ...nodeFs,
@@ -326,6 +371,7 @@ describe("revision-safe data API", () => {
         dataWithName("Fsync failure"),
       ),
     ).rejects.toBeInstanceOf(StorageError);
+    await expectCurrent(1, "Original");
 
     const renameFailure: DataStoreFileSystem = {
       ...nodeFs,
@@ -342,6 +388,7 @@ describe("revision-safe data API", () => {
         dataWithName("Rename failure"),
       ),
     ).rejects.toBeInstanceOf(StorageError);
+    await expectCurrent(1, "Original");
 
     const permissionFailure: DataStoreFileSystem = {
       ...nodeFs,
@@ -362,6 +409,7 @@ describe("revision-safe data API", () => {
         dataWithName("Permission failure"),
       ),
     ).rejects.toBeInstanceOf(StorageError);
+    await expectCurrent(1, "Original");
 
     for (let revision = 1; revision < 22; revision += 1) {
       expect(
@@ -380,6 +428,7 @@ describe("revision-safe data API", () => {
         dataWithName("Prune failure"),
       ),
     ).rejects.toBeInstanceOf(StorageError);
+    await expectCurrent(22, "Build 21");
 
     expect(await createDataStore({ dataDir }).get()).toMatchObject({
       revision: 22,
