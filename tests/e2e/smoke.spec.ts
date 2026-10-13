@@ -419,6 +419,51 @@ test("renames, copies, and confirms build deletion", async ({ page }) => {
   await expect(copied).toBeVisible();
 });
 
+test("copies a higher starting level with its pick slots intact", async ({
+  page,
+}) => {
+  let persisted = startThreeFixtureData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto("/");
+  await page.locator("li").getByRole("button", { name: "Copy" }).click();
+  const copyDialog = page.getByRole("dialog", { name: "Copy build" });
+  await copyDialog.getByLabel("Build name").fill("Higher copy");
+  await copyDialog.getByRole("button", { name: "Copy build" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Higher copy" }),
+  ).toBeVisible();
+  await expect(page.locator(".pick-section")).toHaveCount(2);
+  await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
+  await expect(
+    page.locator(".pick-section").nth(1).getByRole("status"),
+  ).toHaveText("Picked");
+  await expect
+    .poll(async () => {
+      const build = persisted.builds.find(
+        (candidate) => candidate.name === "Higher copy",
+      );
+      return [build?.startLevel, build?.startPicks.length];
+    })
+    .toEqual([3, 2]);
+});
+
 test("pauses open build dialogs after a save failure", async ({ page }) => {
   let releaseSave!: () => void;
   await page.route("**/api/data", async (route) => {
@@ -497,15 +542,22 @@ test("preserves a later starting pick while surfacing an earlier conflict", asyn
 test("offers sequential legal picks for a higher starting level", async ({
   page,
 }) => {
+  let persisted: {
+    schemaVersion: 1;
+    revision: number;
+    builds: Array<{ startPicks: Array<{ cardId: string | null }> }>;
+  } = { schemaVersion: 1, revision: 0, builds: [] };
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ ...fixtureData, builds: [] }),
+        body: JSON.stringify(persisted),
       });
       return;
     }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -531,6 +583,15 @@ test("offers sequential legal picks for a higher starting level", async ({
   await page.getByText("Not in starting deck (18)").click();
   await expect(page.getByText("Cold Snap", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect
+    .poll(async () =>
+      persisted.builds[0]?.startPicks.map((pick) => pick.cardId),
+    )
+    .toEqual(["birds-in-a-tempest", null]);
+  await page.reload();
+  await expect(page.locator(".pick-section").first()).toContainText(
+    "Picked: Birds in a Tempest",
+  );
   await expect(
     page.getByRole("heading", { name: "Level 3 pick" }),
   ).toBeVisible();
