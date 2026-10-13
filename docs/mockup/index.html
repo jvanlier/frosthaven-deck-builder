@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MOCKUP · Frosthaven deck builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1220;--bg2:#111a2e;--panel:#162238cc;--line:#25344f;--ice:#7dd3fc;--ice2:#38bdf8;--txt:#e6eefb;--mut:#8aa0c0;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--r:14px}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:Inter,system-ui,sans-serif;color:var(--txt);background:radial-gradient(1200px 600px at 80% -10%,#1e3a5f55,transparent),radial-gradient(800px 500px at -10% 20%,#0ea5e922,transparent),var(--bg);min-height:100vh;padding-bottom:84px}
+button{font:inherit;color:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:5;backdrop-filter:blur(14px);background:#0b1220cc;border-bottom:1px solid var(--line);padding:12px 16px 10px}
+.top{display:flex;align-items:center;gap:10px}
+.crest{width:36px;height:36px;flex:none;background:linear-gradient(135deg,#e0f2fe,var(--ice2));-webkit-mask:url(snowdancer-icon.png) center/contain no-repeat;mask:url(snowdancer-icon.png) center/contain no-repeat;filter:drop-shadow(0 0 6px #38bdf888)}
+.mockflag{background:repeating-linear-gradient(45deg,#fbbf24 0 12px,#f59e0b 12px 24px);color:#1a1205;font-weight:700;font-size:12px;text-align:center;padding:4px;letter-spacing:.05em;text-transform:uppercase}
+.title{flex:1;line-height:1.15}.title b{font-size:16px}.title small{display:block;color:var(--mut);font-size:12px}
+.levels{display:flex;gap:6px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+.lv{min-width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);display:grid;place-items:center;font-weight:600;position:relative}
+.lv.on{background:linear-gradient(180deg,var(--ice2),#0284c7);border-color:transparent;color:#03111f;box-shadow:0 6px 20px #38bdf855}
+.lv.ghost{border-style:dashed;color:var(--mut);background:transparent}
+.lv .dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
+:root{--cw:220px}
+main{max-width:1240px;margin:0 auto;padding:16px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.chip{padding:5px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);background:var(--bg2)}
+.chip.warn{color:var(--warn);border-color:#fbbf2466}.chip.ok{color:var(--ok);border-color:#4ade8066}
+.spacer{flex:1}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);background:none;border:0}
+.sw{width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;transition:.2s}.sw:after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
+.toggle[aria-pressed=true] .sw{background:var(--ice2)}.toggle[aria-pressed=true] .sw:after{left:19px}
+/* one card size everywhere: --cw wide; on phones two per row */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,var(--cw));gap:14px}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.card{position:relative;border:0;padding:0;background:none;text-align:left;border-radius:12px;transition:transform .15s}
+.card:hover{transform:translateY(-3px)}
+.card.locked{cursor:default}.card.locked:hover{transform:none}
+.card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;display:block;box-shadow:0 10px 25px #0008;border:1px solid #ffffff14}
+.tag{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;background:#03111fdd;letter-spacing:.04em}
+.tag.new{color:var(--ice)}.tag.drop{color:var(--bad)}
+.card.dropped img{filter:grayscale(1) brightness(.45)}
+.card.dropped:after{content:"✕ DROPPED";position:absolute;inset:26% 8px auto 8px;text-align:center;font-weight:800;color:#fff;background:var(--bad);border-radius:8px;padding:6px 0;letter-spacing:.1em;font-size:13px}
+.guide{margin-top:6px;font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;line-height:1.4}
+.guide.empty{font-style:italic;opacity:.6}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:26px 0 10px;font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.change{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}.change:first-child{border:0}
+.change img{width:46px;border-radius:6px}
+.change .k{font-size:11px;font-weight:700;letter-spacing:.06em}.k.add{color:var(--ok)}.k.drop{color:var(--bad)}.k.pick{color:var(--ice)}
+.change p{margin:3px 0 0;font-size:14px;line-height:1.4}.note-add{color:var(--mut);font-size:13px;border:0;background:none;padding:0;text-decoration:underline dotted}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:20px}
+.btn{border:1px solid var(--line);background:var(--bg2);border-radius:12px;padding:12px;font-weight:600}
+.btn.primary{background:linear-gradient(180deg,var(--ice2),#0284c7);color:#03111f;border:0;box-shadow:0 8px 24px #38bdf844}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-content:space-around;background:#0b1220ee;backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 0 14px}
+nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mut);padding:4px 16px}
+nav.tabs button span{font-size:20px}nav.tabs button.on{color:var(--ice)}
+/* level-up */
+.lubar{position:sticky;top:118px;z-index:4;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0b1220f2;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:6px;box-shadow:0 10px 30px #000a;font-weight:700}
+.pill{padding:6px 12px;border-radius:999px;font-size:14px}
+.pill.info{background:#38bdf822;color:var(--ice)}.pill.warn{background:#fbbf2422;color:var(--warn)}.pill.ok{background:#4ade8022;color:var(--ok)}
+.lubar .hint{font-weight:400;font-size:12px;color:var(--mut)}
+@media(max-width:520px){.lubar{flex-wrap:nowrap;gap:6px;padding:8px}.lubar .hint{display:none}.pill{font-size:13px;padding:6px 10px;white-space:nowrap}}
+#lu-deck{scroll-margin-top:190px}
+.lu{display:grid;grid-template-columns:minmax(0,1fr);gap:0 24px}
+/* visible divider between groups: a line above every group but the first, and between the two columns */
+.group+.group,.lu>section+section{border-top:1px solid #2f4466;margin-top:26px;padding-top:2px}
+@media(min-width:1240px){.lu{grid-template-columns:calc(var(--cw)*2 + 14px) minmax(0,1fr)}
+  .lu>section+section{border-top:0;margin-top:0;padding-top:0;border-left:1px solid #2f4466;padding-left:20px}}
+.slot{position:relative}
+.slot>.card{display:block;width:100%}
+.zoom{position:absolute;z-index:3;right:8px;top:8px;width:36px;height:36px;border-radius:10px;border:1px solid #ffffff33;background:#03111fcc;color:#fff;font-size:18px;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.zoom:hover,.zoom:focus-visible{background:var(--ice2);color:#03111f}
+.card.picked img{outline:3px solid var(--ice);outline-offset:2px;box-shadow:0 0 0 7px #38bdf833,0 0 40px #38bdf855}
+.card.added img{outline:3px solid var(--ice);outline-offset:2px;box-shadow:0 0 0 7px #38bdf833,0 0 40px #38bdf855}
+.card.added:before{content:"\2713 Added";position:absolute;z-index:1;top:-11px;left:50%;transform:translateX(-50%);background:var(--ice);color:#03111f;font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px}
+.card.picked:before{content:"\2713 Picked";position:absolute;z-index:1;top:-11px;left:50%;transform:translateX(-50%);background:var(--ice);color:#03111f;font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px}
+#zoomdlg{max-width:none;width:auto;background:transparent;border:0;overflow:visible}
+#zoomdlg img{display:block;height:min(82vh,900px);max-width:92vw;object-fit:contain;border-radius:18px;box-shadow:0 20px 60px #000}
+#zoomdlg .zbar{display:flex;gap:10px;justify-content:center;margin-top:12px}
+details summary{cursor:pointer;color:var(--mut);margin:20px 0 8px}
+/* optional "why" note, overlaid on the lower part of the card it is about */
+.why{position:absolute;z-index:2;left:8px;right:8px;bottom:8px;background:#0b1220f0;border:1px solid #38bdf866;border-radius:10px;padding:8px;box-shadow:0 6px 18px #000a}
+.why label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ice);margin-bottom:4px}
+.why.drop{border-color:#f8717188}.why.drop label{color:var(--bad)}
+.why textarea{min-height:60px;resize:none;font-size:13px;background:#03111f}
+textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:8px;font:inherit;font-size:13px;min-height:52px}
+/* overview */
+.mx{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--bg2)}
+thead th{background:var(--bg2);color:var(--mut);font-weight:600}
+thead a{color:var(--ice);text-decoration:none;font-weight:700}
+tr.grp td{background:#0f1a2e;color:var(--mut);font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-align:left}
+.cell{display:inline-grid;place-items:center;width:30px;height:24px;border-radius:7px;font-size:12px;font-weight:700;position:relative}
+.cell.d{background:var(--ice2);color:#03111f}.cell.p{border:1.5px solid var(--ice2);color:var(--ice)}.cell.n{color:#3a4a66}
+.cell sup{position:absolute;top:-5px;right:-6px;font-size:10px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:12px 0}
+.sum td{color:var(--mut);font-size:12px}
+/* modal */
+dialog{border:1px solid var(--line);background:var(--bg2);color:var(--txt);border-radius:20px;padding:0;max-width:760px;width:calc(100% - 24px)}
+dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}
+.dlg{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:18px;padding:18px}
+@media(max-width:620px){.dlg{grid-template-columns:1fr}.dlg img{max-width:240px;margin:auto}}
+.dlg img{width:100%;border-radius:14px}
+.x{position:absolute;right:12px;top:10px;border:0;background:none;font-size:22px;color:var(--mut)}
+</style></head><body>
+<!-- DESIGN MOCKUP ONLY: static, hard-coded sample data, nothing is saved. See README.md. -->
+<div class="mockflag" role="note">Design mockup · sample data · nothing is saved</div>
+<header>
+  <div class="top"><div class="crest" role="img" aria-label="Snowdancer class icon"></div>
+    <div class="title"><b>Freeze control</b><small>Snowdancer · started at level 3</small></div></div>
+  <div class="levels" id="levels"></div>
+</header>
+<main id="main"></main>
+<nav class="tabs">
+  <button data-s="deck"><span>🂠</span>Deck</button>
+  <button data-s="levelup"><span>⬆︎</span>Level up</button>
+  <button data-s="overview"><span>▦</span>Overview</button>
+  <button data-s="notes"><span>✎</span>Notes</button>
+</nav>
+<dialog id="dlg"></dialog>
+<dialog id="zoomdlg" aria-label="Enlarged card"></dialog>
+<script src="cards.js"></script><script src="data.js"></script>
+<script>
+let screen = location.hash.slice(1) || "deck", L = MAX, showG = false;
+const $ = s => document.querySelector(s);
+const img = (id, cls = "") => `<img class="${cls}" src="${C[id].img}" alt="${esc(C[id].name)}, level ${C[id].level}">`;
+
+function renderLevels() {
+  $("#levels").innerHTML = LEVELS.map(l => `<button class="lv ${l === L && screen !== "levelup" ? "on" : ""}" data-l="${l}" aria-label="Level ${l}">${l}</button>`).join("")
+    + `<button class="lv ghost ${screen === "levelup" ? "on" : ""}" data-s="levelup" aria-label="Level up to ${MAX + 1}">+${MAX + 1}</button>`
+    + [...Array(9 - MAX - 1)].map((_, i) => `<span class="lv ghost" style="opacity:.35">${MAX + 2 + i}</span>`).join("");
+}
+function changeRows(L) {
+  const ch = changes(L), rows = [];
+  if (ch.start) { BUILD.startPicks.forEach(p => rows.push(["pick", `Level ${p.forLevel} pick`, p.cardId, motivation(L, p.cardId, "add")])); }
+  else {
+    if (ch.pick) rows.push(["pick", "Picked + added", ch.pick, motivation(L, ch.pick, "add")]);
+    ch.added.filter(a => a !== ch.pick).forEach(a => rows.push(["add", "Added from pool", a, motivation(L, a, "add")]));
+    ch.dropped.forEach(d => rows.push(["drop", "Dropped", d, motivation(L, d, "drop")]));
+  }
+  return rows.map(([k, label, id, m]) => `<div class="change">${img(id)}<div><div class="k ${k}">${label.toUpperCase()}</div><b>${esc(C[id].name)}</b>
+    ${m ? `<p>${esc(m)}</p>` : `<p><button class="note-add">+ add note</button></p>`}</div></div>`).join("");
+}
+function deckScreen() {
+  const d = deck(L), ch = changes(L);
+  return `<div class="row"><span class="chip ${d.length === HAND ? "ok" : "warn"}">${d.length === HAND ? "✓" : "◐"} ${d.length} / ${HAND} cards</span>
+    <span class="chip">Pool ${pool(L).length}</span><span class="spacer"></span>
+    <button class="toggle" id="tg" aria-pressed="${showG}"><span class="sw"></span>Show guidance</button></div>
+    <div class="grid">${d.map(id => `<div><button class="card" data-c="${id}">${img(id)}${ch.added.includes(id) ? `<span class="tag new">NEW</span>` : ""}</button>
+      ${showG ? `<div class="guide ${BUILD.guidance[id] ? "" : "empty"}">${esc(BUILD.guidance[id] || "No guidance yet")}</div>` : ""}</div>`).join("")}</div>
+    <h2>${ch.start ? "Start picks" : `Changes at level ${L}`}</h2><div class="panel">${changeRows(L)}</div>
+    <div class="actions"><button class="btn">✎ Edit level ${L}</button>${L === MAX ? `<button class="btn primary" data-s="levelup">⬆︎ Level up to ${MAX + 1}</button>` : ""}</div>`;
+}
+// One card "slot": the card itself is the action button, the ⤢ button enlarges it.
+const ACT = { pick: "data-pick", drop: "data-drop", extra: "data-extra" };
+function actionLabel(id, kind) {
+  if (kind === "pick") return LU.pick === id ? "Unpick" : "Pick this card";
+  if (kind === "drop") return LU.dropped.includes(id) ? "Keep in deck" : "Drop this card";
+  return LU.extra.includes(id) ? "Remove from deck" : "Add to deck";
+}
+// Notes typed during the flow survive re-renders; the swap section remembers being open.
+const notes = {}; let swapOpen = false;
+function why(id, kind) {
+  const key = `${kind}|${id}`, q = { add: `Why ${C[id].name}?`, drop: `Why drop ${C[id].name}?` }[kind];
+  return `<div class="why ${kind}"><label for="why-${key}">${esc(q)} <span style="opacity:.7;text-transform:none">(optional)</span></label>
+    <textarea id="why-${key}" data-note="${key}" placeholder="Add a note…">${esc(notes[key] || "")}</textarea></div>`;
+}
+function slot(id, kind, cls = "", tag = "", note = "") {
+  const locked = kind === "drop" && LU.isNew(id);
+  const card = locked
+    ? `<div class="card locked" title="New this level, change it in the pick or swap section">${img(id)}${tag}</div>`
+    : `<button class="card ${cls}" ${ACT[kind]}="${id}" aria-label="${actionLabel(id, kind)}: ${esc(C[id].name)}">${img(id)}${tag}</button>`;
+  return `<div class="slot">${card}
+    <button class="zoom" data-zoom="${id}" data-kind="${kind}" aria-label="Enlarge ${esc(C[id].name)}" title="Enlarge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></button>${note}</div>`;
+}
+function openZoom(id, kind) {
+  const z = $("#zoomdlg");
+  z.innerHTML = `${img(id)}<div class="zbar">${kind === "drop" && LU.isNew(id) ? "" : `<button class="btn primary" ${ACT[kind]}="${id}" data-close="1">${actionLabel(id, kind)}</button>`}<button class="btn" data-close="1">Close</button></div>`;
+  z.showModal();
+}
+function levelupScreen() {
+  const ins = LU.instruction(), w = LU.working();
+  const isNew = id => LU.isNew(id);
+  return `<div class="lubar"><span class="pill ${ins.tone}">${ins.text}</span>
+      <span class="hint">${LU.pick ? "Tap a deck card to drop it" : "Tap a card to pick it"} · 🔍 enlarges</span><span class="spacer"></span>
+      <button class="btn" id="reset" style="padding:6px 10px">Reset</button><button class="btn primary" style="padding:6px 14px" ${ins.tone === "ok" ? "" : "disabled"}>Done</button></div>
+    <div class="lu"><section>
+      ${[["Newly unlocked · level " + LU.to, LU.newly()], ["Earlier, not yet picked", LU.earlier()]].map(([title, ids]) => `<div class="group"><h2>${title}</h2><div class="grid">${ids.map(id =>
+        LU.pick === id ? slot(id, "pick", "picked", "", why(id, "add")) : slot(id, "pick")).join("")}</div></div>`).join("")}
+    </section><section id="lu-deck">
+      <div class="group"><h2>Your deck · ${LU.count()} / ${HAND}</h2>
+      <div class="grid">${w.map(id => { const dr = LU.dropped.includes(id);
+        return slot(id, "drop", dr ? "dropped" : "", isNew(id) ? `<span class="tag new">NEW</span>` : "", dr ? why(id, "drop") : ""); }).join("")}</div></div>
+      <div class="group"><details id="swap" ${swapOpen ? "open" : ""}><summary>Swap more cards from the pool…</summary><div class="grid">${LU.swapIns().map(id => LU.extra.includes(id) ? slot(id, "extra", "added", "", why(id, "add")) : slot(id, "extra")).join("")}</div></details></div>
+    </section></div>`;
+}
+function overviewScreen() {
+  const groups = ["1", "X", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const cell = (id, l) => { const s = cellState(id, l);
+    const sym = s.picked ? "★" : s.added ? "+" : s.dropped ? "−" : s.inDeck ? "●" : s.inPool ? "○" : "·";
+    return `<td><span class="cell ${s.inDeck ? "d" : s.inPool ? "p" : "n"}" title="${s.inDeck ? "In deck" : s.inPool ? "In pool" : "Not in pool"}">${sym}${s.note ? "<sup>✎</sup>" : ""}</span></td>`; };
+  return `<div class="legend"><span><span class="cell d">●</span> in deck</span><span><span class="cell p">○</span> pool only</span><span><span class="cell n">·</span> not in pool</span><span>★ picked · + added · − dropped · ✎ note</span></div>
+  <div class="mx"><table><thead><tr><th>Card</th>${LEVELS.map(l => `<th><a href="#" data-l="${l}">L${l}</a></th>`).join("")}</tr></thead><tbody>
+  ${groups.map(g => { const ids = sortIds(CARDS.filter(c => c.level === g).map(c => c.id)); return `<tr class="grp"><td colspan="${LEVELS.length + 1}">Level ${g}</td></tr>` + ids.map(id => `<tr><td>${esc(C[id].name)} <span style="color:var(--mut)">${C[id].init}</span></td>${LEVELS.map(l => cell(id, l)).join("")}</tr>`).join(""); }).join("")}
+  <tr class="sum"><td>Pick · swaps</td>${LEVELS.map(l => { const c = changes(l); return `<td>${c.start ? "start" : `${esc(C[c.pick].name.split(" ")[0])} · ${c.dropped.length}`}</td>`; }).join("")}</tr>
+  </tbody></table></div>`;
+}
+function notesScreen() {
+  const entries = Object.entries(BUILD.motivations).map(([k, t]) => { const [l, id, kind] = k.split("|"); return { l: +l, id, kind, t }; });
+  const sec = (title, list) => `<h2>${title}</h2><div class="panel">${list.map(e => `<div class="change">${img(e.id)}<div style="flex:1"><b>${esc(C[e.id].name)}</b><textarea>${esc(e.t)}</textarea><small style="color:var(--mut)">updated 2 days ago</small></div></div>`).join("")}</div>`;
+  return sec("Not in starting deck", entries.filter(e => e.kind === "exclude")) +
+    BUILD.levelUps.map(u => sec(`Level ${u.level}`, entries.filter(e => e.l === u.level))).join("");
+}
+function openCard(id) {
+  const g = BUILD.guidance[id] || "";
+  const ms = Object.entries(BUILD.motivations).filter(([k]) => k.split("|")[1] === id);
+  $("#dlg").innerHTML = `<button class="x" onclick="dlg.close()" aria-label="Close">×</button><div class="dlg">${img(id)}<div>
+    <h3 style="margin:0">${esc(C[id].name)}</h3><div style="color:var(--mut);font-size:13px">Level ${C[id].level} · Initiative ${C[id].init}</div>
+    <h2>Guidance for this build</h2><textarea style="min-height:110px">${esc(g)}</textarea>
+    <h2>Motivations</h2>${ms.length ? ms.map(([k, t]) => { const [l, , kind] = k.split("|"); return `<div class="guide"><b class="k ${kind}">${kind.toUpperCase()} · L${l}</b><br>${esc(t || "—")}</div>`; }).join("") : `<div class="guide empty">None yet</div>`}
+  </div></div>`;
+  $("#dlg").showModal();
+}
+function render() {
+  location.hash = screen; renderLevels();
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.s === screen));
+  $("#main").innerHTML = { deck: deckScreen, levelup: levelupScreen, overview: overviewScreen, notes: notesScreen }[screen]();
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("button,a"); if (!t) return;
+  if (t.tagName === "A") e.preventDefault();
+  const d = t.dataset;
+  if (d.close) $("#zoomdlg").close();
+  if (d.zoom) return openZoom(d.zoom, d.kind);
+  const picking = !!d.pick && LU.pick !== d.pick;
+  if (d.l) { L = +d.l; screen = "deck"; }
+  else if (d.s) screen = d.s;
+  else if (t.id === "tg") showG = !showG;
+  else if (t.id === "reset") LU.reset();
+  else if (d.pick) LU.choose(d.pick);
+  else if (d.drop) LU.toggleDrop(d.drop);
+  else if (d.extra) LU.addExtra(d.extra);
+  else if (d.c) return openCard(d.c);
+  else return;
+  render();
+  // Single-column layout: after picking, bring the deck into view so the drop step is obvious.
+  if (picking && screen === "levelup" && !matchMedia("(min-width:1200px)").matches) $("#lu-deck").scrollIntoView({ behavior: "smooth" });
+});
+document.addEventListener("input", e => { if (e.target.dataset.note) notes[e.target.dataset.note] = e.target.value; });
+document.addEventListener("toggle", e => { if (e.target.id === "swap") swapOpen = e.target.open; }, true);
+// Click on the backdrop closes the zoom.
+$("#zoomdlg").addEventListener("click", e => { if (e.target.id === "zoomdlg") e.target.close(); });
+render();
+</script></body></html>
