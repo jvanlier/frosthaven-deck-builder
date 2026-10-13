@@ -39,14 +39,14 @@ npm run test:e2e
 npm run build
 ```
 
-Install the Playwright Chromium browser before the first browser test:
+Install the Playwright Chromium and WebKit browsers before the first browser test:
 
 ```sh
-npx playwright install chromium
+npx playwright install chromium webkit
 ```
 
 On Linux machines that also need Playwright's system packages, use
-`npx playwright install --with-deps chromium` instead.
+`npx playwright install --with-deps chromium webkit` instead.
 
 The production build writes the browser bundle to `dist/client` and the
 Node server to `dist/server/index.js`.
