@@ -80,17 +80,24 @@ export interface ReplayResult {
   startingPicks: AppliedStartingPick[];
 }
 
+export interface DeckEditConflict {
+  cardId: string;
+  existing: "added" | "dropped";
+  requested: "added" | "dropped";
+}
+
 export interface DeckEdit {
   added: string[];
   dropped: string[];
+  conflicts?: DeckEditConflict[];
 }
 
 export interface ApplyDeckEditOptions {
   /** Existing records that were loaded from storage and must not be lost. */
-  existing?: DeckEdit;
-  /** Explicitly identified valid records; all other existing records are retained. */
-  validAdded?: readonly string[];
-  validDropped?: readonly string[];
+  existing: Pick<DeckEdit, "added" | "dropped">;
+  /** Replay-derived valid records; all other existing records remain unresolved. */
+  validAdded: readonly string[];
+  validDropped: readonly string[];
 }
 
 const printedLevel = (level: CardLevel): number => (level === "X" ? 1 : level);
@@ -132,20 +139,6 @@ function cardLevel(card: Card): number {
 
 function cardMap(character: Character): Map<string, Card> {
   return new Map(character.cards.map((card) => [card.id, card]));
-}
-
-function isCharacter(value: Build | Character): value is Character {
-  return "cards" in value;
-}
-
-function resolveBuildCharacter(
-  first: Build | Character,
-  second: Build | Character,
-): { build: Build; character: Character } {
-  if (isCharacter(first)) {
-    return { build: second as Build, character: first };
-  }
-  return { build: first, character: second as Character };
 }
 
 function maxLevel(build: Build): number {
@@ -547,7 +540,11 @@ function activeMotivations(
       return false;
     }
     if (state.level === build.startLevel && motivation.kind === "exclude") {
-      return cardLevel(card) <= build.startLevel && !startDeck.has(card.id);
+      return (
+        motivation.level === build.startLevel &&
+        cardLevel(card) <= build.startLevel &&
+        !startDeck.has(card.id)
+      );
     }
     if (
       state.level === build.startLevel &&
@@ -560,19 +557,15 @@ function activeMotivations(
       return false;
     }
     return (
-      (motivation.kind === "add" && added.has(motivation.cardId)) ||
+      (motivation.kind === "add" &&
+        (added.has(motivation.cardId) ||
+          state.applied.pick === motivation.cardId)) ||
       (motivation.kind === "drop" && dropped.has(motivation.cardId))
     );
   });
 }
 
-export function replayBuild(build: Build, character: Character): ReplayResult;
-export function replayBuild(character: Character, build: Build): ReplayResult;
-export function replayBuild(
-  first: Build | Character,
-  second: Build | Character,
-): ReplayResult {
-  const { build, character } = resolveBuildCharacter(first, second);
+export function replayBuild(build: Build, character: Character): ReplayResult {
   const cards = cardMap(character);
   const starting = replayStartingState(build, character, cards);
   const levels: RuleLevelState[] = [
@@ -663,32 +656,15 @@ export function replayBuild(
   };
 }
 
-export function validateBuild(build: Build, character: Character): RuleIssue[];
-export function validateBuild(character: Character, build: Build): RuleIssue[];
-export function validateBuild(
-  first: Build | Character,
-  second: Build | Character,
-): RuleIssue[] {
-  const { build, character } = resolveBuildCharacter(first, second);
+export function validateBuild(build: Build, character: Character): RuleIssue[] {
   return replayBuild(build, character).issues;
 }
 
 export function pool(
   build: Build,
   character: Character,
-  level?: number,
-): Card[];
-export function pool(
-  character: Character,
-  build: Build,
-  level?: number,
-): Card[];
-export function pool(
-  first: Build | Character,
-  second: Build | Character,
   requestedLevel?: number,
 ): Card[] {
-  const { build, character } = resolveBuildCharacter(first, second);
   const result = replayBuild(build, character);
   const target = requestedLevel ?? maxLevel(build);
   const state = levelState(result, Math.max(build.startLevel, target));
@@ -698,19 +674,8 @@ export function pool(
 export function deck(
   build: Build,
   character: Character,
-  level?: number,
-): Card[];
-export function deck(
-  character: Character,
-  build: Build,
-  level?: number,
-): Card[];
-export function deck(
-  first: Build | Character,
-  second: Build | Character,
   requestedLevel?: number,
 ): Card[] {
-  const { build, character } = resolveBuildCharacter(first, second);
   const result = replayBuild(build, character);
   const target = requestedLevel ?? maxLevel(build);
   const state = levelState(result, Math.max(build.startLevel, target));
@@ -721,18 +686,7 @@ export function pickOptions(
   build: Build,
   character: Character,
   level: number,
-): Card[];
-export function pickOptions(
-  character: Character,
-  build: Build,
-  level: number,
-): Card[];
-export function pickOptions(
-  first: Build | Character,
-  second: Build | Character,
-  level: number,
 ): Card[] {
-  const { build, character } = resolveBuildCharacter(first, second);
   if (!Number.isInteger(level) || level < 2 || level > 9) {
     return [];
   }
@@ -774,19 +728,8 @@ export function pickOptions(
 export function addOptions(
   build: Build,
   character: Character,
-  level?: number,
-): Card[];
-export function addOptions(
-  character: Character,
-  build: Build,
-  level?: number,
-): Card[];
-export function addOptions(
-  first: Build | Character,
-  second: Build | Character,
   requestedLevel?: number,
 ): Card[] {
-  const { build, character } = resolveBuildCharacter(first, second);
   const target = requestedLevel ?? maxLevel(build);
   const result = replayBuild(build, character);
   const current = levelState(result, Math.max(build.startLevel, target));
@@ -815,7 +758,7 @@ export function addOptions(
 export function applyDeckEdit(
   previousDeck: readonly string[],
   nextDeck: readonly string[],
-  options?: ApplyDeckEditOptions | DeckEdit,
+  options?: ApplyDeckEditOptions,
 ): DeckEdit {
   const previous = new Set(previousDeck);
   const next = new Set(nextDeck);
@@ -826,53 +769,62 @@ export function applyDeckEdit(
     return { added, dropped };
   }
 
-  const normalizedOptions: ApplyDeckEditOptions = isDeckEdit(options)
-    ? { existing: options }
-    : options;
-  const existing = normalizedOptions.existing;
-  if (!existing) {
-    return { added, dropped };
+  const validAdded = new Set(options.validAdded);
+  const validDropped = new Set(options.validDropped);
+  const unresolvedAdded = options.existing.added.filter(
+    (cardId) => !validAdded.has(cardId),
+  );
+  const unresolvedDropped = options.existing.dropped.filter(
+    (cardId) => !validDropped.has(cardId),
+  );
+  const unresolvedAddedSet = new Set(unresolvedAdded);
+  const unresolvedDroppedSet = new Set(unresolvedDropped);
+  const conflicts: DeckEditConflict[] = [];
+
+  for (const cardId of added) {
+    if (unresolvedDroppedSet.has(cardId)) {
+      conflicts.push({
+        cardId,
+        existing: "dropped",
+        requested: "added",
+      });
+    }
+  }
+  for (const cardId of dropped) {
+    if (unresolvedAddedSet.has(cardId)) {
+      conflicts.push({
+        cardId,
+        existing: "added",
+        requested: "dropped",
+      });
+    }
   }
 
-  const validAdded = new Set(
-    normalizedOptions.validAdded ??
-      existing.added.filter(
-        (cardId) => !previous.has(cardId) && next.has(cardId),
-      ),
-  );
-  const validDropped = new Set(
-    normalizedOptions.validDropped ??
-      existing.dropped.filter(
-        (cardId) => previous.has(cardId) && !next.has(cardId),
-      ),
-  );
-  return {
+  const conflictIds = new Set(conflicts.map((conflict) => conflict.cardId));
+  const result: DeckEdit = {
     added: [
-      ...existing.added.filter((cardId) => !validAdded.has(cardId)),
-      ...added,
+      ...unresolvedAdded,
+      ...added.filter(
+        (cardId) => !unresolvedAddedSet.has(cardId) && !conflictIds.has(cardId),
+      ),
     ],
     dropped: [
-      ...existing.dropped.filter((cardId) => !validDropped.has(cardId)),
-      ...dropped,
+      ...unresolvedDropped,
+      ...dropped.filter(
+        (cardId) =>
+          !unresolvedDroppedSet.has(cardId) && !conflictIds.has(cardId),
+      ),
     ],
   };
-}
-
-function isDeckEdit(
-  options: ApplyDeckEditOptions | DeckEdit,
-): options is DeckEdit {
-  return "added" in options && "dropped" in options;
+  if (conflicts.length > 0) {
+    result.conflicts = conflicts;
+  }
+  return result;
 }
 
 export const normalizeDeckEdit = applyDeckEdit;
 
-export function canAppendLevel(build: Build, character: Character): boolean;
-export function canAppendLevel(character: Character, build: Build): boolean;
-export function canAppendLevel(
-  first: Build | Character,
-  second: Build | Character,
-): boolean {
-  const { build, character } = resolveBuildCharacter(first, second);
+export function canAppendLevel(build: Build, character: Character): boolean {
   if (maxLevel(build) >= 9) {
     return false;
   }
@@ -885,18 +837,7 @@ export function applicableMotivations(
   build: Build,
   character: Character,
   level?: number,
-): Motivation[];
-export function applicableMotivations(
-  character: Character,
-  build: Build,
-  level?: number,
-): Motivation[];
-export function applicableMotivations(
-  first: Build | Character,
-  second: Build | Character,
-  level?: number,
 ): Motivation[] {
-  const { build, character } = resolveBuildCharacter(first, second);
   const result = replayBuild(build, character);
   const state = levelState(result, level ?? build.startLevel);
   return state?.activeMotivations ?? [];

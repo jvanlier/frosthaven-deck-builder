@@ -179,6 +179,30 @@ describe("Snowdancer rules engine", () => {
     );
   });
 
+  it("keeps a pick motivation active even when its required add is missing", () => {
+    const build = makeBuild(1, {
+      startDeck: startingCards,
+      levelUps: [
+        { level: 2, pick: "birds-in-a-tempest", added: [], dropped: [] },
+      ],
+      motivations: [
+        {
+          level: 2,
+          cardId: "birds-in-a-tempest",
+          kind: "add",
+          text: "Keep this pick available",
+          updatedAt: timestamp,
+        },
+      ],
+    });
+
+    expect(replayBuild(build, character).levels[1]?.activeMotivations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cardId: "birds-in-a-tempest" }),
+      ]),
+    );
+  });
+
   it("marks partial hands incomplete and overfull hands invalid", () => {
     const incomplete = makeBuild(1, { startDeck: startingCards.slice(0, 9) });
     const overfull = makeBuild(1, {
@@ -222,6 +246,13 @@ describe("Snowdancer rules engine", () => {
           text: "Too unreliable",
           updatedAt: timestamp,
         },
+        {
+          level: 1,
+          cardId: "tornado",
+          kind: "exclude",
+          text: "Wrong level note",
+          updatedAt: timestamp,
+        },
       ],
     });
     const level = replayBuild(build, character).levels[0]!;
@@ -229,6 +260,11 @@ describe("Snowdancer rules engine", () => {
     expect(
       level.activeMotivations.map((motivation) => motivation.cardId),
     ).toEqual(expect.arrayContaining(["birds-in-a-tempest", "tornado"]));
+    expect(level.activeMotivations).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: "Wrong level note" }),
+      ]),
+    );
   });
 
   it("normalizes deck edits to added and dropped cards", () => {
@@ -249,6 +285,91 @@ describe("Snowdancer rules engine", () => {
       added: ["invalid-add", "c"],
       dropped: ["invalid-drop", "a"],
     });
+  });
+
+  it("removes undone valid operations but reports conflicts with unresolved operations", () => {
+    expect(
+      applyDeckEdit(["a", "b"], ["a", "b"], {
+        existing: { added: ["c"], dropped: ["d"] },
+        validAdded: ["c"],
+        validDropped: ["d"],
+      }),
+    ).toEqual({ added: [], dropped: [] });
+
+    expect(
+      applyDeckEdit(["a", "b"], ["b"], {
+        existing: { added: ["a"], dropped: [] },
+        validAdded: [],
+        validDropped: [],
+      }),
+    ).toEqual({
+      added: ["a"],
+      dropped: [],
+      conflicts: [{ cardId: "a", existing: "added", requested: "dropped" }],
+    });
+  });
+
+  it("propagates edits and reports duplicate picks and stale drops", () => {
+    const build = makeBuild(1, {
+      startDeck: startingCards,
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+        {
+          level: 3,
+          pick: "tornado",
+          added: ["tornado"],
+          dropped: ["birds-in-a-tempest"],
+        },
+      ],
+    });
+    const changed = buildSchema.parse({
+      ...build,
+      levelUps: [
+        {
+          level: 2,
+          pick: "tornado",
+          added: ["tornado"],
+          dropped: ["whiteout"],
+        },
+        build.levelUps[1],
+      ],
+    });
+    const result = replayBuild(changed, character);
+
+    expect(result.levels[1]?.pool.map((card) => card.id)).not.toContain(
+      "birds-in-a-tempest",
+    );
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ level: 3, code: "PICK_ALREADY_IN_POOL" }),
+        expect.objectContaining({ level: 3, code: "DROP_NOT_IN_PREV_DECK" }),
+      ]),
+    );
+  });
+
+  it("reports high-level and unknown picks without mutating the stored build", () => {
+    const build = makeBuild(1, {
+      startDeck: startingCards,
+      levelUps: [
+        { level: 2, pick: "cold-snap", added: [], dropped: [] },
+        { level: 3, pick: "not-a-card", added: [], dropped: [] },
+      ],
+    });
+    const before = JSON.stringify(build);
+
+    expect(validateBuild(build, character)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "PICK_TOO_HIGH", level: 2 }),
+        expect.objectContaining({ code: "UNKNOWN_CARD", level: 3 }),
+      ]),
+    );
+    replayBuild(build, character);
+    expect(JSON.stringify(build)).toBe(before);
   });
 
   it("allows appending only below level 9 after complete valid history", () => {
