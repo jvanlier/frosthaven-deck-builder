@@ -217,44 +217,47 @@ function LevelUpEditor({
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    heading.focus({ preventScroll: true });
-
     // Picking adds the note field and card before the deck, so calculate the
     // destination after React has committed the new layout. Keep the whole
     // heading between the sticky editor controls and fixed bottom navigation.
     requestAnimationFrame(() => {
-      const headingBox = heading.getBoundingClientRect();
-      const stickyBottom = Math.max(
-        0,
-        ...Array.from(
-          document.querySelectorAll<HTMLElement>(
-            ".app-header, .save-feedback, .level-up-status",
-          ),
-        ).map((element) => element.getBoundingClientRect().bottom),
-      );
-      const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
-      const visibleBottom = Math.min(
-        window.innerHeight,
-        bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
-      );
-      const safeTop = stickyBottom + 16;
-      const safeBottom = visibleBottom - 16;
-      if (safeBottom <= safeTop) {
-        return;
-      }
+      requestAnimationFrame(() => {
+        // The action can come from a modal dialog. Wait until its close effect
+        // has run before moving focus out of the dialog.
+        heading.focus({ preventScroll: true });
+        const headingBox = heading.getBoundingClientRect();
+        const stickyBottom = Math.max(
+          0,
+          ...Array.from(
+            document.querySelectorAll<HTMLElement>(
+              ".app-header, .save-feedback, .level-up-status",
+            ),
+          ).map((element) => element.getBoundingClientRect().bottom),
+        );
+        const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
+        const visibleBottom = Math.min(
+          window.innerHeight,
+          bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
+        );
+        const safeTop = stickyBottom + 16;
+        const safeBottom = visibleBottom - 16;
+        if (safeBottom <= safeTop) {
+          return;
+        }
 
-      let targetTop = window.scrollY;
-      if (headingBox.top < safeTop) {
-        targetTop += headingBox.top - safeTop;
-      } else if (headingBox.bottom > safeBottom) {
-        targetTop += headingBox.bottom - safeBottom;
-      }
-      if (targetTop === window.scrollY) {
-        return;
-      }
-      window.scrollTo({
-        top: Math.max(0, targetTop),
-        behavior: reducedMotion ? "auto" : "smooth",
+        let targetTop = window.scrollY;
+        if (headingBox.top < safeTop) {
+          targetTop += headingBox.top - safeTop;
+        } else if (headingBox.bottom > safeBottom) {
+          targetTop += headingBox.bottom - safeBottom;
+        }
+        if (targetTop === window.scrollY) {
+          return;
+        }
+        window.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: reducedMotion ? "auto" : "smooth",
+        });
       });
     });
   }

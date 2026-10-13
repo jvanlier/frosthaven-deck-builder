@@ -146,6 +146,69 @@ const revisedLevelFixtureData = {
     },
   ],
 };
+const plannedLaterFixtureData = {
+  ...fixtureData,
+  builds: [
+    {
+      ...levelUpBaseBuild,
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+        {
+          level: 3,
+          pick: "tornado",
+          added: ["tornado"],
+          dropped: ["snowball"],
+        },
+      ],
+    },
+  ],
+};
+const invalidLaterFixtureData = {
+  ...plannedLaterFixtureData,
+  builds: [
+    {
+      ...plannedLaterFixtureData.builds[0],
+      levelUps: [
+        plannedLaterFixtureData.builds[0].levelUps[0],
+        {
+          level: 3,
+          pick: "tornado",
+          added: [],
+          dropped: ["snowball"],
+        },
+      ],
+    },
+  ],
+};
+const resetDuringSaveFixtureData = {
+  ...revisedLevelFixtureData,
+  builds: [
+    {
+      ...revisedLevelFixtureData.builds[0],
+      name: "Keep this name",
+      guidance: {
+        blizzard: {
+          text: "Keep this guidance.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+      },
+      motivations: [
+        {
+          level: 1,
+          cardId: "tornado",
+          kind: "exclude",
+          text: "Keep this unrelated note.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+      ],
+    },
+  ],
+};
 
 test("runs a level-up pick, drop and done through the stored editor", async ({
   page,
@@ -261,6 +324,177 @@ test("scrolls and moves focus to the deck after a mobile pick", async ({
       );
     })
     .toBeLessThanOrEqual(0);
+});
+
+test("moves focus to the deck after picking from an enlarged card", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  const enlargeButton = page.getByRole("button", {
+    name: "Enlarge Birds in a Tempest",
+  });
+  await page.evaluate(() => window.scrollTo({ top: 600, behavior: "auto" }));
+  await enlargeButton.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("heading", { name: "Your deck" })).toBeFocused();
+});
+
+test("preserves later stored operations when revising an earlier level", async ({
+  page,
+}) => {
+  let persisted = structuredClone(plannedLaterFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await page.getByRole("button", { name: "Pick Tornado" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[1])
+    .toEqual({
+      level: 3,
+      pick: "tornado",
+      added: ["tornado"],
+      dropped: ["snowball"],
+    });
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({ pick: "tornado" });
+});
+
+test("retains a pre-existing invalid later operation through an unrelated edit", async ({
+  page,
+}) => {
+  let persisted = structuredClone(invalidLaterFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[1])
+    .toEqual({
+      level: 3,
+      pick: "tornado",
+      added: [],
+      dropped: ["snowball"],
+    });
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0]?.dropped)
+    .toEqual(["whiteout", "blizzard"]);
+});
+
+test("resets during an in-flight save without losing unrelated fields or notes", async ({
+  page,
+}) => {
+  let persisted = structuredClone(resetDuringSaveFixtureData);
+  let firstPutStarted = false;
+  let releaseFirstPut: (() => void) | undefined;
+  const firstPut = new Promise<void>((resolve) => {
+    releaseFirstPut = resolve;
+  });
+  let putCount = 0;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    putCount += 1;
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    if (putCount === 1) {
+      firstPutStarted = true;
+      await firstPut;
+    }
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await page.getByRole("button", { name: "Pick Tornado" }).click();
+  await page.getByLabel("Why add Tornado?").fill("Temporary note");
+  await expect.poll(() => firstPutStarted).toBe(true);
+  await page.getByRole("button", { name: "Reset" }).click();
+  releaseFirstPut?.();
+
+  await expect.poll(() => putCount).toBe(2);
+  await expect
+    .poll(async () => persisted.builds[0])
+    .toMatchObject({
+      name: "Keep this name",
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+      guidance: resetDuringSaveFixtureData.builds[0].guidance,
+      motivations: resetDuringSaveFixtureData.builds[0].motivations,
+    });
 });
 
 test("keeps extra swaps open, notes stable and new cards undroppable", async ({
