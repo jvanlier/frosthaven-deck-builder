@@ -557,8 +557,9 @@ h2 {
 
 .level-up-groups {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
   gap: 0 2rem;
+  align-items: start;
 }
 
 .level-up-group {
@@ -566,7 +567,8 @@ h2 {
 }
 
 .level-up-deck {
-  grid-column: 1 / -1;
+  grid-column: 2;
+  grid-row: 1 / span 2;
 }
 
 .level-up-card-grid {
@@ -1231,6 +1233,11 @@ h2 {
 
   .level-up-groups {
     display: block;
+  }
+
+  .level-up-deck {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .level-up-card-grid {

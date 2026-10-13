@@ -80,13 +80,13 @@ export function LevelUpRoute() {
     targetLevel === expectedNextLevel &&
     canMutate &&
     canAppendLevel(build, character);
-  const appendRequested = useRef(false);
+  const appendRequested = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!shouldAppend || !build || appendRequested.current) {
+    if (!shouldAppend || !build || appendRequested.current === targetLevel) {
       return;
     }
-    appendRequested.current = true;
+    appendRequested.current = targetLevel;
     updateData((current) => ({
       ...current,
       builds: current.builds.map((candidate) =>
@@ -94,7 +94,7 @@ export function LevelUpRoute() {
       ),
     }));
     void flush().catch(() => undefined);
-  }, [build, flush, shouldAppend, updateData]);
+  }, [build, flush, shouldAppend, targetLevel, updateData]);
 
   if (characterId !== character.id || !build) {
     return <UnavailableLevelUpView />;
@@ -102,6 +102,7 @@ export function LevelUpRoute() {
   if (existingLevelUp) {
     return (
       <LevelUpEditor
+        key={`${build.id}:${targetLevel}`}
         build={build}
         character={character}
         level={targetLevel}
@@ -109,7 +110,7 @@ export function LevelUpRoute() {
       />
     );
   }
-  if (shouldAppend || appendRequested.current) {
+  if (shouldAppend || appendRequested.current === targetLevel) {
     return (
       <main className="page-content narrow-content">
         <p role="status" aria-live="polite">
@@ -147,6 +148,7 @@ function LevelUpEditor({
   });
   const changedMotivations = useRef(new Set<string>());
   const [swapOpen, setSwapOpen] = useState(false);
+  const deckHeadingRef = useRef<HTMLHeadingElement>(null);
 
   if (!state || !previousState) {
     return <UnavailableLevelUpView />;
@@ -179,8 +181,8 @@ function LevelUpEditor({
   const newCards = activeAdded;
   const droppedCards = new Set(levelUp.dropped);
   const visibleDeck = uniqueCards([
-    ...state.deck,
-    ...previousState.deck.filter((card) => droppedCards.has(card.id)),
+    ...previousState.deck,
+    ...state.deck.filter((card) => newCards.has(card.id)),
   ]);
 
   function mutateBuild(mutator: (current: Build) => Build): void {
@@ -202,6 +204,24 @@ function LevelUpEditor({
         ),
       };
     });
+  }
+
+  function scrollToDeckOnSmallScreen(): void {
+    if (typeof window === "undefined" || window.innerWidth > 650) {
+      return;
+    }
+    const heading = deckHeadingRef.current;
+    if (!heading) {
+      return;
+    }
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    heading.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
+    requestAnimationFrame(() => heading.focus({ preventScroll: true }));
   }
 
   function changeLevelUp(next: Pick<LevelUp, "pick" | "added" | "dropped">) {
@@ -238,6 +258,7 @@ function LevelUpEditor({
       added: withoutPicks,
       dropped: [...levelUp.dropped],
     });
+    scrollToDeckOnSmallScreen();
   }
 
   function changeDeck(card: Card, action: "add" | "remove"): void {
@@ -478,7 +499,9 @@ function LevelUpEditor({
           <div className="section-heading">
             <div>
               <p className="eyebrow">Current hand</p>
-              <h2 id="your-deck-heading">Your deck</h2>
+              <h2 id="your-deck-heading" ref={deckHeadingRef} tabIndex={-1}>
+                Your deck
+              </h2>
             </div>
             <span className="editor-count">
               {state.deck.length} / {handSize}

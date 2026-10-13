@@ -198,6 +198,42 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
     });
 });
 
+test("scrolls and moves focus to the deck after a mobile pick", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  const deckHeading = page.getByRole("heading", { name: "Your deck" });
+  await expect(deckHeading).toBeFocused();
+  await expect
+    .poll(
+      async () =>
+        (await deckHeading.boundingBox())?.y ?? Number.POSITIVE_INFINITY,
+    )
+    .toBeLessThan(568);
+});
+
 test("keeps extra swaps open, notes stable and new cards undroppable", async ({
   page,
 }) => {
@@ -223,6 +259,20 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
   await page.getByRole("link", { name: "Edit this level" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await expect(page.locator(".level-up-deck .card-name")).toHaveText([
+    "Cold Therapy",
+    "Whiteout",
+    "Snowball",
+    "Lifting Gust",
+    "Chilling Impact",
+    "Cross Winds",
+    "Frigid Growth",
+    "Blizzard",
+    "Enticing Breeze",
+    "Gathering Force",
+    "Nature's Breath",
+    "Birds in a Tempest",
+  ]);
   const swapSection = page.getByText("Swap more cards from the pool");
   await swapSection.click();
   const whiteout = page.getByRole("button", {
@@ -309,6 +359,54 @@ test("appends unfinished levels, resumes them after reload and resets only this 
     .poll(async () => persisted.builds[0]?.levelUps[0])
     .toMatchObject({ pick: null, added: [], dropped: [] });
   await expect(persisted.builds[0]?.motivations).toEqual([]);
+});
+
+test("scopes editor reset and appending to the current level", async ({
+  page,
+}) => {
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await page.getByRole("link", { name: "Level up" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
+  await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(2);
+
+  await page.getByRole("link", { name: "2", exact: true }).click();
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await page.getByRole("link", { name: "Level up" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
+  await page.getByRole("button", { name: "Pick Cold Snap" }).click();
+  await page.getByRole("button", { name: "Reset" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[1])
+    .toMatchObject({ pick: null, added: [], dropped: [] });
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["blizzard"],
+    });
 });
 
 test("loads the deck builder shell and health status", async ({ page }) => {
