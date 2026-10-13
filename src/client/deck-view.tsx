@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CardGrid, CardImage } from "./cards";
+import { CardDialog, CardGrid, CardImage } from "./cards";
 import { useAppData } from "./app-data";
 import { startEditorPath } from "./build-editor";
 import { characters } from "../shared/data/characters/index.js";
@@ -367,23 +367,14 @@ function ChangesSection({
               change.kind,
             );
             return (
-              <li key={`${change.label}-${change.cardId}`}>
-                <CardImage
-                  className="change-thumbnail"
-                  card={card}
-                  alt={`${card.name}, level ${formatCardLevel(card)}`}
-                />
-                <div>
-                  <strong>
-                    {change.label}: {card.name}
-                  </strong>
-                  {motivation ? (
-                    <p className="plain-text">{motivation.text}</p>
-                  ) : (
-                    <p className="change-note-empty">No motivation recorded.</p>
-                  )}
-                </div>
-              </li>
+              <ChangeListItem
+                key={`${change.label}-${change.cardId}`}
+                build={build}
+                state={state}
+                card={card}
+                label={change.label}
+                motivation={motivation}
+              />
             );
           })}
         </ul>
@@ -393,6 +384,91 @@ function ChangesSection({
         </p>
       )}
     </section>
+  );
+}
+
+function ChangeListItem({
+  build,
+  state,
+  card,
+  label,
+  motivation,
+}: {
+  build: Build;
+  state: RuleLevelState;
+  card: Card;
+  label: string;
+  motivation: Motivation | undefined;
+}) {
+  const [enlarged, setEnlarged] = useState(false);
+  const enlargeButtonRef = useRef<HTMLButtonElement>(null);
+  const navigate = useNavigate();
+  const detailPath = cardDetailPath(
+    build.characterId,
+    build.id,
+    state.level,
+    card.id,
+  );
+  const closeDialog = () => {
+    setEnlarged(false);
+    requestAnimationFrame(() => enlargeButtonRef.current?.focus());
+  };
+
+  return (
+    <li>
+      <div className="change-card-media">
+        <Link
+          className="change-card-link"
+          to={detailPath}
+          aria-label={`Open ${card.name} details`}
+        >
+          <CardImage
+            className="change-thumbnail"
+            card={card}
+            alt={`${card.name}, level ${formatCardLevel(card)}`}
+          />
+        </Link>
+        <button
+          ref={enlargeButtonRef}
+          className="enlarge-button"
+          type="button"
+          onClick={() => setEnlarged(true)}
+          aria-label={`Enlarge ${card.name}`}
+        >
+          <span aria-hidden="true">⌕</span> Enlarge
+        </button>
+      </div>
+      <div>
+        <Link className="change-card-name" to={detailPath}>
+          <strong>
+            {label}: {card.name}
+          </strong>
+        </Link>
+        {motivation ? (
+          <p className="plain-text">{motivation.text}</p>
+        ) : (
+          <>
+            <p className="change-note-empty">No motivation recorded.</p>
+            <button
+              type="button"
+              className="secondary-button note-button"
+              disabled
+              aria-label={`Add motivation for ${card.name}`}
+              title="Motivation editing is available in the Notes view."
+            >
+              Add note
+            </button>
+          </>
+        )}
+      </div>
+      <CardDialog
+        card={card}
+        open={enlarged}
+        actionLabel={`Open ${card.name} details`}
+        onAction={() => navigate(detailPath)}
+        onClose={closeDialog}
+      />
+    </li>
   );
 }
 
@@ -431,7 +507,7 @@ export function UnavailableDeckView() {
           That character, build or level does not exist. Your saved data is
           unchanged.
         </p>
-        <Link className="button-link" to="/">
+        <Link className="button-link" to={`/c/${character.id}`}>
           Back to builds
         </Link>
       </section>

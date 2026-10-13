@@ -686,6 +686,34 @@ h2 {
   min-width: 0;
 }
 
+.change-card-media {
+  display: grid;
+  justify-items: start;
+  gap: 0.2rem;
+  flex: 0 0 auto;
+}
+
+.change-card-link {
+  display: block;
+  border-radius: 0.3rem;
+}
+
+.change-card-name {
+  color: #f7fcff;
+  text-decoration: none;
+}
+
+.change-card-name:hover {
+  color: #b7eaff;
+  text-decoration: underline;
+}
+
+.note-button {
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+}
+
 .change-thumbnail {
   width: 3.75rem;
   height: 5.25rem;

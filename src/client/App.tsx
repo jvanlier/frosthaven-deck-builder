@@ -149,8 +149,8 @@ function AppHeader({
         <h1 className="visually-hidden">Frosthaven Deck Builder</h1>
         <Link
           className="brand"
-          to="/"
-          aria-label="Frosthaven Deck Builder home"
+          to={`/c/${character.id}`}
+          aria-label="Frosthaven Deck Builder builds"
         >
           <img src={`/${character.icon}`} alt="" />
           <span>
@@ -358,7 +358,7 @@ function UnavailableView() {
           Your saved data is safe. This route will become available when its
           editor is ready.
         </p>
-        <Link className="button-link" to="/">
+        <Link className="button-link" to={`/c/${character.id}`}>
           Back to builds
         </Link>
       </section>
@@ -375,7 +375,11 @@ function BottomTabs() {
   return (
     <nav className="bottom-tabs" aria-label="Primary navigation">
       <NavLink
-        to={hasWorkspace ? workspaceDeckPath(workspace, deckLevel) : "/"}
+        to={
+          hasWorkspace
+            ? workspaceDeckPath(workspace, deckLevel)
+            : `/c/${character.id}`
+        }
         end={!hasWorkspace}
         className={tabClassName}
       >
