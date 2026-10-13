@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
+  PendingChangesError,
   createAppDataController,
   preventUnloadIfPending,
   type AppDataTransport,
@@ -263,6 +264,90 @@ describe("app data save controller", () => {
     vi.clearAllTimers();
     vi.unstubAllGlobals();
     vi.useRealTimers();
+  });
+
+  it("does not let load discard pending changes after a conflict", async () => {
+    const transport = transportWith({
+      put: vi.fn().mockRejectedValue(new ConflictError(4)),
+      get: vi.fn(async () => ({ ...emptyData, revision: 4 })),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+    await expect(controller.flush()).rejects.toBeInstanceOf(ConflictError);
+
+    await expect(controller.load()).rejects.toBeInstanceOf(PendingChangesError);
+    expect(controller.getPendingData()).toMatchObject({ builds: [buildA] });
+    expect(transport.get).toHaveBeenCalledOnce();
+  });
+
+  it("waits for an active save before explicitly reloading", async () => {
+    const deferred: Array<(value: { revision: number }) => void> = [];
+    const transport = transportWith({
+      get: vi
+        .fn()
+        .mockResolvedValueOnce(emptyData)
+        .mockResolvedValueOnce({ ...emptyData, revision: 1, builds: [buildA] }),
+      put: vi.fn(
+        () =>
+          new Promise<{ revision: number }>((resolve) => {
+            deferred.push(resolve);
+          }),
+      ),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+    const save = controller.flush();
+    await vi.waitFor(() => expect(transport.put).toHaveBeenCalledOnce());
+
+    const reload = controller.reload({ discardPending: true });
+    await Promise.resolve();
+    expect(transport.get).toHaveBeenCalledOnce();
+
+    deferred[0]!({ revision: 1 });
+    await expect(save).resolves.toBeUndefined();
+    await expect(reload).resolves.toBeUndefined();
+    expect(transport.get).toHaveBeenCalledTimes(2);
+    expect(controller.getSnapshot().data).toMatchObject({
+      revision: 1,
+      builds: [buildA],
+    });
+  });
+
+  it("rejects concurrent replacements and pauses edits while flushing", async () => {
+    const deferred: Array<(value: { revision: number }) => void> = [];
+    const transport = transportWith({
+      put: vi.fn(
+        () =>
+          new Promise<{ revision: number }>((resolve) => {
+            deferred.push(resolve);
+          }),
+      ),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+
+    const first = controller.replaceData({ ...emptyData, builds: [buildB] });
+    const second = controller.replaceData({ ...emptyData, builds: [buildA] });
+    expect(controller.getSnapshot().canMutate).toBe(false);
+    controller.updateData((data) => ({
+      ...data,
+      builds: [{ ...buildA, name: "Ignored edit" }],
+    }));
+    expect(controller.getPendingData()).toMatchObject({ builds: [buildA] });
+    await expect(second).rejects.toThrow(/replacement/i);
+
+    await vi.waitFor(() => expect(transport.put).toHaveBeenCalledOnce());
+    deferred[0]!({ revision: 1 });
+    await vi.waitFor(() => expect(transport.put).toHaveBeenCalledTimes(2));
+    deferred[1]!({ revision: 2 });
+    await expect(first).resolves.toBeUndefined();
+    expect(controller.getSnapshot().data).toMatchObject({
+      revision: 2,
+      builds: [buildB],
+    });
   });
 
   it("surfaces conflicts and requires explicit reload", async () => {

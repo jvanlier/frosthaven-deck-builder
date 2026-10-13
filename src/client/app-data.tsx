@@ -124,10 +124,13 @@ export function createAppDataController(
   let timer: ReturnType<typeof setTimeout> | undefined;
   let loading: Promise<void> | undefined;
   let inFlight: Promise<void> | undefined;
+  let replacementOperation: Promise<void> | undefined;
+  let mutationPaused = false;
   let snapshot: AppDataSnapshot = makeSnapshot();
 
   function makeSnapshot(): AppDataSnapshot {
-    const pending = replacement !== null || dirty;
+    const pending =
+      replacement !== null || dirty || replacementOperation !== undefined;
     return {
       data: currentData,
       status,
@@ -136,7 +139,8 @@ export function createAppDataController(
         status !== "loading" &&
         status !== "error" &&
         status !== "conflict" &&
-        replacement === null,
+        replacement === null &&
+        !mutationPaused,
       hasPendingChanges: pending,
       error,
     };
@@ -225,6 +229,9 @@ export function createAppDataController(
   }
 
   async function load(): Promise<void> {
+    if (replacement !== null || dirty || replacementOperation !== undefined) {
+      throw new PendingChangesError();
+    }
     if (currentData !== null && status !== "error" && status !== "conflict") {
       return;
     }
@@ -295,22 +302,78 @@ export function createAppDataController(
     if (snapshot.hasPendingChanges && !options.discardPending) {
       throw new PendingChangesError();
     }
+
     clearTimer();
+    mutationPaused = true;
+    publish("loading", null);
+    const activeOperation = replacementOperation;
+    if (activeOperation) {
+      try {
+        await activeOperation;
+      } catch (cause) {
+        if (!options.discardPending) {
+          mutationPaused = false;
+          publish(status, error);
+          throw cause;
+        }
+      }
+      mutationPaused = true;
+      publish("loading", null);
+    }
+    const activeRequest = inFlight;
+    if (activeRequest) {
+      try {
+        await activeRequest;
+      } catch (cause) {
+        if (!options.discardPending) {
+          mutationPaused = false;
+          publish(status, error);
+          throw cause;
+        }
+      }
+    }
+
     dirty = false;
     replacement = null;
     currentData = null;
-    await load();
+    try {
+      await load();
+    } finally {
+      mutationPaused = false;
+      publish(status, error);
+    }
   }
 
   async function replaceData(candidate: AppData): Promise<void> {
     const parsed = parseData(candidate);
-    await flush();
-    if (currentData === null) {
-      throw new Error("Application data has not loaded");
+    if (replacementOperation) {
+      throw new Error("A data replacement is already in progress");
     }
-    replacement = parsed;
-    publish("saving", null);
-    await saveNow();
+    if (isPausedStatus(status)) {
+      throw error ?? new Error("Application data cannot be saved");
+    }
+
+    mutationPaused = true;
+    publish(status, null);
+    const operation = (async () => {
+      await flush();
+      if (currentData === null) {
+        throw new Error("Application data has not loaded");
+      }
+      replacement = parsed;
+      publish("saving", null);
+      await saveNow();
+    })();
+    replacementOperation = operation;
+    try {
+      await operation;
+    } finally {
+      if (replacementOperation === operation) {
+        replacementOperation = undefined;
+        mutationPaused = false;
+        publish(status, error);
+      }
+    }
   }
 
   function updateData(updater: (data: AppData) => AppData): void {

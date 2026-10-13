@@ -20,6 +20,20 @@ const fixtureData = {
     },
   ],
 };
+const fullFixtureData = {
+  ...fixtureData,
+  builds: [
+    {
+      ...fixtureData.builds[0],
+      levelUps: Array.from({ length: 8 }, (_, index) => ({
+        level: index + 2,
+        pick: null,
+        added: [],
+        dropped: [],
+      })),
+    },
+  ],
+};
 
 test("loads the deck builder shell and health status", async ({ page }) => {
   await page.goto("/");
@@ -100,6 +114,37 @@ test("renders contextual build navigation from stored build data", async ({
     "href",
     `/c/SD/b/${fixtureBuildId}/overview`,
   );
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+  await expect(page.getByText("Freeze control")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Deck", exact: true }),
+  ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1`);
+  await expect(page.getByRole("link", { name: "Level up" })).toHaveAttribute(
+    "href",
+    `/c/SD/b/${fixtureBuildId}/l/1/level-up`,
+  );
+});
+
+test("keeps contextual level navigation within a narrow viewport", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(fullFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/9`);
+
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth));
+  await expect(
+    page.getByRole("link", { name: "9", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
 });
 
 test("offers retry after an initial load failure", async ({ page }) => {

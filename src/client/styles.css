@@ -142,6 +142,7 @@ h2 {
 }
 
 .app-header {
+  --header-height: 5.5rem;
   position: sticky;
   z-index: 5;
   top: 0;
@@ -311,7 +312,7 @@ h2 {
 .save-feedback {
   position: sticky;
   z-index: 4;
-  top: 5.5rem;
+  top: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -534,9 +535,20 @@ h2 {
 }
 
 @media (max-width: 650px) {
+  .app-header {
+    --header-height: 4.75rem;
+  }
+
+  .app-header:has(.level-switcher) {
+    --header-height: 7.25rem;
+  }
+
   .header-inner {
-    min-height: 4.75rem;
+    min-height: var(--header-height);
+    flex-wrap: wrap;
+    align-content: center;
     gap: 0.65rem;
+    padding-block: 0.65rem;
   }
 
   .brand {
@@ -555,7 +567,17 @@ h2 {
 
   .header-level:has(.level-switcher) {
     display: grid;
+    flex: 1 0 100%;
     min-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+  }
+
+  .level-switcher {
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: thin;
   }
 
   .page-content,
@@ -564,7 +586,7 @@ h2 {
   }
 
   .save-feedback {
-    top: 4.75rem;
+    top: var(--header-height);
   }
 
   .bottom-tabs {

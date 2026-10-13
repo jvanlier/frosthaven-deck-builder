@@ -134,11 +134,13 @@ function AppHeader({
             {workspace.build?.name ?? "Current workspace"}
           </span>
           <strong>
-            {workspace.build && workspace.level !== null
+            {workspace.level !== null
               ? `Level ${workspace.level}`
-              : "Builds"}
+              : workspace.build
+                ? "Build workspace"
+                : "Builds"}
           </strong>
-          {workspace.build && workspace.level !== null ? (
+          {workspace.build ? (
             <nav className="level-switcher" aria-label="Level navigation">
               {workspace.levels.map((level) => (
                 <Link
@@ -289,12 +291,12 @@ function BottomTabs() {
   const location = useLocation();
   const workspace = useWorkspace();
   const isAbout = location.pathname === "/about";
-  const hasWorkspace =
-    workspace.build !== undefined && workspace.level !== null;
+  const hasWorkspace = workspace.build !== undefined;
+  const deckLevel = workspace.level ?? workspace.build?.startLevel ?? 1;
   return (
     <nav className="bottom-tabs" aria-label="Primary navigation">
       <NavLink
-        to={hasWorkspace ? workspaceDeckPath(workspace, workspace.level!) : "/"}
+        to={hasWorkspace ? workspaceDeckPath(workspace, deckLevel) : "/"}
         end={!hasWorkspace}
         className={tabClassName}
       >
@@ -362,10 +364,12 @@ interface Workspace {
 function useWorkspace(): Workspace {
   const location = useLocation();
   const { data } = useAppData();
-  const match = /^\/c\/([^/]+)\/b\/([^/]+)\/l\/(\d+)/.exec(location.pathname);
+  const match = /^\/c\/([^/]+)\/b\/([^/]+)(?:\/l\/(\d+))?/.exec(
+    location.pathname,
+  );
   const characterId = match ? decodeURIComponent(match[1]!) : null;
   const buildId = match ? decodeURIComponent(match[2]!) : null;
-  const level = match ? Number(match[3]) : null;
+  const level = match?.[3] === undefined ? null : Number(match[3]);
   const build =
     buildId === null
       ? undefined
@@ -383,7 +387,8 @@ function workspaceDeckPath(workspace: Workspace, level: number): string {
 }
 
 function workspaceLevelUpPath(workspace: Workspace): string {
-  return `${workspaceDeckPath(workspace, workspace.level!)}/level-up`;
+  const level = workspace.level ?? workspace.build?.startLevel ?? 1;
+  return `${workspaceDeckPath(workspace, level)}/level-up`;
 }
 
 function workspaceOverviewPath(workspace: Workspace): string {
