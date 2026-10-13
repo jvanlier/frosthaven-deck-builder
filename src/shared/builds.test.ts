@@ -6,6 +6,8 @@ import {
   generateUuid,
   motivationKey,
   renameBuild,
+  setStartDeck,
+  setStartPick,
   upsertMotivation,
   upsertNote,
 } from "./builds";
@@ -49,6 +51,32 @@ describe("build mutations", () => {
       createdAt: firstTime,
       updatedAt: firstTime,
     });
+  });
+
+  it("updates starting picks and decks without changing unrelated build data", () => {
+    const build = createBuild(
+      { characterId: "SD", name: "Original", startLevel: 3 },
+      options,
+    );
+
+    const withPick = setStartPick(build, 2, "birds-in-a-tempest", {
+      now: () => secondTime,
+    });
+    expect(withPick.startPicks).toEqual([
+      { forLevel: 2, cardId: "birds-in-a-tempest" },
+      { forLevel: 3, cardId: null },
+    ]);
+    expect(withPick.startLevel).toBe(3);
+    expect(withPick.name).toBe("Original");
+    expect(withPick.updatedAt).toBe(secondTime);
+
+    const withDeck = setStartDeck(withPick, ["blizzard", "whiteout"], {
+      now: () => firstTime,
+    });
+    expect(withDeck.startDeck).toEqual(["blizzard", "whiteout"]);
+    expect(withDeck.startPicks).toEqual(withPick.startPicks);
+    expect(setStartPick(withDeck, 2, "birds-in-a-tempest")).toBe(withDeck);
+    expect(() => setStartPick(build, 1, "blizzard")).toThrow();
   });
 
   it("renames only when the trimmed name changes and updates the build timestamp", () => {

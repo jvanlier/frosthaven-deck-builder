@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import { preventUnloadIfPending, useAppData } from "./app-data";
 import { CardGrid } from "./cards";
+import { BuildList, StartingEditor, StartingRoute } from "./build-editor";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
@@ -77,8 +85,12 @@ export default function App() {
         ) : null}
         <Route path="/c/:characterId" element={<BuildList />} />
         <Route
+          path="/c/:characterId/b/:buildId/l/:level/start"
+          element={<StartingEditorRoute />}
+        />
+        <Route
           path="/c/:characterId/b/:buildId/l/:level"
-          element={<UnavailableView />}
+          element={<StartingRoute />}
         />
         <Route
           path="/c/:characterId/b/:buildId/l/:level/level-up"
@@ -166,43 +178,18 @@ function AppHeader({
   );
 }
 
-function BuildList() {
+function StartingEditorRoute() {
+  const { characterId, buildId, level } = useParams();
   const { data } = useAppData();
-  const builds = data?.builds ?? [];
-
-  return (
-    <main className="page-content" aria-labelledby="builds-heading">
-      <section className="page-intro">
-        <p className="eyebrow">Snowdancer</p>
-        <h1 id="builds-heading">Your builds</h1>
-        <p>
-          Choose a build to plan its deck from the starting level to level 9.
-        </p>
-      </section>
-      {builds.length === 0 ? (
-        <section className="empty-card" aria-labelledby="empty-heading">
-          <h2 id="empty-heading">No builds yet</h2>
-          <p>
-            Build creation and starting-deck editing will appear here. Your
-            workspace is ready for the first build.
-          </p>
-        </section>
-      ) : (
-        <ul className="build-list">
-          {builds.map((build) => (
-            <li key={build.id}>
-              <Link
-                to={`/c/${build.characterId}/b/${build.id}/l/${build.startLevel}`}
-              >
-                <strong>{build.name}</strong>
-                <span>Starting level {build.startLevel}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
-  );
+  const build = data?.builds.find((candidate) => candidate.id === buildId);
+  if (
+    characterId !== character.id ||
+    !build ||
+    Number(level) !== build.startLevel
+  ) {
+    return <UnavailableView />;
+  }
+  return <StartingEditor build={build} character={character} />;
 }
 
 function CardPreview() {

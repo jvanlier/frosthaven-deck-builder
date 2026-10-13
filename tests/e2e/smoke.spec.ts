@@ -250,3 +250,172 @@ test("fits the compact layout and exposes attribution", async ({ page }) => {
     page.getByRole("heading", { name: "Attribution" }),
   ).toBeVisible();
 });
+
+test("creates a starting build, caps the hand, and restores it after reload", async ({
+  page,
+}) => {
+  let persisted = { ...fixtureData, builds: [] as typeof fixtureData.builds };
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Create build" }).click();
+  const dialog = page.getByRole("dialog", { name: "Create build" });
+  await dialog.getByLabel("Build name").fill("Freeze control");
+  await dialog.getByRole("button", { name: "Create build" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Freeze control" }),
+  ).toBeVisible();
+
+  for (const name of [
+    "Blizzard",
+    "Chilling Impact",
+    "Cold Therapy",
+    "Cross Winds",
+    "Enticing Breeze",
+    "Frigid Growth",
+    "Gathering Force",
+    "Lifting Gust",
+    "Nature's Breath",
+    "Snowball",
+    "Whiteout",
+  ]) {
+    await page
+      .getByRole("button", { name: `Add ${name} to starting deck` })
+      .click();
+  }
+  await expect(page.getByText("11 / 11 cards")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Add Blinding Vortex to starting deck" }),
+  ).toBeDisabled();
+
+  await expect
+    .poll(async () => persisted.builds[0]?.startDeck.length ?? 0, {
+      timeout: 5_000,
+    })
+    .toBe(11);
+  await page.reload();
+  await expect(page.getByText("11 / 11 cards")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Freeze control" }),
+  ).toBeVisible();
+});
+
+test("renames, copies, and confirms build deletion", async ({ page }) => {
+  let persisted = fixtureData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+
+  await page.goto("/");
+  const original = page.locator("li").filter({ hasText: "Freeze control" });
+  await original.getByRole("button", { name: "Rename" }).click();
+  const renameDialog = page.getByRole("dialog", { name: "Rename build" });
+  await renameDialog.getByLabel("Build name").fill("Cold control");
+  await renameDialog.getByRole("button", { name: "Rename build" }).click();
+  await expect(page.getByText("Cold control", { exact: true })).toBeVisible();
+
+  const renamed = page.locator("li").filter({ hasText: "Cold control" });
+  await renamed.getByRole("button", { name: "Copy" }).click();
+  const copyDialog = page.getByRole("dialog", { name: "Copy build" });
+  await copyDialog.getByLabel("Build name").fill("Independent copy");
+  await copyDialog.getByRole("button", { name: "Copy build" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Starting deck: Independent copy" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Back to builds" }).click();
+  await expect(
+    page.getByText("Independent copy", { exact: true }),
+  ).toBeVisible();
+
+  const copied = page.locator("li").filter({ hasText: "Independent copy" });
+  await renamed.getByRole("button", { name: "Delete" }).click();
+  const deleteDialog = page.getByRole("dialog", { name: "Delete build?" });
+  await deleteDialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("Cold control", { exact: true })).toBeVisible();
+  await renamed.getByRole("button", { name: "Delete" }).click();
+  await page
+    .getByRole("dialog", { name: "Delete build?" })
+    .getByRole("button", { name: "Delete build" })
+    .click();
+  await expect(page.getByText("Cold control", { exact: true })).toHaveCount(0);
+  await expect(copied).toBeVisible();
+});
+
+test("offers sequential legal picks for a higher starting level", async ({
+  page,
+}) => {
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ...fixtureData, builds: [] }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: 1 }),
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Create build" }).click();
+  const dialog = page.getByRole("dialog", { name: "Create build" });
+  await dialog.getByLabel("Build name").fill("Prosperity three");
+  await dialog.getByLabel("Start level").selectOption("3");
+  await dialog.getByRole("button", { name: "Create build" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Level 2 pick" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Birds in a Tempest" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Tornado" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Level 3 pick" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Tornado" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Cold Snap" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Polar Vortex" }),
+  ).toBeVisible();
+});
