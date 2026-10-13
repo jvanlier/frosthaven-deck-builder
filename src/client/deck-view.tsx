@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardDialog, CardGrid, CardImage } from "./cards";
 import { useAppData } from "./app-data";
 import { startEditorPath } from "./build-editor";
+import { levelUpPath } from "./level-up";
 import { characters } from "../shared/data/characters/index.js";
 import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
@@ -141,7 +142,14 @@ export function DeckView({
           >
             Edit starting deck
           </Link>
-        ) : null}
+        ) : (
+          <Link
+            className="button-link secondary-button"
+            to={levelUpPath(character.id, build.id, state.level)}
+          >
+            Edit this level
+          </Link>
+        )}
         <label className="guidance-toggle">
           <input
             type="checkbox"

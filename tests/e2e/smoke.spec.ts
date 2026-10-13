@@ -119,6 +119,559 @@ const invalidDeckFixtureData = {
 };
 
 const lastPositionStorageKey = "frosthaven-deck-builder:last-position";
+const levelUpBuildId = "123e4567-e89b-42d3-a456-426614174002";
+const levelUpBaseBuild = {
+  ...fixtureData.builds[0],
+  id: levelUpBuildId,
+  name: "Level-up lab",
+  startDeck: deckFixtureData.builds[0].startDeck,
+};
+const levelUpFixtureData = {
+  ...fixtureData,
+  builds: [levelUpBaseBuild],
+};
+const revisedLevelFixtureData = {
+  ...fixtureData,
+  builds: [
+    {
+      ...levelUpBaseBuild,
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+    },
+  ],
+};
+const plannedLaterFixtureData = {
+  ...fixtureData,
+  builds: [
+    {
+      ...levelUpBaseBuild,
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+        {
+          level: 3,
+          pick: "tornado",
+          added: ["tornado"],
+          dropped: ["snowball"],
+        },
+      ],
+    },
+  ],
+};
+const invalidEditedLevelFixtureData = {
+  ...revisedLevelFixtureData,
+  builds: [
+    {
+      ...revisedLevelFixtureData.builds[0],
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest", "tornado"],
+          dropped: ["whiteout"],
+        },
+      ],
+    },
+  ],
+};
+const resetDuringSaveFixtureData = {
+  ...revisedLevelFixtureData,
+  builds: [
+    {
+      ...revisedLevelFixtureData.builds[0],
+      name: "Keep this name",
+      guidance: {
+        blizzard: {
+          text: "Keep this guidance.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+      },
+      motivations: [
+        {
+          level: 1,
+          cardId: "tornado",
+          kind: "exclude",
+          text: "Keep this unrelated note.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+      ],
+    },
+  ],
+};
+
+test("runs a level-up pick, drop and done through the stored editor", async ({
+  page,
+}) => {
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await expect(
+    page.getByRole("heading", { name: "Newly unlocked" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pick Birds in a Tempest" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(page.getByText("12 / 11 cards", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Drop Blizzard" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["blizzard"],
+    });
+});
+
+test("scrolls and moves focus to the deck after a mobile pick", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  const deckHeading = page.getByRole("heading", { name: "Your deck" });
+  await expect(deckHeading).toBeFocused();
+  await expect
+    .poll(async () => {
+      const headingBox = await deckHeading.boundingBox();
+      const stickyBottom = await page
+        .locator(".app-header, .level-up-status")
+        .evaluateAll((elements) =>
+          Math.max(
+            ...elements.map(
+              (element) =>
+                (element as HTMLElement).getBoundingClientRect().bottom,
+            ),
+          ),
+        );
+      return (headingBox?.y ?? Number.POSITIVE_INFINITY) - stickyBottom;
+    })
+    .toBeGreaterThan(0);
+  await expect
+    .poll(
+      async () =>
+        (await deckHeading.boundingBox())?.y ?? Number.POSITIVE_INFINITY,
+    )
+    .toBeLessThan(568);
+  await expect
+    .poll(async () => {
+      const headingBox = await deckHeading.boundingBox();
+      const bottomTabs = await page
+        .getByRole("navigation", { name: "Primary navigation" })
+        .boundingBox();
+      return (
+        (headingBox?.y ?? 568) +
+        (headingBox?.height ?? 0) -
+        (bottomTabs?.y ?? 0)
+      );
+    })
+    .toBeLessThanOrEqual(0);
+});
+
+test("moves focus to the deck after picking from an enlarged card", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  const enlargeButton = page.getByRole("button", {
+    name: "Enlarge Birds in a Tempest",
+  });
+  await page.evaluate(() => window.scrollTo({ top: 600, behavior: "auto" }));
+  await enlargeButton.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("heading", { name: "Your deck" })).toBeFocused();
+});
+
+test("preserves later stored operations when revising an earlier level", async ({
+  page,
+}) => {
+  let persisted = structuredClone(plannedLaterFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await page.getByRole("button", { name: "Pick Tornado" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps)
+    .toEqual([
+      {
+        level: 2,
+        pick: "tornado",
+        added: ["tornado"],
+        dropped: ["whiteout"],
+      },
+      {
+        level: 3,
+        pick: "tornado",
+        added: ["tornado"],
+        dropped: ["snowball"],
+      },
+    ]);
+});
+
+test("retains a pre-existing invalid operation in the edited level", async ({
+  page,
+}) => {
+  let persisted = structuredClone(invalidEditedLevelFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: expect.arrayContaining(["birds-in-a-tempest", "tornado"]),
+      dropped: ["whiteout", "blizzard"],
+    });
+});
+
+test("resets during an in-flight save without losing unrelated fields or notes", async ({
+  page,
+}) => {
+  let persisted = structuredClone(resetDuringSaveFixtureData);
+  let firstPutStarted = false;
+  let releaseFirstPut: (() => void) | undefined;
+  const firstPut = new Promise<void>((resolve) => {
+    releaseFirstPut = resolve;
+  });
+  let putCount = 0;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    putCount += 1;
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    if (putCount === 1) {
+      firstPutStarted = true;
+      await firstPut;
+    }
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await page.getByRole("button", { name: "Pick Tornado" }).click();
+  await page.getByLabel("Why add Tornado?").fill("Temporary note");
+  await expect.poll(() => firstPutStarted).toBe(true);
+  await page.getByRole("button", { name: "Reset" }).click();
+  releaseFirstPut?.();
+
+  await expect.poll(() => putCount).toBe(2);
+  await expect
+    .poll(async () => persisted.builds[0])
+    .toMatchObject({
+      name: "Keep this name",
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+      guidance: resetDuringSaveFixtureData.builds[0].guidance,
+      motivations: resetDuringSaveFixtureData.builds[0].motivations,
+    });
+});
+
+test("keeps extra swaps open, notes stable and new cards undroppable", async ({
+  page,
+}) => {
+  let persisted = structuredClone(revisedLevelFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await expect(page.locator(".level-up-deck .card-name")).toHaveText([
+    "Cold Therapy",
+    "Whiteout",
+    "Snowball",
+    "Lifting Gust",
+    "Chilling Impact",
+    "Cross Winds",
+    "Frigid Growth",
+    "Blizzard",
+    "Enticing Breeze",
+    "Gathering Force",
+    "Nature's Breath",
+    "Birds in a Tempest",
+  ]);
+  const swapSection = page.getByText("Swap more cards from the pool");
+  await swapSection.click();
+  const whiteout = page.getByRole("button", {
+    name: "Add White Winds to deck",
+  });
+  await whiteout.click();
+  await expect(page.getByLabel("Why add White Winds?")).toBeVisible();
+  await page
+    .getByLabel("Why add White Winds?")
+    .fill("Bring it back for control.");
+  await page
+    .getByRole("button", { name: "Remove White Winds from deck" })
+    .click();
+  await page.getByRole("button", { name: "Add White Winds to deck" }).click();
+  await expect(page.getByLabel("Why add White Winds?")).toHaveValue(
+    "Bring it back for control.",
+  );
+  await expect(
+    page.getByRole("button", { name: "Keep White Winds new" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Drop Birds in a Tempest" }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Drop Snowball" }).click();
+  await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toEqual(
+      expect.objectContaining({
+        added: expect.arrayContaining(["birds-in-a-tempest", "white-winds"]),
+        dropped: expect.arrayContaining(["whiteout", "snowball"]),
+      }),
+    );
+  await expect(persisted.builds[0]?.motivations).toEqual([
+    {
+      level: 2,
+      cardId: "white-winds",
+      kind: "add",
+      text: "Bring it back for control.",
+      updatedAt: expect.any(String),
+    },
+  ]);
+});
+
+test("appends unfinished levels, resumes them after reload and resets only this editor", async ({
+  page,
+}) => {
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(1);
+  await expect(page.getByRole("button", { name: "Done" })).toBeDisabled();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Level up" })).toBeVisible();
+  await expect(page.getByText("Pick a card for level 2")).toBeVisible();
+
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await page.getByText("Swap more cards from the pool").click();
+  await page.getByRole("button", { name: "Add White Winds to deck" }).click();
+  await page.getByLabel("Why add White Winds?").fill("Temporary note");
+  await page.getByRole("button", { name: "Reset" }).click();
+  await expect(page.getByText("Pick a card for level 2")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Done" })).toBeDisabled();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({ pick: null, added: [], dropped: [] });
+  await expect(persisted.builds[0]?.motivations).toEqual([]);
+});
+
+test("scopes editor reset and appending to the current level", async ({
+  page,
+}) => {
+  let persisted = structuredClone(levelUpFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
+  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await page.getByRole("link", { name: "Level up" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
+  await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(2);
+
+  await page.getByRole("link", { name: "2", exact: true }).click();
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  await page.getByRole("link", { name: "Level up" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
+  await page.getByRole("button", { name: "Pick Cold Snap" }).click();
+  await page.getByRole("button", { name: "Reset" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[1])
+    .toMatchObject({ pick: null, added: [], dropped: [] });
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["blizzard"],
+    });
+});
 
 test("loads the deck builder shell and health status", async ({ page }) => {
   await page.goto("/");
@@ -207,8 +760,8 @@ test("renders a derived deck view and disables future feature entry points", asy
     name: "Primary navigation",
   });
   await expect(
-    primaryNavigation.locator(".tab-disabled").filter({ hasText: "Level up" }),
-  ).toHaveAttribute("aria-disabled", "true");
+    primaryNavigation.getByRole("link", { name: "Level up" }),
+  ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
   await expect(
     primaryNavigation.locator(".tab-disabled").filter({ hasText: "Overview" }),
   ).toHaveAttribute("aria-disabled", "true");
@@ -535,7 +1088,10 @@ test("keeps contextual level navigation within a narrow viewport", async ({
   await expect(
     page.getByRole("link", { name: "9", exact: true }),
   ).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("link", { name: "Level up" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Level up" })).toHaveAttribute(
+    "href",
+    `/c/SD/b/${fixtureBuildId}/l/1/start`,
+  );
   await expect(page.getByRole("button", { name: /Level up/i })).toHaveCount(0);
 });
 

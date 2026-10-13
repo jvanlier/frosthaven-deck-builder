@@ -17,6 +17,7 @@ import {
   deckPath,
   readLastPosition,
 } from "./deck-view";
+import { LevelUpRoute, levelUpDestination } from "./level-up";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
@@ -105,7 +106,7 @@ export default function App() {
         />
         <Route
           path="/c/:characterId/b/:buildId/l/:level/level-up"
-          element={<UnavailableView />}
+          element={<LevelUpRoute />}
         />
         <Route
           path="/c/:characterId/b/:buildId/overview"
@@ -385,9 +386,17 @@ function BottomTabs() {
       >
         <span aria-hidden="true">▦</span> Deck
       </NavLink>
-      <WorkspaceTab to={undefined} label="Level up" icon="↗" />
-      <WorkspaceTab to={undefined} label="Overview" icon="▤" />
-      <WorkspaceTab to={undefined} label="Notes" icon="✎" />
+      <WorkspaceTab
+        to={
+          workspace.build
+            ? levelUpDestination(workspace.build, character)
+            : null
+        }
+        label="Level up"
+        icon="↗"
+      />
+      <WorkspaceTab to={null} label="Overview" icon="▤" />
+      <WorkspaceTab to={null} label="Notes" icon="✎" />
       {isAbout ? (
         <span className="tab-current">About</span>
       ) : (
@@ -402,11 +411,11 @@ function WorkspaceTab({
   label,
   icon,
 }: {
-  to: string | undefined;
+  to: string | null;
   label: string;
   icon: string;
 }) {
-  if (to === undefined) {
+  if (to === null) {
     return (
       <span className="tab-disabled" aria-disabled="true">
         <span aria-hidden="true">{icon}</span> {label}
