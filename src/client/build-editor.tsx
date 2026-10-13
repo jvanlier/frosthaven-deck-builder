@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardGrid } from "./cards";
 import { useAppData } from "./app-data";
 import {
@@ -41,6 +41,9 @@ export function BuildList() {
   };
 
   function addBuild(build: Build): void {
+    if (!canMutate) {
+      return;
+    }
     updateData((current) => ({
       ...current,
       builds: [...current.builds, build],
@@ -49,7 +52,7 @@ export function BuildList() {
   }
 
   function renameSelected(name: string): void {
-    if (!selectedBuild) {
+    if (!canMutate || !selectedBuild) {
       return;
     }
     const renamed = renameBuild(selectedBuild, name);
@@ -63,7 +66,7 @@ export function BuildList() {
   }
 
   function copySelected(name: string): void {
-    if (!selectedBuild) {
+    if (!canMutate || !selectedBuild) {
       return;
     }
     const copied = copyBuild(selectedBuild, name);
@@ -72,7 +75,7 @@ export function BuildList() {
   }
 
   function confirmDelete(): void {
-    if (!buildToDelete) {
+    if (!canMutate || !buildToDelete) {
       return;
     }
     updateData((current) => ({
@@ -150,6 +153,7 @@ export function BuildList() {
         title="Create build"
         initialName=""
         submitLabel="Create build"
+        canSubmit={canMutate}
         onClose={() => setDialog(null)}
         onSubmit={(name, startLevel) => {
           const build = createBuild({
@@ -167,6 +171,7 @@ export function BuildList() {
         title="Copy build"
         initialName={selectedBuild ? `${selectedBuild.name} copy` : ""}
         submitLabel="Copy build"
+        canSubmit={canMutate}
         onClose={() => setDialog(null)}
         onSubmit={copySelected}
       />
@@ -175,6 +180,7 @@ export function BuildList() {
         title="Rename build"
         initialName={selectedBuild?.name ?? ""}
         submitLabel="Rename build"
+        canSubmit={canMutate}
         onClose={() => setDialog(null)}
         onSubmit={renameSelected}
       />
@@ -186,6 +192,7 @@ export function BuildList() {
             ? `Delete ${buildToDelete.name}? This removes its saved deck choices and notes.`
             : ""
         }
+        canConfirm={canMutate}
         onClose={() => setBuildToDelete(null)}
         onConfirm={confirmDelete}
       />
@@ -194,7 +201,17 @@ export function BuildList() {
 }
 
 export function StartingRoute() {
-  return <UnavailableStartingView />;
+  const { characterId, buildId, level } = useParams();
+  const { data } = useAppData();
+  const build = data?.builds.find((candidate) => candidate.id === buildId);
+  if (
+    characterId !== character.id ||
+    !build ||
+    Number(level) !== build.startLevel
+  ) {
+    return <UnavailableStartingView />;
+  }
+  return <StartingDeckPlaceholder build={build} />;
 }
 
 export function StartingEditor({
@@ -454,6 +471,7 @@ function NameDialog({
   submitLabel,
   onClose,
   onSubmit,
+  canSubmit,
   includeStartLevel = false,
 }: {
   open: boolean;
@@ -462,6 +480,7 @@ function NameDialog({
   submitLabel: string;
   onClose: () => void;
   onSubmit: (name: string, startLevel?: number) => void;
+  canSubmit: boolean;
   includeStartLevel?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -495,6 +514,10 @@ function NameDialog({
         method="dialog"
         onSubmit={(event) => {
           event.preventDefault();
+          if (!canSubmit) {
+            setError("Saving is paused. Retry the save before editing.");
+            return;
+          }
           try {
             onSubmit(name, includeStartLevel ? Number(startLevel) : undefined);
           } catch {
@@ -510,6 +533,7 @@ function NameDialog({
             value={name}
             maxLength={100}
             onChange={(event) => setName(event.target.value)}
+            disabled={!canSubmit}
           />
         </label>
         {includeStartLevel ? (
@@ -518,6 +542,7 @@ function NameDialog({
             <select
               value={startLevel}
               onChange={(event) => setStartLevel(event.target.value)}
+              disabled={!canSubmit}
             >
               {Array.from({ length: 9 }, (_, index) => (
                 <option value={index + 1} key={index + 1}>
@@ -536,7 +561,9 @@ function NameDialog({
           <button type="button" className="secondary-button" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit">{submitLabel}</button>
+          <button type="submit" disabled={!canSubmit}>
+            {submitLabel}
+          </button>
         </div>
       </form>
     </dialog>
@@ -547,12 +574,14 @@ function ConfirmDialog({
   open,
   title,
   message,
+  canConfirm,
   onClose,
   onConfirm,
 }: {
   open: boolean;
   title: string;
   message: string;
+  canConfirm: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }) {
@@ -574,19 +603,50 @@ function ConfirmDialog({
         onClose();
       }}
     >
-      <form method="dialog" onSubmit={(event) => event.preventDefault()}>
+      <form
+        method="dialog"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canConfirm) {
+            onConfirm();
+          }
+        }}
+      >
         <h2 id="delete-build-heading">{title}</h2>
         <p>{message}</p>
         <div className="dialog-actions">
           <button type="button" className="secondary-button" onClick={onClose}>
             Cancel
           </button>
-          <button type="button" className="danger-button" onClick={onConfirm}>
+          <button
+            type="button"
+            className="danger-button"
+            onClick={onConfirm}
+            disabled={!canConfirm}
+          >
             Delete build
           </button>
         </div>
       </form>
     </dialog>
+  );
+}
+
+function StartingDeckPlaceholder({ build }: { build: Build }) {
+  return (
+    <main className="page-content narrow-content">
+      <section className="empty-card">
+        <p className="eyebrow">Starting level {build.startLevel}</p>
+        <h1>Deck view is not available yet</h1>
+        <p>
+          The starting editor is available while the full deck view is being
+          built.
+        </p>
+        <Link className="button-link" to={startEditorPath(build)}>
+          Open starting editor
+        </Link>
+      </section>
+    </main>
   );
 }
 
