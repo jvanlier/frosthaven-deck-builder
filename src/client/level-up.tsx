@@ -217,11 +217,11 @@ function LevelUpEditor({
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    heading.focus({ preventScroll: true });
     heading.scrollIntoView({
       behavior: reducedMotion ? "auto" : "smooth",
       block: "start",
     });
-    requestAnimationFrame(() => heading.focus({ preventScroll: true }));
   }
 
   function changeLevelUp(next: Pick<LevelUp, "pick" | "added" | "dropped">) {
