@@ -1,6 +1,10 @@
 # Frosthaven Deck Builder — Specification
 
-Status: draft v3 · Owner: jvanlier
+Status: v5 · single-ticket autonomous delivery agreed · Owner: jvanlier
+
+Implementation sequence and GitHub issues: [`implementation-plan.md`](implementation-plan.md).
+Resolved agent-facing contracts and edge cases: [`agent-contracts.md`](agent-contracts.md).
+Mandatory test-first, review and authorized merge policy: [`../AGENTS.md`](../AGENTS.md).
 
 ## 1. Purpose
 
@@ -138,14 +142,16 @@ variants within a level.
 - **F2** Create, rename, copy and delete (with confirmation) builds.
 - **F3** On creation the user chooses a **start level** (1–9). Levels below it don't
   exist in the build and are never asked for. The start level can't be changed later;
-  copy the build instead.
-- **F4** **Copy build** deep-copies everything: levels, picks, decks, motivations and
-  guidance. The user names the copy.
+  create a new build to use a different start level.
+- **F4** **Copy build** deep-copies everything: start level, levels, picks, decks,
+  motivations and guidance. The user names the copy. Its build ID and build timestamps
+  are new; copied note timestamps are preserved until those notes are edited.
 
 ### 4.4 Start level
 
 - **F5** For start level N > 1: one pick slot per level 2..N ("Level 2 pick", …). Each
-  slot offers only options valid per R2/R3 given the other slots.
+  slot offers only options valid per R2/R3 given the preceding slots. Later stored
+  choices never silently constrain or rewrite an earlier slot.
 - **F6** Select up to `handSize` cards from the pool for the starting deck, with a counter
   (`9 / 11`). Selecting more than `handSize` isn't possible.
 
@@ -159,7 +165,15 @@ divider. On wide screens the candidate groups and the deck sit side by side; on 
 screens they're stacked, and picking a card scrolls to the deck.
 
 - **Status bar** (always visible): the current instruction with the deck counter, Reset
-  and Done. Done is only enabled at exactly `handSize` cards.
+  and Done. Done is only enabled with a valid pick, exactly `handSize` cards and no
+  validation issues at this level.
+- Every change, including unfinished or temporarily overfull level-ups and inline notes,
+  autosaves. There is no separate draft model. Done finishes editing; it is not a save
+  button. Reset restores this editor's choices and notes to their entry state, without
+  reverting unrelated build data. Reset changes also autosave. The entry snapshot is
+  in memory only; reload/reopen establishes a new baseline from the persisted state.
+  For a newly appended level, Reset retains its null-pick/empty-diff level rather than
+  deleting it. A full valid level counts as complete even before Done is clicked.
 - **Your deck**: the cards of deck L plus the cards added in this flow.
 - **Pick** and **Swap more** candidates (below).
 
@@ -201,7 +215,13 @@ and never blocks on them. Typed text is kept while the user keeps editing in the
 height, with the card's current action (e.g. *Drop this card*) and Close. In this flow, a
 tap on a card always performs its action; enlarging is never a long-press.
 
-**Planning ahead.** Level-ups can be chained up to level 9 at any time.
+**Planning ahead.** Level-ups can be chained up to level 9 without waiting for actual
+play. Appending a new level requires every existing level to be complete and valid.
+Existing levels always remain viewable and repairable. An unfinished appended level
+is saved and can be reopened; the Level up tab resumes it rather than appending another.
+“Unfinished” means a stored level with validation issues, not a separate completion flag.
+An unfinished starting level opens its starting editor; broken earlier history routes to
+its reported problems instead of appending.
 
 ### 4.6 Revising earlier choices
 
@@ -212,8 +232,9 @@ tap on a card always performs its action; enlarging is never a long-press.
   changes (§5.2). Later levels whose changes no longer apply are flagged **invalid**, with
   the specific problem. Each problem has a one-tap fix: remove that change, or choose a
   replacement.
-- **F9** Only the highest level can be deleted. Deleting a level also deletes its
-  motivations.
+- **F9** Only the highest level above the start level can be deleted, with confirmation.
+  Deleting a level also deletes its motivations, but retains build guidance. Removing
+  the starting level requires deleting the build.
 
 ### 4.7 Views
 
@@ -233,7 +254,7 @@ tap on a card always performs its action; enlarging is never a long-press.
   - A per-level summary shows the pick and the number of swaps.
   - Tapping a column header opens that deck view.
 - **F12 Card detail.** Opens from anything that shows the card. Shows a large image,
-  editable guidance for this build, and all of this build's motivations about this card.
+  editable guidance for this build, and currently applicable motivations about this card.
 
 ### 4.8 Motivations
 
@@ -258,7 +279,13 @@ All optional, free text, stored per build:
 - **F15** If an edit means a motivation no longer applies (e.g. a different card is now
   dropped), keep it in storage but hide it. It reappears if the same change is made
   again.
-- **F16** Text is plain text or Markdown, rendered safely (never raw HTML).
+- Initial-pick `add` motivations are keyed to the build's start level, even when the
+  pick slot is for an earlier level; labels retain the slot's level (e.g. "Level 2 pick").
+  Initial picks need not be in the starting deck for their pick motivations to apply.
+- `exclude` motivations include eligible-but-unpicked cards outside the starting pool,
+  not just cards in the pool.
+- **F16** v1 text is plain text with preserved line breaks, safely escaped. No Markdown
+  rendering or raw HTML.
 
 ### 4.9 Card guidance
 
@@ -311,7 +338,7 @@ interface Build {
   name: string;
   startLevel: number;                  // 1..9
   startPicks: Pick[];                  // one per level 2..startLevel (empty if 1)
-  startDeck: string[];                 // cardIds, ≤ handSize
+  startDeck: string[];                 // cardIds; UI limits to handSize, invalid stored data remains repairable
   levelUps: LevelUp[];                 // levels startLevel+1..max, contiguous, sorted
   motivations: Motivation[];
   guidance: Record<string, Note>;      // cardId -> note
@@ -322,7 +349,7 @@ interface Pick { forLevel: number; cardId: string | null }  // null = not chosen
 
 interface LevelUp {
   level: number;
-  pick: string | null;                 // cardId added to the pool at this level; always also in `added`
+  pick: string | null;                 // pool pick; valid completed levels also include it in `added`
   added: string[];                     // cardIds entering the deck vs. previous level
   dropped: string[];                   // cardIds leaving the deck vs. previous level
 }
@@ -345,7 +372,8 @@ Decks are computed by replaying changes:
 - `pool(start)` = L1 ∪ LX ∪ `startPicks`. `pool(L)` = `pool(L−1)` ∪ {`pick(L)`}.
 - `deck(start)` = `startDeck`. `deck(L)` = (`deck(L−1)` \ `dropped(L)`) ∪ `added(L)`.
 - Editing a deck in the UI stores the normalized diff against the previous level's deck:
-  `added = new \ prev`, `dropped = prev \ new`.
+  `added = new \ prev`, `dropped = prev \ new`. If existing records are invalid, normalize
+  only the valid editable subset and retain unresolved records until targeted repair.
 
 Validation issues per level:
 
@@ -359,9 +387,19 @@ Validation issues per level:
 | Added card not in `pool(L)`, or already in `deck(L−1)` | invalid    |
 | Dropped card not in `deck(L−1)`                        | invalid    |
 | Unknown cardId                                         | invalid    |
+| Starting-deck card not in the starting pool            | invalid    |
 
-During replay, invalid operations are skipped so every deck stays well-defined. They are
-reported, never silently deleted.
+During replay, invalid operations are skipped individually so every pool and deck stays
+well-defined. They are reported, never silently deleted. A valid pick still enters the
+pool when its corresponding add is missing; the missing add is reported separately.
+Starting picks replay in slot order. Earlier slots determine later options; editing an
+earlier slot never silently rewrites a later pick.
+
+Structural validation rejects malformed documents, duplicate identifiers/array entries,
+non-contiguous levels and invalid field types. It does not reject game-rule-invalid
+choices (including unknown card IDs), incomplete decks or temporary overfull decks.
+These remain stored for the rules engine to report and the user to repair. Unsupported
+character IDs are rejected at the API/import boundary.
 
 The engine is a pure TypeScript module in `src/shared/` with unit tests covering every
 rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOptions`,
@@ -379,16 +417,31 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
     - Otherwise: `409 { revision }`.
   - `GET /api/health` → `200`.
 - **Server-side validation**: the same zod schema as the client. Reject malformed or
-  oversized payloads (cap 1 MB) with `400`/`413`.
+  oversized payloads (cap 1 MiB) with `400`/`413`.
 - **Client saves** are debounced (~1 s) after every change, with no save button. Nothing
   is shown while everything is saved; a small status appears only for *Saving…* and
-  *Error (retry)*. Warn on page unload while changes are unsaved.
-- **On 409**: show "Changed on another device — reload". Never merge or overwrite
-  silently.
+  *Error (retry)*. Warn on page unload while changes are unsaved. Saves are serialized;
+  edits made during a request stay queued and use the acknowledged revision next.
+- **On a save/connection failure**: preserve pending data in memory, pause mutation
+  controls and offer Retry. Do not persist offline edits in browser storage.
+- **On 409**: show "Changed on another device — reload", pause mutation controls and
+  offer a JSON download of pending data before explicitly reloading. Never merge,
+  overwrite, discard changes or reload silently.
+- **Import**: validate and confirm replacement, then save using the current acknowledged
+  server revision. The imported revision is never used as the concurrency token.
 - **Persistence on disk** (`DATA_DIR`, default `/data`):
   - `appdata.json`, written atomically: write a temp file, fsync, rename.
   - Before each save, the current file is copied to
     `backups/appdata-<timestamp>-r<revision>.json`. Only the latest 20 are kept.
+  - Serialize revision checks and disk writes within the single server process so two
+    concurrent requests with the same base revision cannot both succeed.
+  - Corrupt storage, failed writes and failed backup creation produce explicit errors;
+    never reset corrupt data to an empty document or silently skip a backup.
+  - Finish required backup pruning and temp-file fsync before rename. Failures before
+    replacement preserve the preceding file. Once rename succeeds, a directory-fsync,
+    process or response failure can leave an unacknowledged committed save; retain its
+    predecessor backup and never promise rollback. Reread disk for subsequent revisions.
+    Client Retry with the old revision can then produce the standard 409 recovery flow.
   - Getting data off the Pi (the Pi runs on an SSD) is configured on the host, outside
     the app.
 - No offline editing. If the server is unreachable, show an error state.
@@ -396,7 +449,8 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 ## 7. Technical approach
 
 - **Language**: TypeScript end to end. The zod schema, card data and rules engine are
-  shared by client and server.
+  shared by client and server. UUID generation must work on plain LAN HTTP, using
+  `crypto.getRandomValues` for a UUID-v4 fallback when `crypto.randomUUID` is unavailable.
 - **Frontend**: Vite + React + TypeScript, React Router. Routes:
   - `/` (resume last position or build list)
   - `/c/:characterId` (builds)
@@ -407,7 +461,19 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
   - `/about`
 - **Backend**: Hono on Node (`@hono/node-server`). It serves the `/api/*` routes above
   and the built static frontend (with SPA fallback to `index.html`).
-- **Tests**: Vitest (rules engine, schema, storage write/backup/409 logic).
+- **Tests and TDD**: Vitest (rules, schemas, build operations and API/storage integration)
+  and Playwright (user flows). Every behavior-changing issue requires failing tests
+  first, verification of the expected failure, minimal implementation, then refactoring
+  with green tests. PR descriptions record red → green evidence; documentation-only
+  changes do not require artificial tests.
+- **Feedback from the first implementation PR**: GitHub Actions on pull requests and
+  pushes to `main`, running prek checks, typechecking, Vitest, browser smoke tests and
+  production builds. Never substitute `passWithNoTests` for a real initial smoke test.
+  Add coverage continuously rather than waiting for the release issue.
+- **Quick local checks**: prek with pinned hooks for whitespace/final-newline fixes,
+  merge conflicts, YAML/JSON validity, and ESLint/Prettier on staged source files.
+  Generated artwork/data, lockfile formatting and the throwaway mockup are excluded
+  from inappropriate source checks. Full tests and builds run in CI, not commit hooks.
 - **Repo layout**: one package.
   ```
   src/client/   src/server/   src/shared/{schema,rules,data}/
@@ -424,7 +490,10 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
     - It runs `CMD ["node", "dist/server/index.js"]`.
   - **`docker-compose.yml`**: one service, `restart: unless-stopped`, port mapping (e.g.
     `8080:8080`), and the volume `./data:/data`. Env vars: `PORT`, `DATA_DIR`.
-  - Built and run on the Pi with `docker compose up -d --build`.
+  - The user can build and run on the Pi with `docker compose up -d --build`.
+  - Delivery acceptance uses automated arm64 container/Compose verification and operating
+    instructions. Actual home Pi deployment, SSH access and network changes are a separate
+    task, not an implementation-agent prerequisite.
   - Reachable only on the LAN/VPN, so no TLS or auth in the app.
 - **Accessibility**:
   - Card images have `alt` = card name and level.
@@ -470,3 +539,7 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 - Perks, attack modifiers, items, enhancements.
 - Offline editing.
 - Motivation/guidance history.
+- Re-basing a copied build onto a different start level.
+- Markdown formatting, offline persistence, custom blocked-label automation.
+- Hosted agent-dispatch infrastructure or automatic ticket-selection loops.
+- Live Pi deployment, SSH/network changes and manual user-sign-off gates.
