@@ -218,9 +218,18 @@ function LevelUpEditor({
       "(prefers-reduced-motion: reduce)",
     ).matches;
     heading.focus({ preventScroll: true });
-    heading.scrollIntoView({
+    const targetTop = Math.max(
+      0,
+      heading.getBoundingClientRect().top + window.scrollY - 16,
+    );
+    window.scrollTo({
+      top: targetTop,
       behavior: reducedMotion ? "auto" : "smooth",
-      block: "start",
+    });
+    requestAnimationFrame(() => {
+      if (Math.abs(heading.getBoundingClientRect().top - 16) > 32) {
+        window.scrollTo({ top: targetTop, behavior: "auto" });
+      }
     });
   }
 
