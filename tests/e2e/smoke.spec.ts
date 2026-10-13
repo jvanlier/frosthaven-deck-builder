@@ -168,18 +168,17 @@ const plannedLaterFixtureData = {
     },
   ],
 };
-const invalidLaterFixtureData = {
-  ...plannedLaterFixtureData,
+const invalidEditedLevelFixtureData = {
+  ...revisedLevelFixtureData,
   builds: [
     {
-      ...plannedLaterFixtureData.builds[0],
+      ...revisedLevelFixtureData.builds[0],
       levelUps: [
-        plannedLaterFixtureData.builds[0].levelUps[0],
         {
-          level: 3,
-          pick: "tornado",
-          added: [],
-          dropped: ["snowball"],
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest", "tornado"],
+          dropped: ["whiteout"],
         },
       ],
     },
@@ -389,22 +388,27 @@ test("preserves later stored operations when revising an earlier level", async (
   await page.getByRole("link", { name: "Edit this level" }).click();
   await page.getByRole("button", { name: "Pick Tornado" }).click();
   await expect
-    .poll(async () => persisted.builds[0]?.levelUps[1])
-    .toEqual({
-      level: 3,
-      pick: "tornado",
-      added: ["tornado"],
-      dropped: ["snowball"],
-    });
-  await expect
-    .poll(async () => persisted.builds[0]?.levelUps[0])
-    .toMatchObject({ pick: "tornado" });
+    .poll(async () => persisted.builds[0]?.levelUps)
+    .toEqual([
+      {
+        level: 2,
+        pick: "tornado",
+        added: ["tornado"],
+        dropped: ["whiteout"],
+      },
+      {
+        level: 3,
+        pick: "tornado",
+        added: ["tornado"],
+        dropped: ["snowball"],
+      },
+    ]);
 });
 
-test("retains a pre-existing invalid later operation through an unrelated edit", async ({
+test("retains a pre-existing invalid operation in the edited level", async ({
   page,
 }) => {
-  let persisted = structuredClone(invalidLaterFixtureData);
+  let persisted = structuredClone(invalidEditedLevelFixtureData);
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({
@@ -427,16 +431,13 @@ test("retains a pre-existing invalid later operation through an unrelated edit",
   await page.getByRole("link", { name: "Edit this level" }).click();
   await page.getByRole("button", { name: "Drop Blizzard" }).click();
   await expect
-    .poll(async () => persisted.builds[0]?.levelUps[1])
-    .toEqual({
-      level: 3,
-      pick: "tornado",
-      added: [],
-      dropped: ["snowball"],
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: expect.arrayContaining(["birds-in-a-tempest", "tornado"]),
+      dropped: ["whiteout", "blizzard"],
     });
-  await expect
-    .poll(async () => persisted.builds[0]?.levelUps[0]?.dropped)
-    .toEqual(["whiteout", "blizzard"]);
 });
 
 test("resets during an in-flight save without losing unrelated fields or notes", async ({
