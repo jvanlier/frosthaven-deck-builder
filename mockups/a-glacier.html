@@ -16,7 +16,8 @@ header{position:sticky;top:0;z-index:5;backdrop-filter:blur(14px);background:#0b
 .lv.on{background:linear-gradient(180deg,var(--ice2),#0284c7);border-color:transparent;color:#03111f;box-shadow:0 6px 20px #38bdf855}
 .lv.ghost{border-style:dashed;color:var(--mut);background:transparent}
 .lv .dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
-main{max-width:1100px;margin:0 auto;padding:16px}
+:root{--cw:220px}
+main{max-width:1200px;margin:0 auto;padding:16px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
 .chip{padding:5px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);background:var(--bg2)}
 .chip.warn{color:var(--warn);border-color:#fbbf2466}.chip.ok{color:var(--ok);border-color:#4ade8066}
@@ -24,15 +25,16 @@ main{max-width:1100px;margin:0 auto;padding:16px}
 .toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);background:none;border:0}
 .sw{width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;transition:.2s}.sw:after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
 .toggle[aria-pressed=true] .sw{background:var(--ice2)}.toggle[aria-pressed=true] .sw:after{left:19px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-@media(max-width:520px){.grid{grid-template-columns:repeat(3,1fr);gap:8px}}
+/* one card size everywhere: --cw wide; on phones two per row */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,var(--cw));gap:14px}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
 .card{position:relative;border:0;padding:0;background:none;text-align:left;border-radius:12px;transition:transform .15s}
 .card:hover{transform:translateY(-3px)}
 .card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;display:block;box-shadow:0 10px 25px #0008;border:1px solid #ffffff14}
 .tag{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;background:#03111fdd;letter-spacing:.04em}
 .tag.new{color:var(--ice)}.tag.drop{color:var(--bad)}
 .card.dropped img{filter:grayscale(1) brightness(.45)}
-.card.dropped:after{content:"✕ DROP";position:absolute;inset:auto 0 45% 0;text-align:center;font-weight:800;color:var(--bad);letter-spacing:.1em;font-size:13px}
+.card.dropped:after{content:"✕ DROPPED";position:absolute;inset:auto 8px 45% 8px;text-align:center;font-weight:800;color:#fff;background:var(--bad);border-radius:8px;padding:6px 0;letter-spacing:.1em;font-size:13px}
 .guide{margin-top:6px;font-size:12px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;line-height:1.4}
 .guide.empty{font-style:italic;opacity:.6}
 h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:26px 0 10px;font-weight:600}
@@ -49,20 +51,23 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;justify-c
 nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mut);padding:4px 16px}
 nav.tabs button span{font-size:20px}nav.tabs button.on{color:var(--ice)}
 /* level-up */
-.sticky-deck{position:sticky;top:118px;z-index:4;background:#0b1220f2;border:1px solid var(--line);border-radius:var(--r);padding:10px;margin-bottom:16px;box-shadow:0 10px 30px #000a}
-.instr{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-weight:700}
-.instr .pill{padding:6px 12px;border-radius:999px;font-size:14px}
+.lubar{position:sticky;top:118px;z-index:4;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0b1220f2;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:6px;box-shadow:0 10px 30px #000a;font-weight:700}
+.pill{padding:6px 12px;border-radius:999px;font-size:14px}
 .pill.info{background:#38bdf822;color:var(--ice)}.pill.warn{background:#fbbf2422;color:var(--warn)}.pill.ok{background:#4ade8022;color:var(--ok)}
-.strip{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
-.strip .card img{border-radius:6px;box-shadow:none}
-.strip .card.dropped:after{content:"✕";font-size:22px;inset:30% 0 auto 0}
-.strip .tag{font-size:8px;padding:2px 4px;top:2px;left:2px}
-.cands{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:14px}
-.cand{border:2px solid transparent;border-radius:14px;padding:0;background:none;position:relative}
-.cand[aria-pressed=true]{border-color:var(--ice);box-shadow:0 0 0 4px #38bdf833,0 0 40px #38bdf855}
-.cand[aria-pressed=true]:before{content:"✓ Picked";position:absolute;z-index:1;top:-12px;left:50%;transform:translateX(-50%);background:var(--ice);color:#03111f;font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px}
-.cand img{width:100%;border-radius:12px;display:block}
-.small .cands{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+.lubar .hint{font-weight:400;font-size:12px;color:var(--mut)}
+@media(max-width:520px){.lubar{flex-wrap:nowrap;gap:6px;padding:8px}.lubar .hint{display:none}.pill{font-size:13px;padding:6px 10px;white-space:nowrap}}
+#lu-deck{scroll-margin-top:190px}
+.lu{display:grid;grid-template-columns:minmax(0,1fr);gap:0 28px}
+@media(min-width:1200px){.lu{grid-template-columns:calc(var(--cw)*2 + 14px) minmax(0,1fr);gap:0 20px}}
+.slot{position:relative}
+.slot>.card{display:block;width:100%}
+.zoom{position:absolute;right:8px;bottom:8px;width:36px;height:36px;border-radius:10px;border:1px solid #ffffff33;background:#03111fcc;color:#fff;font-size:18px;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.zoom:hover,.zoom:focus-visible{background:var(--ice2);color:#03111f}
+.card.picked img{outline:3px solid var(--ice);outline-offset:2px;box-shadow:0 0 0 7px #38bdf833,0 0 40px #38bdf855}
+.card.picked:before{content:"\2713 Picked";position:absolute;z-index:1;top:-11px;left:50%;transform:translateX(-50%);background:var(--ice);color:#03111f;font-weight:700;font-size:12px;padding:3px 10px;border-radius:99px}
+#zoomdlg{max-width:none;width:auto;background:transparent;border:0;overflow:visible}
+#zoomdlg img{display:block;height:min(82vh,900px);max-width:92vw;object-fit:contain;border-radius:18px;box-shadow:0 20px 60px #000}
+#zoomdlg .zbar{display:flex;gap:10px;justify-content:center;margin-top:12px}
 details summary{cursor:pointer;color:var(--mut);margin:20px 0 8px}
 textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:8px;font:inherit;font-size:13px;min-height:52px}
 /* overview */
@@ -99,6 +104,7 @@ dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}
   <button data-s="notes"><span>✎</span>Notes</button>
 </nav>
 <dialog id="dlg"></dialog>
+<dialog id="zoomdlg" aria-label="Enlarged card"></dialog>
 <script src="cards.js"></script><script src="data.js"></script>
 <script>
 let screen = location.hash.slice(1) || "deck", L = MAX, showG = false;
@@ -131,17 +137,38 @@ function deckScreen() {
     <h2>${ch.start ? "Start picks" : `Changes at level ${L}`}</h2><div class="panel">${changeRows(L)}</div>
     <div class="actions"><button class="btn">✎ Edit level ${L}</button>${L === MAX ? `<button class="btn primary" data-s="levelup">⬆︎ Level up to ${MAX + 1}</button>` : ""}</div>`;
 }
+// One card "slot": the card itself is the action button, the ⤢ button enlarges it.
+const ACT = { pick: "data-pick", drop: "data-drop", extra: "data-extra" };
+function actionLabel(id, kind) {
+  if (kind === "pick") return LU.pick === id ? "Unpick" : "Pick this card";
+  if (kind === "drop") return LU.dropped.includes(id) ? "Keep in deck" : "Drop this card";
+  return "Add to deck";
+}
+function slot(id, kind, cls = "", tag = "") {
+  return `<div class="slot"><button class="card ${cls}" ${ACT[kind]}="${id}" aria-label="${actionLabel(id, kind)}: ${esc(C[id].name)}">${img(id)}${tag}</button>
+    <button class="zoom" data-zoom="${id}" data-kind="${kind}" aria-label="Enlarge ${esc(C[id].name)}" title="Enlarge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></button></div>`;
+}
+function openZoom(id, kind) {
+  const z = $("#zoomdlg");
+  z.innerHTML = `${img(id)}<div class="zbar"><button class="btn primary" ${ACT[kind]}="${id}" data-close="1">${actionLabel(id, kind)}</button><button class="btn" data-close="1">Close</button></div>`;
+  z.showModal();
+}
 function levelupScreen() {
   const ins = LU.instruction(), w = LU.working();
-  const cand = (id, big) => `<button class="cand" aria-pressed="${LU.pick === id}" data-pick="${id}">${img(id)}</button>`;
-  return `<div class="sticky-deck"><div class="instr"><span class="pill ${ins.tone}">${ins.text}</span><span class="spacer"></span>
+  const isNew = id => id === LU.pick || LU.extra.includes(id);
+  return `<div class="lubar"><span class="pill ${ins.tone}">${ins.text}</span>
+      <span class="hint">${LU.pick ? "Tap a deck card to drop it" : "Tap a card to pick it"} · 🔍 enlarges</span><span class="spacer"></span>
       <button class="btn" id="reset" style="padding:6px 10px">Reset</button><button class="btn primary" style="padding:6px 14px" ${ins.tone === "ok" ? "" : "disabled"}>Done</button></div>
-    <div class="strip">${w.map(id => `<button class="card ${LU.dropped.includes(id) ? "dropped" : ""}" data-drop="${id}" aria-label="Toggle drop ${esc(C[id].name)}">${img(id)}${id === LU.pick || LU.extra.includes(id) ? `<span class="tag new">NEW</span>` : ""}</button>`).join("")}</div>
-    <div style="font-size:12px;color:var(--mut);margin-top:6px">Tap a card in your deck to drop it. Long-press to enlarge.</div></div>
-    <h2>Newly unlocked · level ${LU.to}</h2><div class="cands">${LU.newly().map(id => cand(id, true)).join("")}</div>
-    <div class="small"><h2>Earlier, not yet picked</h2><div class="cands">${LU.earlier().map(id => cand(id)).join("")}</div></div>
-    ${LU.pick ? `<h2>Why ${esc(C[LU.pick].name)}? <span style="text-transform:none;letter-spacing:0">(optional)</span></h2><textarea placeholder="Optional note…"></textarea>` : ""}
-    <details><summary>Swap more cards from the pool…</summary><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(90px,1fr))">${LU.swapIns().map(id => `<button class="card" data-extra="${id}">${img(id)}</button>`).join("")}</div></details>`;
+    <div class="lu"><section>
+      <h2>Newly unlocked · level ${LU.to}</h2><div class="grid">${LU.newly().map(id => slot(id, "pick", LU.pick === id ? "picked" : "")).join("")}</div>
+      <h2>Earlier, not yet picked</h2><div class="grid">${LU.earlier().map(id => slot(id, "pick", LU.pick === id ? "picked" : "")).join("")}</div>
+    </section><section id="lu-deck">
+      <h2>Your deck · ${LU.count()} / ${HAND}</h2>
+      <div class="grid">${w.map(id => slot(id, "drop", LU.dropped.includes(id) ? "dropped" : "", isNew(id) ? `<span class="tag new">NEW</span>` : "")).join("")}</div>
+      ${LU.pick ? `<h2>Why ${esc(C[LU.pick].name)}? <span style="text-transform:none;letter-spacing:0">(optional)</span></h2><textarea placeholder="Optional note…"></textarea>` : ""}
+      ${LU.dropped.map(id => `<h2>Why drop ${esc(C[id].name)}? <span style="text-transform:none;letter-spacing:0">(optional)</span></h2><textarea placeholder="Optional note…"></textarea>`).join("")}
+      <details><summary>Swap more cards from the pool…</summary><div class="grid">${LU.swapIns().map(id => slot(id, "extra")).join("")}</div></details>
+    </section></div>`;
 }
 function overviewScreen() {
   const groups = ["1", "X", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -179,6 +206,9 @@ document.addEventListener("click", e => {
   const t = e.target.closest("button,a"); if (!t) return;
   if (t.tagName === "A") e.preventDefault();
   const d = t.dataset;
+  if (d.close) $("#zoomdlg").close();
+  if (d.zoom) return openZoom(d.zoom, d.kind);
+  const picking = !!d.pick && LU.pick !== d.pick;
   if (d.l) { L = +d.l; screen = "deck"; }
   else if (d.s) screen = d.s;
   else if (t.id === "tg") showG = !showG;
@@ -189,6 +219,10 @@ document.addEventListener("click", e => {
   else if (d.c) return openCard(d.c);
   else return;
   render();
+  // Single-column layout: after picking, bring the deck into view so the drop step is obvious.
+  if (picking && screen === "levelup" && !matchMedia("(min-width:1200px)").matches) $("#lu-deck").scrollIntoView({ behavior: "smooth" });
 });
+// Click on the backdrop closes the zoom.
+$("#zoomdlg").addEventListener("click", e => { if (e.target.id === "zoomdlg") e.target.close(); });
 render();
 </script></body></html>
