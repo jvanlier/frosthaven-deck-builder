@@ -147,15 +147,18 @@ export function upsertNote(
   if (text === "" && existing === undefined) {
     return build;
   }
-  if (existing?.text === text) {
+  if (text !== "" && existing?.text === text) {
     return build;
   }
 
-  const guidance = { ...build.guidance };
+  const guidance = cloneRecord(build.guidance);
   if (text === "") {
     delete guidance[cardId];
   } else {
-    guidance[cardId] = { text, updatedAt: getNow(options) };
+    setRecordValue(guidance, cardId, {
+      text,
+      updatedAt: getNow(options),
+    });
   }
   return buildSchema.parse({
     ...build,
@@ -187,7 +190,7 @@ export function upsertMotivation(
   if (text === "" && existing === undefined) {
     return build;
   }
-  if (existing?.text === text) {
+  if (text !== "" && existing?.text === text) {
     return build;
   }
 
@@ -251,6 +254,27 @@ function resolveMotivationLevel(
 
 function getNow(options: Pick<BuildMutationOptions, "now">): string {
   return options.now?.() ?? new Date().toISOString();
+}
+
+function cloneRecord<T>(record: Record<string, T>): Record<string, T> {
+  const clone = Object.create(null) as Record<string, T>;
+  for (const key of Object.keys(record)) {
+    setRecordValue(clone, key, record[key]!);
+  }
+  return clone;
+}
+
+function setRecordValue<T>(
+  record: Record<string, T>,
+  key: string,
+  value: T,
+): void {
+  Object.defineProperty(record, key, {
+    configurable: true,
+    enumerable: true,
+    value,
+    writable: true,
+  });
 }
 
 function getId(options: BuildMutationOptions): string {

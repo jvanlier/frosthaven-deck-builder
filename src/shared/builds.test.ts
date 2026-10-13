@@ -9,6 +9,7 @@ import {
   upsertMotivation,
   upsertNote,
 } from "./builds";
+import { buildSchema } from "./schema";
 import type { Build } from "./schema";
 
 const firstId = "123e4567-e89b-42d3-a456-426614174000";
@@ -187,14 +188,60 @@ describe("build mutations", () => {
     expect(changed.motivations[1]?.text).toBe("Starting reason");
   });
 
+  it("preserves prototype-named guidance IDs and serializes them safely", () => {
+    const build = createBuild(
+      { characterId: "SD", name: "Original", startLevel: 1 },
+      options,
+    );
+    const updated = upsertNote(build, "__proto__", "preserve this note", {
+      now: () => firstTime,
+    });
+
+    expect(Object.hasOwn(updated.guidance, "__proto__")).toBe(true);
+    expect(updated.guidance["__proto__"]?.text).toBe("preserve this note");
+    expect(JSON.parse(JSON.stringify(updated)).guidance["__proto__"]).toEqual({
+      text: "preserve this note",
+      updatedAt: firstTime,
+    });
+  });
+
   it("removes empty guidance/motivation notes without touching unrelated notes", () => {
     const build = createBuild(
       { characterId: "SD", name: "Original", startLevel: 1 },
       options,
     );
-    const withGuidance = upsertNote(build, "card-a", "guidance", {
-      now: () => firstTime,
+    const importedEmptyNotes = buildSchema.parse({
+      ...build,
+      guidance: {
+        "empty-guidance": { text: "", updatedAt: firstTime },
+      },
+      motivations: [
+        {
+          level: 1,
+          cardId: "empty-motivation",
+          kind: "exclude",
+          text: "",
+          updatedAt: firstTime,
+        },
+      ],
     });
+    const clearedImportedGuidance = upsertNote(
+      importedEmptyNotes,
+      "empty-guidance",
+      "",
+      { now: () => secondTime },
+    );
+    const clearedImportedMotivation = upsertMotivation(
+      clearedImportedGuidance,
+      { kind: "exclude", cardId: "empty-motivation", text: "" },
+      { now: () => secondTime },
+    );
+    const withGuidance = upsertNote(
+      clearedImportedMotivation,
+      "card-a",
+      "guidance",
+      { now: () => firstTime },
+    );
     const withBoth = upsertMotivation(
       withGuidance,
       { kind: "exclude", cardId: "card-b", text: "exclude reason" },
@@ -210,6 +257,8 @@ describe("build mutations", () => {
       { now: () => secondTime },
     );
 
+    expect(clearedImportedGuidance.guidance).toEqual({});
+    expect(clearedImportedMotivation.motivations).toEqual([]);
     expect(clearedGuidance.guidance).toEqual({});
     expect(clearedGuidance.motivations).toHaveLength(1);
     expect(clearedMotivation.motivations).toEqual([]);

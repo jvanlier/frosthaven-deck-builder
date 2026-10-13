@@ -138,6 +138,22 @@ describe("shared document schemas", () => {
     ).toThrow();
   });
 
+  it("preserves structurally valid conflicts between starting-pick slots", () => {
+    expect(() =>
+      appDataSchema.parse({
+        ...validData(),
+        builds: [
+          validBuild({
+            startPicks: [
+              { forLevel: 2, cardId: "same-card" },
+              { forLevel: 3, cardId: "same-card" },
+            ],
+          }),
+        ],
+      }),
+    ).not.toThrow();
+  });
+
   it("rejects duplicate build/card/motivation keys and overlapping deck edits", () => {
     const duplicateBuild = validBuild();
     expect(() =>

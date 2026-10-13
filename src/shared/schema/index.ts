@@ -52,6 +52,50 @@ const noteSchema = z
   })
   .strict();
 
+type NoteValue = z.infer<typeof noteSchema>;
+const guidanceSchema = z
+  .unknown()
+  .superRefine((value, context) => {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      context.addIssue({
+        code: "invalid_type",
+        expected: "record",
+        input: value,
+      });
+      return;
+    }
+    for (const key of Object.keys(value)) {
+      if (!identifierSchema.safeParse(key).success) {
+        context.addIssue({
+          code: "custom",
+          path: [key],
+          message: "Invalid guidance card ID",
+        });
+        continue;
+      }
+      const note = (value as Record<string, unknown>)[key];
+      if (!noteSchema.safeParse(note).success) {
+        context.addIssue({
+          code: "custom",
+          path: [key],
+          message: "Invalid guidance note",
+        });
+      }
+    }
+  })
+  .transform((value) => {
+    const safeRecord = Object.create(null) as Record<string, NoteValue>;
+    for (const key of Object.keys(value as object)) {
+      Object.defineProperty(safeRecord, key, {
+        configurable: true,
+        enumerable: true,
+        value: noteSchema.parse((value as Record<string, unknown>)[key]),
+        writable: true,
+      });
+    }
+    return safeRecord;
+  });
+
 export const buildNameSchema = z
   .string()
   .trim()
@@ -79,7 +123,7 @@ export const buildSchema = z
     startDeck: z.array(cardIdSchema).max(MAX_OPERATION_ENTRIES),
     levelUps: z.array(levelUpSchema),
     motivations: z.array(motivationSchema),
-    guidance: z.record(identifierSchema, noteSchema),
+    guidance: guidanceSchema,
     createdAt: timestampSchema,
     updatedAt: timestampSchema,
   })
@@ -104,14 +148,6 @@ export const buildSchema = z
           "Starting picks must contain exactly the sorted slots 2..startLevel",
       });
     }
-    addDuplicateIssues(
-      build.startPicks.flatMap((pick) =>
-        pick.cardId === null ? [] : [pick.cardId],
-      ),
-      context,
-      ["startPicks"],
-    );
-
     const expectedLevelUps = Array.from(
       { length: 9 - build.startLevel },
       (_, index) => build.startLevel + index + 1,
