@@ -172,7 +172,7 @@ export function CardDialog({
   );
 }
 
-function CardImage({
+export function CardImage({
   card,
   alt,
   className,

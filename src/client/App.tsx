@@ -5,11 +5,18 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
   useParams,
 } from "react-router-dom";
 import { preventUnloadIfPending, useAppData } from "./app-data";
 import { CardGrid } from "./cards";
-import { BuildList, StartingEditor, StartingRoute } from "./build-editor";
+import { BuildList, StartingEditor } from "./build-editor";
+import {
+  CardDetailRoute,
+  DeckRoute,
+  deckPath,
+  readLastPosition,
+} from "./deck-view";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
@@ -72,7 +79,7 @@ export default function App() {
       <AppHeader character={character} health={health} />
       <SaveFeedback />
       <Routes>
-        <Route path="/" element={<BuildList />} />
+        <Route path="/" element={<HomeRoute />} />
         <Route path="/about" element={<AboutView />} />
         {import.meta.env.DEV ? (
           <>
@@ -89,8 +96,12 @@ export default function App() {
           element={<StartingEditorRoute />}
         />
         <Route
+          path="/c/:characterId/b/:buildId/l/:level/card/:cardId"
+          element={<CardDetailRoute />}
+        />
+        <Route
           path="/c/:characterId/b/:buildId/l/:level"
-          element={<StartingRoute />}
+          element={<DeckRoute />}
         />
         <Route
           path="/c/:characterId/b/:buildId/l/:level/level-up"
@@ -138,8 +149,8 @@ function AppHeader({
         <h1 className="visually-hidden">Frosthaven Deck Builder</h1>
         <Link
           className="brand"
-          to="/"
-          aria-label="Frosthaven Deck Builder home"
+          to={`/c/${character.id}`}
+          aria-label="Frosthaven Deck Builder builds"
         >
           <img src={`/${character.icon}`} alt="" />
           <span>
@@ -176,6 +187,50 @@ function AppHeader({
       </div>
     </header>
   );
+}
+
+function HomeRoute() {
+  const { data } = useAppData();
+  const navigate = useNavigate();
+  const [checkedResume, setCheckedResume] = useState(false);
+
+  useEffect(() => {
+    if (data === null || checkedResume) {
+      return;
+    }
+    const position = readLastPosition();
+    const build = position
+      ? data.builds.find(
+          (candidate) =>
+            candidate.id === position.buildId &&
+            candidate.characterId === position.characterId,
+        )
+      : undefined;
+    const levelExists =
+      build !== undefined &&
+      (build.startLevel === position?.level ||
+        build.levelUps.some((levelUp) => levelUp.level === position?.level));
+    if (position && build && levelExists) {
+      setCheckedResume(true);
+      navigate(
+        deckPath(position.characterId, position.buildId, position.level),
+        { replace: true },
+      );
+      return;
+    }
+    setCheckedResume(true);
+  }, [checkedResume, data, navigate]);
+
+  if (!checkedResume) {
+    return (
+      <main className="page-content" aria-labelledby="resume-heading">
+        <p id="resume-heading" role="status" aria-live="polite">
+          Opening your last deck…
+        </p>
+      </main>
+    );
+  }
+  return <BuildList />;
 }
 
 function StartingEditorRoute() {
@@ -303,7 +358,7 @@ function UnavailableView() {
           Your saved data is safe. This route will become available when its
           editor is ready.
         </p>
-        <Link className="button-link" to="/">
+        <Link className="button-link" to={`/c/${character.id}`}>
           Back to builds
         </Link>
       </section>
@@ -320,27 +375,19 @@ function BottomTabs() {
   return (
     <nav className="bottom-tabs" aria-label="Primary navigation">
       <NavLink
-        to={hasWorkspace ? workspaceDeckPath(workspace, deckLevel) : "/"}
+        to={
+          hasWorkspace
+            ? workspaceDeckPath(workspace, deckLevel)
+            : `/c/${character.id}`
+        }
         end={!hasWorkspace}
         className={tabClassName}
       >
         <span aria-hidden="true">▦</span> Deck
       </NavLink>
-      <WorkspaceTab
-        to={hasWorkspace ? workspaceLevelUpPath(workspace) : undefined}
-        label="Level up"
-        icon="↗"
-      />
-      <WorkspaceTab
-        to={hasWorkspace ? workspaceOverviewPath(workspace) : undefined}
-        label="Overview"
-        icon="▤"
-      />
-      <WorkspaceTab
-        to={hasWorkspace ? workspaceMotivationsPath(workspace) : undefined}
-        label="Notes"
-        icon="✎"
-      />
+      <WorkspaceTab to={undefined} label="Level up" icon="↗" />
+      <WorkspaceTab to={undefined} label="Overview" icon="▤" />
+      <WorkspaceTab to={undefined} label="Notes" icon="✎" />
       {isAbout ? (
         <span className="tab-current">About</span>
       ) : (
@@ -408,23 +455,6 @@ function workspaceDeckPath(workspace: Workspace, level: number): string {
   return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
     workspace.buildId!,
   )}/l/${level}`;
-}
-
-function workspaceLevelUpPath(workspace: Workspace): string {
-  const level = workspace.level ?? workspace.build?.startLevel ?? 1;
-  return `${workspaceDeckPath(workspace, level)}/level-up`;
-}
-
-function workspaceOverviewPath(workspace: Workspace): string {
-  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
-    workspace.buildId!,
-  )}/overview`;
-}
-
-function workspaceMotivationsPath(workspace: Workspace): string {
-  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
-    workspace.buildId!,
-  )}/motivations`;
 }
 
 function SaveFeedback() {

@@ -296,7 +296,10 @@ export function StartingEditor({
       aria-labelledby="starting-heading"
     >
       <div className="editor-toolbar">
-        <Link className="button-link secondary-button" to="/">
+        <Link
+          className="button-link secondary-button"
+          to={`/c/${character.id}`}
+        >
           Back to builds
         </Link>
         <span className="save-hint">Changes save automatically.</span>
@@ -657,7 +660,7 @@ function UnavailableStartingView() {
         <p className="eyebrow">Build not found</p>
         <h1>This starting editor is unavailable</h1>
         <p>Choose an existing build or create a new one.</p>
-        <Link className="button-link" to="/">
+        <Link className="button-link" to={`/c/${character.id}`}>
           Back to builds
         </Link>
       </section>
@@ -665,7 +668,7 @@ function UnavailableStartingView() {
   );
 }
 
-function startEditorPath(build: Build): string {
+export function startEditorPath(build: Build): string {
   return `/c/${encodeURIComponent(build.characterId)}/b/${encodeURIComponent(build.id)}/l/${build.startLevel}/start`;
 }
 

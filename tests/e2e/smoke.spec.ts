@@ -49,6 +49,76 @@ const startThreeFixtureData = {
     },
   ],
 };
+const deckFixtureData = {
+  ...fixtureData,
+  builds: [
+    {
+      ...fixtureData.builds[0],
+      startDeck: [
+        "blizzard",
+        "chilling-impact",
+        "cold-therapy",
+        "cross-winds",
+        "enticing-breeze",
+        "frigid-growth",
+        "gathering-force",
+        "lifting-gust",
+        "natures-breath",
+        "snowball",
+        "whiteout",
+      ],
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+      guidance: {
+        "cold-therapy": {
+          text: "Use early.\nPair with Snowball.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+      },
+      motivations: [
+        {
+          level: 2,
+          cardId: "birds-in-a-tempest",
+          kind: "add",
+          text: "The best level-up pick.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+        {
+          level: 2,
+          cardId: "whiteout",
+          kind: "drop",
+          text: "The weakest initiative.",
+          updatedAt: "2024-01-02T03:04:05.000Z",
+        },
+      ],
+    },
+  ],
+};
+
+const invalidDeckFixtureData = {
+  ...deckFixtureData,
+  builds: [
+    {
+      ...deckFixtureData.builds[0],
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: [],
+          dropped: ["whiteout"],
+        },
+      ],
+    },
+  ],
+};
+
+const lastPositionStorageKey = "frosthaven-deck-builder:last-position";
 
 test("loads the deck builder shell and health status", async ({ page }) => {
   await page.goto("/");
@@ -107,7 +177,7 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   ).toBeFocused();
 });
 
-test("renders contextual build navigation from stored build data", async ({
+test("renders a derived deck view and disables future feature entry points", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -119,32 +189,261 @@ test("renders contextual build navigation from stored build data", async ({
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
 
-  await expect(page.getByText("Freeze control")).toBeVisible();
-  await expect(page.getByText("Level 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Freeze control", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Deck view is not available yet" }),
+    page
+      .getByRole("navigation", { name: "Previous and next deck levels" })
+      .getByText("Level 1", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Open starting editor" }),
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeVisible();
+  await expect(page.getByText("0 / 11 cards", { exact: true })).toBeVisible();
+  await expect(page.getByText("Incomplete", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Edit starting deck" }),
   ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await expect(page.getByRole("link", { name: "Level up" })).toHaveAttribute(
-    "href",
-    `/c/SD/b/${fixtureBuildId}/l/1/level-up`,
-  );
-  await expect(page.getByRole("link", { name: "Overview" })).toHaveAttribute(
-    "href",
-    `/c/SD/b/${fixtureBuildId}/overview`,
-  );
+  const primaryNavigation = page.getByRole("navigation", {
+    name: "Primary navigation",
+  });
+  await expect(
+    primaryNavigation.locator(".tab-disabled").filter({ hasText: "Level up" }),
+  ).toHaveAttribute("aria-disabled", "true");
+  await expect(
+    primaryNavigation.locator(".tab-disabled").filter({ hasText: "Overview" }),
+  ).toHaveAttribute("aria-disabled", "true");
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
   await expect(page.getByText("Freeze control")).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Deck", exact: true }),
-  ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1`);
-  await expect(page.getByRole("link", { name: "Level up" })).toHaveAttribute(
-    "href",
-    `/c/SD/b/${fixtureBuildId}/l/1/level-up`,
+    page.getByRole("heading", {
+      name: "This planning view is not available yet",
+    }),
+  ).toBeVisible();
+});
+
+test("shows sorted cards, changes, guidance and read-only card detail", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
   );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+
+  await expect(
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeVisible();
+  const deckCardNames = page.locator(".deck-card-list .card-name");
+  await expect(deckCardNames).toHaveText([
+    "Cold Therapy",
+    "Snowball",
+    "Lifting Gust",
+    "Chilling Impact",
+    "Cross Winds",
+    "Frigid Growth",
+    "Blizzard",
+    "Enticing Breeze",
+    "Gathering Force",
+    "Nature's Breath",
+    "Birds in a Tempest",
+  ]);
+  await expect(page.getByText("11 / 11 cards", { exact: true })).toBeVisible();
+  await expect(page.getByText("Level 2 changes")).toBeVisible();
+  await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
+  await expect(page.getByText("Dropped: Whiteout")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Open Whiteout details" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Enlarge Whiteout" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("checkbox", { name: "Show guidance" }),
+  ).not.toBeChecked();
+  await page.getByRole("checkbox", { name: "Show guidance" }).check();
+  await expect(page.getByText("Use early.")).toBeVisible();
+  await expect(page.getByText("Pair with Snowball.")).toBeVisible();
+
+  await page
+    .getByRole("button", { name: "Open Birds in a Tempest details" })
+    .click();
+  await expect(page).toHaveURL(
+    `/c/SD/b/${fixtureBuildId}/l/2/card/birds-in-a-tempest`,
+  );
+  await expect(
+    page.getByRole("heading", { name: "Card detail" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Birds in a Tempest" }),
+  ).toBeVisible();
+  await expect(page.getByText("The best level-up pick.")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Back to level 2 deck" }),
+  ).toBeVisible();
+});
+
+test("renders invalid badges and specific replay validation messages", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(invalidDeckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Picked card birds-in-a-tempest must be added to the deck", {
+      exact: true,
+    }),
+  ).toBeVisible();
+});
+
+test("switches between stored levels with previous, next and direct navigation", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
+  await page.getByRole("link", { name: "Next level (2)" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page.getByRole("link", { name: "1", exact: true }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
+  await page.getByRole("link", { name: "Next level (2)" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page.getByRole("link", { name: "Previous level (1)" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
+});
+
+test("resumes the last valid deck position and safely falls back for invalid storage", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page).toHaveURL(/\/l\/2$/);
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
+  await expect(page).toHaveURL(`/c/SD`);
+  await expect(
+    page.getByRole("heading", { name: "Your builds" }),
+  ).toBeVisible();
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
+  await page.getByRole("link", { name: "Back to builds" }).click();
+  await expect(page).toHaveURL(`/c/SD`);
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page).toHaveURL(/\/l\/2$/);
+  await expect(
+    page.evaluate((key) => localStorage.getItem(key), lastPositionStorageKey),
+  ).resolves.toBe(
+    JSON.stringify({ characterId: "SD", buildId: fixtureBuildId, level: 2 }),
+  );
+
+  await page.goto("/");
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeVisible();
+
+  await page.evaluate(
+    (key) => localStorage.setItem(key, "not-json"),
+    lastPositionStorageKey,
+  );
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Your builds" }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+
+  await page.evaluate(
+    ({ key, buildId }) =>
+      localStorage.setItem(
+        key,
+        JSON.stringify({ characterId: "SD", buildId, level: 9 }),
+      ),
+    { key: lastPositionStorageKey, buildId: fixtureBuildId },
+  );
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Your builds" }),
+  ).toBeVisible();
+
+  await page.evaluate(
+    (key) =>
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          characterId: "SD",
+          buildId: "missing-build",
+          level: 1,
+        }),
+      ),
+    lastPositionStorageKey,
+  );
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Your builds" }),
+  ).toBeVisible();
+});
+
+test("keeps deck navigation usable when local storage is blocked", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      get() {
+        throw new Error("local storage is blocked");
+      },
+    });
+  });
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeVisible();
+});
+
+test("keeps malformed deck routes safe", async ({ page }) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/99`);
+  await expect(
+    page.getByRole("heading", { name: "This deck view is unavailable" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Back to builds" }),
+  ).toBeVisible();
 });
 
 test("keeps saving feedback below a populated mobile header while scrolling", async ({
@@ -236,6 +535,8 @@ test("keeps contextual level navigation within a narrow viewport", async ({
   await expect(
     page.getByRole("link", { name: "9", exact: true }),
   ).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "Level up" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Level up/i })).toHaveCount(0);
 });
 
 test("offers retry after an initial load failure", async ({ page }) => {
@@ -496,7 +797,7 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
       .getByRole("dialog", { name: "Create build" })
       .getByRole("button", { name: "Create build" }),
   ).toBeDisabled();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/c\/SD$/);
 });
 
 test("preserves a later starting pick while surfacing an earlier conflict", async ({
