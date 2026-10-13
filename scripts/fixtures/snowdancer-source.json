@@ -1,0 +1,30 @@
+[
+  {
+    "name": "sd-back",
+    "expansion": "Frosthaven",
+    "image": "character-ability-cards/frosthaven/SD/fh-sd-back.jpeg",
+    "level": "-",
+    "initiative": "-"
+  },
+  {
+    "name": "nature's breath",
+    "expansion": "Frosthaven",
+    "image": "character-ability-cards/frosthaven/SD/fh-natures-breath.jpeg",
+    "level": "1",
+    "initiative": "90"
+  },
+  {
+    "name": "the endless white",
+    "expansion": "Frosthaven",
+    "image": "character-ability-cards/frosthaven/SD/fh-the-endless-white.jpeg",
+    "level": "8",
+    "initiative": "05"
+  },
+  {
+    "name": "not snowdancer",
+    "expansion": "Frosthaven",
+    "image": "character-ability-cards/frosthaven/BB/fh-not-snowdancer.jpeg",
+    "level": "1",
+    "initiative": "10"
+  }
+]

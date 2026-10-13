@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "build": "tsc -p tsconfig.server.json && chmod +x dist/server/index.js && vite build"
+    "build": "tsc -p tsconfig.server.json && chmod +x dist/server/index.js && vite build",
+    "import:cards": "tsx scripts/import-cards.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.2",

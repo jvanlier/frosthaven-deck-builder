@@ -1,0 +1,176 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/main/data/character-abilities/frosthaven.json",
+      "revision": "e208ad7fa0486b65fca96087cf1ccd0bd26aaf32",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/images/images/",
+      "revision": "99389953249f2c23fddd5cdaa78c17e061a715fe"
+    }
+  },
+  "assets": [
+    {
+      "id": "birds-in-a-tempest",
+      "source": "character-ability-cards/frosthaven/SD/fh-birds-in-a-tempest.jpeg",
+      "sha256": "675463035dfc13def7d03a16c16476375d5beea346f9a852dd367f4011968aa9"
+    },
+    {
+      "id": "biting-frost",
+      "source": "character-ability-cards/frosthaven/SD/fh-biting-frost.jpeg",
+      "sha256": "733ef0c459edbe1cfeab6d8a59b858c48084bfa64efc9cb2d40ab98b46213322"
+    },
+    {
+      "id": "blinding-vortex",
+      "source": "character-ability-cards/frosthaven/SD/fh-blinding-vortex.jpeg",
+      "sha256": "6ec1f2057030566498942ffa35a749ba14c380edd748bfe4b8ed4345086c18d3"
+    },
+    {
+      "id": "blizzard",
+      "source": "character-ability-cards/frosthaven/SD/fh-blizzard.jpeg",
+      "sha256": "3a26d199c7fbdc14ff72105e8df7aedce0d79174e7a599e18cee0d3756ef55db"
+    },
+    {
+      "id": "chilling-impact",
+      "source": "character-ability-cards/frosthaven/SD/fh-chilling-impact.jpeg",
+      "sha256": "db7fc4d83110e87f46d306df9e2eef3a412f543ded19901fb1848de0fa09cf79"
+    },
+    {
+      "id": "cold-snap",
+      "source": "character-ability-cards/frosthaven/SD/fh-cold-snap.jpeg",
+      "sha256": "11e179c99976f5e40193b0b30ba6a9406de3099e03546bf8a034a4500b1bcb08"
+    },
+    {
+      "id": "cold-therapy",
+      "source": "character-ability-cards/frosthaven/SD/fh-cold-therapy.jpeg",
+      "sha256": "56ab928b1b962914f54ccbaf5c18edd48a7132f44f698e7be65a32f890eef374"
+    },
+    {
+      "id": "cross-winds",
+      "source": "character-ability-cards/frosthaven/SD/fh-cross-winds.jpeg",
+      "sha256": "b4fd4addd26b97ee5314b0a1cb8b1f3411bf68548a7bf97b1dd305f064f24552"
+    },
+    {
+      "id": "enticing-breeze",
+      "source": "character-ability-cards/frosthaven/SD/fh-enticing-breeze.jpeg",
+      "sha256": "721f8fab1d3983ec666fc8e69b08aea72f149c4a5122ea52748e8b48e3fd5954"
+    },
+    {
+      "id": "freezing-storm",
+      "source": "character-ability-cards/frosthaven/SD/fh-freezing-storm.jpeg",
+      "sha256": "771cb035ed1796dcbe20087f0ece8d61bbb0287df467de07748105f4812bef30"
+    },
+    {
+      "id": "frigid-growth",
+      "source": "character-ability-cards/frosthaven/SD/fh-frigid-growth.jpeg",
+      "sha256": "4639a4d657e608584bd95b2438e97a767d96a911a296ec15d4cfb8c6bd6d0d2e"
+    },
+    {
+      "id": "frozen-brand",
+      "source": "character-ability-cards/frosthaven/SD/fh-frozen-brand.jpeg",
+      "sha256": "7c04c3218614d6e701706504923792c684de75bb57c4abb419c3b34e2fbc408e"
+    },
+    {
+      "id": "gathering-force",
+      "source": "character-ability-cards/frosthaven/SD/fh-gathering-force.jpeg",
+      "sha256": "ea306ef298ff0a663aa55f721674f1ec0142adf96bf7d89fea16735ca18a6e28"
+    },
+    {
+      "id": "lifting-gust",
+      "source": "character-ability-cards/frosthaven/SD/fh-lifting-gust.jpeg",
+      "sha256": "56b3a78a85f3a3c9fd48f6d81cba0cee2a7051f3e91d7927c2621183d2863211"
+    },
+    {
+      "id": "natures-breath",
+      "source": "character-ability-cards/frosthaven/SD/fh-natures-breath.jpeg",
+      "sha256": "d0e4bcbc66a4601b0dd139a45ca67dff1469f49e70e6732b010ffa52f95333a3"
+    },
+    {
+      "id": "polar-vortex",
+      "source": "character-ability-cards/frosthaven/SD/fh-polar-vortex.jpeg",
+      "sha256": "c922da002aebdcd594ee06897c2f4404d7e6f63c88683400923a8406dd2ecb0c"
+    },
+    {
+      "id": "refreshing-flurry",
+      "source": "character-ability-cards/frosthaven/SD/fh-refreshing-flurry.jpeg",
+      "sha256": "21b01884868779cc3dab1c7731b4d8331cbffd282443adf7d504ddae8ffd3ad1"
+    },
+    {
+      "id": "shifting-snow",
+      "source": "character-ability-cards/frosthaven/SD/fh-shifting-snow.jpeg",
+      "sha256": "885ec9ffb5cc5623ab63526c4487eae2d6102384ce8bbe3c84d9e1684ab92b6c"
+    },
+    {
+      "id": "snowball",
+      "source": "character-ability-cards/frosthaven/SD/fh-snowball.jpeg",
+      "sha256": "068fc96a32058c56b6462a5a221239b4d72bc9ccbff8e0c53d843637741e0461"
+    },
+    {
+      "id": "snowblind",
+      "source": "character-ability-cards/frosthaven/SD/fh-snowblind.jpeg",
+      "sha256": "54d9c568f328e6a6a474204877c450ad227d6a601e6859c9a7dd58481a739274"
+    },
+    {
+      "id": "storm-wall",
+      "source": "character-ability-cards/frosthaven/SD/fh-storm-wall.jpeg",
+      "sha256": "6b1e5426f3fca51e6b30066557cc8454e98e0668441b0e3deabf8d369403785b"
+    },
+    {
+      "id": "surging-blow",
+      "source": "character-ability-cards/frosthaven/SD/fh-surging-blow.jpeg",
+      "sha256": "b8c345213c49eb89ba9687250f87f1c53d0224eb0c8af6f48c9d69bf477a2925"
+    },
+    {
+      "id": "the-endless-white",
+      "source": "character-ability-cards/frosthaven/SD/fh-the-endless-white.jpeg",
+      "sha256": "4f52da54eff5f66dc7ee398398fe3f8aad39ed51472f1f67267328e3f9384ea8"
+    },
+    {
+      "id": "the-spirits-call",
+      "source": "character-ability-cards/frosthaven/SD/fh-the-spirits-call.jpeg",
+      "sha256": "ca4c3da987ffd7543dc16e2f416a4f3c62ffaaf21a951fef62be9c65e8444178"
+    },
+    {
+      "id": "tornado",
+      "source": "character-ability-cards/frosthaven/SD/fh-tornado.jpeg",
+      "sha256": "521d3e9cecceff2eab69b13045faccf3d83d87ac67f9e31113cb1845ceb85da2"
+    },
+    {
+      "id": "whipping-gale",
+      "source": "character-ability-cards/frosthaven/SD/fh-whipping-gale.jpeg",
+      "sha256": "e01bf7320ebd633766141db71e6f6c9d0a842dcb2d1c2329e0546ffd3c6ebf30"
+    },
+    {
+      "id": "white-winds",
+      "source": "character-ability-cards/frosthaven/SD/fh-white-winds.jpeg",
+      "sha256": "0823561165792a86b905d317425c9e1c9ef32a7330c114354febb13ecae0d4bf"
+    },
+    {
+      "id": "whiteout",
+      "source": "character-ability-cards/frosthaven/SD/fh-whiteout.jpeg",
+      "sha256": "16a3b59a035d1f4585aff319d3cbcb1b7c896f8e24dc9cbf0b1363b0714ac080"
+    },
+    {
+      "id": "winds-of-change",
+      "source": "character-ability-cards/frosthaven/SD/fh-winds-of-change.jpeg",
+      "sha256": "c22bbbd30adfb165d9f1c190dff9376e1c05b22e929b437abf5a8325dc33f5d8"
+    },
+    {
+      "id": "zephyr-barrier",
+      "source": "character-ability-cards/frosthaven/SD/fh-zephyr-barrier.jpeg",
+      "sha256": "c0488c6387e1d89fad1999231f8801fe4d73e2bf54a68fdb6d197e5168acf731"
+    },
+    {
+      "id": "sd-back",
+      "source": "character-ability-cards/frosthaven/SD/fh-sd-back.jpeg",
+      "sha256": "f0a4a707a69835a67e3501a60ea8e5c4a12512cd06d9da22df135f3bf5f5711d"
+    }
+  ],
+  "icon": {
+    "source": "docs/mockup/snowdancer-icon.png",
+    "sha256": "015c651b7e2d36ee45353702ae289ee1694c38098a856dfe7f8b4163eb891d31"
+  }
+}

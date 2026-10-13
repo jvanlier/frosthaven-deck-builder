@@ -1,0 +1,218 @@
+{
+  "id": "SD",
+  "name": "Snowdancer",
+  "handSize": 11,
+  "icon": "SD.png",
+  "cards": [
+    {
+      "id": "birds-in-a-tempest",
+      "name": "Birds in a Tempest",
+      "level": 2,
+      "initiative": 18,
+      "image": "SD/fh-birds-in-a-tempest.jpeg"
+    },
+    {
+      "id": "biting-frost",
+      "name": "Biting Frost",
+      "level": 4,
+      "initiative": 16,
+      "image": "SD/fh-biting-frost.jpeg"
+    },
+    {
+      "id": "blinding-vortex",
+      "name": "Blinding Vortex",
+      "level": "X",
+      "initiative": 31,
+      "image": "SD/fh-blinding-vortex.jpeg"
+    },
+    {
+      "id": "blizzard",
+      "name": "Blizzard",
+      "level": 1,
+      "initiative": 71,
+      "image": "SD/fh-blizzard.jpeg"
+    },
+    {
+      "id": "chilling-impact",
+      "name": "Chilling Impact",
+      "level": 1,
+      "initiative": 31,
+      "image": "SD/fh-chilling-impact.jpeg"
+    },
+    {
+      "id": "cold-snap",
+      "name": "Cold Snap",
+      "level": 3,
+      "initiative": 86,
+      "image": "SD/fh-cold-snap.jpeg"
+    },
+    {
+      "id": "cold-therapy",
+      "name": "Cold Therapy",
+      "level": 1,
+      "initiative": 20,
+      "image": "SD/fh-cold-therapy.jpeg"
+    },
+    {
+      "id": "cross-winds",
+      "name": "Cross Winds",
+      "level": 1,
+      "initiative": 32,
+      "image": "SD/fh-cross-winds.jpeg"
+    },
+    {
+      "id": "enticing-breeze",
+      "name": "Enticing Breeze",
+      "level": 1,
+      "initiative": 76,
+      "image": "SD/fh-enticing-breeze.jpeg"
+    },
+    {
+      "id": "freezing-storm",
+      "name": "Freezing Storm",
+      "level": 7,
+      "initiative": 81,
+      "image": "SD/fh-freezing-storm.jpeg"
+    },
+    {
+      "id": "frigid-growth",
+      "name": "Frigid Growth",
+      "level": 1,
+      "initiative": 70,
+      "image": "SD/fh-frigid-growth.jpeg"
+    },
+    {
+      "id": "frozen-brand",
+      "name": "Frozen Brand",
+      "level": 6,
+      "initiative": 33,
+      "image": "SD/fh-frozen-brand.jpeg"
+    },
+    {
+      "id": "gathering-force",
+      "name": "Gathering Force",
+      "level": 1,
+      "initiative": 89,
+      "image": "SD/fh-gathering-force.jpeg"
+    },
+    {
+      "id": "lifting-gust",
+      "name": "Lifting Gust",
+      "level": 1,
+      "initiative": 27,
+      "image": "SD/fh-lifting-gust.jpeg"
+    },
+    {
+      "id": "natures-breath",
+      "name": "Nature's Breath",
+      "level": 1,
+      "initiative": 90,
+      "image": "SD/fh-natures-breath.jpeg"
+    },
+    {
+      "id": "polar-vortex",
+      "name": "Polar Vortex",
+      "level": 3,
+      "initiative": 61,
+      "image": "SD/fh-polar-vortex.jpeg"
+    },
+    {
+      "id": "refreshing-flurry",
+      "name": "Refreshing Flurry",
+      "level": 6,
+      "initiative": 95,
+      "image": "SD/fh-refreshing-flurry.jpeg"
+    },
+    {
+      "id": "shifting-snow",
+      "name": "Shifting Snow",
+      "level": 5,
+      "initiative": 17,
+      "image": "SD/fh-shifting-snow.jpeg"
+    },
+    {
+      "id": "snowball",
+      "name": "Snowball",
+      "level": 1,
+      "initiative": 23,
+      "image": "SD/fh-snowball.jpeg"
+    },
+    {
+      "id": "snowblind",
+      "name": "Snowblind",
+      "level": 9,
+      "initiative": 83,
+      "image": "SD/fh-snowblind.jpeg"
+    },
+    {
+      "id": "storm-wall",
+      "name": "Storm Wall",
+      "level": 7,
+      "initiative": 30,
+      "image": "SD/fh-storm-wall.jpeg"
+    },
+    {
+      "id": "surging-blow",
+      "name": "Surging Blow",
+      "level": 8,
+      "initiative": 73,
+      "image": "SD/fh-surging-blow.jpeg"
+    },
+    {
+      "id": "the-endless-white",
+      "name": "The Endless White",
+      "level": 8,
+      "initiative": 5,
+      "image": "SD/fh-the-endless-white.jpeg"
+    },
+    {
+      "id": "the-spirits-call",
+      "name": "The Spirit's Call",
+      "level": "X",
+      "initiative": 45,
+      "image": "SD/fh-the-spirits-call.jpeg"
+    },
+    {
+      "id": "tornado",
+      "name": "Tornado",
+      "level": 2,
+      "initiative": 59,
+      "image": "SD/fh-tornado.jpeg"
+    },
+    {
+      "id": "whipping-gale",
+      "name": "Whipping Gale",
+      "level": 5,
+      "initiative": 79,
+      "image": "SD/fh-whipping-gale.jpeg"
+    },
+    {
+      "id": "white-winds",
+      "name": "White Winds",
+      "level": "X",
+      "initiative": 11,
+      "image": "SD/fh-white-winds.jpeg"
+    },
+    {
+      "id": "whiteout",
+      "name": "Whiteout",
+      "level": 1,
+      "initiative": 21,
+      "image": "SD/fh-whiteout.jpeg"
+    },
+    {
+      "id": "winds-of-change",
+      "name": "Winds of Change",
+      "level": 9,
+      "initiative": 15,
+      "image": "SD/fh-winds-of-change.jpeg"
+    },
+    {
+      "id": "zephyr-barrier",
+      "name": "Zephyr Barrier",
+      "level": 4,
+      "initiative": 40,
+      "image": "SD/fh-zephyr-barrier.jpeg"
+    }
+  ]
+}
