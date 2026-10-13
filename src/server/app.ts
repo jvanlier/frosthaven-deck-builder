@@ -75,13 +75,22 @@ export function createApp(options: CreateAppOptions = {}) {
     }
   });
 
+  app.use("*", async (context, next) => {
+    if (isApiPath(context.req.path)) {
+      return context.json({ error: "Not found" }, 404);
+    }
+    await next();
+  });
   app.use("*", serveStatic({ root: staticDir }));
 
   app.get("*", async (context) => {
     if (isApiPath(context.req.path)) {
       return context.json({ error: "Not found" }, 404);
     }
-    if (extname(context.req.path) !== "") {
+    if (
+      extname(context.req.path) !== "" ||
+      isStaticAssetPath(context.req.path)
+    ) {
       return context.text("Not found", 404);
     }
 
@@ -164,14 +173,16 @@ function isApiPath(path: string): boolean {
   try {
     decodedPath = decodeURIComponent(path);
   } catch {
-    return path.startsWith("/api");
+    return (
+      path === "/api" || path.startsWith("/api/") || path.startsWith("/api%")
+    );
   }
-  return (
-    decodedPath === "/api" ||
-    decodedPath.startsWith("/api/") ||
-    path === "/api" ||
-    path.startsWith("/api/") ||
-    path.startsWith("/api%")
+  return decodedPath === "/api" || decodedPath.startsWith("/api/");
+}
+
+function isStaticAssetPath(path: string): boolean {
+  return ["/assets/", "/cards/", "/icons/"].some((prefix) =>
+    path.startsWith(prefix),
   );
 }
 

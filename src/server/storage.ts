@@ -240,6 +240,8 @@ class FileDataStore implements DataStore {
       try {
         const existing = await this.fileSystem.readFile(path);
         if (existing.equals(raw)) {
+          await syncFile(this.fileSystem, path);
+          await syncDirectory(this.fileSystem, this.backupsDir);
           return { name, path, reused: true };
         }
       } catch (error) {
@@ -388,9 +390,10 @@ async function syncDirectory(
     });
   } catch (error) {
     if (
-      isNodeError(error, "EINVAL") ||
-      isNodeError(error, "ENOTSUP") ||
-      isNodeError(error, "EOPNOTSUPP")
+      process.platform === "win32" &&
+      (isNodeError(error, "EINVAL") ||
+        isNodeError(error, "ENOTSUP") ||
+        isNodeError(error, "EOPNOTSUPP"))
     ) {
       return;
     }

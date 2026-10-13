@@ -1,4 +1,11 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -6,6 +13,7 @@ import * as nodeFs from "node:fs/promises";
 import { createApp } from "./app";
 import {
   createDataStore,
+  RevisionConflictError,
   StorageError,
   type DataStoreFileSystem,
 } from "./storage";
@@ -221,8 +229,39 @@ describe("revision-safe data API", () => {
     });
   });
 
-  it("reports uncertain durability after rename and rereads the committed revision", async () => {
+  it("requires backup-directory durability before reusing a predecessor backup", async () => {
     const dataDir = await newDataDir();
+    const app = createApp({ dataDir });
+    expect((await put(app, 0, dataWithName("Original"))).status).toBe(200);
+    const backupsDir = join(dataDir, "backups");
+    let failDirectorySync = true;
+    const failingFileSystem: DataStoreFileSystem = {
+      ...nodeFs,
+      open: async (path, flags) => {
+        if (path === backupsDir && failDirectorySync) {
+          const error = new Error(
+            "simulated backup directory fsync failure",
+          ) as NodeJS.ErrnoException;
+          error.code = "EIO";
+          throw error;
+        }
+        return nodeFs.open(path, flags);
+      },
+    };
+    const now = () => new Date("2024-01-02T03:04:05.000Z");
+    const store = createDataStore({ dataDir, fs: failingFileSystem, now });
+    const next = dataWithName("Next");
+
+    await expect(store.put(1, next)).rejects.toBeInstanceOf(StorageError);
+    await expect(store.put(1, next)).rejects.toBeInstanceOf(StorageError);
+    failDirectorySync = false;
+    await expect(store.put(1, next)).resolves.toEqual({ revision: 2 });
+  });
+
+  it("retains a predecessor and rejects stale retry after uncertain rename durability", async () => {
+    const dataDir = await newDataDir();
+    const app = createApp({ dataDir });
+    expect((await put(app, 0, dataWithName("Original"))).status).toBe(200);
     let failDirectorySync = true;
     const failingFileSystem: DataStoreFileSystem = {
       ...nodeFs,
@@ -232,22 +271,119 @@ describe("revision-safe data API", () => {
           const error = new Error(
             "simulated directory fsync failure",
           ) as NodeJS.ErrnoException;
-          error.code = "EIO";
+          error.code = "EINVAL";
           throw error;
         }
         return nodeFs.open(path, flags);
       },
     };
     const store = createDataStore({ dataDir, fs: failingFileSystem });
+    const next = dataWithName("Committed");
 
-    await expect(store.put(0, dataWithName("Committed"))).rejects.toMatchObject(
-      {
-        uncertain: true,
-      },
+    await expect(store.put(1, next)).rejects.toMatchObject({ uncertain: true });
+    const backups = await readdir(join(dataDir, "backups"));
+    expect(backups).toHaveLength(1);
+    expect(
+      JSON.parse(await readFile(join(dataDir, "backups", backups[0]!), "utf8")),
+    ).toMatchObject({ revision: 1 });
+    await expect(store.put(1, next)).rejects.toMatchObject({ revision: 2 });
+    await expect(store.put(1, next)).rejects.toBeInstanceOf(
+      RevisionConflictError,
     );
-    expect(await store.get()).toMatchObject({
-      revision: 1,
-      builds: [{ name: "Committed" }],
+  });
+
+  it("preserves the current document for backup, fsync, rename, prune, and permission failures", async () => {
+    const dataDir = await newDataDir();
+    const app = createApp({ dataDir });
+    expect((await put(app, 0, dataWithName("Original"))).status).toBe(200);
+
+    const backupFailure: DataStoreFileSystem = {
+      ...nodeFs,
+      copyFile: async () => {
+        throw new Error("simulated backup copy permission failure");
+      },
+    };
+    await expect(
+      createDataStore({ dataDir, fs: backupFailure }).put(
+        1,
+        dataWithName("Backup failure"),
+      ),
+    ).rejects.toBeInstanceOf(StorageError);
+
+    const fsyncFailure: DataStoreFileSystem = {
+      ...nodeFs,
+      open: async (path, flags) => {
+        if (path.includes(".appdata.json.")) {
+          const error = new Error("simulated temp fsync failure");
+          throw error;
+        }
+        return nodeFs.open(path, flags);
+      },
+    };
+    await expect(
+      createDataStore({ dataDir, fs: fsyncFailure }).put(
+        1,
+        dataWithName("Fsync failure"),
+      ),
+    ).rejects.toBeInstanceOf(StorageError);
+
+    const renameFailure: DataStoreFileSystem = {
+      ...nodeFs,
+      rename: async (oldPath, newPath) => {
+        if (newPath === join(dataDir, "appdata.json")) {
+          throw new Error("simulated rename failure");
+        }
+        return nodeFs.rename(oldPath, newPath);
+      },
+    };
+    await expect(
+      createDataStore({ dataDir, fs: renameFailure }).put(
+        1,
+        dataWithName("Rename failure"),
+      ),
+    ).rejects.toBeInstanceOf(StorageError);
+
+    const permissionFailure: DataStoreFileSystem = {
+      ...nodeFs,
+      writeFile: async (path, data, options) => {
+        if (path.includes(".appdata.json.")) {
+          const error = new Error(
+            "simulated permission failure",
+          ) as NodeJS.ErrnoException;
+          error.code = "EACCES";
+          throw error;
+        }
+        return nodeFs.writeFile(path, data, options);
+      },
+    };
+    await expect(
+      createDataStore({ dataDir, fs: permissionFailure }).put(
+        1,
+        dataWithName("Permission failure"),
+      ),
+    ).rejects.toBeInstanceOf(StorageError);
+
+    for (let revision = 1; revision < 22; revision += 1) {
+      expect(
+        (await put(app, revision, dataWithName(`Build ${revision}`))).status,
+      ).toBe(200);
+    }
+    const pruneFailure: DataStoreFileSystem = {
+      ...nodeFs,
+      unlink: async () => {
+        throw new Error("simulated prune failure");
+      },
+    };
+    await expect(
+      createDataStore({ dataDir, fs: pruneFailure }).put(
+        22,
+        dataWithName("Prune failure"),
+      ),
+    ).rejects.toBeInstanceOf(StorageError);
+
+    expect(await createDataStore({ dataDir }).get()).toMatchObject({
+      revision: 22,
+      builds: [{ name: "Build 21" }],
     });
   });
 
@@ -264,6 +400,8 @@ describe("revision-safe data API", () => {
       "console.log('asset')",
       "utf8",
     );
+    await mkdir(join(staticDir, "api"), { recursive: true });
+    await writeFile(join(staticDir, "api", "missing"), "not the API", "utf8");
     const app = createApp({ dataDir, staticDir });
 
     expect((await app.request("/build/one")).status).toBe(200);
@@ -273,5 +411,6 @@ describe("revision-safe data API", () => {
     expect((await app.request("/asset.js")).status).toBe(200);
     expect((await app.request("/missing.js")).status).toBe(404);
     expect((await app.request("/api/missing")).status).toBe(404);
+    expect((await app.request("/cards/SD/missing")).status).toBe(404);
   });
 });
