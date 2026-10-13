@@ -352,6 +352,49 @@ describe("Snowdancer rules engine", () => {
     );
   });
 
+  it("hides a stale drop motivation and restores it when the same choice returns", () => {
+    const build = makeBuild(1, {
+      startDeck: startingCards,
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+      motivations: [
+        {
+          level: 2,
+          cardId: "whiteout",
+          kind: "drop",
+          text: "Keep this note hidden while stale",
+          updatedAt: timestamp,
+        },
+      ],
+    });
+    const stale = buildSchema.parse({
+      ...build,
+      startDeck: startingCards.filter((cardId) => cardId !== "whiteout"),
+    });
+    expect(
+      replayBuild(stale, character).levels[1]?.activeMotivations,
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cardId: "whiteout", kind: "drop" }),
+      ]),
+    );
+    expect(replayBuild(build, character).levels[1]?.activeMotivations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          cardId: "whiteout",
+          kind: "drop",
+          text: "Keep this note hidden while stale",
+        }),
+      ]),
+    );
+  });
+
   it("reports high-level and unknown picks without mutating the stored build", () => {
     const build = makeBuild(1, {
       startDeck: startingCards,

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardDialog, CardGrid, CardImage } from "./cards";
 import { useAppData } from "./app-data";
+import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
 import { levelUpPath } from "./level-up";
 import { characters } from "../shared/data/characters/index.js";
+import { deleteHighestLevel } from "../shared/builds.js";
 import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
 import type { Build, Motivation } from "../shared/schema/index.js";
@@ -46,7 +48,9 @@ export function DeckView({
   character: Character;
   state: RuleLevelState;
 }) {
+  const { canMutate, updateData } = useAppData();
   const [showGuidance, setShowGuidance] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
   const cardById = new Map(character.cards.map((card) => [card.id, card]));
   const levels = [
@@ -72,6 +76,24 @@ export function DeckView({
   const openCardDetail = (card: Card) => {
     navigate(cardDetailPath(character.id, build.id, state.level, card.id));
   };
+  const highestLevel = build.levelUps.at(-1)?.level;
+  const canDeleteLevel =
+    canMutate && highestLevel === state.level && state.level > build.startLevel;
+  const survivingLevel = build.levelUps.at(-2)?.level ?? build.startLevel;
+
+  function confirmDeleteLevel(): void {
+    if (!canDeleteLevel) {
+      return;
+    }
+    updateData((current) => ({
+      ...current,
+      builds: current.builds.map((candidate) =>
+        candidate.id === build.id ? deleteHighestLevel(candidate) : candidate,
+      ),
+    }));
+    setDeleteDialogOpen(false);
+    navigate(deckPath(character.id, build.id, survivingLevel));
+  }
 
   return (
     <main className="page-content deck-view" aria-labelledby="deck-heading">
@@ -118,21 +140,7 @@ export function DeckView({
         />
       </nav>
 
-      {state.issues.length > 0 ? (
-        <section className="deck-issues" aria-labelledby="deck-issues-heading">
-          <h2 id="deck-issues-heading">Needs attention</h2>
-          <ul className="issue-list">
-            {state.issues.map((issue, index) => (
-              <li
-                className={`issue-${issue.severity}`}
-                key={`${issue.code}-${issue.cardId ?? index}-${issue.operation?.index ?? ""}`}
-              >
-                {issue.message}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <RepairIssues build={build} character={character} state={state} />
 
       <section className="deck-toolbar" aria-label="Deck actions">
         {state.level === build.startLevel ? (
@@ -158,6 +166,16 @@ export function DeckView({
           />
           Show guidance
         </label>
+        {highestLevel === state.level && state.level > build.startLevel ? (
+          <button
+            type="button"
+            className="danger-button"
+            disabled={!canMutate}
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            Delete level {state.level}
+          </button>
+        ) : null}
       </section>
 
       <section
@@ -201,6 +219,13 @@ export function DeckView({
       </section>
 
       <ChangesSection build={build} state={state} cardById={cardById} />
+      <DeleteLevelDialog
+        level={state.level}
+        open={deleteDialogOpen}
+        canConfirm={canDeleteLevel}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={confirmDeleteLevel}
+      />
     </main>
   );
 }
@@ -309,6 +334,70 @@ function CardDetailView({
         </div>
       </section>
     </main>
+  );
+}
+
+function DeleteLevelDialog({
+  level,
+  open,
+  canConfirm,
+  onClose,
+  onConfirm,
+}: {
+  level: number;
+  open: boolean;
+  canConfirm: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (open && dialogRef.current && !dialogRef.current.open) {
+      dialogRef.current.showModal();
+    } else if (!open && dialogRef.current?.open) {
+      dialogRef.current.close();
+    }
+  }, [open]);
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className="form-dialog"
+      aria-labelledby="delete-level-heading"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+    >
+      <form
+        method="dialog"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canConfirm) {
+            onConfirm();
+          }
+        }}
+      >
+        <h2 id="delete-level-heading">Delete level {level}?</h2>
+        <p>
+          This removes the level&apos;s choices and motivations. Build guidance
+          remains saved.
+        </p>
+        <div className="dialog-actions">
+          <button type="button" className="secondary-button" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="danger-button"
+            disabled={!canConfirm}
+          >
+            Delete level
+          </button>
+        </div>
+      </form>
+    </dialog>
   );
 }
 

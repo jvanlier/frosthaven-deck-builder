@@ -715,6 +715,18 @@ h2 {
   margin: 0;
 }
 
+.repair-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.repair-button {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.6rem;
+}
+
 .deck-toolbar {
   display: flex;
   align-items: center;

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardTile } from "./cards";
 import { useAppData } from "./app-data";
+import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
 import { characters } from "../shared/data/characters/index.js";
 import {
@@ -64,6 +65,7 @@ export function levelUpDestination(
 
 export function LevelUpRoute() {
   const { characterId, buildId, level } = useParams();
+  const location = useLocation();
   const { data, canMutate, updateData, flush } = useAppData();
   const build = data?.builds.find((candidate) => candidate.id === buildId);
   const targetLevel = level === undefined ? Number.NaN : Number(level);
@@ -107,6 +109,7 @@ export function LevelUpRoute() {
         character={character}
         level={targetLevel}
         levelUp={existingLevelUp}
+        focusCardId={new URLSearchParams(location.search).get("focus")}
       />
     );
   }
@@ -127,11 +130,13 @@ function LevelUpEditor({
   character,
   level,
   levelUp,
+  focusCardId,
 }: {
   build: Build;
   character: Character;
   level: number;
   levelUp: LevelUp;
+  focusCardId: string | null;
 }) {
   const { canMutate, updateData } = useAppData();
   const navigate = useNavigate();
@@ -149,6 +154,26 @@ function LevelUpEditor({
   const changedMotivations = useRef(new Set<string>());
   const [swapOpen, setSwapOpen] = useState(false);
   const deckHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!focusCardId) {
+      return;
+    }
+    if (focusCardId === "deck") {
+      document.getElementById("your-deck-heading")?.focus();
+      return;
+    }
+    const buttons = [
+      ...document.querySelectorAll<HTMLButtonElement>(".card-action"),
+    ];
+    const button =
+      focusCardId === "pick"
+        ? document.querySelector<HTMLButtonElement>(
+            ".level-up-candidate .card-action",
+          )
+        : buttons.find((candidate) => candidate.dataset.cardId === focusCardId);
+    button?.focus();
+  }, [focusCardId, level]);
 
   if (!state || !previousState) {
     return <UnavailableLevelUpView />;
@@ -457,24 +482,7 @@ function LevelUpEditor({
         </div>
       </section>
 
-      {state.issues.length > 0 ? (
-        <section
-          className="deck-issues"
-          aria-labelledby="level-up-issues-heading"
-        >
-          <h2 id="level-up-issues-heading">Needs attention</h2>
-          <ul className="issue-list">
-            {state.issues.map((issue, index) => (
-              <li
-                className={`issue-${issue.severity}`}
-                key={`${issue.code}-${issue.cardId ?? index}-${issue.operation?.index ?? ""}`}
-              >
-                {issue.message}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <RepairIssues build={build} character={character} state={state} />
 
       <div className="level-up-groups">
         <section

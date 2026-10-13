@@ -39,6 +39,16 @@ export interface MotivationInput {
   forLevel?: number;
 }
 
+export type BuildOperationKind =
+  "start-pick" | "start-deck" | "pick" | "add" | "drop";
+
+export interface BuildOperationIdentity {
+  kind: BuildOperationKind;
+  index: number;
+  cardId?: string | null;
+  forLevel?: number;
+}
+
 export function generateUuid(): string {
   const cryptoApi = globalThis.crypto;
   if (typeof cryptoApi?.randomUUID === "function") {
@@ -184,6 +194,121 @@ export function setLevelUp(
   return buildSchema.parse({
     ...build,
     levelUps,
+    updatedAt: getNow(options),
+  });
+}
+
+export function removeBuildOperation(
+  build: Build,
+  level: number,
+  operation: BuildOperationIdentity,
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  if (operation.kind === "start-pick") {
+    if (operation.forLevel === undefined) {
+      return build;
+    }
+    const pick = build.startPicks.find(
+      (candidate) => candidate.forLevel === operation.forLevel,
+    );
+    if (!pick || pick.cardId !== operation.cardId) {
+      return build;
+    }
+    return setStartPick(build, operation.forLevel, null, options);
+  }
+
+  if (operation.kind === "start-deck") {
+    const cardId = build.startDeck[operation.index];
+    if (cardId === undefined || cardId !== operation.cardId) {
+      return build;
+    }
+    return setStartDeck(
+      build,
+      build.startDeck.filter((_, index) => index !== operation.index),
+      options,
+    );
+  }
+
+  const levelUp = build.levelUps.find((candidate) => candidate.level === level);
+  if (!levelUp) {
+    return build;
+  }
+
+  if (operation.kind === "pick") {
+    if (levelUp.pick !== operation.cardId) {
+      return build;
+    }
+    return setLevelUp(
+      build,
+      level,
+      {
+        pick: null,
+        added: levelUp.added.filter((cardId) => cardId !== operation.cardId),
+        dropped: [...levelUp.dropped],
+      },
+      options,
+    );
+  }
+
+  const values = operation.kind === "add" ? levelUp.added : levelUp.dropped;
+  if (values[operation.index] !== operation.cardId) {
+    return build;
+  }
+  const nextValues = values.filter((_, index) => index !== operation.index);
+  return setLevelUp(
+    build,
+    level,
+    operation.kind === "add"
+      ? {
+          pick: levelUp.pick,
+          added: nextValues,
+          dropped: [...levelUp.dropped],
+        }
+      : {
+          pick: levelUp.pick,
+          added: [...levelUp.added],
+          dropped: nextValues,
+        },
+    options,
+  );
+}
+
+export function restorePickedCard(
+  build: Build,
+  level: number,
+  cardId: string,
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  const levelUp = build.levelUps.find((candidate) => candidate.level === level);
+  if (!levelUp || levelUp.pick !== cardId || levelUp.added.includes(cardId)) {
+    return build;
+  }
+  return setLevelUp(
+    build,
+    level,
+    {
+      pick: levelUp.pick,
+      added: [...levelUp.added, cardId],
+      dropped: [...levelUp.dropped],
+    },
+    options,
+  );
+}
+
+export function deleteHighestLevel(
+  build: Build,
+  options: Pick<BuildMutationOptions, "now"> = {},
+): Build {
+  const highest = build.levelUps.at(-1);
+  if (!highest) {
+    throw new Error("A build has no level-up to delete");
+  }
+  return buildSchema.parse({
+    ...build,
+    levelUps: build.levelUps.slice(0, -1).map(cloneLevelUp),
+    motivations: build.motivations.filter(
+      (motivation) => motivation.level !== highest.level,
+    ),
     updatedAt: getNow(options),
   });
 }

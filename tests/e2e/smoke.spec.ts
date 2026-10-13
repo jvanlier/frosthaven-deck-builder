@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { AppData } from "../../src/shared/schema";
 
 const fixtureBuildId = "123e4567-e89b-42d3-a456-426614174000";
 const fixtureData = {
@@ -856,6 +857,152 @@ test("renders invalid badges and specific replay validation messages", async ({
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test("removes an invalid downstream operation without changing its neighbors", async ({
+  page,
+}) => {
+  let persisted = structuredClone(invalidEditedLevelFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Remove added card Tornado" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toEqual({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["whiteout"],
+    });
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
+});
+
+test("deletes only the highest level and its motivations", async ({ page }) => {
+  let persisted = structuredClone(plannedLaterFixtureData) as AppData;
+  persisted.builds[0]!.motivations = [
+    {
+      level: 2,
+      cardId: "birds-in-a-tempest",
+      kind: "add",
+      text: "Keep this note",
+      updatedAt: "2024-01-02T03:04:05.000Z",
+    },
+    {
+      level: 3,
+      cardId: "tornado",
+      kind: "drop",
+      text: "Delete this note",
+      updatedAt: "2024-01-02T03:04:05.000Z",
+    },
+  ];
+  persisted.builds[0]!.guidance = {
+    tornado: {
+      text: "Keep this guidance",
+      updatedAt: "2024-01-02T03:04:05.000Z",
+    },
+  };
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/3`);
+  await page.getByRole("button", { name: "Delete level 3" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Delete level 3?" }),
+  ).toBeVisible();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Delete level" })
+    .click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect
+    .poll(async () => persisted.builds[0])
+    .toMatchObject({
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+      motivations: [
+        {
+          level: 2,
+          cardId: "birds-in-a-tempest",
+          text: "Keep this note",
+        },
+      ],
+      guidance: {
+        tornado: {
+          text: "Keep this guidance",
+        },
+      },
+    });
+});
+
+test("restores a picked card when its stored add is missing", async ({
+  page,
+}) => {
+  let persisted = structuredClone(invalidDeckFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page
+    .getByRole("button", { name: "Restore Birds in a Tempest to deck" })
+    .click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({ added: ["birds-in-a-tempest"] });
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
 test("switches between stored levels with previous, next and direct navigation", async ({
