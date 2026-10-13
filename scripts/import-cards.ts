@@ -11,10 +11,12 @@ import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Card, CardLevel, Character } from "../src/shared/character";
 
-export const SOURCE_METADATA_URL =
-  "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/main/data/character-abilities/frosthaven.json";
-export const SOURCE_IMAGE_BASE_URL =
-  "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/images/images/";
+const RAW_REPOSITORY_URL =
+  "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser";
+const SOURCE_METADATA_PATH = "data/character-abilities/frosthaven.json";
+const SOURCE_IMAGE_PATH = "images/";
+export const SOURCE_METADATA_URL = `${RAW_REPOSITORY_URL}/main/${SOURCE_METADATA_PATH}`;
+export const SOURCE_IMAGE_BASE_URL = `${RAW_REPOSITORY_URL}/images/${SOURCE_IMAGE_PATH}`;
 export const SOURCE_REPOSITORY =
   "https://github.com/cmlenius/gloomhaven-card-browser";
 export const SOURCE_REVISION_URLS = {
@@ -98,10 +100,29 @@ export type FetchImplementation = (
   init?: RequestInit,
 ) => Promise<Response>;
 
+export interface ImportFileSystem {
+  mkdtemp: typeof mkdtemp;
+  readFile: typeof readFile;
+  rename: typeof rename;
+  rm: typeof rm;
+  mkdir: typeof mkdir;
+  writeFile: typeof writeFile;
+}
+
+const defaultFileSystem: ImportFileSystem = {
+  mkdtemp,
+  readFile,
+  rename,
+  rm,
+  mkdir,
+  writeFile,
+};
+
 export interface ImportCardsOptions {
   projectRoot?: string;
   iconSource?: string;
   fetchImpl?: FetchImplementation;
+  fileSystem?: Partial<ImportFileSystem>;
   requireCompleteCatalog?: boolean;
   sourceRevisions?: SourceRevisions;
 }
@@ -309,11 +330,12 @@ export async function importCards(
 ): Promise<ImportCardsResult> {
   const projectRoot = resolve(options.projectRoot ?? process.cwd());
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
+  const fileSystem = { ...defaultFileSystem, ...options.fileSystem };
   const sourceRevisions =
     options.sourceRevisions ?? (await fetchSourceRevisions(fetchImpl));
   const metadataResponse = await fetchRequired(
     fetchImpl,
-    SOURCE_METADATA_URL,
+    sourceMetadataUrl(sourceRevisions.metadata),
     "source metadata download",
   );
   const metadataBytes = new Uint8Array(await metadataResponse.arrayBuffer());
@@ -337,21 +359,38 @@ export async function importCards(
   for (const card of plan.cards) {
     assetBytes.set(
       card.id,
-      await downloadAsset(fetchImpl, card.sourceImage, card.id),
+      await downloadAsset(
+        fetchImpl,
+        card.sourceImage,
+        card.id,
+        sourceRevisions.images,
+      ),
     );
   }
   assetBytes.set(
     "sd-back",
-    await downloadAsset(fetchImpl, plan.back.image, "card back"),
+    await downloadAsset(
+      fetchImpl,
+      plan.back.image,
+      "card back",
+      sourceRevisions.images,
+    ),
   );
 
   const iconSource = options.iconSource ?? DEFAULT_ICON_SOURCE;
   const iconPath = isAbsolute(iconSource)
     ? iconSource
     : resolve(projectRoot, iconSource);
-  const iconBytes = new Uint8Array(await readFile(iconPath));
+  const iconBytes = new Uint8Array(await fileSystem.readFile(iconPath));
   const manifest = createManifest(plan, assetBytes, iconSource, iconBytes);
-  await commitOutputs(projectRoot, plan, manifest, assetBytes, iconBytes);
+  await commitOutputs(
+    projectRoot,
+    plan,
+    manifest,
+    assetBytes,
+    iconBytes,
+    fileSystem,
+  );
 
   return { character: plan.character, manifest };
 }
@@ -504,12 +543,21 @@ async function readRevision(response: Response): Promise<string> {
   return body.sha;
 }
 
+function sourceMetadataUrl(revision: string): string {
+  return `${RAW_REPOSITORY_URL}/${revision}/${SOURCE_METADATA_PATH}`;
+}
+
+function sourceImageBaseUrl(revision: string): string {
+  return `${RAW_REPOSITORY_URL}/${revision}/${SOURCE_IMAGE_PATH}`;
+}
+
 async function downloadAsset(
   fetchImpl: FetchImplementation,
   sourceImage: string,
   label: string,
+  revision: string,
 ): Promise<Uint8Array> {
-  const url = new URL(sourceImage, SOURCE_IMAGE_BASE_URL).toString();
+  const url = new URL(sourceImage, sourceImageBaseUrl(revision)).toString();
   const response = await fetchRequired(fetchImpl, url, `${label} download`);
   return new Uint8Array(await response.arrayBuffer());
 }
@@ -529,12 +577,12 @@ function createManifest(
     source: {
       repository: SOURCE_REPOSITORY,
       metadata: {
-        url: SOURCE_METADATA_URL,
+        url: sourceMetadataUrl(plan.sourceRevisions.metadata),
         revision: plan.sourceRevisions.metadata,
         sha256: plan.metadataChecksum,
       },
       images: {
-        baseUrl: SOURCE_IMAGE_BASE_URL,
+        baseUrl: sourceImageBaseUrl(plan.sourceRevisions.images),
         revision: plan.sourceRevisions.images,
       },
     },
@@ -554,12 +602,20 @@ function createManifest(
   };
 }
 
+interface InstalledFileState {
+  target: string;
+  backup: string;
+  hadPreviousFile: boolean;
+  installed: boolean;
+}
+
 async function commitOutputs(
   projectRoot: string,
   plan: ImportPlan,
   manifest: SourceManifest,
   assetBytes: ReadonlyMap<string, Uint8Array>,
   iconBytes: Uint8Array,
+  fileSystem: ImportFileSystem,
 ): Promise<void> {
   const generatedFiles = [
     {
@@ -585,52 +641,83 @@ async function commitOutputs(
     { relativePath: GENERATED_ICON_PATH, contents: iconBytes },
   ];
 
-  const stagingDirectory = await mkdtemp(join(projectRoot, ".import-cards-"));
-  const installedFiles: Array<{ target: string; backup?: string }> = [];
+  const stagingDirectory = await fileSystem.mkdtemp(
+    join(projectRoot, ".import-cards-"),
+  );
+  const fileStates: InstalledFileState[] = [];
+  let committed = false;
   try {
     for (const [index, file] of generatedFiles.entries()) {
       const stagedPath = join(stagingDirectory, file.relativePath);
-      await mkdir(dirname(stagedPath), { recursive: true });
-      await writeFile(stagedPath, file.contents);
+      await fileSystem.mkdir(dirname(stagedPath), { recursive: true });
+      await fileSystem.writeFile(stagedPath, file.contents);
 
       const target = join(projectRoot, file.relativePath);
-      await mkdir(dirname(target), { recursive: true });
+      await fileSystem.mkdir(dirname(target), { recursive: true });
       const backup = join(stagingDirectory, ".backups", `${index}.bak`);
-      let previousFile = false;
+      const state: InstalledFileState = {
+        target,
+        backup,
+        hadPreviousFile: false,
+        installed: false,
+      };
+      fileStates.push(state);
       try {
-        await mkdir(dirname(backup), { recursive: true });
-        await rename(target, backup);
-        previousFile = true;
+        await fileSystem.mkdir(dirname(backup), { recursive: true });
+        await fileSystem.rename(target, backup);
+        state.hadPreviousFile = true;
       } catch (error) {
         if (!isMissingFileError(error)) {
           throw error;
         }
       }
 
-      try {
-        await rename(stagedPath, target);
-      } catch (error) {
-        if (previousFile) {
-          await rename(backup, target);
-        }
-        throw error;
-      }
-      installedFiles.push({
-        target,
-        backup: previousFile ? backup : undefined,
-      });
+      await fileSystem.rename(stagedPath, target);
+      state.installed = true;
     }
+    committed = true;
   } catch (error) {
-    for (const installed of installedFiles.reverse()) {
-      await rm(installed.target, { force: true });
-      if (installed.backup) {
-        await rename(installed.backup, installed.target);
+    const rollbackErrors: unknown[] = [];
+    for (const state of [...fileStates].reverse()) {
+      if (state.installed) {
+        try {
+          await fileSystem.rm(state.target, { force: true });
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
       }
+      if (state.hadPreviousFile) {
+        try {
+          await fileSystem.rename(state.backup, state.target);
+        } catch (rollbackError) {
+          rollbackErrors.push(rollbackError);
+        }
+      }
+    }
+    if (rollbackErrors.length > 0) {
+      throw new Error(
+        `Import failed and rollback incomplete; staging directory retained at ${stagingDirectory}. ${rollbackErrors.map(formatError).join("; ")}`,
+        { cause: error },
+      );
+    }
+    try {
+      await fileSystem.rm(stagingDirectory, { recursive: true, force: true });
+    } catch (cleanupError) {
+      throw new Error(
+        `Import failed; rollback completed but staging directory retained at ${stagingDirectory}: ${formatError(cleanupError)}`,
+        { cause: error },
+      );
     }
     throw error;
-  } finally {
-    await rm(stagingDirectory, { recursive: true, force: true });
   }
+
+  if (committed) {
+    await fileSystem.rm(stagingDirectory, { recursive: true, force: true });
+  }
+}
+
+function formatError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function createCatalogIndex(): string {

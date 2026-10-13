@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { characters, getCharacter } from "./characters";
 import { attribution } from "../attribution";
+import { validateCatalog } from "../../../scripts/import-cards";
 import manifest from "./characters/source-manifest.json";
 
 function assetPath(relativePath: string): string {
@@ -41,6 +42,7 @@ describe("committed Snowdancer catalog", () => {
       counts.set(card.level, (counts.get(card.level) ?? 0) + 1);
     }
 
+    expect(() => validateCatalog(snowdancer.cards)).not.toThrow();
     expect(snowdancer.cards).toHaveLength(30);
     expect(counts.get(1)).toBe(11);
     expect(counts.get("X")).toBe(3);

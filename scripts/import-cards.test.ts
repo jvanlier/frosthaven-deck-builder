@@ -1,4 +1,12 @@
-import { mkdtemp, readFile, readdir } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rename as realRename,
+  writeFile,
+} from "node:fs/promises";
+import type { PathLike } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -188,6 +196,101 @@ describe("Snowdancer import transaction", () => {
     ).rejects.toThrow(/download/i);
 
     await expect(readdir(root)).resolves.toEqual([]);
+  });
+
+  it("pins metadata and asset downloads to the recorded revisions", async () => {
+    const root = await mkdtemp(join(tmpdir(), "frosthaven-import-"));
+    const requestedUrls: string[] = [];
+    const image = new TextEncoder().encode("fixture image");
+    const back = new TextEncoder().encode("fixture back");
+
+    const result = await importCards({
+      projectRoot: root,
+      iconSource: fixtureIcon,
+      requireCompleteCatalog: false,
+      sourceRevisions: {
+        metadata: "metadata-revision",
+        images: "image-revision",
+      },
+      fetchImpl: async (url) => {
+        requestedUrls.push(url);
+        if (url.endsWith("frosthaven.json")) {
+          return new Response(JSON.stringify(fixture), { status: 200 });
+        }
+        return new Response(url.endsWith("fh-sd-back.jpeg") ? back : image, {
+          status: 200,
+        });
+      },
+    });
+
+    expect(requestedUrls).toContain(
+      "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/metadata-revision/data/character-abilities/frosthaven.json",
+    );
+    expect(requestedUrls).toContain(
+      "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/image-revision/images/character-ability-cards/frosthaven/SD/fh-natures-breath.jpeg",
+    );
+    expect(result.manifest.source.metadata.url).toContain(
+      "/metadata-revision/",
+    );
+    expect(result.manifest.source.images.baseUrl).toContain("/image-revision/");
+  });
+
+  it("preserves the staging backups when rollback itself fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "frosthaven-import-"));
+    const existingCatalog = join(root, "src/shared/data/characters/SD.json");
+    await mkdir(join(root, "src/shared/data/characters"), { recursive: true });
+    await writeFile(existingCatalog, "old catalog");
+    let stagedInstalls = 0;
+    const fileSystem = {
+      rename: async (from: PathLike, to: PathLike) => {
+        const fromPath = String(from);
+        const toPath = String(to);
+        if (
+          fromPath.includes(".import-cards-") &&
+          !toPath.includes(".backups")
+        ) {
+          stagedInstalls += 1;
+          if (stagedInstalls === 2) {
+            throw new Error("injected install failure");
+          }
+        }
+        if (fromPath.includes(".backups") && toPath.endsWith("SD.json")) {
+          throw new Error("injected restore failure");
+        }
+        return realRename(from, to);
+      },
+    };
+
+    let failure: unknown;
+    try {
+      await importCards({
+        projectRoot: root,
+        iconSource: fixtureIcon,
+        requireCompleteCatalog: false,
+        sourceRevisions: {
+          metadata: "metadata-revision",
+          images: "image-revision",
+        },
+        fileSystem,
+        fetchImpl: async (url) => {
+          if (url.endsWith("frosthaven.json")) {
+            return new Response(JSON.stringify(fixture), { status: 200 });
+          }
+          return new Response("fixture asset", { status: 200 });
+        },
+      });
+    } catch (error) {
+      failure = error;
+    }
+
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toMatch(
+      /rollback incomplete.*staging directory/,
+    );
+    const remainingFiles = await readdir(root, { recursive: true });
+    expect(remainingFiles.some((entry) => entry.includes(".backups"))).toBe(
+      true,
+    );
   });
 
   it("writes the catalog, local assets, manifest checksums, and index only after all downloads succeed", async () => {

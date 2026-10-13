@@ -3,12 +3,12 @@
   "source": {
     "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
     "metadata": {
-      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/main/data/character-abilities/frosthaven.json",
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/e208ad7fa0486b65fca96087cf1ccd0bd26aaf32/data/character-abilities/frosthaven.json",
       "revision": "e208ad7fa0486b65fca96087cf1ccd0bd26aaf32",
       "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
     },
     "images": {
-      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/images/images/",
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/99389953249f2c23fddd5cdaa78c17e061a715fe/images/",
       "revision": "99389953249f2c23fddd5cdaa78c17e061a715fe"
     }
   },
