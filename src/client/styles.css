@@ -193,6 +193,30 @@ h2 {
   color: #f7fcff;
 }
 
+.level-switcher {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.level-switcher a {
+  min-width: 1.55rem;
+  padding: 0.18rem 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+  color: #b8d3e1;
+  font-size: 0.78rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.level-switcher a:hover,
+.level-switcher a[aria-current="page"] {
+  border-color: #8fd9f4;
+  color: #07131f;
+  background: #b7eaff;
+}
+
 .health {
   margin: 0;
   color: #9af0c2;
@@ -373,6 +397,17 @@ h2 {
   background: #173b55;
 }
 
+.tab-disabled {
+  display: grid;
+  place-items: center;
+  gap: 0.15rem;
+  min-width: 4.25rem;
+  padding: 0.25rem 0.4rem;
+  color: #496c7d;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, 220px);
@@ -516,6 +551,11 @@ h2 {
   .brand small,
   .header-level {
     display: none;
+  }
+
+  .header-level:has(.level-switcher) {
+    display: grid;
+    min-width: 0;
   }
 
   .page-content,

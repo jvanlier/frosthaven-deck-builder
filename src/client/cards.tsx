@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { Card } from "../shared/character.js";
 
 const CARD_BACK = "/cards/SD/fh-sd-back.jpeg";
@@ -63,6 +63,7 @@ export function CardTile({
           onAction?.();
         }}
         onClose={closeDialog}
+        disabled={disabled}
       />
     </article>
   );
@@ -78,7 +79,7 @@ export function CardGrid({
   cards: Card[];
   actionLabel?: (card: Card) => string;
   stateLabel?: (card: Card) => string | undefined;
-  disabled?: boolean;
+  disabled?: boolean | ((card: Card) => boolean);
   onAction?: (card: Card) => void;
 }) {
   return (
@@ -89,7 +90,9 @@ export function CardGrid({
             card={card}
             actionLabel={actionLabel?.(card)}
             stateLabel={stateLabel?.(card)}
-            disabled={disabled}
+            disabled={
+              typeof disabled === "function" ? disabled(card) : disabled
+            }
             onAction={() => onAction?.(card)}
           />
         </div>
@@ -104,15 +107,17 @@ export function CardDialog({
   actionLabel,
   onAction,
   onClose,
+  disabled = false,
 }: {
   card: Card;
   open: boolean;
   actionLabel: string;
   onAction: () => void;
   onClose: () => void;
+  disabled?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const titleId = `card-dialog-title-${card.id}`;
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -154,7 +159,12 @@ export function CardDialog({
           card={card}
           alt={`${card.name}, level ${formatCardLevel(card)}`}
         />
-        <button className="dialog-action" type="button" onClick={onAction}>
+        <button
+          className="dialog-action"
+          type="button"
+          onClick={onAction}
+          disabled={disabled}
+        >
           {actionLabel}
         </button>
       </div>

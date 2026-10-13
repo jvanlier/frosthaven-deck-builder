@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
   createAppDataController,
+  preventUnloadIfPending,
   type AppDataTransport,
 } from "./app-data";
 import { createBuild } from "../shared/builds";
@@ -32,6 +33,29 @@ function transportWith(
 }
 
 describe("app data save controller", () => {
+  it("reports an initial-load failure and retries it explicitly", async () => {
+    const transport = transportWith({
+      get: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("offline"))
+        .mockResolvedValue(emptyData),
+    });
+    const controller = createAppDataController(transport);
+
+    await expect(controller.load()).rejects.toThrow("offline");
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "error",
+      canMutate: false,
+      data: null,
+    });
+    await controller.retry();
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "saved",
+      canMutate: true,
+      data: emptyData,
+    });
+  });
+
   it("debounces changes and saves the latest immutable snapshot", async () => {
     vi.useFakeTimers();
     const transport = transportWith();
@@ -93,6 +117,35 @@ describe("app data save controller", () => {
     vi.useRealTimers();
   });
 
+  it("does not retry a queued timer after an in-flight save fails", async () => {
+    vi.useFakeTimers();
+    const deferred: Array<{
+      reject: (cause: Error) => void;
+    }> = [];
+    const transport = transportWith({
+      put: vi.fn(
+        () =>
+          new Promise<{ revision: number }>((_, reject) => {
+            deferred.push({ reject });
+          }),
+      ),
+    });
+    const controller = createAppDataController(transport, {
+      debounceMs: 1000,
+    });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+    vi.advanceTimersByTime(1000);
+    await vi.waitFor(() => expect(transport.put).toHaveBeenCalledTimes(1));
+    controller.updateData((data) => ({ ...data, builds: [buildB] }));
+
+    deferred[0]!.reject(new Error("offline"));
+    await expect(controller.flush()).rejects.toThrow("offline");
+    vi.advanceTimersByTime(1000);
+    expect(transport.put).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
   it("pauses mutation after a failed save and retries without discarding pending data", async () => {
     const failure = new Error("offline");
     const transport = transportWith({
@@ -118,6 +171,98 @@ describe("app data save controller", () => {
       canMutate: true,
       hasPendingChanges: false,
     });
+  });
+
+  it("keeps an unacknowledged save pending until stale retry reaches conflict", async () => {
+    const transport = transportWith({
+      put: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("response lost"))
+        .mockRejectedValueOnce(new ConflictError(1)),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+
+    await expect(controller.flush()).rejects.toThrow("response lost");
+    await expect(controller.retry()).rejects.toBeInstanceOf(ConflictError);
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "conflict",
+      canMutate: false,
+      hasPendingChanges: true,
+    });
+    expect(transport.put).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the visible document while a replacement is pending and recovers on retry", async () => {
+    const imported = { ...emptyData, revision: 99, builds: [buildA] };
+    const transport = transportWith({
+      put: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("disk unavailable"))
+        .mockResolvedValueOnce({ revision: 1 }),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+
+    await expect(controller.replaceData(imported)).rejects.toThrow(
+      "disk unavailable",
+    );
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "error",
+      data: emptyData,
+      hasPendingChanges: true,
+      canMutate: false,
+    });
+    expect(controller.getPendingData()).toEqual(imported);
+
+    await controller.retry();
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "saved",
+      data: { revision: 1, builds: [buildA] },
+      hasPendingChanges: false,
+    });
+  });
+
+  it("warns only when the browser has pending data", () => {
+    const preventDefault = vi.fn();
+    const event = {
+      preventDefault,
+      returnValue: "",
+    } as unknown as BeforeUnloadEvent;
+    preventUnloadIfPending(event, false);
+    expect(preventDefault).not.toHaveBeenCalled();
+    preventUnloadIfPending(event, true);
+    expect(preventDefault).toHaveBeenCalledOnce();
+    expect(event.returnValue).toBe("");
+  });
+
+  it("downloads the current pending document without changing it", async () => {
+    vi.useFakeTimers();
+    const click = vi.fn();
+    const link = { click, href: "", download: "" };
+    const createObjectURL = vi.fn(() => "blob:pending");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("document", { createElement: () => link });
+    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+    const transport = transportWith();
+    const controller = createAppDataController(transport, {
+      debounceMs: 60_000,
+    });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+
+    controller.downloadPendingData();
+    expect(link).toMatchObject({
+      href: "blob:pending",
+      download: "frosthaven-deck-builder-pending.json",
+    });
+    expect(click).toHaveBeenCalledOnce();
+    expect(createObjectURL).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:pending");
+    vi.clearAllTimers();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it("surfaces conflicts and requires explicit reload", async () => {

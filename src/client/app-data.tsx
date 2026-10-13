@@ -33,6 +33,17 @@ export class PendingChangesError extends Error {
   }
 }
 
+export function preventUnloadIfPending(
+  event: BeforeUnloadEvent,
+  hasPendingChanges: boolean,
+): void {
+  if (!hasPendingChanges) {
+    return;
+  }
+  event.preventDefault();
+  event.returnValue = "";
+}
+
 export interface AppDataSnapshot {
   data: AppData | null;
   status: AppDataStatus;
@@ -159,7 +170,12 @@ export function createAppDataController(
   }
 
   async function saveNow(): Promise<void> {
-    if (inFlight || (!dirty && replacement === null) || currentData === null) {
+    if (
+      inFlight ||
+      isPausedStatus(status) ||
+      (!dirty && replacement === null) ||
+      currentData === null
+    ) {
       return inFlight ?? Promise.resolve();
     }
 
@@ -189,6 +205,7 @@ export function createAppDataController(
         }
       })
       .catch((cause: unknown) => {
+        clearTimer();
         const failure = asError(cause);
         publish(
           failure instanceof ConflictError ? "conflict" : "error",
