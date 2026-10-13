@@ -513,8 +513,236 @@ h2 {
   text-align: center;
 }
 
-.starting-editor {
+.starting-editor,
+.deck-view {
   max-width: 78rem;
+}
+
+.deck-intro {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.deck-intro > p {
+  margin-bottom: 0;
+}
+
+.deck-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: end;
+}
+
+.status-badge {
+  display: inline-block;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status-badge.complete {
+  color: #9af0c2;
+}
+
+.status-badge.incomplete {
+  color: #ffdb91;
+}
+
+.status-badge.invalid {
+  color: #ffb2a8;
+}
+
+.deck-level-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid #2c617b;
+  border-radius: 0.65rem;
+  background: rgb(10 34 51 / 70%);
+}
+
+.deck-level-navigation a,
+.level-navigation-disabled {
+  color: #b7eaff;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.deck-level-navigation a:hover {
+  color: #f7fcff;
+  text-decoration: underline;
+}
+
+.level-navigation-disabled {
+  color: #496c7d;
+}
+
+.deck-issues {
+  padding: 1rem 1.25rem;
+  border: 1px solid #8b423c;
+  border-radius: 0.65rem;
+  background: rgb(122 48 44 / 22%);
+}
+
+.deck-issues h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.deck-issues .issue-list {
+  margin: 0;
+}
+
+.deck-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.guidance-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d7eef8;
+  font-weight: 750;
+}
+
+.guidance-toggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #b7eaff;
+}
+
+.deck-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.deck-card-item {
+  min-width: 0;
+}
+
+.deck-card-item .card-grid {
+  grid-template-columns: minmax(0, 220px);
+}
+
+.guidance-note {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid #8fd9f4;
+  color: #d7eef8;
+  background: rgb(10 34 51 / 70%);
+}
+
+.guidance-note strong {
+  color: #f9d875;
+}
+
+.guidance-note p,
+.change-list p,
+.motivation-list p {
+  margin: 0.35rem 0 0;
+}
+
+.empty-inline,
+.change-note-empty,
+.card-detail-copy > .content-card p {
+  color: #b8d3e1;
+}
+
+.change-list,
+.motivation-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem;
+  border: 1px solid #2c617b;
+  border-radius: 0.55rem;
+  background: rgb(10 34 51 / 70%);
+}
+
+.change-list li > div {
+  min-width: 0;
+}
+
+.change-thumbnail {
+  width: 3.75rem;
+  height: 5.25rem;
+  flex: 0 0 auto;
+  border: 1px solid #477b94;
+  border-radius: 0.3rem;
+  object-fit: cover;
+}
+
+.plain-text {
+  white-space: pre-wrap;
+}
+
+.card-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 34rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 2rem;
+}
+
+.card-detail-image-wrap {
+  padding: 1rem;
+  border: 1px solid #2c617b;
+  border-radius: 0.75rem;
+  background: rgb(10 34 51 / 70%);
+}
+
+.card-detail-image {
+  display: block;
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+}
+
+.card-detail-copy {
+  display: grid;
+  gap: 1rem;
+}
+
+.card-detail-copy h2,
+.card-detail-copy h3 {
+  margin: 0;
+}
+
+.card-meta {
+  margin: -0.6rem 0 0;
+  color: #b8d3e1;
+}
+
+.motivation-list li {
+  padding-top: 0.75rem;
+  border-top: 1px solid #244c62;
+}
+
+.motivation-list li:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .editor-toolbar {
@@ -824,6 +1052,8 @@ h2 {
   }
 
   .build-list-intro,
+  .deck-intro,
+  .deck-toolbar,
   .editor-toolbar,
   .section-heading,
   .build-list-item {
@@ -867,6 +1097,19 @@ h2 {
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
+  }
+
+  .deck-card-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .deck-card-item .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .card-detail-layout {
+    grid-template-columns: 1fr;
   }
 
   .card-tile {

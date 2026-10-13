@@ -665,7 +665,7 @@ function UnavailableStartingView() {
   );
 }
 
-function startEditorPath(build: Build): string {
+export function startEditorPath(build: Build): string {
   return `/c/${encodeURIComponent(build.characterId)}/b/${encodeURIComponent(build.id)}/l/${build.startLevel}/start`;
 }
 
