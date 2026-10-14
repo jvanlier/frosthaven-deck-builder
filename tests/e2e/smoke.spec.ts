@@ -1760,6 +1760,20 @@ test("edits motivations and guidance from the notes and card detail views", asyn
     .toBe(false);
 
   await page.getByRole("link", { name: "Back to level 2 deck" }).click();
+  const deckChangeMotivation = page.getByLabel(
+    "Motivation for Birds in a Tempest",
+  );
+  await deckChangeMotivation.fill("Deck change reason");
+  await expect
+    .poll(
+      async () =>
+        persisted.builds[0]?.motivations.find(
+          (motivation) =>
+            motivation.cardId === "birds-in-a-tempest" &&
+            motivation.kind === "add",
+        )?.text,
+    )
+    .toBe("Deck change reason");
   await page
     .getByRole("button", { name: "Open Birds in a Tempest details" })
     .click();
@@ -1785,6 +1799,17 @@ test("edits motivations and guidance from the notes and card detail views", asyn
   await expect(
     page.getByText("<b>Top</b>\nPair with Cold Therapy."),
   ).toBeVisible();
+  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
+  await page.getByRole("checkbox", { name: "Show guidance" }).check();
+  await expect(
+    page
+      .locator(".guidance-note .plain-text")
+      .filter({ hasText: "<b>Top</b>\nPair with Cold Therapy." }),
+  ).toBeVisible();
+  await expect(page.locator(".guidance-note b")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Open Birds in a Tempest details" })
+    .click();
   await page.reload();
   await expect(guidance).toHaveValue("<b>Top</b>\nPair with Cold Therapy.");
   await expect(cardDetailMotivation).toHaveValue("Card detail reason");
