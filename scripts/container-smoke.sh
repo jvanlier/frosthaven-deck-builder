@@ -11,6 +11,7 @@ IMAGE="frosthaven-deck-builder:smoke-$$"
 BASE_URL="http://127.0.0.1:${PORT}"
 HOST_UID=$(id -u)
 HOST_GID=$(id -g)
+response_file=""
 
 cleanup() {
   if command -v docker >/dev/null 2>&1 && docker image inspect "$IMAGE" >/dev/null 2>&1; then
@@ -19,7 +20,7 @@ cleanup() {
   fi
   chmod u+rwx "$DATA_DIR" 2>/dev/null || true
   docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" down --remove-orphans 2>/dev/null || true
-  rm -f "$OVERRIDE_FILE"
+  rm -f "$OVERRIDE_FILE" "$response_file"
   rm -rf "$DATA_DIR"
 }
 trap cleanup EXIT
@@ -89,13 +90,23 @@ curl --fail --silent "$BASE_URL/icons/SD.png" >/dev/null
 echo "Built frontend and local assets are reachable"
 
 DATA='{"schemaVersion":1,"revision":0,"builds":[]}'
-curl --fail --silent --request PUT "$BASE_URL/api/data" \
+response_file=$(mktemp)
+status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+  --request PUT "$BASE_URL/api/data" \
   --header 'content-type: application/json' \
-  --data "$DATA" | grep -Fq '"revision":1'
+  --data "$DATA")
+echo "Initial data write: HTTP $status $(cat "$response_file")"
+[[ "$status" == "200" ]]
+grep -Fq '"revision":1' "$response_file"
 DATA='{"schemaVersion":1,"revision":1,"builds":[]}'
-curl --fail --silent --request PUT "$BASE_URL/api/data" \
+status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+  --request PUT "$BASE_URL/api/data" \
   --header 'content-type: application/json' \
-  --data "$DATA" | grep -Fq '"revision":2'
+  --data "$DATA")
+echo "Backup-triggering data write: HTTP $status $(cat "$response_file")"
+[[ "$status" == "200" ]]
+grep -Fq '"revision":2' "$response_file"
+rm -f "$response_file"
 [[ "$(find "$DATA_DIR/backups" -maxdepth 1 -type f -name 'appdata-*.json' | wc -l)" -eq 1 ]]
 [[ "$(stat -c '%u:%g' "$DATA_DIR/appdata.json")" == "1000:1000" ]]
 backup_file=$(find "$DATA_DIR/backups" -maxdepth 1 -type f -name 'appdata-*.json' -print -quit)
