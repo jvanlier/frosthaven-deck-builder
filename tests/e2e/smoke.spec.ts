@@ -960,7 +960,7 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
     .click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
   await expect(
-    page.getByRole("button", { name: "Delete level 2" }),
+    page.getByRole("button", { name: "Delete level 1" }),
   ).toHaveCount(0);
   await expect
     .poll(async () => persisted.builds[0])
