@@ -6,7 +6,12 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { appDataSchema, type AppData } from "../shared/schema/index.js";
+import { getCharacter } from "../shared/data/characters/index.js";
+import {
+  appDataSchema,
+  MAX_DOCUMENT_BYTES,
+  type AppData,
+} from "../shared/schema/index.js";
 
 export type AppDataStatus =
   "loading" | "saved" | "saving" | "error" | "conflict";
@@ -31,6 +36,48 @@ export class PendingChangesError extends Error {
     super("Pending changes must be resolved before reloading");
     this.name = "PendingChangesError";
   }
+}
+
+export class ImportDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ImportDataError";
+  }
+}
+
+export async function parseImportFile(file: Blob): Promise<AppData> {
+  if (file.size > MAX_DOCUMENT_BYTES) {
+    throw new ImportDataError("The backup file must be at most 1 MiB.");
+  }
+
+  let text: string;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(
+      await file.arrayBuffer(),
+    );
+  } catch {
+    throw new ImportDataError("The backup file is not valid UTF-8 JSON.");
+  }
+
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    throw new ImportDataError("The backup file is not valid JSON.");
+  }
+
+  return parseImportData(value);
+}
+
+export function parseImportData(value: unknown): AppData {
+  const parsed = appDataSchema.safeParse(value);
+  if (!parsed.success) {
+    throw new ImportDataError("The backup does not match the app data schema.");
+  }
+  if (!hasSupportedCharacters(parsed.data)) {
+    throw new ImportDataError("The backup contains an unsupported character.");
+  }
+  return parsed.data;
 }
 
 export function preventUnloadIfPending(
@@ -62,6 +109,7 @@ export interface AppDataController {
   reload(options?: { discardPending?: boolean }): Promise<void>;
   replaceData(candidate: AppData): Promise<void>;
   getPendingData(): AppData | null;
+  downloadData(): Promise<void>;
   downloadPendingData(): void;
 }
 
@@ -119,6 +167,7 @@ export function createAppDataController(
   let acknowledgedRevision = 0;
   let dirty = false;
   let replacement: AppData | null = null;
+  let stagedReplacement: AppData | null = null;
   let status: AppDataStatus = "loading";
   let error: Error | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -130,7 +179,10 @@ export function createAppDataController(
 
   function makeSnapshot(): AppDataSnapshot {
     const pending =
-      replacement !== null || dirty || replacementOperation !== undefined;
+      replacement !== null ||
+      stagedReplacement !== null ||
+      dirty ||
+      replacementOperation !== undefined;
     return {
       data: currentData,
       status,
@@ -140,6 +192,7 @@ export function createAppDataController(
         status !== "error" &&
         status !== "conflict" &&
         replacement === null &&
+        stagedReplacement === null &&
         !mutationPaused,
       hasPendingChanges: pending,
       error,
@@ -229,7 +282,12 @@ export function createAppDataController(
   }
 
   async function load(): Promise<void> {
-    if (replacement !== null || dirty || replacementOperation !== undefined) {
+    if (
+      replacement !== null ||
+      stagedReplacement !== null ||
+      dirty ||
+      replacementOperation !== undefined
+    ) {
       throw new PendingChangesError();
     }
     if (currentData !== null && status !== "error" && status !== "conflict") {
@@ -284,6 +342,16 @@ export function createAppDataController(
     }
   }
 
+  async function promoteStagedReplacement(): Promise<void> {
+    if (stagedReplacement === null) {
+      return;
+    }
+    replacement = stagedReplacement;
+    stagedReplacement = null;
+    publish("saving", null);
+    await saveNow();
+  }
+
   async function retry(): Promise<void> {
     if (status === "conflict") {
       throw error ?? new ConflictError(acknowledgedRevision);
@@ -294,6 +362,7 @@ export function createAppDataController(
     error = null;
     publish("saved", null);
     await flush();
+    await promoteStagedReplacement();
   }
 
   async function reload(
@@ -335,6 +404,7 @@ export function createAppDataController(
 
     dirty = false;
     replacement = null;
+    stagedReplacement = null;
     currentData = null;
     try {
       await load();
@@ -345,24 +415,31 @@ export function createAppDataController(
   }
 
   async function replaceData(candidate: AppData): Promise<void> {
-    const parsed = parseData(candidate);
-    if (replacementOperation) {
+    const parsed = parseImportData(candidate);
+    if (
+      replacementOperation ||
+      replacement !== null ||
+      stagedReplacement !== null
+    ) {
       throw new Error("A data replacement is already in progress");
     }
     if (isPausedStatus(status)) {
       throw error ?? new Error("Application data cannot be saved");
     }
+    if (currentData === null) {
+      await load();
+    }
 
     mutationPaused = true;
     publish(status, null);
     const operation = (async () => {
+      stagedReplacement = parsed;
+      publish(status, null);
       await flush();
       if (currentData === null) {
         throw new Error("Application data has not loaded");
       }
-      replacement = parsed;
-      publish("saving", null);
-      await saveNow();
+      await promoteStagedReplacement();
     })();
     replacementOperation = operation;
     try {
@@ -394,7 +471,15 @@ export function createAppDataController(
   }
 
   function getPendingData(): AppData | null {
-    return replacement ?? (dirty ? currentData : null);
+    return replacement ?? stagedReplacement ?? (dirty ? currentData : null);
+  }
+
+  async function downloadData(): Promise<void> {
+    await flush();
+    if (currentData === null) {
+      throw new Error("Application data has not loaded");
+    }
+    downloadDocument(currentData, "frosthaven-deck-builder-backup.json");
   }
 
   function downloadPendingData(): void {
@@ -402,15 +487,7 @@ export function createAppDataController(
     if (data === null) {
       return;
     }
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "frosthaven-deck-builder-pending.json";
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadDocument(data, "frosthaven-deck-builder-pending.json");
   }
 
   return {
@@ -426,6 +503,7 @@ export function createAppDataController(
     reload,
     replaceData,
     getPendingData,
+    downloadData,
     downloadPendingData,
   };
 }
@@ -465,6 +543,27 @@ export function useAppData(): AppDataController & AppDataSnapshot {
 
 function parseData(value: unknown): AppData {
   return appDataSchema.parse(value);
+}
+
+function hasSupportedCharacters(data: AppData): boolean {
+  return data.builds.every(
+    (build) => getCharacter(build.characterId) !== undefined,
+  );
+}
+
+function downloadDocument(data: AppData, filename: string): void {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  try {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 function isPausedStatus(value: AppDataStatus): value is "error" | "conflict" {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardGrid } from "./cards";
 import { MotivationInput } from "./notes";
-import { useAppData } from "./app-data";
+import { ImportDataError, parseImportFile, useAppData } from "./app-data";
 import {
   copyBuild,
   createBuild,
@@ -15,7 +15,7 @@ import {
 import { characters } from "../shared/data/characters/index.js";
 import { pickOptions, pool, replayBuild } from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
-import type { Build } from "../shared/schema/index.js";
+import type { AppData, Build } from "../shared/schema/index.js";
 
 const character = characters[0]!;
 
@@ -102,6 +102,7 @@ export function BuildList() {
           Create build
         </button>
       </section>
+      <DataBackupControls />
       {builds.length === 0 ? (
         <section className="empty-card" aria-labelledby="empty-heading">
           <h2 id="empty-heading">No builds yet</h2>
@@ -199,6 +200,203 @@ export function BuildList() {
         onConfirm={confirmDelete}
       />
     </main>
+  );
+}
+
+function DataBackupControls() {
+  const { canMutate, downloadData, replaceData, status, hasPendingChanges } =
+    useAppData();
+  const [candidate, setCandidate] = useState<AppData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [importAttempted, setImportAttempted] = useState(false);
+  const [importing, setImporting] = useState(false);
+
+  useEffect(() => {
+    if (
+      candidate !== null &&
+      importAttempted &&
+      status === "saved" &&
+      !hasPendingChanges
+    ) {
+      setCandidate(null);
+      setImportAttempted(false);
+    }
+  }, [candidate, hasPendingChanges, importAttempted, status]);
+
+  async function exportData(): Promise<void> {
+    setError(null);
+    try {
+      await downloadData();
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "The data could not be exported.",
+      );
+    }
+  }
+
+  async function selectImport(file: File | undefined): Promise<void> {
+    if (!file) {
+      return;
+    }
+    setError(null);
+    setImportAttempted(false);
+    try {
+      setCandidate(await parseImportFile(file));
+    } catch (cause) {
+      setCandidate(null);
+      setError(
+        cause instanceof ImportDataError
+          ? cause.message
+          : "The backup could not be read.",
+      );
+    }
+  }
+
+  async function confirmImport(): Promise<void> {
+    if (candidate === null || !canMutate) {
+      return;
+    }
+    setError(null);
+    setImportAttempted(true);
+    setImporting(true);
+    try {
+      await replaceData(candidate);
+      setCandidate(null);
+      setImportAttempted(false);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "The imported data could not be saved.",
+      );
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <section
+      className="content-card backup-panel"
+      aria-labelledby="backup-heading"
+    >
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Portable data</p>
+          <h2 id="backup-heading">Data backup</h2>
+        </div>
+        <div className="backup-actions">
+          <button
+            type="button"
+            onClick={() => void exportData()}
+            disabled={!canMutate}
+          >
+            Export JSON
+          </button>
+          <label className="button-link secondary-button" htmlFor="import-json">
+            Import JSON backup
+            <input
+              id="import-json"
+              className="visually-hidden"
+              type="file"
+              accept="application/json,.json"
+              disabled={!canMutate}
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                event.currentTarget.value = "";
+                void selectImport(file);
+              }}
+            />
+          </label>
+        </div>
+      </div>
+      <p>
+        Export includes every build, motivation and guidance note. Import first
+        validates a backup, then replaces all saved data after confirmation.
+      </p>
+      {error ? (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <ImportConfirmationDialog
+        candidate={candidate}
+        canConfirm={canMutate && !importing}
+        onCancel={() => {
+          setCandidate(null);
+          setImportAttempted(false);
+          setError(null);
+        }}
+        onConfirm={() => void confirmImport()}
+      />
+    </section>
+  );
+}
+
+function ImportConfirmationDialog({
+  candidate,
+  canConfirm,
+  onCancel,
+  onConfirm,
+}: {
+  candidate: AppData | null;
+  canConfirm: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (candidate !== null && dialogRef.current && !dialogRef.current.open) {
+      dialogRef.current.showModal();
+    } else if (candidate === null && dialogRef.current?.open) {
+      dialogRef.current.close();
+    }
+  }, [candidate]);
+
+  const motivationCount =
+    candidate?.builds.reduce(
+      (total, build) => total + build.motivations.length,
+      0,
+    ) ?? 0;
+  const guidanceCount =
+    candidate?.builds.reduce(
+      (total, build) => total + Object.keys(build.guidance).length,
+      0,
+    ) ?? 0;
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className="form-dialog"
+      aria-labelledby="replace-data-heading"
+      onCancel={(event) => {
+        event.preventDefault();
+        onCancel();
+      }}
+    >
+      <div className="dialog-form">
+        <h2 id="replace-data-heading">Replace saved data?</h2>
+        <p>This will replace all data currently saved on the server.</p>
+        <ul>
+          <li>{candidate?.builds.length ?? 0} builds</li>
+          <li>{motivationCount} motivations</li>
+          <li>{guidanceCount} guidance notes</li>
+        </ul>
+        <p>
+          The backup&apos;s revision is ignored. The current server revision is
+          used when saving the replacement.
+        </p>
+        <div className="dialog-actions">
+          <button type="button" className="secondary-button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="button" onClick={onConfirm} disabled={!canConfirm}>
+            Replace data
+          </button>
+        </div>
+      </div>
+    </dialog>
   );
 }
 

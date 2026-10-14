@@ -1,13 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
+  ImportDataError,
   PendingChangesError,
   createAppDataController,
+  parseImportFile,
   preventUnloadIfPending,
   type AppDataTransport,
 } from "./app-data";
 import { createBuild } from "../shared/builds";
-import type { AppData } from "../shared/schema";
+import { MAX_DOCUMENT_BYTES, type AppData } from "../shared/schema";
 
 const buildA = createBuild(
   { characterId: "SD", name: "Freeze control", startLevel: 1 },
@@ -266,6 +268,139 @@ describe("app data save controller", () => {
     vi.useRealTimers();
   });
 
+  it("flushes pending changes before downloading an official export", async () => {
+    const click = vi.fn();
+    const link = { click, href: "", download: "" };
+    const createObjectURL = vi.fn(() => "blob:export");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("document", { createElement: () => link });
+    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+    const transport = transportWith({
+      put: vi.fn(async () => ({ revision: 8 })),
+    });
+    const controller = createAppDataController(transport, {
+      debounceMs: 60_000,
+    });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+
+    await controller.downloadData();
+
+    expect(transport.put).toHaveBeenCalledWith(0, {
+      ...emptyData,
+      builds: [buildA],
+    });
+    expect(link).toMatchObject({
+      href: "blob:export",
+      download: "frosthaven-deck-builder-backup.json",
+    });
+    const exported = (
+      createObjectURL.mock.calls as unknown as Array<[Blob]>
+    )[0]?.[0];
+    expect(exported).toBeDefined();
+    expect(await exported!.text()).toMatch(/\"revision\": 8/);
+    expect(click).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:export");
+    vi.unstubAllGlobals();
+  });
+
+  it("does not download an export when pending data cannot be saved", async () => {
+    const createObjectURL = vi.fn(() => "blob:export");
+    vi.stubGlobal("document", { createElement: vi.fn() });
+    vi.stubGlobal("URL", { createObjectURL });
+    const transport = transportWith({
+      put: vi.fn().mockRejectedValue(new Error("disk unavailable")),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+
+    await expect(controller.downloadData()).rejects.toThrow("disk unavailable");
+    expect(createObjectURL).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses the acknowledged server revision when replacing imported data", async () => {
+    const transport = transportWith({
+      get: vi.fn(async () => ({ ...emptyData, revision: 7 })),
+      put: vi.fn(async () => ({ revision: 8 })),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    const imported = { ...emptyData, revision: 999, builds: [buildA] };
+
+    await controller.replaceData(imported);
+
+    expect(transport.put).toHaveBeenCalledWith(7, imported);
+    expect(controller.getSnapshot().data).toMatchObject({
+      revision: 8,
+      builds: [buildA],
+    });
+  });
+
+  it("keeps a staged import for retry when an earlier pending save fails", async () => {
+    const imported = { ...emptyData, revision: 99, builds: [buildB] };
+    const transport = transportWith({
+      put: vi
+        .fn()
+        .mockRejectedValueOnce(new Error("disk unavailable"))
+        .mockResolvedValueOnce({ revision: 1 })
+        .mockResolvedValueOnce({ revision: 2 }),
+    });
+    const controller = createAppDataController(transport, { debounceMs: 0 });
+    await controller.load();
+    controller.updateData((data) => ({ ...data, builds: [buildA] }));
+
+    await expect(controller.replaceData(imported)).rejects.toThrow(
+      "disk unavailable",
+    );
+    expect(controller.getSnapshot().data).toMatchObject({ builds: [buildA] });
+    expect(controller.getPendingData()).toMatchObject({
+      revision: 99,
+      builds: [buildB],
+    });
+
+    await controller.retry();
+    expect(transport.put).toHaveBeenNthCalledWith(2, 0, {
+      ...emptyData,
+      builds: [buildA],
+    });
+    expect(transport.put).toHaveBeenNthCalledWith(3, 1, imported);
+    expect(controller.getSnapshot()).toMatchObject({
+      status: "saved",
+      data: { revision: 2, builds: [buildB] },
+      hasPendingChanges: false,
+    });
+  });
+
+  it("validates imports before replacement, including size and supported characters", async () => {
+    await expect(
+      parseImportFile(new Blob(["not json"])),
+    ).rejects.toBeInstanceOf(ImportDataError);
+    await expect(
+      parseImportFile(
+        new Blob([
+          JSON.stringify({
+            ...emptyData,
+            builds: [{ ...buildA, characterId: "unsupported" }],
+          }),
+        ]),
+      ),
+    ).rejects.toThrow(/unsupported character/i);
+    const oversized = {
+      size: MAX_DOCUMENT_BYTES + 1,
+      arrayBuffer: vi.fn(),
+    } as unknown as Blob;
+    await expect(parseImportFile(oversized)).rejects.toThrow(/1 MiB/i);
+    expect(oversized.arrayBuffer).not.toHaveBeenCalled();
+
+    await expect(
+      parseImportFile(
+        new Blob([JSON.stringify({ ...emptyData, revision: 44 })]),
+      ),
+    ).resolves.toMatchObject({ revision: 44 });
+  });
+
   it("does not let load discard pending changes after a conflict", async () => {
     const transport = transportWith({
       put: vi.fn().mockRejectedValue(new ConflictError(4)),
@@ -336,7 +471,7 @@ describe("app data save controller", () => {
       ...data,
       builds: [{ ...buildA, name: "Ignored edit" }],
     }));
-    expect(controller.getPendingData()).toMatchObject({ builds: [buildA] });
+    expect(controller.getPendingData()).toMatchObject({ builds: [buildB] });
     await expect(second).rejects.toThrow(/replacement/i);
 
     await vi.waitFor(() => expect(transport.put).toHaveBeenCalledOnce());

@@ -283,6 +283,24 @@ h2 {
   margin-bottom: 0.75rem;
 }
 
+.backup-panel {
+  display: grid;
+  gap: 1rem;
+  max-width: 60rem;
+  margin-bottom: 2rem;
+}
+
+.backup-panel p:last-child {
+  margin-bottom: 0;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.5rem;
+}
+
 .build-list {
   display: grid;
   gap: 0.75rem;
@@ -368,10 +386,18 @@ h2 {
   background: rgb(0 0 0 / 78%);
 }
 
-.form-dialog form {
+.form-dialog form,
+.form-dialog .dialog-form {
   display: grid;
   gap: 1rem;
   padding: 1.5rem;
+}
+
+.form-dialog .dialog-form > p,
+.form-dialog .dialog-form > ul {
+  margin: 0;
+  color: #b8d3e1;
+  line-height: 1.6;
 }
 
 .form-dialog h2 {
