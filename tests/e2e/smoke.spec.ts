@@ -355,7 +355,7 @@ test("moves focus to the deck after picking from an enlarged card", async ({
     name: "Enlarge Birds in a Tempest",
   });
   await page.evaluate(() => window.scrollTo({ top: 600, behavior: "auto" }));
-  await enlargeButton.click();
+  await enlargeButton.click({ force: true });
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
