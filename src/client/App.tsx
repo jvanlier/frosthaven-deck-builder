@@ -128,7 +128,7 @@ export default function App() {
 function AppHeading({ character }: { character: Character }) {
   return (
     <header className="hero app-heading">
-      <img className="class-icon" src={`/${character.icon}`} alt="" />
+      <img className="class-icon" src={`/icons/${character.icon}`} alt="" />
       <p className="eyebrow">{character.name} · Frosthaven</p>
       <h1>Frosthaven Deck Builder</h1>
       <p className="intro">
@@ -155,7 +155,7 @@ function AppHeader({
           to={`/c/${character.id}`}
           aria-label="Frosthaven Deck Builder builds"
         >
-          <img src={`/${character.icon}`} alt="" />
+          <img src={`/icons/${character.icon}`} alt="" />
           <span>
             <strong>{character.name}</strong>
             <small>Deck Builder</small>

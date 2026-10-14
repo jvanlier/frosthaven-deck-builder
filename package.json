@@ -7,7 +7,7 @@
     "node": ">=22 <23"
   },
   "scripts": {
-    "dev": "concurrently --kill-others --names api,client \"tsx src/server/index.ts\" \"vite --host 127.0.0.1\"",
+    "dev": "DATA_DIR=\"${DATA_DIR:-./data}\" concurrently --kill-others --names api,client \"tsx src/server/index.ts\" \"vite --host 127.0.0.1\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format:check": "prettier --check .",

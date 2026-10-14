@@ -27,6 +27,10 @@ Run the development client and API together:
 npm run dev
 ```
 
+Development saves builds and backups in `./data/` (gitignored), creating it on
+first save. Set `DATA_DIR` to override this location. The production server and
+Docker image still default to `/data`.
+
 The canonical checks are:
 
 ```sh
