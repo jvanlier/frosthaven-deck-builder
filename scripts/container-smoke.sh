@@ -50,21 +50,24 @@ docker run --rm --user 0 --volume "$DATA_DIR:/data" "$IMAGE" chown 1000:1000 /da
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" up -d --force-recreate app
 
 wait_for_health() {
-  local container_id
-  container_id=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" ps -q app)
+  local container_id=""
+  local health_status="missing"
   for _ in $(seq 1 60); do
-    if curl --fail --silent "$BASE_URL/api/health" >/dev/null; then
-      local health_status
-      health_status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' "$container_id")
+    container_id=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" ps -q --all app || true)
+    if [[ -n "$container_id" ]] && curl --fail --silent "$BASE_URL/api/health" >/dev/null; then
+      health_status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' "$container_id" || true)
       if [[ "$health_status" == "healthy" ]]; then
         return 0
       fi
     fi
     sleep 1
   done
-  echo "Container did not become healthy" >&2
+  echo "Container did not become healthy (status: $health_status)" >&2
+  docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" ps --all >&2 || true
   docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" logs >&2 || true
-  docker inspect "$container_id" >&2 || true
+  if [[ -n "$container_id" ]]; then
+    docker inspect "$container_id" >&2 || true
+  fi
   return 1
 }
 
