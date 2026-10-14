@@ -236,6 +236,7 @@ function HomeRoute() {
 
 function StartingEditorRoute() {
   const { characterId, buildId, level } = useParams();
+  const location = useLocation();
   const { data } = useAppData();
   const build = data?.builds.find((candidate) => candidate.id === buildId);
   if (
@@ -245,7 +246,17 @@ function StartingEditorRoute() {
   ) {
     return <UnavailableView />;
   }
-  return <StartingEditor build={build} character={character} />;
+  const focusValue = new URLSearchParams(location.search).get("focus");
+  const focusForLevel = focusValue === null ? undefined : Number(focusValue);
+  return (
+    <StartingEditor
+      build={build}
+      character={character}
+      focusForLevel={
+        Number.isInteger(focusForLevel) ? focusForLevel : undefined
+      }
+    />
+  );
 }
 
 function CardPreview() {

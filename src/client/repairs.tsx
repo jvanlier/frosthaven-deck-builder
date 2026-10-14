@@ -40,7 +40,11 @@ export function RepairIssues({
 
   function openEditor(issue: RuleIssue): void {
     if (state.level === build.startLevel) {
-      navigate(startEditorPath(build));
+      const focusForLevel =
+        issue.operation?.kind === "start-pick"
+          ? issue.operation.forLevel
+          : undefined;
+      navigate(startEditorPath(build, focusForLevel));
       return;
     }
     const focus = issue.cardId

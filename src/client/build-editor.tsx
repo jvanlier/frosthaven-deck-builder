@@ -217,9 +217,11 @@ export function StartingRoute() {
 export function StartingEditor({
   build,
   character,
+  focusForLevel,
 }: {
   build: Build;
   character: Character;
+  focusForLevel?: number;
 }) {
   const { updateData, canMutate } = useAppData();
   const projection = replayBuild(build, character);
@@ -230,11 +232,30 @@ export function StartingEditor({
   const firstIncompleteSlot = build.startPicks.findIndex(
     (pick) => pick.cardId === null,
   );
+  const focusedSlot =
+    focusForLevel === undefined
+      ? -1
+      : build.startPicks.findIndex((pick) => pick.forLevel === focusForLevel);
   const activeSlot =
     editingSlot ??
-    (firstIncompleteSlot === -1
-      ? Math.max(build.startPicks.length - 1, 0)
-      : firstIncompleteSlot);
+    (focusedSlot !== -1
+      ? focusedSlot
+      : firstIncompleteSlot === -1
+        ? Math.max(build.startPicks.length - 1, 0)
+        : firstIncompleteSlot);
+
+  useEffect(() => {
+    if (focusForLevel === undefined) {
+      return;
+    }
+    const section = document.querySelector<HTMLElement>(
+      `[data-pick-level="${focusForLevel}"]`,
+    );
+    const target =
+      section?.querySelector<HTMLButtonElement>(".card-action") ??
+      section?.querySelector<HTMLElement>("h3");
+    target?.focus();
+  }, [focusForLevel]);
 
   const updateBuild = (nextBuild: Build) => {
     updateData((current) => ({
@@ -342,10 +363,11 @@ export function StartingEditor({
               return (
                 <article
                   className={`pick-section${isActive ? " active" : ""}`}
+                  data-pick-level={pick.forLevel}
                   key={pick.forLevel}
                 >
                   <div className="pick-heading">
-                    <h3>Level {pick.forLevel} pick</h3>
+                    <h3 tabIndex={-1}>Level {pick.forLevel} pick</h3>
                     {selected && !isActive ? (
                       <button
                         type="button"
@@ -668,8 +690,9 @@ function UnavailableStartingView() {
   );
 }
 
-export function startEditorPath(build: Build): string {
-  return `/c/${encodeURIComponent(build.characterId)}/b/${encodeURIComponent(build.id)}/l/${build.startLevel}/start`;
+export function startEditorPath(build: Build, focusForLevel?: number): string {
+  const path = `/c/${encodeURIComponent(build.characterId)}/b/${encodeURIComponent(build.id)}/l/${build.startLevel}/start`;
+  return focusForLevel === undefined ? path : `${path}?focus=${focusForLevel}`;
 }
 
 function effectiveCardLevel(card: Card): number {

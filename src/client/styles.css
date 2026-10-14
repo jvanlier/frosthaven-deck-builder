@@ -1233,6 +1233,17 @@ h2 {
     top: var(--header-height);
   }
 
+  .repair-list li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .repair-button {
+    align-self: flex-start;
+    max-width: 100%;
+    white-space: normal;
+  }
+
   .level-up-status {
     grid-template-columns: 1fr auto;
     margin-top: -0.5rem;

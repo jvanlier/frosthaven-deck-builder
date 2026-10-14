@@ -863,6 +863,7 @@ test("removes an invalid downstream operation without changing its neighbors", a
   page,
 }) => {
   let persisted = structuredClone(invalidEditedLevelFixtureData);
+  await page.setViewportSize({ width: 320, height: 568 });
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({
@@ -883,6 +884,9 @@ test("removes an invalid downstream operation without changing its neighbors", a
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
   await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth));
   await page.getByRole("button", { name: "Remove added card Tornado" }).click();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[0])
@@ -944,9 +948,20 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
   ).toBeVisible();
   await page
     .getByRole("dialog")
+    .getByRole("button", { name: "Cancel" })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Delete level 3?" }),
+  ).toBeHidden();
+  await page.getByRole("button", { name: "Delete level 3" }).click();
+  await page
+    .getByRole("dialog")
     .getByRole("button", { name: "Delete level" })
     .click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(
+    page.getByRole("button", { name: "Delete level 2" }),
+  ).toHaveCount(0);
   await expect
     .poll(async () => persisted.builds[0])
     .toMatchObject({
@@ -971,6 +986,36 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
         },
       },
     });
+});
+
+test("focuses the selected starting-pick repair", async ({ page }) => {
+  const persisted = structuredClone(startThreeFixtureData) as AppData;
+  persisted.builds[0]!.startPicks = [
+    { forLevel: 2, cardId: null },
+    { forLevel: 3, cardId: null },
+  ];
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(persisted),
+    }),
+  );
+
+  await page.goto(
+    `/c/SD/b/${persisted.builds[0]!.id}/l/${persisted.builds[0]!.startLevel}`,
+  );
+  await expect(
+    page.getByRole("button", { name: "Edit starting choices" }),
+  ).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Edit starting choices" })
+    .nth(1)
+    .click();
+  await expect(page).toHaveURL(/focus=3$/);
+  await expect(
+    page.locator('[data-pick-level="3"] .card-action').first(),
+  ).toBeFocused();
 });
 
 test("restores a picked card when its stored add is missing", async ({
