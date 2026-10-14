@@ -4,6 +4,7 @@ import type {
   LevelUp,
   Motivation,
   Pick as BuildPick,
+  MotivationKind,
 } from "../schema/index.js";
 
 export type IssueSeverity = "incomplete" | "invalid";
@@ -62,6 +63,14 @@ export interface StoredOperations {
   pick: string | null;
   added: string[];
   dropped: string[];
+}
+
+export interface ApplicableMotivationContext {
+  kind: MotivationKind;
+  /** The stored motivation level, which is the start level for initial picks. */
+  level: number;
+  /** The displayed slot level for an initial pick. */
+  forLevel?: number;
 }
 
 export interface RuleLevelState {
@@ -524,45 +533,58 @@ function activeMotivations(
   state: RuleLevelState,
   startingPicks: AppliedStartingPick[],
 ): Motivation[] {
-  const cards = cardMap(character);
-  const startDeck = new Set(
-    state.level === build.startLevel
-      ? state.deck.map((card) => card.id)
-      : build.startDeck,
+  return build.motivations.filter((motivation) =>
+    applicableMotivationContextsForState(
+      build,
+      character,
+      state,
+      startingPicks,
+      motivation.cardId,
+    ).some(
+      (context) =>
+        context.level === motivation.level && context.kind === motivation.kind,
+    ),
   );
-  const startingPickIds = new Set(startingPicks.map((pick) => pick.cardId));
-  const added = new Set(state.applied.added);
-  const dropped = new Set(state.applied.dropped);
+}
 
-  return build.motivations.filter((motivation) => {
-    const card = cards.get(motivation.cardId);
-    if (!card) {
-      return false;
-    }
-    if (state.level === build.startLevel && motivation.kind === "exclude") {
-      return (
-        motivation.level === build.startLevel &&
-        cardLevel(card) <= build.startLevel &&
-        !startDeck.has(card.id)
-      );
+function applicableMotivationContextsForState(
+  build: Build,
+  character: Character,
+  state: RuleLevelState,
+  startingPicks: AppliedStartingPick[],
+  cardId: string,
+): ApplicableMotivationContext[] {
+  const card = cardMap(character).get(cardId);
+  if (!card) {
+    return [];
+  }
+
+  const contexts: ApplicableMotivationContext[] = [];
+  if (state.level === build.startLevel) {
+    const initialPick = startingPicks.find((pick) => pick.cardId === cardId);
+    if (initialPick) {
+      contexts.push({
+        kind: "add",
+        level: build.startLevel,
+        forLevel: initialPick.forLevel,
+      });
     }
     if (
-      state.level === build.startLevel &&
-      motivation.kind === "add" &&
-      motivation.level === build.startLevel
+      cardLevel(card) <= build.startLevel &&
+      !state.deck.some((candidate) => candidate.id === cardId)
     ) {
-      return startingPickIds.has(card.id);
+      contexts.push({ kind: "exclude", level: build.startLevel });
     }
-    if (motivation.level !== state.level) {
-      return false;
-    }
-    return (
-      (motivation.kind === "add" &&
-        (added.has(motivation.cardId) ||
-          state.applied.pick === motivation.cardId)) ||
-      (motivation.kind === "drop" && dropped.has(motivation.cardId))
-    );
-  });
+    return contexts;
+  }
+
+  if (state.applied.pick === cardId || state.applied.added.includes(cardId)) {
+    contexts.push({ kind: "add", level: state.level });
+  }
+  if (state.applied.dropped.includes(cardId)) {
+    contexts.push({ kind: "drop", level: state.level });
+  }
+  return contexts;
 }
 
 export function replayBuild(build: Build, character: Character): ReplayResult {
@@ -654,6 +676,25 @@ export function replayBuild(build: Build, character: Character): ReplayResult {
     issues: levels.flatMap((state) => state.issues),
     startingPicks: starting.applied,
   };
+}
+
+export function applicableMotivationContexts(
+  build: Build,
+  character: Character,
+  level: number,
+  cardId: string,
+): ApplicableMotivationContext[] {
+  const result = replayBuild(build, character);
+  const state = levelState(result, level);
+  return state
+    ? applicableMotivationContextsForState(
+        build,
+        character,
+        state,
+        result.startingPicks,
+        cardId,
+      )
+    : [];
 }
 
 export function validateBuild(build: Build, character: Character): RuleIssue[] {

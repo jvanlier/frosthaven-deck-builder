@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardDialog, CardGrid, CardImage } from "./cards";
 import { useAppData } from "./app-data";
-import { GuidanceInput, MotivationInput, formatNoteTimestamp } from "./notes";
+import {
+  GuidanceInput,
+  MotivationInput,
+  formatNoteTimestamp,
+  updateBuildData,
+} from "./notes";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
 import { levelUpPath } from "./level-up";
@@ -12,13 +17,14 @@ import {
   upsertMotivation,
   upsertNote,
 } from "../shared/builds.js";
-import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
+import {
+  applicableMotivationContexts,
+  replayBuild,
+  type ApplicableMotivationContext,
+  type RuleLevelState,
+} from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
-import type {
-  Build,
-  Motivation,
-  MotivationKind,
-} from "../shared/schema/index.js";
+import type { Build, Motivation } from "../shared/schema/index.js";
 
 export const LAST_POSITION_STORAGE_KEY =
   "frosthaven-deck-builder:last-position";
@@ -281,60 +287,42 @@ function CardDetailView({
 }) {
   const { canMutate, updateData } = useAppData();
   const guidance = build.guidance[card.id];
-  const contexts = applicableMotivationContexts(build, state, card);
+  const contexts = applicableMotivationContexts(
+    build,
+    character,
+    state.level,
+    card.id,
+  );
 
   function updateGuidance(text: string): void {
     if (!canMutate) {
       return;
     }
-    updateData((current) => {
-      const currentBuild = current.builds.find(
-        (candidate) => candidate.id === build.id,
-      );
-      if (!currentBuild) {
-        return current;
-      }
-      const updated = upsertNote(currentBuild, card.id, text);
-      if (updated === currentBuild) {
-        return current;
-      }
-      return {
-        ...current,
-        builds: current.builds.map((candidate) =>
-          candidate.id === updated.id ? updated : candidate,
-        ),
-      };
-    });
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertNote(currentBuild, card.id, text),
+      ),
+    );
   }
 
-  function updateMotivation(context: MotivationContext, text: string): void {
+  function updateMotivation(
+    context: ApplicableMotivationContext,
+    text: string,
+  ): void {
     if (!canMutate) {
       return;
     }
-    updateData((current) => {
-      const currentBuild = current.builds.find(
-        (candidate) => candidate.id === build.id,
-      );
-      if (!currentBuild) {
-        return current;
-      }
-      const updated = upsertMotivation(currentBuild, {
-        kind: context.kind,
-        cardId: card.id,
-        text,
-        level: state.level,
-        forLevel: context.forLevel,
-      });
-      if (updated === currentBuild) {
-        return current;
-      }
-      return {
-        ...current,
-        builds: current.builds.map((candidate) =>
-          candidate.id === updated.id ? updated : candidate,
-        ),
-      };
-    });
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertMotivation(currentBuild, {
+          kind: context.kind,
+          cardId: card.id,
+          text,
+          level: state.level,
+          forLevel: context.forLevel,
+        }),
+      ),
+    );
   }
 
   return (
@@ -620,30 +608,17 @@ function ChangeListItem({
     if (!canMutate) {
       return;
     }
-    updateData((current) => {
-      const currentBuild = current.builds.find(
-        (candidate) => candidate.id === build.id,
-      );
-      if (!currentBuild) {
-        return current;
-      }
-      const updated = upsertMotivation(currentBuild, {
-        kind,
-        cardId: card.id,
-        text,
-        level: state.level,
-        forLevel,
-      });
-      if (updated === currentBuild) {
-        return current;
-      }
-      return {
-        ...current,
-        builds: current.builds.map((candidate) =>
-          candidate.id === updated.id ? updated : candidate,
-        ),
-      };
-    });
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertMotivation(currentBuild, {
+          kind,
+          cardId: card.id,
+          text,
+          level: state.level,
+          forLevel,
+        }),
+      ),
+    );
   }
 
   return (
@@ -808,42 +783,6 @@ function isLastPosition(value: unknown): value is LastPosition {
   );
 }
 
-interface MotivationContext {
-  kind: MotivationKind;
-  forLevel?: number;
-}
-
-function applicableMotivationContexts(
-  build: Build,
-  state: RuleLevelState,
-  card: Card,
-): MotivationContext[] {
-  const contexts: MotivationContext[] = [];
-  if (state.level === build.startLevel) {
-    const initialPick = state.applied.startingPicks.find(
-      (pick) => pick.cardId === card.id,
-    );
-    if (initialPick) {
-      contexts.push({ kind: "add", forLevel: initialPick.forLevel });
-    }
-    if (
-      effectiveCardLevel(card) <= build.startLevel &&
-      !state.deck.some((candidate) => candidate.id === card.id)
-    ) {
-      contexts.push({ kind: "exclude" });
-    }
-    return contexts;
-  }
-
-  if (state.applied.pick === card.id || state.applied.added.includes(card.id)) {
-    contexts.push({ kind: "add" });
-  }
-  if (state.applied.dropped.includes(card.id)) {
-    contexts.push({ kind: "drop" });
-  }
-  return contexts;
-}
-
 function findMotivation(
   motivations: Motivation[],
   cardId: string,
@@ -854,7 +793,7 @@ function findMotivation(
   );
 }
 
-function motivationLabel(context: MotivationContext): string {
+function motivationLabel(context: ApplicableMotivationContext): string {
   if (context.kind === "drop") {
     return "Drop motivation";
   }
@@ -865,10 +804,6 @@ function motivationLabel(context: MotivationContext): string {
     return `Level ${context.forLevel} pick motivation`;
   }
   return "Add motivation";
-}
-
-function effectiveCardLevel(card: Card): number {
-  return card.level === "X" ? 1 : card.level;
 }
 
 function formatCardLevel(card: Card): string {

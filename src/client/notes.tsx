@@ -1,7 +1,32 @@
 import type { Card } from "../shared/character.js";
-import { MAX_NOTE_LENGTH } from "../shared/schema/index.js";
+import {
+  MAX_NOTE_LENGTH,
+  type AppData,
+  type Build,
+} from "../shared/schema/index.js";
 
 export type EditableMotivationKind = "exclude" | "add" | "drop";
+
+export function updateBuildData(
+  data: AppData,
+  buildId: string,
+  updater: (build: Build) => Build,
+): AppData {
+  const build = data.builds.find((candidate) => candidate.id === buildId);
+  if (!build) {
+    return data;
+  }
+  const updated = updater(build);
+  if (updated === build) {
+    return data;
+  }
+  return {
+    ...data,
+    builds: data.builds.map((candidate) =>
+      candidate.id === updated.id ? updated : candidate,
+    ),
+  };
+}
 
 export function MotivationInput({
   card,

@@ -2,10 +2,14 @@ import { Link, useParams } from "react-router-dom";
 import { useAppData } from "./app-data";
 import { CardImage } from "./cards";
 import { cardDetailPath, deckPath, readLastPosition } from "./deck-view";
-import { MotivationInput, formatNoteTimestamp } from "./notes";
+import { MotivationInput, formatNoteTimestamp, updateBuildData } from "./notes";
 import { upsertMotivation } from "../shared/builds.js";
 import { characters } from "../shared/data/characters/index.js";
-import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
+import {
+  applicableMotivationContexts,
+  replayBuild,
+  type RuleLevelState,
+} from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
 import type { Build, Motivation } from "../shared/schema/index.js";
 
@@ -41,30 +45,17 @@ export function MotivationsView({
     if (!canMutate) {
       return;
     }
-    updateData((current) => {
-      const currentBuild = current.builds.find(
-        (candidate) => candidate.id === build.id,
-      );
-      if (!currentBuild) {
-        return current;
-      }
-      const updated = upsertMotivation(currentBuild, {
-        kind: entry.motivation.kind,
-        cardId: entry.motivation.cardId,
-        text,
-        level: entry.state.level,
-        forLevel: entry.forLevel,
-      });
-      if (updated === currentBuild) {
-        return current;
-      }
-      return {
-        ...current,
-        builds: current.builds.map((candidate) =>
-          candidate.id === updated.id ? updated : candidate,
-        ),
-      };
-    });
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertMotivation(currentBuild, {
+          kind: entry.motivation.kind,
+          cardId: entry.motivation.cardId,
+          text,
+          level: entry.state.level,
+          forLevel: entry.forLevel,
+        }),
+      ),
+    );
   }
 
   const grouped = new Map<string, MotivationEntry[]>();
@@ -212,7 +203,17 @@ function motivationEntries(
               (pick) => pick.cardId === motivation.cardId,
             )
           : undefined;
-      const forLevel = initialPick?.forLevel;
+      const context = applicableMotivationContexts(
+        build,
+        character,
+        state.level,
+        motivation.cardId,
+      ).find(
+        (candidate) =>
+          candidate.kind === motivation.kind &&
+          candidate.level === motivation.level,
+      );
+      const forLevel = context?.forLevel;
       const group =
         motivation.kind === "exclude"
           ? "Not in starting deck"

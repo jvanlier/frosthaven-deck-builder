@@ -3,6 +3,7 @@ import { createBuild } from "../builds";
 import { characters } from "../data/characters";
 import {
   addOptions,
+  applicableMotivationContexts,
   applyDeckEdit,
   canAppendLevel,
   deck,
@@ -263,6 +264,14 @@ describe("Snowdancer rules engine", () => {
     expect(level.activeMotivations).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ text: "Wrong level note" }),
+      ]),
+    );
+    expect(
+      applicableMotivationContexts(build, character, 2, "birds-in-a-tempest"),
+    ).toEqual(
+      expect.arrayContaining([
+        { kind: "add", level: 2, forLevel: 2 },
+        { kind: "exclude", level: 2 },
       ]),
     );
   });
