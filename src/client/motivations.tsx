@@ -1,4 +1,5 @@
-import { Link, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useAppData } from "./app-data";
 import { CardImage } from "./cards";
 import { cardDetailPath, deckPath, readLastPosition } from "./deck-view";
@@ -33,6 +34,7 @@ export function MotivationsView({
   character: Character;
 }) {
   const { canMutate, updateData } = useAppData();
+  const location = useLocation();
   const entries = motivationEntries(build, character);
   const position = readLastPosition();
   const backLevel =
@@ -40,6 +42,29 @@ export function MotivationsView({
       ? position.level
       : (build.levelUps.at(-1)?.level ?? build.startLevel);
   const cardById = new Map(character.cards.map((card) => [card.id, card]));
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const level = params.get("level");
+    const cardId = params.get("cardId");
+    const kind = params.get("kind");
+    if (!level || !cardId || !kind) {
+      return;
+    }
+    const target = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-motivation-entry]"),
+    ).find(
+      (entry) =>
+        entry.dataset.motivationLevel === level &&
+        entry.dataset.motivationCardId === cardId &&
+        entry.dataset.motivationKind === kind,
+    );
+    const textarea = target?.querySelector<HTMLTextAreaElement>("textarea");
+    if (textarea) {
+      textarea.focus();
+      target?.scrollIntoView({ block: "center" });
+    }
+  }, [location.search]);
 
   function updateMotivation(entry: MotivationEntry, text: string): void {
     if (!canMutate) {
@@ -146,7 +171,13 @@ function MotivationEntryView({
   onChange: (text: string) => void;
 }) {
   return (
-    <li className="motivation-entry">
+    <li
+      className="motivation-entry"
+      data-motivation-entry="true"
+      data-motivation-level={entry.motivation.level}
+      data-motivation-card-id={entry.motivation.cardId}
+      data-motivation-kind={entry.motivation.kind}
+    >
       <Link
         className="motivation-thumbnail-link"
         to={cardDetailPath(
