@@ -354,8 +354,39 @@ test("moves focus to the deck after picking from an enlarged card", async ({
   const enlargeButton = page.getByRole("button", {
     name: "Enlarge Birds in a Tempest",
   });
-  await page.evaluate(() => window.scrollTo({ top: 600, behavior: "auto" }));
-  await enlargeButton.click({ force: true });
+  await expect(enlargeButton).toBeVisible();
+  await page.evaluate(() => {
+    const button = [
+      ...document.querySelectorAll<HTMLButtonElement>(".enlarge-button"),
+    ].find(
+      (candidate) =>
+        candidate.getAttribute("aria-label") === "Enlarge Birds in a Tempest",
+    );
+    if (!button) {
+      return;
+    }
+    const stickyBottom = Math.max(
+      0,
+      ...Array.from(
+        document.querySelectorAll<HTMLElement>(
+          ".app-header, .save-feedback, .level-up-status",
+        ),
+      ).map((element) => element.getBoundingClientRect().bottom),
+    );
+    const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
+    const safeTop = stickyBottom + 16;
+    const safeBottom =
+      Math.min(
+        window.innerHeight,
+        bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
+      ) - 16;
+    const buttonCenter =
+      button.getBoundingClientRect().top +
+      button.getBoundingClientRect().height / 2;
+    const safeCenter = (safeTop + safeBottom) / 2;
+    window.scrollBy({ top: buttonCenter - safeCenter, behavior: "auto" });
+  });
+  await enlargeButton.click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
@@ -886,7 +917,7 @@ test("removes an invalid downstream operation without changing its neighbors", a
   await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
-  ).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth));
+  ).toBeLessThanOrEqual(320);
   await page.getByRole("button", { name: "Remove added card Tornado" }).click();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[0])
@@ -941,6 +972,10 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
     });
   });
 
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(
+    page.getByRole("button", { name: "Delete level 2" }),
+  ).toHaveCount(0);
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/3`);
   await page.getByRole("button", { name: "Delete level 3" }).click();
   await expect(
@@ -959,9 +994,6 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
     .getByRole("button", { name: "Delete level" })
     .click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
-  await expect(
-    page.getByRole("button", { name: "Delete level 1" }),
-  ).toHaveCount(0);
   await expect
     .poll(async () => persisted.builds[0])
     .toMatchObject({
