@@ -19,6 +19,7 @@ import {
 } from "./deck-view";
 import { LevelUpRoute, levelUpDestination } from "./level-up";
 import { MotivationsRoute } from "./motivations";
+import { OverviewRoute } from "./overview-view";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
@@ -111,7 +112,7 @@ export default function App() {
         />
         <Route
           path="/c/:characterId/b/:buildId/overview"
-          element={<UnavailableView />}
+          element={<OverviewRoute />}
         />
         <Route
           path="/c/:characterId/b/:buildId/motivations"
@@ -407,7 +408,11 @@ function BottomTabs() {
         label="Level up"
         icon="↗"
       />
-      <WorkspaceTab to={null} label="Overview" icon="▤" />
+      <WorkspaceTab
+        to={workspace.build ? overviewPath(workspace) : null}
+        label="Overview"
+        icon="▤"
+      />
       <WorkspaceTab
         to={workspace.build ? motivationsPath(workspace) : null}
         label="Notes"
@@ -486,6 +491,12 @@ function motivationsPath(workspace: Workspace): string {
   return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
     workspace.buildId!,
   )}/motivations`;
+}
+
+function overviewPath(workspace: Workspace): string {
+  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
+    workspace.buildId!,
+  )}/overview`;
 }
 
 function SaveFeedback() {

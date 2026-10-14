@@ -1391,3 +1391,175 @@ h2 {
     animation-iteration-count: 1 !important;
   }
 }
+
+.overview-view {
+  max-width: 92rem;
+}
+
+.overview-scroll {
+  overflow: auto;
+  border: 1px solid #2c617b;
+  border-radius: 0.9rem;
+  background: #0a2233;
+  outline-offset: 4px;
+}
+
+.overview-scroll:focus-visible {
+  outline: 3px solid #f9d875;
+}
+
+.overview-matrix {
+  width: 100%;
+  min-width: 42rem;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.overview-matrix th,
+.overview-matrix td {
+  border-bottom: 1px solid #244c62;
+  padding: 0.55rem 0.65rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.overview-matrix thead th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  color: #b8d3e1;
+  background: #0a2233;
+}
+
+.overview-matrix thead th:first-child,
+.overview-matrix .overview-card-name {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  min-width: 13rem;
+  text-align: left;
+  background: #0a2233;
+}
+
+.overview-matrix thead th:first-child {
+  z-index: 4;
+}
+
+.overview-matrix thead a {
+  color: #b7eaff;
+  text-decoration: none;
+}
+
+.overview-matrix thead a:hover {
+  text-decoration: underline;
+}
+
+.overview-card-name {
+  color: #f7fcff;
+}
+
+.overview-card-name span,
+.overview-card-name small {
+  display: block;
+}
+
+.overview-card-name small {
+  margin-top: 0.15rem;
+  color: #8aaabd;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.overview-group-row th {
+  padding: 0.7rem 0.65rem 0.4rem;
+  color: #8fd9f4;
+  background: #102f45;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.overview-cell {
+  position: relative;
+  display: inline-grid;
+  min-width: 2.2rem;
+  min-height: 1.75rem;
+  place-items: center;
+  border-radius: 0.4rem;
+  font-weight: 800;
+}
+
+.overview-deck {
+  color: #07131f;
+  background: #8fd9f4;
+}
+
+.overview-pool {
+  border: 1px solid #8fd9f4;
+  color: #8fd9f4;
+}
+
+.overview-not-in-pool {
+  color: #496c7d;
+}
+
+.overview-cell .overview-motivation-links {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.5rem;
+  display: flex;
+  gap: 0.15rem;
+}
+
+.overview-motivation-link {
+  display: inline-grid;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #07131f;
+  background: #f9d875;
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+.overview-motivation-link:hover {
+  background: #fff2b5;
+}
+
+.overview-summary-row th,
+.overview-summary-row td {
+  border-top: 2px solid #477b94;
+  color: #b8d3e1;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.overview-summary-row th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #0a2233;
+  text-align: left;
+}
+
+.overview-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: -1rem 0 1.25rem;
+  color: #b8d3e1;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 600px) {
+  .overview-matrix {
+    min-width: 38rem;
+  }
+
+  .overview-matrix thead th:first-child,
+  .overview-matrix .overview-card-name {
+    min-width: 10rem;
+  }
+}
