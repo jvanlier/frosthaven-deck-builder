@@ -90,19 +90,21 @@ curl --fail --silent "$BASE_URL/icons/SD.png" >/dev/null
 echo "Built frontend and local assets are reachable"
 
 DATA='{"schemaVersion":1,"revision":0,"builds":[]}'
+REQUEST="{\"baseRevision\":0,\"data\":$DATA}"
 response_file=$(mktemp)
 status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
   --request PUT "$BASE_URL/api/data" \
   --header 'content-type: application/json' \
-  --data "$DATA")
+  --data "$REQUEST")
 echo "Initial data write: HTTP $status $(cat "$response_file")"
 [[ "$status" == "200" ]]
 grep -Fq '"revision":1' "$response_file"
 DATA='{"schemaVersion":1,"revision":1,"builds":[]}'
+REQUEST="{\"baseRevision\":1,\"data\":$DATA}"
 status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
   --request PUT "$BASE_URL/api/data" \
   --header 'content-type: application/json' \
-  --data "$DATA")
+  --data "$REQUEST")
 echo "Backup-triggering data write: HTTP $status $(cat "$response_file")"
 [[ "$status" == "200" ]]
 grep -Fq '"revision":2' "$response_file"
@@ -126,7 +128,7 @@ wait_for_health
 status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
   --request PUT "$BASE_URL/api/data" \
   --header 'content-type: application/json' \
-  --data '{"schemaVersion":1,"revision":2,"builds":[]}' || true)
+  --data '{"baseRevision":2,"data":{"schemaVersion":1,"revision":2,"builds":[]}}' || true)
 [[ "$status" == "500" ]]
 
 echo "Container smoke test passed"
