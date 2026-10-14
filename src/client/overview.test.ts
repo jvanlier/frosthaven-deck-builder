@@ -141,10 +141,12 @@ describe("overview matrix projection", () => {
     );
 
     const start = model.levels[0]!;
-    expect(
-      start.cells.find((cell) => cell.card.id === "birds-in-a-tempest")
-        ?.motivations,
-    ).toEqual([
+    const picked = start.cells.find(
+      (cell) => cell.card.id === "birds-in-a-tempest",
+    );
+    expect(picked?.marker).toBe("picked");
+    expect(picked?.markerForLevel).toBe(2);
+    expect(picked?.motivations).toEqual([
       expect.objectContaining({ kind: "add", text: "A strong pick" }),
       expect.objectContaining({
         kind: "exclude",
@@ -156,6 +158,47 @@ describe("overview matrix projection", () => {
     ).toEqual([
       expect.objectContaining({ kind: "exclude", text: "Too unreliable" }),
     ]);
+  });
+
+  it("keeps a starting pick's slot and applied counts distinct from the start level", () => {
+    const model = buildOverviewModel(
+      makeBuild({
+        startLevel: 3,
+        startPicks: [
+          { forLevel: 2, cardId: "birds-in-a-tempest" },
+          { forLevel: 3, cardId: "tornado" },
+        ],
+      }),
+      character,
+    );
+
+    expect(model.levels[0]?.summary).toMatchObject({
+      isStartingLevel: true,
+      startingPicks: [
+        { cardId: "birds-in-a-tempest", forLevel: 2 },
+        { cardId: "tornado", forLevel: 3 },
+      ],
+    });
+
+    const later = buildOverviewModel(
+      makeBuild({
+        levelUps: [
+          {
+            level: 2,
+            pick: "cold-therapy",
+            added: ["white-winds"],
+            dropped: ["whiteout"],
+          },
+        ],
+      }),
+      character,
+    ).levels[1]!;
+    expect(later.summary).toMatchObject({
+      isStartingLevel: false,
+      pick: null,
+      addedCount: 1,
+      droppedCount: 1,
+    });
   });
 
   it("hides stale motivation indicators while keeping their stored notes intact", () => {

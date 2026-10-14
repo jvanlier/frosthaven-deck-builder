@@ -1402,6 +1402,7 @@ h2 {
   border-radius: 0.9rem;
   background: #0a2233;
   outline-offset: 4px;
+  scroll-padding-left: 8rem;
 }
 
 .overview-scroll:focus-visible {
@@ -1412,6 +1413,7 @@ h2 {
   width: 100%;
   min-width: 42rem;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 0.86rem;
 }
 
@@ -1436,6 +1438,7 @@ h2 {
   position: sticky;
   left: 0;
   z-index: 3;
+  width: 13rem;
   min-width: 13rem;
   text-align: left;
   background: #0a2233;
@@ -1452,6 +1455,23 @@ h2 {
 
 .overview-matrix thead a:hover {
   text-decoration: underline;
+}
+
+.overview-column-status {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.overview-invalid {
+  color: #ffb2a8;
+}
+
+.overview-incomplete {
+  color: #f9d875;
 }
 
 .overview-card-name {
@@ -1558,8 +1578,14 @@ h2 {
     min-width: 38rem;
   }
 
+  .overview-scroll {
+    scroll-padding-left: 8rem;
+  }
+
   .overview-matrix thead th:first-child,
   .overview-matrix .overview-card-name {
-    min-width: 10rem;
+    width: 8rem;
+    min-width: 8rem;
+    white-space: normal;
   }
 }

@@ -64,6 +64,15 @@ export function OverviewView({
                   >
                     Level {level.level}
                   </Link>
+                  {levelStatus(level) ? (
+                    <span
+                      className={`overview-column-status overview-${levelStatus(level)?.toLowerCase()}`}
+                      role="status"
+                      aria-label={`Level ${level.level} column ${levelStatus(level)?.toLowerCase()}`}
+                    >
+                      {levelStatus(level)}
+                    </span>
+                  ) : null}
                 </th>
               ))}
             </tr>
@@ -137,7 +146,9 @@ function OverviewCellView({
   level: number;
   build: Build;
 }) {
-  const markerLabel = cell.marker ? markerText(cell.marker) : "";
+  const markerLabel = cell.marker
+    ? markerText(cell.marker, cell.markerForLevel)
+    : "";
   const membershipLabel = membershipText(cell.membership);
   const noteLabel =
     cell.motivations.length === 0
@@ -225,21 +236,38 @@ function OverviewLegend() {
   );
 }
 
+function levelStatus(level: OverviewLevel): "Invalid" | "Incomplete" | null {
+  if (level.state.issues.some((issue) => issue.severity === "invalid")) {
+    return "Invalid";
+  }
+  if (level.state.issues.some((issue) => issue.severity === "incomplete")) {
+    return "Incomplete";
+  }
+  return null;
+}
+
 function summaryText(level: OverviewLevel, character: Character): string {
-  if (level.summary.startingPicks.length > 0) {
+  if (level.summary.isStartingLevel) {
     const names = level.summary.startingPicks
-      .map((cardId) => character.cards.find((card) => card.id === cardId)?.name)
+      .map((pick) => {
+        const name = character.cards.find(
+          (card) => card.id === pick.cardId,
+        )?.name;
+        return name ? `Level ${pick.forLevel}: ${name}` : undefined;
+      })
       .filter((name): name is string => name !== undefined)
       .join(", ");
-    return names ? `Starting picks: ${names}` : "Starting picks";
-  }
-  if (level.summary.pick === null) {
-    return "Starting deck";
+    return names ? `Starting picks: ${names}` : "Starting deck";
   }
   const pickName =
-    character.cards.find((card) => card.id === level.summary.pick)?.name ??
-    level.summary.pick;
-  const details = [`Pick: ${pickName}`, `${level.summary.addedCount} added`];
+    level.summary.pick === null
+      ? "No applied pick"
+      : (character.cards.find((card) => card.id === level.summary.pick)?.name ??
+        level.summary.pick);
+  const details = [
+    level.summary.pick === null ? pickName : `Pick: ${pickName}`,
+    `${level.summary.addedCount} added`,
+  ];
   if (level.summary.extraAddedCount > 0) {
     details.push(
       `${level.summary.extraAddedCount} extra swap${level.summary.extraAddedCount === 1 ? "" : "s"}`,
@@ -260,10 +288,12 @@ function membershipText(membership: OverviewCell["membership"]): string {
   }
 }
 
-function markerText(marker: OverviewCell["marker"]): string {
+function markerText(marker: OverviewCell["marker"], forLevel?: number): string {
   switch (marker) {
     case "picked":
-      return "Picked here";
+      return forLevel === undefined
+        ? "Picked here"
+        : `Picked at level ${forLevel}`;
     case "added":
       return "Added here";
     case "dropped":

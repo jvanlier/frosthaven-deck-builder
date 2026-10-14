@@ -850,6 +850,22 @@ test("shows overview membership, applied markers, swap counts and note navigatio
       exact: true,
     }),
   ).toBeVisible();
+
+  const levelOneDeckLink = page.getByRole("link", {
+    name: "Open level 1 deck",
+  });
+  await levelOneDeckLink.click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
+  await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+  const levelTwoDeckLink = page.getByRole("link", {
+    name: "Open level 2 deck",
+  });
+  await levelTwoDeckLink.focus();
+  await expect(levelTwoDeckLink).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+
   await expect(page.getByLabel("Tornado: In deck; Picked here")).toBeVisible();
   await expect(
     page.getByLabel("White Winds: In deck; Added here"),
@@ -864,13 +880,60 @@ test("shows overview membership, applied markers, swap counts and note navigatio
   await motivationLink.evaluate((link) =>
     link.scrollIntoView({ block: "center", inline: "center" }),
   );
-  await motivationLink.evaluate((link) => (link as HTMLElement).click());
+  await motivationLink.click();
   await expect(page).toHaveURL(
     `/c/SD/b/${fixtureBuildId}/motivations?level=2&cardId=whiteout&kind=drop`,
   );
   await expect(
     page.getByLabel("Motivation for Dropped: Whiteout"),
   ).toBeFocused();
+});
+
+test("keeps starting pick slot context in overview cells and summaries", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(startThreeFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${startThreeFixtureData.builds[0].id}/overview`);
+
+  await expect(
+    page.getByLabel(
+      "Birds in a Tempest: In pool, not in deck; Picked at level 2",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Starting picks: Level 2: Birds in a Tempest, Level 3: Tornado",
+      { exact: true },
+    ),
+  ).toBeVisible();
+});
+
+test("flags an invalid overview column without hiding its applied state", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(invalidDeckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+
+  await expect(
+    page.getByRole("status", { name: "Level 2 column invalid" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Pick: Birds in a Tempest · 0 added · 1 dropped", {
+      exact: true,
+    }),
+  ).toBeVisible();
 });
 
 test("shows sorted cards, changes, guidance and read-only card detail", async ({

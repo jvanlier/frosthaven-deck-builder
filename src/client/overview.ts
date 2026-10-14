@@ -9,13 +9,15 @@ export interface OverviewCell {
   card: Card;
   membership: OverviewMembership;
   marker?: OverviewMarker;
+  markerForLevel?: number;
   motivations: Motivation[];
 }
 
 export interface OverviewLevelSummary {
   level: number;
   pick: string | null;
-  startingPicks: string[];
+  startingPicks: { cardId: string; forLevel: number }[];
+  isStartingLevel: boolean;
   addedCount: number;
   extraAddedCount: number;
   droppedCount: number;
@@ -68,6 +70,11 @@ function makeCell(
   const deckIds = new Set(state.deck.map((candidate) => candidate.id));
   const poolIds = new Set(state.pool.map((candidate) => candidate.id));
   const marker = markerFor(card.id, state, build);
+  const markerForLevel =
+    state.level === build.startLevel
+      ? state.applied.startingPicks.find((pick) => pick.cardId === card.id)
+          ?.forLevel
+      : undefined;
   return {
     card,
     membership: deckIds.has(card.id)
@@ -76,6 +83,7 @@ function makeCell(
         ? "pool"
         : "not-in-pool",
     marker,
+    markerForLevel,
     motivations: state.activeMotivations.filter(
       (motivation) => motivation.cardId === card.id,
     ),
@@ -115,7 +123,11 @@ function makeSummary(
   return {
     level: state.level,
     pick: state.applied.pick,
-    startingPicks: state.applied.startingPicks.map((pick) => pick.cardId),
+    startingPicks: state.applied.startingPicks.map((pick) => ({
+      cardId: pick.cardId,
+      forLevel: pick.forLevel,
+    })),
+    isStartingLevel,
     addedCount: isStartingLevel ? 0 : state.applied.added.length,
     extraAddedCount: extraAdded.length,
     droppedCount: isStartingLevel ? 0 : state.applied.dropped.length,
