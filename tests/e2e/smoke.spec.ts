@@ -1,3 +1,5 @@
+import AxeBuilder from "@axe-core/playwright";
+import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import type { AppData } from "../../src/shared/schema";
 
@@ -760,6 +762,11 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   await expect(dialog).toBeHidden();
   await expect(firstEnlarge).toBeFocused();
 
+  await firstEnlarge.click();
+  await dialog.getByRole("button", { name: firstLabel! }).click();
+  await expect(dialog).toBeHidden();
+  await expect(firstEnlarge).toBeFocused();
+
   const fallbackImage = page
     .locator(".card-tile")
     .nth(1)
@@ -865,12 +872,12 @@ test("shows overview membership, applied markers, swap counts and note navigatio
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
   await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+  const summaryCells = page.locator(".overview-summary-row td");
+  await expect(summaryCells).toHaveCount(3);
   expect(
-    await page
-      .locator(".overview-summary-row td")
-      .evaluateAll((cells) =>
-        cells.map((cell) => cell.scrollWidth > cell.clientWidth + 1),
-      ),
+    await summaryCells.evaluateAll((cells) =>
+      cells.map((cell) => cell.scrollWidth > cell.clientWidth + 1),
+    ),
   ).toEqual([false, false, false]);
 
   await expect(page.getByLabel("Tornado: In deck; Picked here")).toBeVisible();
@@ -2333,4 +2340,267 @@ test("pauses note editors after save failures and conflicts", async ({
     ).toBeDisabled();
     await page.unrouteAll({ behavior: "ignoreErrors" });
   }
+});
+
+test("restores focus after closing a build dialog with the keyboard", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ...fixtureData, builds: [] }),
+    }),
+  );
+  await page.goto("/c/SD");
+
+  const createButton = page.getByRole("button", { name: "Create build" });
+  await createButton.click();
+  const dialog = page.getByRole("dialog", { name: "Create build" });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(createButton).toBeFocused();
+});
+
+test("preserves pending changes through a two-device conflict and explicit reload", async ({
+  browser,
+}) => {
+  let persisted = structuredClone(fixtureData) as AppData;
+  const desktopContext = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
+  const phoneContext = await browser.newContext({
+    viewport: { width: 320, height: 568 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  const contexts = [desktopContext, phoneContext];
+
+  try {
+    for (const context of contexts) {
+      await context.route("**/api/data", async (route) => {
+        if (route.request().method() === "GET") {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(persisted),
+          });
+          return;
+        }
+        const body = JSON.parse(route.request().postData() ?? "{}") as {
+          baseRevision: number;
+          data: AppData;
+        };
+        if (body.baseRevision !== persisted.revision) {
+          await route.fulfill({
+            status: 409,
+            contentType: "application/json",
+            body: JSON.stringify({ revision: persisted.revision }),
+          });
+          return;
+        }
+        persisted = { ...body.data, revision: persisted.revision + 1 };
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ revision: persisted.revision }),
+        });
+      });
+    }
+
+    const desktop = await desktopContext.newPage();
+    const phone = await phoneContext.newPage();
+    await phone.goto("/c/SD");
+    await desktop.goto("/c/SD");
+
+    await desktop
+      .locator("li")
+      .filter({ hasText: "Freeze control" })
+      .getByRole("button", { name: "Rename" })
+      .click();
+    const desktopDialog = desktop.getByRole("dialog", { name: "Rename build" });
+    const desktopName = desktopDialog.getByLabel("Build name");
+    await expect(desktopName).toHaveValue("Freeze control");
+    await desktopName.fill("Desktop plan");
+    await expect(desktopName).toHaveValue("Desktop plan");
+    await desktopDialog.getByRole("button", { name: "Rename build" }).click();
+    await expect.poll(() => persisted.builds[0]!.name).toBe("Desktop plan");
+
+    await phone
+      .locator("li")
+      .filter({ hasText: "Freeze control" })
+      .getByRole("button", { name: "Rename" })
+      .click();
+    const phoneDialog = phone.getByRole("dialog", { name: "Rename build" });
+    const phoneName = phoneDialog.getByLabel("Build name");
+    await expect(phoneName).toHaveValue("Freeze control");
+    await phoneName.fill("Phone plan");
+    await expect(phoneName).toHaveValue("Phone plan");
+    await phoneDialog.getByRole("button", { name: "Rename build" }).click();
+    await expect(phone.locator(".save-feedback.conflict")).toBeVisible();
+
+    const downloadPromise = phone.waitForEvent("download");
+    await phone
+      .locator(".save-feedback.conflict")
+      .getByRole("button", { name: "Download pending JSON" })
+      .click();
+    const download = await downloadPromise;
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    expect(
+      JSON.parse(await readFile(downloadPath!, "utf8")).builds[0].name,
+    ).toBe("Phone plan");
+
+    phone.once("dialog", (dialog) => void dialog.accept());
+    await phone
+      .locator(".save-feedback.conflict")
+      .getByRole("button", { name: "Reload" })
+      .click();
+    await expect(
+      phone.getByText("Desktop plan", { exact: true }),
+    ).toBeVisible();
+    expect(persisted.builds[0]!.name).toBe("Desktop plan");
+  } finally {
+    await Promise.all(contexts.map((context) => context.close()));
+  }
+});
+
+test("supports keyboard-only card activation and visible focus", async ({
+  page,
+}) => {
+  await page.goto("/__test/cards");
+  const firstAction = page.locator(".card-action").first();
+  await firstAction.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Selected" }),
+  ).toContainText(
+    (await firstAction.getAttribute("aria-label"))?.replace("Open ", "") ?? "",
+  );
+
+  await page.keyboard.press("Tab");
+  const firstEnlarge = page.getByRole("button", { name: /Enlarge/ }).first();
+  await expect(firstEnlarge).toBeFocused();
+  await expect(firstEnlarge).toHaveCSS("outline-style", "solid");
+});
+
+test("uses instant level-up scrolling under reduced motion", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    const state = window as Window & {
+      lastScrollBehavior?: ScrollBehavior;
+    };
+    const originalScrollTo = window.scrollTo.bind(window);
+    window.scrollTo = ((x: number | ScrollToOptions, y?: number) => {
+      if (typeof x === "object" && x !== null) {
+        state.lastScrollBehavior = x.behavior ?? "auto";
+      }
+      if (typeof x === "number") {
+        originalScrollTo(x, y ?? 0);
+      } else {
+        originalScrollTo(x);
+      }
+    }) as typeof window.scrollTo;
+  });
+  let persisted = structuredClone(levelUpFixtureData) as AppData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}") as {
+      data: AppData;
+    };
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(page.getByRole("heading", { name: "Your deck" })).toBeFocused();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as Window & { lastScrollBehavior?: ScrollBehavior })
+            .lastScrollBehavior,
+      ),
+    )
+    .toBe("auto");
+  expect(
+    await page.evaluate(() => {
+      const value = getComputedStyle(
+        document.documentElement,
+      ).transitionDuration;
+      const duration = Number.parseFloat(value);
+      return value.endsWith("ms") ? duration : duration * 1000;
+    }),
+  ).toBeLessThanOrEqual(0.01);
+});
+
+test("passes automated accessibility audits across the build workspace", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  const expectAccessible = async () => {
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  };
+
+  await page.goto("/c/SD");
+  await expect(page.getByText("Freeze control", { exact: true })).toBeVisible();
+  await expectAccessible();
+
+  await page.getByRole("button", { name: "Create build" }).click();
+  const createDialog = page.getByRole("dialog", { name: "Create build" });
+  await expect(createDialog).toBeVisible();
+  await expectAccessible();
+  await page.keyboard.press("Escape");
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
+  await expect(
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeVisible();
+  await expectAccessible();
+  await page
+    .getByRole("button", { name: /Enlarge/ })
+    .first()
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expectAccessible();
+  await page.keyboard.press("Escape");
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.getByRole("heading", { name: "Level up" })).toBeVisible();
+  await expectAccessible();
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+  await expect(
+    page.getByRole("heading", { name: "Build overview" }),
+  ).toBeVisible();
+  await expectAccessible();
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/motivations`);
+  await expect(
+    page.getByRole("heading", { name: "Build motivations" }),
+  ).toBeVisible();
+  await expectAccessible();
 });
