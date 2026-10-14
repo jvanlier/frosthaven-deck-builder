@@ -72,15 +72,21 @@ wait_for_health() {
 }
 
 wait_for_health
-[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app id -un)" == "node" ]]
-[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app id -u)" == "1000" ]]
+echo "Container healthcheck passed"
+runtime_user=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app id -un)
+runtime_uid=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app id -u)
+echo "Container runtime user: ${runtime_user@Q} (${runtime_uid@Q})"
+[[ "$runtime_user" == "node" ]]
+[[ "$runtime_uid" == "1000" ]]
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
   test -f /app/dist/server/index.js
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
   test -f /app/dist/shared/data/characters/SD.json
+echo "Built server and catalog are present"
 curl --fail --silent "$BASE_URL/" | grep -Fq "Frosthaven"
 curl --fail --silent "$BASE_URL/cards/SD/fh-snowball.jpeg" >/dev/null
 curl --fail --silent "$BASE_URL/icons/SD.png" >/dev/null
+echo "Built frontend and local assets are reachable"
 
 DATA='{"schemaVersion":1,"revision":0,"builds":[]}'
 curl --fail --silent --request PUT "$BASE_URL/api/data" \
