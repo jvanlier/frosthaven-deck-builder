@@ -1556,6 +1556,12 @@ h2 {
   text-align: center;
 }
 
+.overview-summary-row td {
+  max-width: 14rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
 .overview-summary-row th {
   position: sticky;
   left: 0;
