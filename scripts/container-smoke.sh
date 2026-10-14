@@ -109,16 +109,21 @@ echo "Backup-triggering data write: HTTP $status $(cat "$response_file")"
 [[ "$status" == "200" ]]
 grep -Fq '"revision":2' "$response_file"
 rm -f "$response_file"
-[[ "$(find "$DATA_DIR/backups" -maxdepth 1 -type f -name 'appdata-*.json' | wc -l)" -eq 1 ]]
-[[ "$(stat -c '%u:%g' "$DATA_DIR/appdata.json")" == "1000:1000" ]]
-backup_file=$(find "$DATA_DIR/backups" -maxdepth 1 -type f -name 'appdata-*.json' -print -quit)
-[[ "$(stat -c '%u:%g' "$backup_file")" == "1000:1000" ]]
+[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  find /data/backups -maxdepth 1 -type f -name 'appdata-*.json' | wc -l)" -eq 1 ]]
+[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  stat -c '%u:%g' /data/appdata.json)" == "1000:1000" ]]
+backup_file=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  find /data/backups -maxdepth 1 -type f -name 'appdata-*.json' -print -quit)
+[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  stat -c '%u:%g' "$backup_file")" == "1000:1000" ]]
 
 # Recreating the service must retain both appdata.json and its predecessor backup.
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" up -d --force-recreate app
 wait_for_health
 curl --fail --silent "$BASE_URL/api/data" | grep -Fq '"revision":2'
-[[ "$(find "$DATA_DIR/backups" -maxdepth 1 -type f -name 'appdata-*.json' | wc -l)" -eq 1 ]]
+[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  find /data/backups -maxdepth 1 -type f -name 'appdata-*.json' | wc -l)" -eq 1 ]]
 
 # A mount without directory write permission must fail explicitly rather than reset data.
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" down --remove-orphans
