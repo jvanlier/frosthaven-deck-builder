@@ -764,7 +764,7 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   await firstEnlarge.click();
   await dialog.getByRole("button", { name: firstLabel! }).click();
   await expect(dialog).toBeHidden();
-  await expect(firstAction).toBeFocused();
+  await expect(firstEnlarge).toBeFocused();
 
   const fallbackImage = page
     .locator(".card-tile")
