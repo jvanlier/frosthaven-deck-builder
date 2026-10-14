@@ -23,6 +23,7 @@ ENV NODE_ENV=production \
 
 WORKDIR /app
 
+COPY --from=production-dependencies --chown=node:node /app/package.json ./package.json
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 
