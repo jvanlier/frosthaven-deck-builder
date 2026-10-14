@@ -51,6 +51,57 @@ On Linux machines that also need Playwright's system packages, use
 The production build writes the browser bundle to `dist/client` and the
 Node server to `dist/server/index.js`.
 
+### Raspberry Pi deployment
+
+The repository includes a multi-stage `node:22-alpine` image and a one-service Compose
+configuration. The runtime image contains only production dependencies and the built
+server/client assets, runs as the non-root `node` user, and stores application data in
+`/data`.
+
+On the Pi, create the bind mount first and give it to the runtime user (UID/GID 1000):
+
+```sh
+mkdir -p data
+sudo chown -R 1000:1000 data
+chmod 700 data
+docker compose up -d --build
+```
+
+Do not run the container as root or make the data directory world-writable. If an
+existing mount is root-owned, stop the service, correct its ownership, and start it
+again. The default `PORT=8080` and `DATA_DIR=/data` can be changed in a `.env` file;
+`./data` remains the host-side bind mount. For example, `PORT=8088` publishes and uses
+port 8088, while `DATA_DIR=/data` is the normal container path.
+
+Check the service and health endpoint with `docker compose ps` and
+`curl http://127.0.0.1:8080/api/health`. Inspect startup or storage errors with
+`docker compose logs --follow app`. Keep the published port reachable only from the
+trusted LAN/VPN: do not configure router port forwarding or expose it directly to the
+internet. The app intentionally provides no authentication or TLS.
+
+For an upgrade, copy the host data directory to a host-level backup, then run
+`docker compose up -d --build` again. Host-level backups are the operator's
+responsibility; include `data/appdata.json` and `data/backups/` and keep them off the Pi.
+For example, stop writes before making a tar archive and start the service again:
+
+```sh
+docker compose stop
+tar -C . -czf frosthaven-data-$(date +%Y%m%d).tar.gz data
+docker compose start
+```
+
+To recover an exported JSON file, use the app's import action. To recover a predecessor
+backup, stop the service, copy the selected `data/backups/appdata-*.json` over
+`data/appdata.json`, restore ownership with `sudo chown 1000:1000 data/appdata.json`,
+and start the service. Preserve the existing directory as a separate host backup before
+replacing anything.
+
+The disposable arm64 packaging check can be run where Docker and Compose are available:
+
+```sh
+npm run test:container
+```
+
 ### Catalog import
 
 The committed Snowdancer catalog and all runtime artwork are local. To refresh
