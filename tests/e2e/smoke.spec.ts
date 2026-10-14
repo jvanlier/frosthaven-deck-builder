@@ -2550,17 +2550,57 @@ test("uses instant level-up scrolling under reduced motion", async ({
   ).toBeLessThanOrEqual(0.01);
 });
 
-test("passes an automated accessibility audit for the build workspace", async ({
+test("passes automated accessibility audits across the build workspace", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ ...fixtureData, builds: [] }),
+      body: JSON.stringify(deckFixtureData),
     }),
   );
+  const expectAccessible = async () => {
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  };
+
   await page.goto("/c/SD");
-  const results = await new AxeBuilder({ page }).analyze();
-  expect(results.violations).toEqual([]);
+  await expect(page.getByText("Freeze control", { exact: true })).toBeVisible();
+  await expectAccessible();
+
+  await page.getByRole("button", { name: "Create build" }).click();
+  const createDialog = page.getByRole("dialog", { name: "Create build" });
+  await expect(createDialog).toBeVisible();
+  await expectAccessible();
+  await page.keyboard.press("Escape");
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
+  await expect(
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeVisible();
+  await expectAccessible();
+  await page
+    .getByRole("button", { name: /Enlarge/ })
+    .first()
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expectAccessible();
+  await page.keyboard.press("Escape");
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.getByRole("heading", { name: "Level up" })).toBeVisible();
+  await expectAccessible();
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+  await expect(
+    page.getByRole("heading", { name: "Build overview" }),
+  ).toBeVisible();
+  await expectAccessible();
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/motivations`);
+  await expect(
+    page.getByRole("heading", { name: "Build motivations" }),
+  ).toBeVisible();
+  await expectAccessible();
 });
