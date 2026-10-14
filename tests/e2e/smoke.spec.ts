@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import type { AppData } from "../../src/shared/schema";
 
@@ -759,6 +760,11 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(firstEnlarge).toBeFocused();
+
+  await firstEnlarge.click();
+  await dialog.getByRole("button", { name: firstLabel! }).click();
+  await expect(dialog).toBeHidden();
+  await expect(firstAction).toBeFocused();
 
   const fallbackImage = page
     .locator(".card-tile")
@@ -2332,5 +2338,123 @@ test("pauses note editors after save failures and conflicts", async ({
       page.getByLabel("Motivation for Birds in a Tempest (Add motivation)"),
     ).toBeDisabled();
     await page.unrouteAll({ behavior: "ignoreErrors" });
+  }
+});
+
+test("restores focus after closing a build dialog with the keyboard", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ...fixtureData, builds: [] }),
+    }),
+  );
+  await page.goto("/c/SD");
+
+  const createButton = page.getByRole("button", { name: "Create build" });
+  await createButton.click();
+  const dialog = page.getByRole("dialog", { name: "Create build" });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(createButton).toBeFocused();
+});
+
+test("preserves pending changes through a two-device conflict and explicit reload", async ({
+  browser,
+}) => {
+  let persisted = structuredClone(fixtureData) as AppData;
+  const desktopContext = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
+  const phoneContext = await browser.newContext({
+    viewport: { width: 320, height: 568 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  const contexts = [desktopContext, phoneContext];
+
+  try {
+    for (const context of contexts) {
+      await context.route("**/api/data", async (route) => {
+        if (route.request().method() === "GET") {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(persisted),
+          });
+          return;
+        }
+        const body = JSON.parse(route.request().postData() ?? "{}") as {
+          baseRevision: number;
+          data: AppData;
+        };
+        if (body.baseRevision !== persisted.revision) {
+          await route.fulfill({
+            status: 409,
+            contentType: "application/json",
+            body: JSON.stringify({ revision: persisted.revision }),
+          });
+          return;
+        }
+        persisted = { ...body.data, revision: persisted.revision + 1 };
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ revision: persisted.revision }),
+        });
+      });
+    }
+
+    const desktop = await desktopContext.newPage();
+    const phone = await phoneContext.newPage();
+    await phone.goto("/c/SD");
+    await desktop.goto("/c/SD");
+
+    await desktop
+      .locator("li")
+      .filter({ hasText: "Freeze control" })
+      .getByRole("button", { name: "Rename" })
+      .click();
+    const desktopDialog = desktop.getByRole("dialog", { name: "Rename build" });
+    await desktopDialog.getByLabel("Build name").fill("Desktop plan");
+    await desktopDialog.getByRole("button", { name: "Rename build" }).click();
+    await expect.poll(() => persisted.builds[0]!.name).toBe("Desktop plan");
+
+    await phone
+      .locator("li")
+      .filter({ hasText: "Freeze control" })
+      .getByRole("button", { name: "Rename" })
+      .click();
+    const phoneDialog = phone.getByRole("dialog", { name: "Rename build" });
+    await phoneDialog.getByLabel("Build name").fill("Phone plan");
+    await phoneDialog.getByRole("button", { name: "Rename build" }).click();
+    await expect(phone.locator(".save-feedback.conflict")).toBeVisible();
+
+    const downloadPromise = phone.waitForEvent("download");
+    await phone
+      .locator(".save-feedback.conflict")
+      .getByRole("button", { name: "Download pending JSON" })
+      .click();
+    const download = await downloadPromise;
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    expect(
+      JSON.parse(await readFile(downloadPath!, "utf8")).builds[0].name,
+    ).toBe("Phone plan");
+
+    phone.once("dialog", (dialog) => void dialog.accept());
+    await phone
+      .locator(".save-feedback.conflict")
+      .getByRole("button", { name: "Reload" })
+      .click();
+    await expect(
+      phone.getByText("Desktop plan", { exact: true }),
+    ).toBeVisible();
+    expect(persisted.builds[0]!.name).toBe("Desktop plan");
+  } finally {
+    await Promise.all(contexts.map((context) => context.close()));
   }
 });

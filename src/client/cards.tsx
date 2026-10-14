@@ -19,6 +19,7 @@ export function CardTile({
   onAction,
 }: CardTileProps) {
   const [enlarged, setEnlarged] = useState(false);
+  const actionButtonRef = useRef<HTMLButtonElement>(null);
   const enlargeButtonRef = useRef<HTMLButtonElement>(null);
   const level = formatCardLevel(card);
   const alt = `${card.name}, level ${level}`;
@@ -30,6 +31,7 @@ export function CardTile({
   return (
     <article className="card-tile" data-card-id={card.id}>
       <button
+        ref={actionButtonRef}
         className="card-action"
         type="button"
         onClick={onAction}
@@ -62,6 +64,7 @@ export function CardTile({
         onAction={() => {
           setEnlarged(false);
           onAction?.();
+          requestAnimationFrame(() => actionButtonRef.current?.focus());
         }}
         onClose={closeDialog}
         disabled={disabled}
