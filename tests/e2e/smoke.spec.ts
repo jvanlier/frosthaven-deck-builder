@@ -872,12 +872,12 @@ test("shows overview membership, applied markers, swap counts and note navigatio
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
   await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);
+  const summaryCells = page.locator(".overview-summary-row td");
+  await expect(summaryCells).toHaveCount(3);
   expect(
-    await page
-      .locator(".overview-summary-row td")
-      .evaluateAll((cells) =>
-        cells.map((cell) => cell.scrollWidth > cell.clientWidth + 1),
-      ),
+    await summaryCells.evaluateAll((cells) =>
+      cells.map((cell) => cell.scrollWidth > cell.clientWidth + 1),
+    ),
   ).toEqual([false, false, false]);
 
   await expect(page.getByLabel("Tornado: In deck; Picked here")).toBeVisible();
