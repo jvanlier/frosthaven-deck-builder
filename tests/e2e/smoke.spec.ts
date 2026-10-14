@@ -2420,7 +2420,10 @@ test("preserves pending changes through a two-device conflict and explicit reloa
       .getByRole("button", { name: "Rename" })
       .click();
     const desktopDialog = desktop.getByRole("dialog", { name: "Rename build" });
-    await desktopDialog.getByLabel("Build name").fill("Desktop plan");
+    const desktopName = desktopDialog.getByLabel("Build name");
+    await expect(desktopName).toHaveValue("Freeze control");
+    await desktopName.fill("Desktop plan");
+    await expect(desktopName).toHaveValue("Desktop plan");
     await desktopDialog.getByRole("button", { name: "Rename build" }).click();
     await expect.poll(() => persisted.builds[0]!.name).toBe("Desktop plan");
 
@@ -2430,7 +2433,10 @@ test("preserves pending changes through a two-device conflict and explicit reloa
       .getByRole("button", { name: "Rename" })
       .click();
     const phoneDialog = phone.getByRole("dialog", { name: "Rename build" });
-    await phoneDialog.getByLabel("Build name").fill("Phone plan");
+    const phoneName = phoneDialog.getByLabel("Build name");
+    await expect(phoneName).toHaveValue("Freeze control");
+    await phoneName.fill("Phone plan");
+    await expect(phoneName).toHaveValue("Phone plan");
     await phoneDialog.getByRole("button", { name: "Rename build" }).click();
     await expect(phone.locator(".save-feedback.conflict")).toBeVisible();
 
