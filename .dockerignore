@@ -1,0 +1,13 @@
+node_modules
+.git
+.gitignore
+.DS_Store
+data
+backups
+dist
+playwright-report
+test-results
+tests
+docs/mockup
+scripts/fixtures
+src/**/*.test.ts

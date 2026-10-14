@@ -13,6 +13,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:e2e": "playwright test",
+    "test:container": "bash scripts/container-smoke.sh",
     "build": "tsc -p tsconfig.server.json && chmod +x dist/server/index.js && vite build",
     "import:cards": "tsx scripts/import-cards.ts"
   },
