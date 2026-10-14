@@ -5,8 +5,11 @@ ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 PROJECT="frosthaven-smoke-$$"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
 OVERRIDE_FILE=$(mktemp)
-DATA_DIR=$(mktemp -d)
+HOST_DATA_DIR=$(mktemp -d)
 PORT=${SMOKE_PORT:-18080}
+export HOST_IP=127.0.0.1
+export PORT
+export DATA_DIR=/data
 IMAGE="frosthaven-deck-builder:smoke-$$"
 BASE_URL="http://127.0.0.1:${PORT}"
 HOST_UID=$(id -u)
@@ -15,13 +18,13 @@ response_file=""
 
 cleanup() {
   if command -v docker >/dev/null 2>&1 && docker image inspect "$IMAGE" >/dev/null 2>&1; then
-    docker run --rm --user 0 --volume "$DATA_DIR:/data" "$IMAGE" \
+    docker run --rm --user 0 --volume "$HOST_DATA_DIR:/data" "$IMAGE" \
       chown -R "$HOST_UID:$HOST_GID" /data 2>/dev/null || true
   fi
-  chmod u+rwx "$DATA_DIR" 2>/dev/null || true
+  chmod u+rwx "$HOST_DATA_DIR" 2>/dev/null || true
   docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" down --remove-orphans 2>/dev/null || true
   rm -f "$OVERRIDE_FILE" "$response_file"
-  rm -rf "$DATA_DIR"
+  rm -rf "$HOST_DATA_DIR"
 }
 trap cleanup EXIT
 
@@ -36,18 +39,16 @@ cat >"$OVERRIDE_FILE" <<EOF
 services:
   app:
     image: $IMAGE
-    ports:
-      - "127.0.0.1:${PORT}:8080"
     volumes:
-      - "${DATA_DIR}:/data"
-    environment:
-      PORT: "8080"
-      DATA_DIR: /data
+      - "${HOST_DATA_DIR}:/data"
 EOF
 
 cd "$ROOT_DIR"
+compose_config=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" config --format json)
+[[ "$(jq -r '.services.app.ports | length' <<<"$compose_config")" == "1" ]]
+[[ "$(jq -r '.services.app.ports[0].host_ip' <<<"$compose_config")" == "127.0.0.1" ]]
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" build app
-docker run --rm --user 0 --volume "$DATA_DIR:/data" "$IMAGE" chown 1000:1000 /data
+docker run --rm --user 0 --volume "$HOST_DATA_DIR:/data" "$IMAGE" chown 1000:1000 /data
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" up -d --force-recreate app
 
 wait_for_health() {
@@ -127,13 +128,21 @@ curl --fail --silent "$BASE_URL/api/data" | grep -Fq '"revision":2'
 
 # A mount without directory write permission must fail explicitly rather than reset data.
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" down --remove-orphans
-docker run --rm --user 0 --volume "$DATA_DIR:/data" "$IMAGE" chmod a-w /data
+docker run --rm --user 0 --volume "$HOST_DATA_DIR:/data" "$IMAGE" chmod a-w /data
 docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" up -d app
 wait_for_health
+current_data_checksum=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  sha256sum /data/appdata.json | awk '{print $1}')
+predecessor_checksum=$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  sha256sum "$backup_file" | awk '{print $1}')
 status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
   --request PUT "$BASE_URL/api/data" \
   --header 'content-type: application/json' \
   --data '{"baseRevision":2,"data":{"schemaVersion":1,"revision":2,"builds":[]}}' || true)
 [[ "$status" == "500" ]]
+[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  sha256sum /data/appdata.json | awk '{print $1}')" == "$current_data_checksum" ]]
+[[ "$(docker compose -p "$PROJECT" -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" exec -T app \
+  sha256sum "$backup_file" | awk '{print $1}')" == "$predecessor_checksum" ]]
 
 echo "Container smoke test passed"
