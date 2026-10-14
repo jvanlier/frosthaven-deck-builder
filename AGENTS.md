@@ -32,6 +32,7 @@ After #4, use these canonical commands (that ticket must establish them):
 
 ```sh
 npm ci
+npx playwright install chromium webkit
 prek run --all-files
 npm run typecheck
 npm run lint
