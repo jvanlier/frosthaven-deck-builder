@@ -2479,19 +2479,60 @@ test("supports keyboard-only card activation and visible focus", async ({
   await expect(firstEnlarge).toHaveCSS("outline-style", "solid");
 });
 
-test("applies reduced-motion behavior", async ({ page }) => {
+test("uses instant level-up scrolling under reduced motion", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/__test/cards");
+  await page.addInitScript(() => {
+    const state = window as Window & {
+      lastScrollBehavior?: ScrollBehavior;
+    };
+    const originalScrollTo = window.scrollTo.bind(window);
+    window.scrollTo = ((x: number | ScrollToOptions, y?: number) => {
+      if (typeof x === "object" && x !== null) {
+        state.lastScrollBehavior = x.behavior ?? "auto";
+      }
+      if (typeof x === "number") {
+        originalScrollTo(x, y ?? 0);
+      } else {
+        originalScrollTo(x);
+      }
+    }) as typeof window.scrollTo;
+  });
+  let persisted = structuredClone(levelUpFixtureData) as AppData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}") as {
+      data: AppData;
+    };
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
+  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(page.getByRole("heading", { name: "Your deck" })).toBeFocused();
   await expect
     .poll(() =>
-      page.evaluate(() => ({
-        reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)")
-          .matches,
-        scrollBehavior: getComputedStyle(document.documentElement)
-          .scrollBehavior,
-      })),
+      page.evaluate(
+        () =>
+          (window as Window & { lastScrollBehavior?: ScrollBehavior })
+            .lastScrollBehavior,
+      ),
     )
-    .toMatchObject({ reducedMotion: true, scrollBehavior: "auto" });
+    .toBe("auto");
   expect(
     await page.evaluate(() => {
       const value = getComputedStyle(
