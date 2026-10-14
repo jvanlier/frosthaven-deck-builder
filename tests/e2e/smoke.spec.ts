@@ -1686,3 +1686,333 @@ test("offers sequential legal picks for a higher starting level", async ({
     page.getByRole("button", { name: "Pick Polar Vortex" }),
   ).toBeVisible();
 });
+
+test("edits motivations and guidance from the notes and card detail views", async ({
+  page,
+}) => {
+  let persisted = structuredClone(deckFixtureData) as AppData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page.getByRole("link", { name: "Notes" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/motivations`);
+  await expect(
+    page.getByRole("heading", { name: "Build motivations" }),
+  ).toBeVisible();
+  const addMotivation = page.getByLabel(
+    "Motivation for Added: Birds in a Tempest",
+  );
+  await expect(addMotivation).toHaveValue("The best level-up pick.");
+  await addMotivation.fill("<script>alert(1)</script>\nPrefer the top action.");
+  await expect
+    .poll(async () => persisted.builds[0]?.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        cardId: "birds-in-a-tempest",
+        kind: "add",
+        text: "<script>alert(1)</script>\nPrefer the top action.",
+      }),
+    );
+  const dropMotivation = page.getByLabel("Motivation for Dropped: Whiteout");
+  const originalDropTimestamp = persisted.builds[0]!.motivations.find(
+    (motivation) =>
+      motivation.cardId === "whiteout" && motivation.kind === "drop",
+  )!.updatedAt;
+  await dropMotivation.fill("Updated drop reason");
+  await expect
+    .poll(async () =>
+      persisted.builds[0]?.motivations.find(
+        (motivation) =>
+          motivation.cardId === "whiteout" && motivation.kind === "drop",
+      ),
+    )
+    .toMatchObject({ text: "Updated drop reason" });
+  expect(
+    persisted.builds[0]!.motivations.find(
+      (motivation) =>
+        motivation.cardId === "whiteout" && motivation.kind === "drop",
+    )!.updatedAt,
+  ).not.toBe(originalDropTimestamp);
+  await dropMotivation.fill("");
+  await expect
+    .poll(async () =>
+      persisted.builds[0]?.motivations.some(
+        (motivation) =>
+          motivation.cardId === "whiteout" && motivation.kind === "drop",
+      ),
+    )
+    .toBe(false);
+
+  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
+  const deckChangeMotivation = page.getByLabel(
+    "Motivation for Birds in a Tempest",
+  );
+  await deckChangeMotivation.fill("Deck change reason");
+  await expect
+    .poll(
+      async () =>
+        persisted.builds[0]?.motivations.find(
+          (motivation) =>
+            motivation.cardId === "birds-in-a-tempest" &&
+            motivation.kind === "add",
+        )?.text,
+    )
+    .toBe("Deck change reason");
+  await page
+    .getByRole("button", { name: "Open Birds in a Tempest details" })
+    .click();
+  const cardDetailMotivation = page.getByLabel(
+    "Motivation for Birds in a Tempest (Add motivation)",
+  );
+  await cardDetailMotivation.fill("Card detail reason");
+  await expect
+    .poll(
+      async () =>
+        persisted.builds[0]?.motivations.find(
+          (motivation) =>
+            motivation.cardId === "birds-in-a-tempest" &&
+            motivation.kind === "add",
+        )?.text,
+    )
+    .toBe("Card detail reason");
+  const guidance = page.getByLabel("Guidance for Birds in a Tempest");
+  await guidance.fill("<b>Top</b>\nPair with Cold Therapy.");
+  await expect
+    .poll(async () => persisted.builds[0]?.guidance["birds-in-a-tempest"]?.text)
+    .toBe("<b>Top</b>\nPair with Cold Therapy.");
+  await expect(
+    page.getByText("<b>Top</b>\nPair with Cold Therapy."),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
+  await page.getByRole("checkbox", { name: "Show guidance" }).check();
+  await expect(
+    page
+      .locator(".guidance-note .plain-text")
+      .filter({ hasText: "<b>Top</b>\nPair with Cold Therapy." }),
+  ).toBeVisible();
+  await expect(page.locator(".guidance-note b")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Open Birds in a Tempest details" })
+    .click();
+  await page.reload();
+  await expect(guidance).toHaveValue("<b>Top</b>\nPair with Cold Therapy.");
+  await expect(cardDetailMotivation).toHaveValue("Card detail reason");
+
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
+  await page
+    .locator("li")
+    .filter({ hasText: "Freeze control" })
+    .getByRole("button", { name: "Copy" })
+    .click();
+  const copyDialog = page.getByRole("dialog", { name: "Copy build" });
+  await copyDialog.getByLabel("Build name").fill("Independent guidance copy");
+  await copyDialog.getByRole("button", { name: "Copy build" }).click();
+  await expect
+    .poll(() =>
+      persisted.builds.find(
+        (build) => build.name === "Independent guidance copy",
+      ),
+    )
+    .toBeDefined();
+  const copiedBuild = persisted.builds.find(
+    (build) => build.name === "Independent guidance copy",
+  )!;
+  await page.goto(`/c/SD/b/${copiedBuild.id}/l/2/card/birds-in-a-tempest`);
+  const copiedGuidance = page.getByLabel("Guidance for Birds in a Tempest");
+  await expect(copiedGuidance).toHaveValue(
+    "<b>Top</b>\nPair with Cold Therapy.",
+  );
+  await copiedGuidance.fill("Copy-only guidance");
+  await expect
+    .poll(
+      async () =>
+        persisted.builds.find((build) => build.id === copiedBuild.id)?.guidance[
+          "birds-in-a-tempest"
+        ]?.text,
+    )
+    .toBe("Copy-only guidance");
+  expect(
+    persisted.builds.find((build) => build.id === fixtureBuildId)?.guidance[
+      "birds-in-a-tempest"
+    ]?.text,
+  ).toBe("<b>Top</b>\nPair with Cold Therapy.");
+});
+
+test("edits starting exclusion and initial-pick motivations", async ({
+  page,
+}) => {
+  const initialPickData = structuredClone(startThreeFixtureData) as AppData;
+  initialPickData.builds[0]!.startDeck = [
+    "blizzard",
+    "chilling-impact",
+    "cold-therapy",
+    "cross-winds",
+    "enticing-breeze",
+    "frigid-growth",
+    "gathering-force",
+    "lifting-gust",
+    "natures-breath",
+    "snowball",
+    "whiteout",
+  ];
+  let persisted = initialPickData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  const buildId = persisted.builds[0]!.id;
+  await page.goto(`/c/SD/b/${buildId}/l/3/start`);
+  await page.getByText(/Not in starting deck/).click();
+  const exclusion = page.getByLabel("Why exclude Cold Snap?");
+  await exclusion.fill("Not for this build.");
+  await expect
+    .poll(async () => persisted.builds[0]?.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        level: 3,
+        cardId: "cold-snap",
+        kind: "exclude",
+        text: "Not for this build.",
+      }),
+    );
+
+  await page.getByRole("button", { name: "Change pick" }).first().click();
+  await expect(page.getByLabel("Why add Birds in a Tempest?")).toBeVisible();
+  await page.getByLabel("Why add Birds in a Tempest?").fill("Slot two reason");
+  await expect
+    .poll(async () => persisted.builds[0]?.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        level: 3,
+        cardId: "birds-in-a-tempest",
+        kind: "add",
+        text: "Slot two reason",
+      }),
+    );
+});
+
+test("hides and restores a motivation without deleting its stored note", async ({
+  page,
+}) => {
+  let persisted = structuredClone(deckFixtureData) as AppData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
+  await page
+    .getByRole("button", { name: "Remove Whiteout from starting deck" })
+    .click();
+  await expect
+    .poll(() => persisted.builds[0]?.startDeck)
+    .not.toContain("whiteout");
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(
+    page
+      .locator(".change-list p.plain-text")
+      .filter({ hasText: "The weakest initiative." }),
+  ).toHaveCount(0);
+  expect(persisted.builds[0]?.motivations).toContainEqual(
+    expect.objectContaining({ cardId: "whiteout", kind: "drop" }),
+  );
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
+  await page
+    .getByRole("button", { name: "Add Whiteout to starting deck" })
+    .click();
+  await expect.poll(() => persisted.builds[0]?.startDeck).toContain("whiteout");
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(
+    page
+      .locator(".change-list p.plain-text")
+      .filter({ hasText: "The weakest initiative." }),
+  ).toBeVisible();
+});
+
+test("pauses note editors after save failures and conflicts", async ({
+  page,
+}) => {
+  for (const response of [503, 409] as const) {
+    const persisted = structuredClone(deckFixtureData) as AppData;
+    await page.route("**/api/data", async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(persisted),
+        });
+        return;
+      }
+      if (response === 409) {
+        await route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify({ revision: 1 }),
+        });
+      } else {
+        await route.fulfill({ status: response, body: "unavailable" });
+      }
+    });
+
+    await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/card/birds-in-a-tempest`);
+    await page
+      .getByLabel("Guidance for Birds in a Tempest")
+      .fill("Pending note");
+    await expect(page.getByRole("alert")).toContainText(
+      response === 409 ? "Changed on another device" : "Error saving",
+    );
+    await expect(
+      page.getByLabel("Guidance for Birds in a Tempest"),
+    ).toBeDisabled();
+    await expect(
+      page.getByLabel("Motivation for Birds in a Tempest (Add motivation)"),
+    ).toBeDisabled();
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  }
+});

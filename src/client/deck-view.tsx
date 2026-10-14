@@ -2,12 +2,27 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardDialog, CardGrid, CardImage } from "./cards";
 import { useAppData } from "./app-data";
+import {
+  GuidanceInput,
+  MotivationInput,
+  formatNoteTimestamp,
+  updateBuildData,
+} from "./notes";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
 import { levelUpPath } from "./level-up";
 import { characters } from "../shared/data/characters/index.js";
-import { deleteHighestLevel } from "../shared/builds.js";
-import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
+import {
+  deleteHighestLevel,
+  upsertMotivation,
+  upsertNote,
+} from "../shared/builds.js";
+import {
+  applicableMotivationContexts,
+  replayBuild,
+  type ApplicableMotivationContext,
+  type RuleLevelState,
+} from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
 import type { Build, Motivation } from "../shared/schema/index.js";
 
@@ -201,10 +216,13 @@ export function DeckView({
                   stateLabel={() => "In deck"}
                   onAction={openCardDetail}
                 />
-                {showGuidance && build.guidance[card.id] ? (
+                {showGuidance ? (
                   <div className="guidance-note">
                     <strong>Guidance</strong>
-                    <p className="plain-text">{build.guidance[card.id].text}</p>
+                    <p className="plain-text">
+                      {build.guidance[card.id]?.text ??
+                        "No guidance recorded for this card yet."}
+                    </p>
                   </div>
                 ) : null}
               </div>
@@ -267,10 +285,45 @@ function CardDetailView({
   card: Card;
   state: RuleLevelState;
 }) {
+  const { canMutate, updateData } = useAppData();
   const guidance = build.guidance[card.id];
-  const motivations = state.activeMotivations.filter(
-    (motivation) => motivation.cardId === card.id,
+  const contexts = applicableMotivationContexts(
+    build,
+    character,
+    state.level,
+    card.id,
   );
+
+  function updateGuidance(text: string): void {
+    if (!canMutate) {
+      return;
+    }
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertNote(currentBuild, card.id, text),
+      ),
+    );
+  }
+
+  function updateMotivation(
+    context: ApplicableMotivationContext,
+    text: string,
+  ): void {
+    if (!canMutate) {
+      return;
+    }
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertMotivation(currentBuild, {
+          kind: context.kind,
+          cardId: card.id,
+          text,
+          level: state.level,
+          forLevel: context.forLevel,
+        }),
+      ),
+    );
+  }
 
   return (
     <main
@@ -309,25 +362,48 @@ function CardDetailView({
           </p>
           <section className="content-card" aria-labelledby="guidance-heading">
             <h3 id="guidance-heading">Guidance</h3>
-            {guidance ? (
-              <p className="plain-text">{guidance.text}</p>
-            ) : (
-              <p>No guidance has been recorded for this card yet.</p>
-            )}
+            <GuidanceInput
+              card={card}
+              value={guidance?.text ?? ""}
+              disabled={!canMutate}
+              onChange={updateGuidance}
+            />
+            {!guidance ? <p>No guidance has been recorded yet.</p> : null}
           </section>
-          {motivations.length > 0 ? (
+          {contexts.length > 0 ? (
             <section
               className="content-card"
               aria-labelledby="motivations-heading"
             >
               <h3 id="motivations-heading">Applicable motivations</h3>
               <ul className="motivation-list">
-                {motivations.map((motivation) => (
-                  <li key={`${motivation.level}-${motivation.kind}`}>
-                    <strong>{motivationLabel(motivation)}</strong>
-                    <p className="plain-text">{motivation.text}</p>
-                  </li>
-                ))}
+                {contexts.map((context) => {
+                  const motivation = state.activeMotivations.find(
+                    (candidate) =>
+                      candidate.cardId === card.id &&
+                      candidate.kind === context.kind,
+                  );
+                  return (
+                    <li
+                      key={`${context.kind}-${context.forLevel ?? "current"}`}
+                    >
+                      <strong>{motivationLabel(context)}</strong>
+                      {motivation ? (
+                        <time dateTime={motivation.updatedAt}>
+                          Updated {formatNoteTimestamp(motivation.updatedAt)}
+                        </time>
+                      ) : null}
+                      <MotivationInput
+                        card={card}
+                        kind={context.kind}
+                        label={`Motivation for ${card.name} (${motivationLabel(context)})`}
+                        value={motivation?.text ?? ""}
+                        disabled={!canMutate}
+                        onChange={(text) => updateMotivation(context, text)}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ) : null}
@@ -418,20 +494,30 @@ function ChangesSection({
           label: `Level ${pick.forLevel} pick`,
           cardId: pick.cardId,
           kind: "add" as const,
+          forLevel: pick.forLevel,
         }))
       : []),
     ...(picked === null
       ? []
-      : [{ label: "Picked", cardId: picked, kind: "add" as const }]),
+      : [
+          {
+            label: "Picked",
+            cardId: picked,
+            kind: "add" as const,
+            forLevel: undefined,
+          },
+        ]),
     ...added.map((cardId) => ({
       label: "Added",
       cardId,
       kind: "add" as const,
+      forLevel: undefined,
     })),
     ...state.applied.dropped.map((cardId) => ({
       label: "Dropped",
       cardId,
       kind: "drop" as const,
+      forLevel: undefined,
     })),
   ];
 
@@ -471,6 +557,8 @@ function ChangesSection({
                 card={card}
                 label={change.label}
                 motivation={motivation}
+                kind={change.kind}
+                forLevel={change.forLevel}
               />
             );
           })}
@@ -490,13 +578,18 @@ function ChangeListItem({
   card,
   label,
   motivation,
+  kind,
+  forLevel,
 }: {
   build: Build;
   state: RuleLevelState;
   card: Card;
   label: string;
   motivation: Motivation | undefined;
+  kind: "add" | "drop";
+  forLevel?: number;
 }) {
+  const { canMutate, updateData } = useAppData();
   const [enlarged, setEnlarged] = useState(false);
   const enlargeButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
@@ -510,6 +603,23 @@ function ChangeListItem({
     setEnlarged(false);
     requestAnimationFrame(() => enlargeButtonRef.current?.focus());
   };
+
+  function updateMotivation(text: string): void {
+    if (!canMutate) {
+      return;
+    }
+    updateData((current) =>
+      updateBuildData(current, build.id, (currentBuild) =>
+        upsertMotivation(currentBuild, {
+          kind,
+          cardId: card.id,
+          text,
+          level: state.level,
+          forLevel,
+        }),
+      ),
+    );
+  }
 
   return (
     <li>
@@ -542,21 +652,23 @@ function ChangeListItem({
           </strong>
         </Link>
         {motivation ? (
-          <p className="plain-text">{motivation.text}</p>
-        ) : (
           <>
-            <p className="change-note-empty">No motivation recorded.</p>
-            <button
-              type="button"
-              className="secondary-button note-button"
-              disabled
-              aria-label={`Add motivation for ${card.name}`}
-              title="Motivation editing is available in the Notes view."
-            >
-              Add note
-            </button>
+            <p className="plain-text">{motivation.text}</p>
+            <time dateTime={motivation.updatedAt}>
+              Updated {formatNoteTimestamp(motivation.updatedAt)}
+            </time>
           </>
+        ) : (
+          <p className="change-note-empty">No motivation recorded.</p>
         )}
+        <MotivationInput
+          card={card}
+          kind={kind}
+          label={`Motivation for ${card.name}`}
+          value={motivation?.text ?? ""}
+          disabled={!canMutate}
+          onChange={updateMotivation}
+        />
       </div>
       <CardDialog
         card={card}
@@ -681,12 +793,15 @@ function findMotivation(
   );
 }
 
-function motivationLabel(motivation: Motivation): string {
-  if (motivation.kind === "drop") {
+function motivationLabel(context: ApplicableMotivationContext): string {
+  if (context.kind === "drop") {
     return "Drop motivation";
   }
-  if (motivation.kind === "exclude") {
+  if (context.kind === "exclude") {
     return "Exclusion motivation";
+  }
+  if (context.forLevel !== undefined) {
+    return `Level ${context.forLevel} pick motivation`;
   }
   return "Add motivation";
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardGrid } from "./cards";
+import { MotivationInput } from "./notes";
 import { useAppData } from "./app-data";
 import {
   copyBuild,
@@ -9,6 +10,7 @@ import {
   renameBuild,
   setStartDeck,
   setStartPick,
+  upsertMotivation,
 } from "../shared/builds.js";
 import { characters } from "../shared/data/characters/index.js";
 import { pickOptions, pool, replayBuild } from "../shared/rules/index.js";
@@ -291,6 +293,34 @@ export function StartingEditor({
     updateBuild(setStartDeck(build, nextDeck));
   };
 
+  const updateMotivation = (
+    card: Card,
+    kind: "exclude" | "add",
+    text: string,
+    forLevel?: number,
+  ) => {
+    if (!canMutate) {
+      return;
+    }
+    updateBuild(
+      upsertMotivation(build, {
+        kind,
+        cardId: card.id,
+        text,
+        forLevel,
+        level: forLevel ?? build.startLevel,
+      }),
+    );
+  };
+
+  const motivationText = (cardId: string, kind: "exclude" | "add") =>
+    build.motivations.find(
+      (motivation) =>
+        motivation.level === build.startLevel &&
+        motivation.cardId === cardId &&
+        motivation.kind === kind,
+    )?.text ?? "";
+
   const pickCards = (forLevel: number): Card[] => {
     const selected = build.startPicks.find(
       (pick) => pick.forLevel === forLevel,
@@ -408,6 +438,18 @@ export function StartingEditor({
                       No legal cards are available for this pick.
                     </p>
                   ) : null}
+                  {selected ? (
+                    <MotivationInput
+                      card={selected}
+                      kind="add"
+                      label={`Why add ${selected.name}?`}
+                      value={motivationText(selected.id, "add")}
+                      disabled={!canMutate}
+                      onChange={(text) =>
+                        updateMotivation(selected, "add", text, pick.forLevel)
+                      }
+                    />
+                  ) : null}
                 </article>
               );
             })}
@@ -478,8 +520,17 @@ export function StartingEditor({
           <ul className="exclusion-list">
             {eligibleNotInDeck.map((card) => (
               <li key={card.id}>
-                <span>{card.name}</span>
-                <small>Level {formatCardLevel(card)}</small>
+                <div>
+                  <span>{card.name}</span>
+                  <small>Level {formatCardLevel(card)}</small>
+                </div>
+                <MotivationInput
+                  card={card}
+                  kind="exclude"
+                  value={motivationText(card.id, "exclude")}
+                  disabled={!canMutate}
+                  onChange={(text) => updateMotivation(card, "exclude", text)}
+                />
               </li>
             ))}
           </ul>
