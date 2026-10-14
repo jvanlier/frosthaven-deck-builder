@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import type { AppData } from "../../src/shared/schema";
@@ -2457,4 +2458,62 @@ test("preserves pending changes through a two-device conflict and explicit reloa
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }
+});
+
+test("supports keyboard-only card activation and visible focus", async ({
+  page,
+}) => {
+  await page.goto("/__test/cards");
+  const firstAction = page.locator(".card-action").first();
+  await firstAction.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Selected" }),
+  ).toContainText(
+    (await firstAction.getAttribute("aria-label"))?.replace("Open ", "") ?? "",
+  );
+
+  await page.keyboard.press("Tab");
+  const firstEnlarge = page.getByRole("button", { name: /Enlarge/ }).first();
+  await expect(firstEnlarge).toBeFocused();
+  await expect(firstEnlarge).toHaveCSS("outline-style", "solid");
+});
+
+test("applies reduced-motion behavior", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/__test/cards");
+  await expect
+    .poll(() =>
+      page.evaluate(() => ({
+        reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches,
+        scrollBehavior: getComputedStyle(document.documentElement)
+          .scrollBehavior,
+      })),
+    )
+    .toMatchObject({ reducedMotion: true, scrollBehavior: "auto" });
+  expect(
+    await page.evaluate(() => {
+      const value = getComputedStyle(
+        document.documentElement,
+      ).transitionDuration;
+      const duration = Number.parseFloat(value);
+      return value.endsWith("ms") ? duration : duration * 1000;
+    }),
+  ).toBeLessThanOrEqual(0.01);
+});
+
+test("passes an automated accessibility audit for the build workspace", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ...fixtureData, builds: [] }),
+    }),
+  );
+  await page.goto("/c/SD");
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
 });
