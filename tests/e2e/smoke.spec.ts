@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { AppData } from "../../src/shared/schema";
 
 const fixtureBuildId = "123e4567-e89b-42d3-a456-426614174000";
 const fixtureData = {
@@ -353,7 +354,38 @@ test("moves focus to the deck after picking from an enlarged card", async ({
   const enlargeButton = page.getByRole("button", {
     name: "Enlarge Birds in a Tempest",
   });
-  await page.evaluate(() => window.scrollTo({ top: 600, behavior: "auto" }));
+  await expect(enlargeButton).toBeVisible();
+  await page.evaluate(() => {
+    const button = [
+      ...document.querySelectorAll<HTMLButtonElement>(".enlarge-button"),
+    ].find(
+      (candidate) =>
+        candidate.getAttribute("aria-label") === "Enlarge Birds in a Tempest",
+    );
+    if (!button) {
+      return;
+    }
+    const stickyBottom = Math.max(
+      0,
+      ...Array.from(
+        document.querySelectorAll<HTMLElement>(
+          ".app-header, .save-feedback, .level-up-status",
+        ),
+      ).map((element) => element.getBoundingClientRect().bottom),
+    );
+    const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
+    const safeTop = stickyBottom + 16;
+    const safeBottom =
+      Math.min(
+        window.innerHeight,
+        bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
+      ) - 16;
+    const buttonCenter =
+      button.getBoundingClientRect().top +
+      button.getBoundingClientRect().height / 2;
+    const safeCenter = (safeTop + safeBottom) / 2;
+    window.scrollBy({ top: buttonCenter - safeCenter, behavior: "auto" });
+  });
   await enlargeButton.click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
@@ -856,6 +888,198 @@ test("renders invalid badges and specific replay validation messages", async ({
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test("removes an invalid downstream operation without changing its neighbors", async ({
+  page,
+}) => {
+  let persisted = structuredClone(invalidEditedLevelFixtureData);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(320);
+  await page.getByRole("button", { name: "Remove added card Tornado" }).click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toEqual({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["whiteout"],
+    });
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
+});
+
+test("deletes only the highest level and its motivations", async ({ page }) => {
+  let persisted = structuredClone(plannedLaterFixtureData) as AppData;
+  persisted.builds[0]!.motivations = [
+    {
+      level: 2,
+      cardId: "birds-in-a-tempest",
+      kind: "add",
+      text: "Keep this note",
+      updatedAt: "2024-01-02T03:04:05.000Z",
+    },
+    {
+      level: 3,
+      cardId: "tornado",
+      kind: "drop",
+      text: "Delete this note",
+      updatedAt: "2024-01-02T03:04:05.000Z",
+    },
+  ];
+  persisted.builds[0]!.guidance = {
+    tornado: {
+      text: "Keep this guidance",
+      updatedAt: "2024-01-02T03:04:05.000Z",
+    },
+  };
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(
+    page.getByRole("button", { name: "Delete level 2" }),
+  ).toHaveCount(0);
+  await page.goto(`/c/SD/b/${levelUpBuildId}/l/3`);
+  await page.getByRole("button", { name: "Delete level 3" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Delete level 3?" }),
+  ).toBeVisible();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Cancel" })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Delete level 3?" }),
+  ).toBeHidden();
+  await page.getByRole("button", { name: "Delete level 3" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Delete level" })
+    .click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect
+    .poll(async () => persisted.builds[0])
+    .toMatchObject({
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest"],
+          dropped: ["whiteout"],
+        },
+      ],
+      motivations: [
+        {
+          level: 2,
+          cardId: "birds-in-a-tempest",
+          text: "Keep this note",
+        },
+      ],
+      guidance: {
+        tornado: {
+          text: "Keep this guidance",
+        },
+      },
+    });
+});
+
+test("focuses the selected starting-pick repair", async ({ page }) => {
+  const persisted = structuredClone(startThreeFixtureData) as AppData;
+  persisted.builds[0]!.startPicks = [
+    { forLevel: 2, cardId: null },
+    { forLevel: 3, cardId: null },
+  ];
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(persisted),
+    }),
+  );
+
+  await page.goto(
+    `/c/SD/b/${persisted.builds[0]!.id}/l/${persisted.builds[0]!.startLevel}`,
+  );
+  await expect(
+    page.getByRole("button", { name: "Edit starting choices" }),
+  ).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Edit starting choices" })
+    .nth(1)
+    .click();
+  await expect(page).toHaveURL(/focus=3$/);
+  await expect(
+    page.locator('[data-pick-level="3"] .card-action').first(),
+  ).toBeFocused();
+});
+
+test("restores a picked card when its stored add is missing", async ({
+  page,
+}) => {
+  let persisted = structuredClone(invalidDeckFixtureData);
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page
+    .getByRole("button", { name: "Restore Birds in a Tempest to deck" })
+    .click();
+  await expect
+    .poll(async () => persisted.builds[0]?.levelUps[0])
+    .toMatchObject({ added: ["birds-in-a-tempest"] });
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
 test("switches between stored levels with previous, next and direct navigation", async ({

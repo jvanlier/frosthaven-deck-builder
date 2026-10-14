@@ -35,6 +35,7 @@ export function CardTile({
         onClick={onAction}
         disabled={disabled}
         aria-label={actionLabel}
+        data-card-id={card.id}
       >
         <CardImage card={card} alt={alt} />
         <span className="card-name">{card.name}</span>

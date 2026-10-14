@@ -3,10 +3,13 @@ import {
   copyBuild,
   createBuild,
   deleteBuild,
+  deleteHighestLevel,
   generateUuid,
   motivationKey,
   appendLevelUp,
+  removeBuildOperation,
   renameBuild,
+  restorePickedCard,
   setLevelUp,
   setStartDeck,
   setStartPick,
@@ -133,6 +136,153 @@ describe("build mutations", () => {
     expect(() =>
       setLevelUp(build, 3, { pick: null, added: [], dropped: [] }),
     ).toThrow();
+  });
+
+  it("removes only the targeted stored operation and its paired pick add", () => {
+    const build = buildSchema.parse({
+      ...createBuild(
+        { characterId: "SD", name: "Original", startLevel: 1 },
+        options,
+      ),
+      startDeck: ["blizzard", "whiteout"],
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: ["birds-in-a-tempest", "tornado"],
+          dropped: ["blizzard", "whiteout"],
+        },
+      ],
+    });
+
+    const withoutAdd = removeBuildOperation(build, 2, {
+      kind: "add",
+      index: 1,
+      cardId: "tornado",
+    });
+    expect(withoutAdd.levelUps[0]).toEqual({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["blizzard", "whiteout"],
+    });
+    expect(
+      removeBuildOperation(withoutAdd, 2, {
+        kind: "add",
+        index: 0,
+        cardId: "not-tornado",
+      }),
+    ).toBe(withoutAdd);
+
+    const withoutPick = removeBuildOperation(build, 2, {
+      kind: "pick",
+      index: 0,
+      cardId: "birds-in-a-tempest",
+    });
+    expect(withoutPick.levelUps[0]).toEqual({
+      level: 2,
+      pick: null,
+      added: ["tornado"],
+      dropped: ["blizzard", "whiteout"],
+    });
+
+    const starting = buildSchema.parse({
+      ...createBuild(
+        { characterId: "SD", name: "Starting", startLevel: 2 },
+        options,
+      ),
+      startPicks: [{ forLevel: 2, cardId: "tornado" }],
+      startDeck: ["blizzard", "whiteout"],
+    });
+    const withoutStartingPick = removeBuildOperation(starting, 2, {
+      kind: "start-pick",
+      index: 0,
+      cardId: "tornado",
+      forLevel: 2,
+    });
+    expect(withoutStartingPick.startPicks).toEqual([
+      { forLevel: 2, cardId: null },
+    ]);
+    const withoutStartingCard = removeBuildOperation(build, 1, {
+      kind: "start-deck",
+      index: 1,
+      cardId: "whiteout",
+    });
+    expect(withoutStartingCard.startDeck).toEqual(["blizzard"]);
+  });
+
+  it("restores a missing picked-card add without changing other operations", () => {
+    const build = buildSchema.parse({
+      ...createBuild(
+        { characterId: "SD", name: "Original", startLevel: 1 },
+        options,
+      ),
+      levelUps: [
+        {
+          level: 2,
+          pick: "birds-in-a-tempest",
+          added: [],
+          dropped: ["blizzard"],
+        },
+      ],
+    });
+
+    const restored = restorePickedCard(build, 2, "birds-in-a-tempest");
+    expect(restored.levelUps[0]).toEqual({
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: ["blizzard"],
+    });
+    expect(restorePickedCard(restored, 2, "birds-in-a-tempest")).toBe(restored);
+  });
+
+  it("deletes only the highest level and its motivations while retaining guidance", () => {
+    const build = buildSchema.parse({
+      ...createBuild(
+        { characterId: "SD", name: "Original", startLevel: 1 },
+        options,
+      ),
+      levelUps: [
+        { level: 2, pick: null, added: [], dropped: [] },
+        { level: 3, pick: null, added: [], dropped: [] },
+      ],
+      motivations: [
+        {
+          level: 2,
+          cardId: "blizzard",
+          kind: "add",
+          text: "Keep level 2 note",
+          updatedAt: firstTime,
+        },
+        {
+          level: 3,
+          cardId: "tornado",
+          kind: "drop",
+          text: "Delete this note",
+          updatedAt: firstTime,
+        },
+      ],
+      guidance: {
+        tornado: { text: "Keep guidance", updatedAt: firstTime },
+      },
+    });
+
+    const deleted = deleteHighestLevel(build, { now: () => secondTime });
+    expect(deleted.levelUps).toEqual([
+      { level: 2, pick: null, added: [], dropped: [] },
+    ]);
+    expect(deleted.motivations).toEqual([
+      {
+        level: 2,
+        cardId: "blizzard",
+        kind: "add",
+        text: "Keep level 2 note",
+        updatedAt: firstTime,
+      },
+    ]);
+    expect(deleted.guidance).toEqual(build.guidance);
+    expect(deleted.updatedAt).toBe(secondTime);
   });
 
   it("renames only when the trimmed name changes and updates the build timestamp", () => {

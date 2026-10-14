@@ -715,6 +715,18 @@ h2 {
   margin: 0;
 }
 
+.repair-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.repair-button {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.6rem;
+}
+
 .deck-toolbar {
   display: flex;
   align-items: center;
@@ -1219,6 +1231,17 @@ h2 {
 
   .save-feedback {
     top: var(--header-height);
+  }
+
+  .repair-list li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .repair-button {
+    align-self: flex-start;
+    max-width: 100%;
+    white-space: normal;
   }
 
   .level-up-status {
