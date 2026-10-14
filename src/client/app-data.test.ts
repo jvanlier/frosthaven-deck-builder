@@ -9,7 +9,11 @@ import {
   type AppDataTransport,
 } from "./app-data";
 import { createBuild } from "../shared/builds";
-import { MAX_DOCUMENT_BYTES, type AppData } from "../shared/schema";
+import {
+  appDataSchema,
+  MAX_DOCUMENT_BYTES,
+  type AppData,
+} from "../shared/schema";
 
 const buildA = createBuild(
   { characterId: "SD", name: "Freeze control", startLevel: 1 },
@@ -298,7 +302,7 @@ describe("app data save controller", () => {
       createObjectURL.mock.calls as unknown as Array<[Blob]>
     )[0]?.[0];
     expect(exported).toBeDefined();
-    expect(await exported!.text()).toMatch(/\"revision\": 8/);
+    expect(JSON.parse(await exported!.text())).toMatchObject({ revision: 8 });
     expect(click).toHaveBeenCalledOnce();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:export");
     vi.unstubAllGlobals();
@@ -317,6 +321,51 @@ describe("app data save controller", () => {
 
     await expect(controller.downloadData()).rejects.toThrow("disk unavailable");
     expect(createObjectURL).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps a near-limit export importable", async () => {
+    const longText = "x".repeat(17_000);
+    const nearLimit = appDataSchema.parse({
+      ...emptyData,
+      builds: Array.from({ length: 60 }, (_, index) => ({
+        ...buildA,
+        id: `123e4567-e89b-42d3-a456-42661417${index.toString(16).padStart(4, "0")}`,
+        name: `Build ${"n".repeat(40)} ${index}`,
+        guidance: {
+          blizzard: {
+            text: longText,
+            updatedAt: "2024-01-02T03:04:05.000Z",
+          },
+        },
+      })),
+    });
+    const click = vi.fn();
+    const link = { click, href: "", download: "" };
+    const createObjectURL = vi.fn(() => "blob:near-limit");
+    vi.stubGlobal("document", { createElement: () => link });
+    vi.stubGlobal("URL", {
+      createObjectURL,
+      revokeObjectURL: vi.fn(),
+    });
+    const controller = createAppDataController(
+      transportWith({ get: vi.fn(async () => nearLimit) }),
+    );
+    await controller.load();
+
+    await controller.downloadData();
+
+    const exported = (
+      createObjectURL.mock.calls as unknown as Array<[Blob]>
+    )[0]?.[0];
+    expect(exported).toBeDefined();
+    const exportedText = await exported!.text();
+    expect(
+      new TextEncoder().encode(exportedText).byteLength,
+    ).toBeLessThanOrEqual(MAX_DOCUMENT_BYTES);
+    await expect(
+      parseImportFile(new Blob([exportedText])),
+    ).resolves.toMatchObject({ revision: 0 });
     vi.unstubAllGlobals();
   });
 

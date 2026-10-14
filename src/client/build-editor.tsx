@@ -204,24 +204,10 @@ export function BuildList() {
 }
 
 function DataBackupControls() {
-  const { canMutate, downloadData, replaceData, status, hasPendingChanges } =
-    useAppData();
+  const { canMutate, downloadData, replaceData } = useAppData();
   const [candidate, setCandidate] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [importAttempted, setImportAttempted] = useState(false);
   const [importing, setImporting] = useState(false);
-
-  useEffect(() => {
-    if (
-      candidate !== null &&
-      importAttempted &&
-      status === "saved" &&
-      !hasPendingChanges
-    ) {
-      setCandidate(null);
-      setImportAttempted(false);
-    }
-  }, [candidate, hasPendingChanges, importAttempted, status]);
 
   async function exportData(): Promise<void> {
     setError(null);
@@ -241,7 +227,6 @@ function DataBackupControls() {
       return;
     }
     setError(null);
-    setImportAttempted(false);
     try {
       setCandidate(await parseImportFile(file));
     } catch (cause) {
@@ -258,13 +243,12 @@ function DataBackupControls() {
     if (candidate === null || !canMutate) {
       return;
     }
+    const replacementCandidate = candidate;
+    setCandidate(null);
     setError(null);
-    setImportAttempted(true);
     setImporting(true);
     try {
-      await replaceData(candidate);
-      setCandidate(null);
-      setImportAttempted(false);
+      await replaceData(replacementCandidate);
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -325,7 +309,6 @@ function DataBackupControls() {
         canConfirm={canMutate && !importing}
         onCancel={() => {
           setCandidate(null);
-          setImportAttempted(false);
           setError(null);
         }}
         onConfirm={() => void confirmImport()}

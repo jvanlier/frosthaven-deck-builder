@@ -552,7 +552,7 @@ function hasSupportedCharacters(data: AppData): boolean {
 }
 
 function downloadDocument(data: AppData, filename: string): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
+  const blob = new Blob([JSON.stringify(data)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(blob);
