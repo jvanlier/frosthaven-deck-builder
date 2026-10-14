@@ -583,7 +583,8 @@ h2 {
   min-width: 0;
 }
 
-.motivation-input {
+.motivation-input,
+.guidance-input {
   display: grid;
   gap: 0.35rem;
   margin-top: 0.55rem;
@@ -592,7 +593,8 @@ h2 {
   font-weight: 700;
 }
 
-.motivation-input textarea {
+.motivation-input textarea,
+.guidance-input textarea {
   width: 100%;
   resize: vertical;
   border: 1px solid #477b94;
@@ -604,7 +606,8 @@ h2 {
   line-height: 1.4;
 }
 
-.motivation-input textarea:focus-visible {
+.motivation-input textarea:focus-visible,
+.guidance-input textarea:focus-visible {
   outline: 3px solid #f9d875;
   outline-offset: 2px;
 }
@@ -877,6 +880,48 @@ h2 {
   gap: 1rem;
 }
 
+.card-detail-copy time,
+.motivation-entry-content time,
+.change-list time {
+  display: block;
+  margin-top: 0.35rem;
+  color: #8aaabd;
+  font-size: 0.8rem;
+}
+
+.motivation-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.motivation-group {
+  margin-top: 0;
+}
+
+.motivation-entry {
+  display: flex;
+  align-items: start;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid #2c617b;
+  border-radius: 0.55rem;
+  background: rgb(10 34 51 / 70%);
+}
+
+.motivation-thumbnail-link {
+  flex: 0 0 auto;
+  border-radius: 0.3rem;
+}
+
+.motivation-entry-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.motivation-entry-content .motivation-input {
+  margin-top: 0.75rem;
+}
+
 .card-detail-copy h2,
 .card-detail-copy h3 {
   margin: 0;
@@ -1011,10 +1056,23 @@ h2 {
 
 .exclusion-list li {
   display: flex;
+  align-items: start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.55rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid #244c62;
+}
+
+.exclusion-list li > div:first-child {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 8rem;
+}
+
+.exclusion-list .motivation-input {
+  flex: 1;
+  max-width: 30rem;
+  margin-top: 0;
 }
 
 .exclusion-list small {
@@ -1297,6 +1355,19 @@ h2 {
 
   .card-detail-layout {
     grid-template-columns: 1fr;
+  }
+
+  .exclusion-list li {
+    flex-direction: column;
+  }
+
+  .exclusion-list .motivation-input {
+    width: 100%;
+    max-width: none;
+  }
+
+  .motivation-entry {
+    align-items: stretch;
   }
 
   .card-tile {

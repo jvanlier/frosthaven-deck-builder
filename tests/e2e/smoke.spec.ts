@@ -1686,3 +1686,127 @@ test("offers sequential legal picks for a higher starting level", async ({
     page.getByRole("button", { name: "Pick Polar Vortex" }),
   ).toBeVisible();
 });
+
+test("edits motivations and guidance from the notes and card detail views", async ({
+  page,
+}) => {
+  let persisted = structuredClone(deckFixtureData) as AppData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page.getByRole("link", { name: "Notes" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/motivations`);
+  await expect(
+    page.getByRole("heading", { name: "Build motivations" }),
+  ).toBeVisible();
+  const addMotivation = page.getByLabel(
+    "Motivation for Added: Birds in a Tempest",
+  );
+  await expect(addMotivation).toHaveValue("The best level-up pick.");
+  await addMotivation.fill("<script>alert(1)</script>\nPrefer the top action.");
+  await expect
+    .poll(async () => persisted.builds[0]?.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        cardId: "birds-in-a-tempest",
+        kind: "add",
+        text: "<script>alert(1)</script>\nPrefer the top action.",
+      }),
+    );
+
+  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
+  await page
+    .getByRole("button", { name: "Open Birds in a Tempest details" })
+    .click();
+  const guidance = page.getByLabel("Guidance for Birds in a Tempest");
+  await guidance.fill("<b>Top</b>\nPair with Cold Therapy.");
+  await expect
+    .poll(async () => persisted.builds[0]?.guidance["birds-in-a-tempest"]?.text)
+    .toBe("<b>Top</b>\nPair with Cold Therapy.");
+  await expect(
+    page.getByText("<b>Top</b>\nPair with Cold Therapy."),
+  ).toBeVisible();
+});
+
+test("edits starting exclusion and initial-pick motivations", async ({
+  page,
+}) => {
+  const initialPickData = structuredClone(startThreeFixtureData) as AppData;
+  initialPickData.builds[0]!.startDeck = [
+    "blizzard",
+    "chilling-impact",
+    "cold-therapy",
+    "cross-winds",
+    "enticing-breeze",
+    "frigid-growth",
+    "gathering-force",
+    "lifting-gust",
+    "natures-breath",
+    "snowball",
+    "whiteout",
+  ];
+  let persisted = initialPickData;
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(persisted),
+      });
+      return;
+    }
+    const body = JSON.parse(route.request().postData() ?? "{}");
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ revision: persisted.revision }),
+    });
+  });
+
+  const buildId = persisted.builds[0]!.id;
+  await page.goto(`/c/SD/b/${buildId}/l/3/start`);
+  await page.getByText(/Not in starting deck/).click();
+  const exclusion = page.getByLabel("Why exclude Blinding Vortex?");
+  await exclusion.fill("Not for this build.");
+  await expect
+    .poll(async () => persisted.builds[0]?.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        level: 3,
+        cardId: "blinding-vortex",
+        kind: "exclude",
+        text: "Not for this build.",
+      }),
+    );
+
+  await page.getByRole("button", { name: "Change pick" }).first().click();
+  await expect(page.getByLabel("Why add Birds in a Tempest?")).toBeVisible();
+  await page.getByLabel("Why add Birds in a Tempest?").fill("Slot two reason");
+  await expect
+    .poll(async () => persisted.builds[0]?.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        level: 3,
+        cardId: "birds-in-a-tempest",
+        kind: "add",
+        text: "Slot two reason",
+      }),
+    );
+});

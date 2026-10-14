@@ -18,6 +18,7 @@ import {
   readLastPosition,
 } from "./deck-view";
 import { LevelUpRoute, levelUpDestination } from "./level-up";
+import { MotivationsRoute } from "./motivations";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
@@ -114,7 +115,7 @@ export default function App() {
         />
         <Route
           path="/c/:characterId/b/:buildId/motivations"
-          element={<UnavailableView />}
+          element={<MotivationsRoute />}
         />
         <Route path="*" element={<UnavailableView />} />
       </Routes>
@@ -407,7 +408,11 @@ function BottomTabs() {
         icon="↗"
       />
       <WorkspaceTab to={null} label="Overview" icon="▤" />
-      <WorkspaceTab to={null} label="Notes" icon="✎" />
+      <WorkspaceTab
+        to={workspace.build ? motivationsPath(workspace) : null}
+        label="Notes"
+        icon="✎"
+      />
       {isAbout ? (
         <span className="tab-current">About</span>
       ) : (
@@ -475,6 +480,12 @@ function workspaceDeckPath(workspace: Workspace, level: number): string {
   return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
     workspace.buildId!,
   )}/l/${level}`;
+}
+
+function motivationsPath(workspace: Workspace): string {
+  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
+    workspace.buildId!,
+  )}/motivations`;
 }
 
 function SaveFeedback() {

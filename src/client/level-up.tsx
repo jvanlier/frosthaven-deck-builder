@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardTile } from "./cards";
+import { MotivationInput } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
@@ -685,35 +686,6 @@ function CandidateGrid({
         );
       })}
     </div>
-  );
-}
-
-function MotivationInput({
-  card,
-  kind,
-  value,
-  disabled,
-  onChange,
-}: {
-  card: Card;
-  kind: "add" | "drop";
-  value: string;
-  disabled: boolean;
-  onChange: (text: string) => void;
-}) {
-  const label =
-    kind === "drop" ? `Why drop ${card.name}?` : `Why add ${card.name}?`;
-  return (
-    <label className="motivation-input">
-      {label}
-      <textarea
-        value={value}
-        maxLength={20_000}
-        rows={3}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
   );
 }
 
