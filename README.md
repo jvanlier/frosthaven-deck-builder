@@ -49,7 +49,7 @@ Install the Playwright Chromium and WebKit browsers before the first browser tes
 npx playwright install chromium webkit
 ```
 
-On Linux machines that also need Playwright's system packages, use
+On Linux machines that also need Playwright's system packages, if they're not installed yet, use
 `npx playwright install --with-deps chromium webkit` instead.
 
 The production build writes the browser bundle to `dist/client` and the
