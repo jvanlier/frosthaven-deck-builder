@@ -28,7 +28,11 @@ export function CardTile({
   };
 
   return (
-    <article className="card-tile" data-card-id={card.id}>
+    <article
+      className="card-tile"
+      data-card-id={card.id}
+      data-state={stateLabel}
+    >
       <button
         className="card-action"
         type="button"
@@ -38,11 +42,18 @@ export function CardTile({
         data-card-id={card.id}
       >
         <CardImage card={card} alt={alt} />
-        <span className="card-name">{card.name}</span>
-        <span className="card-level">Level {level}</span>
+        <span className="card-name visually-hidden">{card.name}</span>
+        <span className="visually-hidden">Level {level}</span>
         {stateLabel ? (
-          <span className="card-state" role="status">
-            {stateLabel}
+          <span className="card-state" role="status" title={stateLabel}>
+            {stateLabel.startsWith("NEW") ? (
+              <>
+                NEW
+                <span className="visually-hidden">{stateLabel.slice(3)}</span>
+              </>
+            ) : (
+              stateLabel
+            )}
           </span>
         ) : null}
       </button>
@@ -52,8 +63,21 @@ export function CardTile({
         type="button"
         onClick={() => setEnlarged(true)}
         aria-label={`Enlarge ${card.name}`}
+        title={`Enlarge ${card.name}`}
       >
-        <span aria-hidden="true">⌕</span> Enlarge
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6" />
+        </svg>
       </button>
       <CardDialog
         card={card}

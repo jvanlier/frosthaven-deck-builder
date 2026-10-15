@@ -50,8 +50,8 @@ export function MotivationInput({
         ? `Why drop ${card.name}?`
         : `Why add ${card.name}?`;
   return (
-    <label className="motivation-input">
-      {label ?? defaultLabel}
+    <label className="motivation-input" data-kind={kind}>
+      <span title={label ?? defaultLabel}>{label ?? defaultLabel}</span>
       <textarea
         value={value}
         maxLength={MAX_NOTE_LENGTH}

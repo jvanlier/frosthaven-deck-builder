@@ -138,7 +138,7 @@ function compareCards(left: Card, right: Card): number {
   return 0;
 }
 
-function sortedCards(cards: Iterable<Card>): Card[] {
+export function sortedCards(cards: Iterable<Card>): Card[] {
   return [...cards].sort(compareCards);
 }
 
@@ -568,6 +568,8 @@ function applicableMotivationContextsForState(
         level: build.startLevel,
         forLevel: initialPick.forLevel,
       });
+    } else if (state.deck.some((candidate) => candidate.id === cardId)) {
+      contexts.push({ kind: "add", level: build.startLevel });
     }
     if (
       cardLevel(card) <= build.startLevel &&

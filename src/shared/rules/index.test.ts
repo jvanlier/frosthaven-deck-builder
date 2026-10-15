@@ -276,6 +276,71 @@ describe("Snowdancer rules engine", () => {
     );
   });
 
+  it("keeps starting-hand inclusion reasons active only while the card is included", () => {
+    const build = makeBuild(1, {
+      startDeck: ["cold-therapy", "missing-card", "birds-in-a-tempest"],
+      motivations: [
+        "cold-therapy",
+        "whiteout",
+        "missing-card",
+        "birds-in-a-tempest",
+      ].map((cardId) => ({
+        level: 1,
+        cardId,
+        kind: "add" as const,
+        text: `Include ${cardId}`,
+        updatedAt: timestamp,
+      })),
+    });
+    expect(
+      applicableMotivationContexts(build, character, 1, "cold-therapy"),
+    ).toEqual([{ kind: "add", level: 1 }]);
+    expect(
+      replayBuild(build, character).levels[0]!.activeMotivations.map(
+        (note) => note.cardId,
+      ),
+    ).toEqual(["cold-therapy"]);
+    const removed = { ...build, startDeck: [] };
+    expect(
+      replayBuild(removed, character).levels[0]!.activeMotivations,
+    ).toEqual([]);
+    expect(removed.motivations).toEqual(build.motivations);
+    expect(
+      replayBuild({ ...removed, startDeck: ["cold-therapy"] }, character)
+        .levels[0]!.activeMotivations,
+    ).toEqual([build.motivations[0]]);
+  });
+
+  it("shares one starting add motivation between a prosperity pick and its inclusion in the hand", () => {
+    const build = makeBuild(3, {
+      startPicks: [
+        { forLevel: 2, cardId: "birds-in-a-tempest" },
+        { forLevel: 3, cardId: "tornado" },
+      ],
+      startDeck: ["birds-in-a-tempest", "cold-therapy"],
+      motivations: ["birds-in-a-tempest", "cold-therapy"].map((cardId) => ({
+        level: 3,
+        cardId,
+        kind: "add" as const,
+        text: `Include ${cardId}`,
+        updatedAt: timestamp,
+      })),
+    });
+    expect(
+      applicableMotivationContexts(build, character, 3, "birds-in-a-tempest"),
+    ).toEqual([{ kind: "add", level: 3, forLevel: 2 }]);
+    expect(
+      applicableMotivationContexts(build, character, 3, "cold-therapy"),
+    ).toEqual([{ kind: "add", level: 3 }]);
+    expect(replayBuild(build, character).levels[0]!.activeMotivations).toEqual(
+      build.motivations,
+    );
+    expect(
+      replayBuild({ ...build, startDeck: [] }, character).levels[0]!
+        .activeMotivations,
+    ).toEqual([build.motivations[0]]);
+  });
+
   it("normalizes deck edits to added and dropped cards", () => {
     expect(applyDeckEdit(["a", "b", "c"], ["b", "c", "d"])).toEqual({
       added: ["d"],
