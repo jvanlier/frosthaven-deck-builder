@@ -730,6 +730,37 @@ test("scopes editor reset and appending to the current level", async ({
     });
 });
 
+test("loads local class icons in the picker and build header", async ({
+  page,
+}) => {
+  let releaseData!: () => void;
+  const loading = new Promise<void>((resolve) => {
+    releaseData = resolve;
+  });
+  await page.route("**/api/data", async (route) => {
+    await loading;
+    await route.fulfill({ json: fixtureData });
+  });
+  await page.goto("/c/SD");
+  const pickerIcon = page.locator(".class-icon");
+  await expect(pickerIcon).toHaveAttribute("src", "/icons/SD.png");
+  await expect
+    .poll(() =>
+      pickerIcon.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  releaseData();
+  await expect(page.locator(".brand img")).toBeVisible();
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
+  const headerIcon = page.locator(".brand img");
+  await expect(headerIcon).toHaveAttribute("src", "/icons/SD.png");
+  await expect
+    .poll(() =>
+      headerIcon.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    )
+    .toBeGreaterThan(0);
+});
+
 test("loads the deck builder shell and health status", async ({ page }) => {
   await page.goto("/");
 
