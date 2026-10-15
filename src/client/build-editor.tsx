@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CardGrid } from "./cards";
+import { CardGrid, CardTile } from "./cards";
 import { MotivationInput } from "./notes";
 import { ImportDataError, parseImportFile, useAppData } from "./app-data";
 import {
@@ -13,7 +13,11 @@ import {
   upsertMotivation,
 } from "../shared/builds.js";
 import { characters } from "../shared/data/characters/index.js";
-import { pickOptions, pool, replayBuild } from "../shared/rules/index.js";
+import {
+  pickOptions,
+  replayBuild,
+  sortedCards,
+} from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
 import type { AppData, Build } from "../shared/schema/index.js";
 
@@ -409,8 +413,9 @@ export function StartingEditor({
   const { updateData, canMutate } = useAppData();
   const projection = replayBuild(build, character);
   const startState = projection.levels[0]!;
-  const startPool = pool(build, character, build.startLevel);
+  const startPoolIds = new Set(startState.pool.map((card) => card.id));
   const selectedDeck = new Set(startState.deck.map((card) => card.id));
+  const handFull = selectedDeck.size >= character.handSize;
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
   const firstIncompleteSlot = build.startPicks.findIndex(
     (pick) => pick.cardId === null,
@@ -461,11 +466,11 @@ export function StartingEditor({
   };
 
   const toggleDeckCard = (card: Card) => {
-    if (!canMutate) {
+    if (!canMutate || !startPoolIds.has(card.id)) {
       return;
     }
     const isSelected = selectedDeck.has(card.id);
-    if (!isSelected && selectedDeck.size >= character.handSize) {
+    if (!isSelected && handFull) {
       return;
     }
     const nextDeck = isSelected
@@ -516,10 +521,10 @@ export function StartingEditor({
     return options;
   };
 
-  const eligibleNotInDeck = character.cards.filter(
-    (card) =>
-      effectiveCardLevel(card) <= build.startLevel &&
-      !selectedDeck.has(card.id),
+  const eligibleCards = sortedCards(
+    character.cards.filter(
+      (card) => effectiveCardLevel(card) <= build.startLevel,
+    ),
   );
 
   return (
@@ -667,55 +672,61 @@ export function StartingEditor({
             ))}
           </ul>
         ) : null}
-        <CardGrid
-          cards={startPool}
-          actionLabel={(card) =>
-            selectedDeck.has(card.id)
-              ? `Remove ${card.name} from starting deck`
-              : `Add ${card.name} to starting deck`
-          }
-          stateLabel={(card) =>
-            selectedDeck.has(card.id) ? "In starting deck" : undefined
-          }
-          disabled={(card) =>
-            !canMutate ||
-            (!selectedDeck.has(card.id) &&
-              selectedDeck.size >= character.handSize)
-          }
-          onAction={toggleDeckCard}
-        />
-      </section>
-
-      <section
-        className="editor-section exclusions"
-        aria-labelledby="exclusions-heading"
-      >
-        <details>
-          <summary id="exclusions-heading">
-            Not in starting deck ({eligibleNotInDeck.length})
-          </summary>
-          <p>
-            These cards are eligible at the starting level but are not currently
-            in the hand.
-          </p>
-          <ul className="exclusion-list">
-            {eligibleNotInDeck.map((card) => (
-              <li key={card.id}>
-                <div>
-                  <span>{card.name}</span>
-                  <small>Level {formatCardLevel(card)}</small>
-                </div>
-                <MotivationInput
+        <div className="card-grid" role="list">
+          {eligibleCards.map((card) => {
+            const selected = selectedDeck.has(card.id);
+            const inPool = startPoolIds.has(card.id);
+            const excluded = !selected && (handFull || !inPool);
+            return (
+              <div
+                className="starting-deck-card"
+                data-excluded={excluded}
+                role="listitem"
+                key={card.id}
+              >
+                <CardTile
                   card={card}
-                  kind="exclude"
-                  value={motivationText(card.id, "exclude")}
-                  disabled={!canMutate}
-                  onChange={(text) => updateMotivation(card, "exclude", text)}
+                  actionLabel={
+                    !inPool
+                      ? `${card.name} is not in the starting pool`
+                      : selected
+                        ? `Remove ${card.name} from starting deck`
+                        : `Add ${card.name} to starting deck`
+                  }
+                  stateLabel={
+                    selected
+                      ? "In starting deck"
+                      : !inPool
+                        ? "Not in pool"
+                        : excluded
+                          ? "Excluded"
+                          : undefined
+                  }
+                  disabled={!canMutate || !inPool || (!selected && handFull)}
+                  onAction={() => toggleDeckCard(card)}
                 />
-              </li>
-            ))}
-          </ul>
-        </details>
+                {selected ? (
+                  <MotivationInput
+                    card={card}
+                    kind="add"
+                    label={`Why include ${card.name}?`}
+                    value={motivationText(card.id, "add")}
+                    disabled={!canMutate}
+                    onChange={(text) => updateMotivation(card, "add", text)}
+                  />
+                ) : excluded ? (
+                  <MotivationInput
+                    card={card}
+                    kind="exclude"
+                    value={motivationText(card.id, "exclude")}
+                    disabled={!canMutate}
+                    onChange={(text) => updateMotivation(card, "exclude", text)}
+                  />
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </section>
     </main>
   );
@@ -929,8 +940,4 @@ export function startEditorPath(build: Build, focusForLevel?: number): string {
 
 function effectiveCardLevel(card: Card): number {
   return card.level === "X" ? 1 : card.level;
-}
-
-function formatCardLevel(card: Card): string {
-  return String(card.level);
 }

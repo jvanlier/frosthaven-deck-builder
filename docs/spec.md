@@ -153,7 +153,10 @@ variants within a level.
   slot offers only options valid per R2/R3 given the preceding slots. Later stored
   choices never silently constrain or rewrite an earlier slot.
 - **F6** Select up to `handSize` cards from the pool for the starting deck, with a counter
-  (`9 / 11`). Selecting more than `handSize` isn't possible.
+  (`9 / 11`). Selecting more than `handSize` isn't possible. The grid also shows
+  eligible-but-unpicked cards outside the starting pool, gray and unselectable; their
+  exclusion notes are immediately editable. Cards already in the pool but left out of
+  the hand show exclusion notes once the hand reaches `handSize`.
 
 ### 4.5 Level-up (L → L+1): happy path
 
@@ -263,14 +266,16 @@ All optional, free text, stored per build:
 | Kind      | Key                      | Meaning                                                                                                                            |
 |-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------|
 | `exclude` | build, start level, card | Why this card was never a good fit for the build. Available for every card of level ≤ start level that's not in the starting deck. |
-| `add`     | build, level, card       | Why this card is the best choice: the pool pick and/or a card added to the deck at this level.                                     |
+| `add`     | build, level, card       | Why include this card in the starting hand, or why it is the best pool pick and/or addition to the deck at this level.             |
 | `drop`    | build, level, card       | Why this is the worst card and has to go.                                                                                          |
 
 - **F13** Where motivations can be entered:
   - inline wherever the subject appears: in the level-up flow, on the card itself (§4.5);
     in the deck view's changes; in card detail.
-  - in the starting-deck view, a collapsed "Not in deck" section with an optional note
-    per card.
+  - in the starting-deck view, an optional "Why include [card]?" note over each selected
+    card, using the same on-card layout as level-up notes. "Why exclude [card]?" notes
+    appear on excluded cards in that same grid (§4.4), with amber text and translucent
+    amber boxes distinct from inclusion notes. There is no separate expandable list.
   - A missing motivation is shown as a subtle "add note" affordance, never as a warning.
 - **F14 Motivations view** per build, to inspect and revise:
   - Grouped as *Not in starting deck*, then per level *Picked / Added* and *Dropped*.
@@ -282,6 +287,9 @@ All optional, free text, stored per build:
 - Initial-pick `add` motivations are keyed to the build's start level, even when the
   pick slot is for an earlier level; labels retain the slot's level (e.g. "Level 2 pick").
   Initial picks need not be in the starting deck for their pick motivations to apply.
+  A picked card's inclusion field and pick field edit the same `add` motivation, not
+  separate notes. Other starting-hand `add` motivations apply only while the card is
+  included; removing it hides the note without deleting it, and reselecting restores it.
 - `exclude` motivations include eligible-but-unpicked cards outside the starting pool,
   not just cards in the pool.
 - **F16** v1 text is plain text with preserved line breaks, safely escaped. No Markdown
