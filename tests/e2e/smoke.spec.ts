@@ -841,6 +841,7 @@ test("loads the deck builder shell and health status", async ({ page }) => {
 
 test("keeps card actions separate from enlarge and provides an image fallback", async ({
   page,
+  browserName,
 }) => {
   await page.goto("/__test/cards");
 
@@ -856,7 +857,8 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Close" })).toBeFocused();
-  await page.keyboard.press("Tab");
+  // WebKit requires Option+Tab to include buttons in keyboard navigation.
+  await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
   await expect(dialog.locator(":focus")).toHaveCount(1);
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
@@ -2717,7 +2719,8 @@ test("restores focus after closing a build dialog with the keyboard", async ({
   await page.goto("/c/SD");
 
   const createButton = page.getByRole("button", { name: "Create build" });
-  await createButton.click();
+  await createButton.focus();
+  await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog", { name: "Create build" });
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Escape");
@@ -2830,6 +2833,7 @@ test("preserves pending changes through a two-device conflict and explicit reloa
 
 test("supports keyboard-only card activation and visible focus", async ({
   page,
+  browserName,
 }) => {
   await page.goto("/__test/cards");
   const firstAction = page.locator(".card-action").first();
@@ -2841,7 +2845,8 @@ test("supports keyboard-only card activation and visible focus", async ({
     (await firstAction.getAttribute("aria-label"))?.replace("Open ", "") ?? "",
   );
 
-  await page.keyboard.press("Tab");
+  // WebKit requires Option+Tab to include buttons in keyboard navigation.
+  await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
   const firstEnlarge = page.getByRole("button", { name: /Enlarge/ }).first();
   await expect(firstEnlarge).toBeFocused();
   await expect(firstEnlarge).toHaveCSS("outline-style", "solid");

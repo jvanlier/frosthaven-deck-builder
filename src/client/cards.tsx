@@ -84,7 +84,7 @@ export function CardTile({
         open={enlarged}
         actionLabel={actionLabel}
         onAction={() => {
-          setEnlarged(false);
+          closeDialog();
           onAction?.();
         }}
         onClose={closeDialog}
