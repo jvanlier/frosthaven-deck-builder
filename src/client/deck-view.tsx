@@ -125,6 +125,18 @@ export function DeckView({
           />
           Show guidance
         </label>
+        <Link
+          className="button-link secondary-button"
+          to={
+            state.level === build.startLevel
+              ? startEditorPath(build)
+              : levelUpPath(character.id, build.id, state.level)
+          }
+        >
+          {state.level === build.startLevel
+            ? "Edit starting deck"
+            : "Edit this level"}
+        </Link>
       </section>
 
       <RepairIssues build={build} character={character} state={state} />
@@ -169,20 +181,8 @@ export function DeckView({
       </section>
 
       <ChangesSection build={build} state={state} cardById={cardById} />
-      <section className="deck-toolbar" aria-label="Deck actions">
-        <Link
-          className="button-link secondary-button"
-          to={
-            state.level === build.startLevel
-              ? startEditorPath(build)
-              : levelUpPath(character.id, build.id, state.level)
-          }
-        >
-          {state.level === build.startLevel
-            ? "Edit starting deck"
-            : "Edit this level"}
-        </Link>
-        {highestLevel === state.level && state.level > build.startLevel ? (
+      {highestLevel === state.level && state.level > build.startLevel ? (
+        <section className="deck-toolbar" aria-label="Deck actions">
           <button
             type="button"
             className="danger-button"
@@ -191,8 +191,8 @@ export function DeckView({
           >
             Delete level {state.level}
           </button>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
       <DeleteLevelDialog
         level={state.level}
         open={deleteDialogOpen}

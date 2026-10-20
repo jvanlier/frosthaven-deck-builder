@@ -465,7 +465,7 @@ function resolveMotivationLevel(
       (pick) => pick.forLevel === input.level && pick.cardId === input.cardId,
     );
   if (
-    input.kind === "exclude" ||
+    (input.kind === "exclude" && input.level === undefined) ||
     input.forLevel !== undefined ||
     isInitialPick
   ) {

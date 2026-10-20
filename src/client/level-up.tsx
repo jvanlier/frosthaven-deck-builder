@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardTile } from "./cards";
-import { MotivationInput } from "./notes";
+import { MotivationInput, type EditableMotivationKind } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
@@ -358,7 +358,7 @@ function LevelUpEditor({
 
   function updateMotivation(
     card: Card,
-    kind: "add" | "drop",
+    kind: EditableMotivationKind,
     text: string,
   ): void {
     if (!canMutate) {
@@ -375,7 +375,10 @@ function LevelUpEditor({
     );
   }
 
-  function motivationText(cardId: string, kind: "add" | "drop"): string {
+  function motivationText(
+    cardId: string,
+    kind: EditableMotivationKind,
+  ): string {
     return (
       build.motivations.find(
         (motivation) =>
@@ -628,10 +631,14 @@ function CandidateGrid({
   selectedPick: string | null;
   added: Set<string>;
   canMutate: boolean;
-  motivationText: (cardId: string, kind: "add" | "drop") => string;
+  motivationText: (cardId: string, kind: EditableMotivationKind) => string;
   onPick: (card: Card) => void;
   onAdd: (card: Card) => void;
-  onMotivation: (card: Card, kind: "add" | "drop", text: string) => void;
+  onMotivation: (
+    card: Card,
+    kind: EditableMotivationKind,
+    text: string,
+  ) => void;
 }) {
   if (cards.length === 0) {
     return <p className="empty-inline">No eligible cards are available.</p>;
@@ -641,6 +648,11 @@ function CandidateGrid({
       {cards.map((card) => {
         const isPicked = selectedPick === card.id;
         const isAdded = added.has(card.id) && !isPicked;
+        const isExcluded =
+          selection === "pick" &&
+          selectedPick !== null &&
+          !isPicked &&
+          !isAdded;
         return (
           <div className="level-up-candidate" role="listitem" key={card.id}>
             <CardTile
@@ -654,7 +666,15 @@ function CandidateGrid({
                     ? `Remove ${card.name} from deck`
                     : `Add ${card.name} to deck`
               }
-              stateLabel={isPicked ? "Picked" : isAdded ? "Added" : undefined}
+              stateLabel={
+                isPicked
+                  ? "Picked"
+                  : isAdded
+                    ? "Added"
+                    : isExcluded
+                      ? "Excluded"
+                      : undefined
+              }
               disabled={!canMutate}
               onAction={() =>
                 selection === "pick" ? onPick(card) : onAdd(card)
@@ -668,6 +688,14 @@ function CandidateGrid({
                 value={motivationText(card.id, "add")}
                 disabled={!canMutate}
                 onChange={(text) => onMotivation(card, "add", text)}
+              />
+            ) : isExcluded ? (
+              <MotivationInput
+                card={card}
+                kind="exclude"
+                value={motivationText(card.id, "exclude")}
+                disabled={!canMutate}
+                onChange={(text) => onMotivation(card, "exclude", text)}
               />
             ) : null}
           </div>

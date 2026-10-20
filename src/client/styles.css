@@ -11,6 +11,7 @@
   --warn: #fbbf24;
   --bad: #f87171;
   --card-width: 220px;
+  --status-bar-gap: 12px;
   color: var(--text);
   background: var(--bg);
   font-family: Inter, system-ui, sans-serif;
@@ -563,7 +564,7 @@ textarea {
 .starting-hand-status {
   position: sticky;
   z-index: 3;
-  top: calc(var(--header-height) + 12px);
+  top: calc(var(--header-height) + var(--status-bar-gap));
 }
 .deck-issues .issue-list {
   width: 100%;
@@ -591,6 +592,18 @@ textarea {
 .repair-button {
   flex: 0 0 auto;
   padding: 6px 10px;
+}
+@media (min-width: 521px) {
+  .deck-view,
+  .starting-hand {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--card-width));
+    column-gap: 14px;
+  }
+  .deck-view > *,
+  .starting-hand > * {
+    grid-column: 1 / -1;
+  }
 }
 .deck-intro {
   display: flex;
@@ -636,7 +649,10 @@ textarea {
   gap: 8px;
   margin: 20px 0 14px;
 }
-.deck-toolbar .button-link,
+.deck-intro > .button-link {
+  margin-left: auto;
+}
+.deck-intro > .button-link,
 .deck-toolbar button {
   padding: 6px 10px;
   font-size: 12px;
@@ -645,7 +661,6 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
   color: var(--muted);
   font-size: 13px;
   cursor: pointer;
@@ -703,6 +718,7 @@ textarea {
 }
 .card-tile {
   position: relative;
+  isolation: isolate;
   width: 100%;
   color: var(--text);
 }
@@ -776,7 +792,7 @@ textarea {
 .card-tile[data-state="Added"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.starting-deck-card .card-tile[data-state="Excluded"] .card-state {
+.card-tile[data-state="Excluded"] .card-state {
   top: -11px;
   left: 50%;
   transform: translateX(-50%);
@@ -798,6 +814,10 @@ textarea {
 }
 .starting-deck-card[data-excluded="true"] .card-action img {
   filter: grayscale(1);
+}
+.card-tile[data-state="Excluded"] img {
+  filter: grayscale(1);
+  opacity: 0.4;
 }
 .starting-deck-card[data-excluded="true"] .card-action:disabled {
   opacity: 1;
@@ -878,7 +898,7 @@ textarea {
 .level-up-status {
   position: sticky;
   z-index: 3;
-  top: calc(var(--header-height) + 12px);
+  top: calc(var(--header-height) + var(--status-bar-gap));
 }
 .level-up-status,
 .deck-issues,
@@ -887,6 +907,7 @@ textarea {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  min-height: 54px;
   padding: 10px 12px;
   margin-bottom: 24px;
   border: 1px solid var(--line);
@@ -894,8 +915,11 @@ textarea {
   background: #0b1220f2;
   box-shadow: 0 10px 30px #000a;
 }
+.starting-editor {
+  padding-top: var(--status-bar-gap);
+}
 .starting-hand-status {
-  margin-top: 16px;
+  margin-top: 0;
   flex-wrap: nowrap;
 }
 .starting-hand-status .issue-list {
@@ -949,7 +973,8 @@ textarea {
   gap: 8px;
   margin-left: auto;
 }
-.level-up-actions button {
+.level-up-actions button,
+.starting-hand-status > button {
   padding: 6px 12px;
   font-size: 13px;
 }
@@ -1012,7 +1037,7 @@ textarea {
   background: rgb(3 17 31 / 35%);
 }
 .motivation-input[data-kind="exclude"],
-.starting-deck-card .card-tile[data-state="Excluded"] .card-state {
+.card-tile[data-state="Excluded"] .card-state {
   color: var(--warn);
   border-color: #fbbf2488;
   background: rgb(42 27 12 / 75%);
@@ -1422,7 +1447,8 @@ textarea {
   .level-up-actions {
     gap: 4px;
   }
-  .level-up-actions button {
+  .level-up-actions button,
+  .starting-hand-status > button {
     padding: 6px;
     font-size: 12px;
   }

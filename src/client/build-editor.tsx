@@ -663,7 +663,6 @@ export function StartingEditor({
           </ul>
           <button
             type="button"
-            className="secondary-button repair-button"
             onClick={() =>
               navigate(deckPath(character.id, build.id, build.startLevel))
             }

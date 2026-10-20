@@ -164,6 +164,15 @@ for (const view of ["starting", "deck"] as const) {
       view === "starting" ? ".starting-hand-status" : ".deck-issues",
     );
     await expect(bar).toBeVisible();
+    if (view === "starting") {
+      const initialOffset = await bar.evaluate((element) =>
+        Math.abs(
+          element.getBoundingClientRect().top -
+            Number.parseFloat(getComputedStyle(element).top),
+        ),
+      );
+      expect(initialOffset).toBeLessThan(2);
+    }
     await bar.evaluate((element) => {
       window.scrollTo(
         0,
@@ -182,6 +191,26 @@ for (const view of ["starting", "deck"] as const) {
       await expect(bar.getByRole("button").first()).toBeVisible();
     } else {
       await expect(bar).toContainText("0 / 11 cards");
+      await bar.evaluate((element) => {
+        const zoom = document.querySelectorAll(
+          ".starting-hand .enlarge-button",
+        )[4]!;
+        const targetY = element.getBoundingClientRect().top + 20;
+        window.scrollBy(0, zoom.getBoundingClientRect().top + 18 - targetY);
+      });
+      const barCoversZoom = await bar.evaluate((element) => {
+        const zoom = document.querySelectorAll(
+          ".starting-hand .enlarge-button",
+        )[4]!;
+        const box = zoom.getBoundingClientRect();
+        return element.contains(
+          document.elementFromPoint(
+            box.x + box.width / 2,
+            box.y + box.height / 2,
+          ),
+        );
+      });
+      expect(barCoversZoom).toBe(true);
       const editorHeight = await bar.evaluate(
         (element) => element.getBoundingClientRect().height,
       );
@@ -218,6 +247,15 @@ test("keeps starting cards in place when the deck becomes incomplete", async ({
   const done = page.getByRole("button", { name: "Done", exact: true });
   await expect(done).toBeEnabled();
   const grid = page.locator(".starting-hand > .card-grid");
+  const barRight = await page
+    .locator(".starting-hand-status")
+    .evaluate((element) => element.getBoundingClientRect().right);
+  const cardsRight = await grid
+    .locator(".card-tile")
+    .evaluateAll((cards) =>
+      Math.max(...cards.map((card) => card.getBoundingClientRect().right)),
+    );
+  expect(Math.abs(barRight - cardsRight)).toBeLessThan(2);
   const gridTop = () =>
     grid.evaluate(
       (element) => element.getBoundingClientRect().top + window.scrollY,
@@ -354,17 +392,12 @@ test("matches the compact image-first mockup on desktop and phone", async ({
     const imageBox = (await image.boundingBox())!;
     expect(Math.abs(cardBox.height - imageBox.height)).toBeLessThan(3);
     if (width > 520) expect(cardBox.width).toBe(220);
-    if (width >= 1240) {
-      const newly = (await page
-        .locator(".level-up-picks .level-up-group")
-        .first()
-        .boundingBox())!;
-      const earlier = (await page
-        .locator(".level-up-picks .level-up-group")
-        .nth(1)
-        .boundingBox())!;
-      expect(earlier.y - (newly.y + newly.height)).toBeLessThan(60);
-    }
+    await expect(page.locator(".level-up-picks .level-up-group")).toHaveCount(
+      1,
+    );
+    await expect(
+      page.getByRole("heading", { name: "Available cards" }),
+    ).toBeVisible();
     const zoomBox = (await candidate.locator(".enlarge-button").boundingBox())!;
     expect(zoomBox.y).toBeLessThan(cardBox.y + 16);
     expect(zoomBox.x + zoomBox.width).toBeLessThanOrEqual(
@@ -444,6 +477,30 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await expect(page.getByText("12 / 11 cards", { exact: true })).toBeVisible();
+  const excluded = page.locator(
+    '.level-up-candidate:has([data-card-id="tornado"])',
+  );
+  await expect(excluded.getByRole("status")).toHaveText("Excluded");
+  await expect(
+    excluded.getByRole("button", { name: "Pick Tornado", exact: true }),
+  ).toBeEnabled();
+  await excluded
+    .getByLabel("Why exclude Tornado?")
+    .fill("Prefer the other card.");
+  await expect
+    .poll(() => persisted.builds[0]!.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        cardId: "tornado",
+        level: 2,
+        kind: "exclude",
+        text: "Prefer the other card.",
+      }),
+    );
+  await page.reload();
+  await expect(excluded.getByLabel("Why exclude Tornado?")).toHaveValue(
+    "Prefer the other card.",
+  );
   await expect(page.locator(".level-up-editor .deck-issues")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Drop Blizzard" }),
@@ -1478,6 +1535,15 @@ test("switches between stored levels using the header navigation", async ({
     }),
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
+  const editRight = await page
+    .locator(".deck-intro > .button-link")
+    .evaluate((element) => element.getBoundingClientRect().right);
+  const cardsRight = await page
+    .locator(".deck-card-list .card-tile")
+    .evaluateAll((cards) =>
+      Math.max(...cards.map((card) => card.getBoundingClientRect().right)),
+    );
+  expect(Math.abs(editRight - cardsRight)).toBeLessThan(2);
   await page.getByRole("link", { name: "Level 2", exact: true }).click();
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
   await page.getByRole("link", { name: "Level 1", exact: true }).click();
@@ -1505,7 +1571,9 @@ test("resumes the last valid deck position and safely falls back for invalid sto
   ).toBeVisible();
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
   await expect(page).toHaveURL(`/c/SD`);
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
@@ -2057,7 +2125,9 @@ test("renames, copies, and confirms build deletion", async ({ page }) => {
       ["Cold control", []],
       ["Independent copy", ["blizzard"]],
     ]);
-  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
   await expect(
     page.getByText("Independent copy", { exact: true }),
   ).toBeVisible();
@@ -2143,7 +2213,9 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
   const createDialog = page.getByRole("dialog", { name: "Create build" });
   await createDialog.getByLabel("Build name").fill("Pending build");
   await createDialog.getByRole("button", { name: "Create build" }).click();
-  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
   await page.getByRole("button", { name: "Create build" }).click();
   await expect.poll(() => Boolean(releaseSave)).toBe(true);
   releaseSave();
