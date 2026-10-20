@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Link,
   NavLink,
@@ -146,8 +146,29 @@ function AppHeader({
   health: HealthState;
 }) {
   const workspace = useWorkspace();
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const observer = new ResizeObserver(() => {
+      header
+        .closest<HTMLElement>(".app-frame")
+        ?.style.setProperty(
+          "--header-height",
+          `${header.getBoundingClientRect().height}px`,
+        );
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+  const levelUpTo = workspace.build
+    ? levelUpDestination(workspace.build, character)
+    : null;
+  const highestLevel = workspace.levels.at(-1) ?? 1;
+  const canPlanNext =
+    levelUpTo?.endsWith(`/l/${highestLevel + 1}/level-up`) ?? false;
   return (
-    <header className="app-header">
+    <header className="app-header" ref={headerRef}>
       <div className="header-inner">
         <h1 className="visually-hidden">Frosthaven Deck Builder</h1>
         <Link
@@ -157,36 +178,53 @@ function AppHeader({
         >
           <img src={`/icons/${character.icon}`} alt="" />
           <span>
-            <strong>{character.name}</strong>
-            <small>Deck Builder</small>
+            <strong>{workspace.build?.name ?? character.name}</strong>
+            <small>
+              {workspace.build
+                ? `${character.name} · started at level ${workspace.build.startLevel}`
+                : "Deck Builder"}
+            </small>
           </span>
         </Link>
         <div className="header-level">
-          <span className="eyebrow">
-            {workspace.build?.name ?? "Current workspace"}
-          </span>
-          <strong>
-            {workspace.level !== null
-              ? `Level ${workspace.level}`
-              : workspace.build
-                ? "Build workspace"
-                : "Builds"}
-          </strong>
           {workspace.build ? (
             <nav className="level-switcher" aria-label="Level navigation">
               {workspace.levels.map((level) => (
                 <Link
                   key={level}
                   to={workspaceDeckPath(workspace, level)}
+                  aria-label={`Level ${level}`}
                   aria-current={level === workspace.level ? "page" : undefined}
                 >
                   {level}
                 </Link>
               ))}
+              {canPlanNext && highestLevel < 9 ? (
+                <Link
+                  className="future-level"
+                  to={levelUpTo!}
+                  aria-label={`Plan level ${highestLevel + 1}`}
+                >
+                  +{highestLevel + 1}
+                </Link>
+              ) : null}
+              {Array.from(
+                { length: 9 - highestLevel },
+                (_, index) => highestLevel + index + 1,
+              )
+                .filter((level) => !canPlanNext || level !== highestLevel + 1)
+                .map((level) => (
+                  <span className="future-level unavailable-level" key={level}>
+                    {level}
+                  </span>
+                ))}
             </nav>
           ) : null}
         </div>
-        <HealthIndicator state={health} />
+        <div className="header-utilities">
+          <HealthIndicator state={health} />
+          <Link to="/about">About</Link>
+        </div>
       </div>
     </header>
   );
@@ -381,9 +419,7 @@ function UnavailableView() {
 }
 
 function BottomTabs() {
-  const location = useLocation();
   const workspace = useWorkspace();
-  const isAbout = location.pathname === "/about";
   const hasWorkspace = workspace.build !== undefined;
   const deckLevel = workspace.level ?? workspace.build?.startLevel ?? 1;
   return (
@@ -394,10 +430,10 @@ function BottomTabs() {
             ? workspaceDeckPath(workspace, deckLevel)
             : `/c/${character.id}`
         }
-        end={!hasWorkspace}
+        end
         className={tabClassName}
       >
-        <span aria-hidden="true">▦</span> Deck
+        <span aria-hidden="true">🂠</span> Deck
       </NavLink>
       <WorkspaceTab
         to={
@@ -406,23 +442,18 @@ function BottomTabs() {
             : null
         }
         label="Level up"
-        icon="↗"
+        icon="⬆︎"
       />
       <WorkspaceTab
         to={workspace.build ? overviewPath(workspace) : null}
         label="Overview"
-        icon="▤"
+        icon="▦"
       />
       <WorkspaceTab
         to={workspace.build ? motivationsPath(workspace) : null}
         label="Notes"
         icon="✎"
       />
-      {isAbout ? (
-        <span className="tab-current">About</span>
-      ) : (
-        <Link to="/about">About</Link>
-      )}
     </nav>
   );
 }
@@ -436,6 +467,9 @@ function WorkspaceTab({
   label: string;
   icon: string;
 }) {
+  const location = useLocation();
+  const editingLevel =
+    label === "Level up" && location.pathname.endsWith("/level-up");
   if (to === null) {
     return (
       <span className="tab-disabled" aria-disabled="true">
@@ -444,7 +478,13 @@ function WorkspaceTab({
     );
   }
   return (
-    <NavLink to={to} className={tabClassName}>
+    <NavLink
+      to={to}
+      aria-current={editingLevel ? "page" : undefined}
+      className={({ isActive }) =>
+        tabClassName({ isActive: isActive || editingLevel })
+      }
+    >
       <span aria-hidden="true">{icon}</span> {label}
     </NavLink>
   );
@@ -563,7 +603,12 @@ function SaveFeedback() {
 
 function HealthIndicator({ state }: { state: HealthState }) {
   return (
-    <p className={`health health-${state}`} role="status" aria-live="polite">
+    <p
+      className={`health health-${state}`}
+      role="status"
+      aria-live="polite"
+      title={healthMessages[state]}
+    >
       {healthMessages[state]}
     </p>
   );

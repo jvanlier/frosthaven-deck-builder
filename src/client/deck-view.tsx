@@ -113,15 +113,18 @@ export function DeckView({
   return (
     <main className="page-content deck-view" aria-labelledby="deck-heading">
       <section className="page-intro deck-intro">
-        <div>
-          <p className="eyebrow">
-            {character.name} · {build.name}
-          </p>
-          <h1 id="deck-heading">Deck: {build.name}</h1>
-          <p>
-            Level {state.level} · {state.pool.length} cards in the pool ·{" "}
-            {state.deck.length} / {character.handSize} cards in the hand
-          </p>
+        <h1 id="deck-heading" className="visually-hidden">
+          Deck: {build.name}
+        </h1>
+        <div className="deck-summary">
+          <span
+            className={`status-badge ${state.deck.length === character.handSize ? "complete" : "incomplete"}`}
+          >
+            {state.deck.length} / {character.handSize} cards
+          </span>
+          <span className="status-badge pool-badge">
+            Pool {state.pool.length}
+          </span>
         </div>
         <div className="deck-badges" aria-label="Deck status">
           {incomplete ? (
@@ -130,10 +133,15 @@ export function DeckView({
           {invalid ? (
             <span className="status-badge invalid">Invalid</span>
           ) : null}
-          {!incomplete && !invalid ? (
-            <span className="status-badge complete">Complete</span>
-          ) : null}
         </div>
+        <label className="guidance-toggle">
+          <input
+            type="checkbox"
+            checked={showGuidance}
+            onChange={(event) => setShowGuidance(event.target.checked)}
+          />
+          Show guidance
+        </label>
       </section>
 
       <nav
@@ -157,55 +165,13 @@ export function DeckView({
 
       <RepairIssues build={build} character={character} state={state} />
 
-      <section className="deck-toolbar" aria-label="Deck actions">
-        {state.level === build.startLevel ? (
-          <Link
-            className="button-link secondary-button"
-            to={startEditorPath(build)}
-          >
-            Edit starting deck
-          </Link>
-        ) : (
-          <Link
-            className="button-link secondary-button"
-            to={levelUpPath(character.id, build.id, state.level)}
-          >
-            Edit this level
-          </Link>
-        )}
-        <label className="guidance-toggle">
-          <input
-            type="checkbox"
-            checked={showGuidance}
-            onChange={(event) => setShowGuidance(event.target.checked)}
-          />
-          Show guidance
-        </label>
-        {highestLevel === state.level && state.level > build.startLevel ? (
-          <button
-            type="button"
-            className="danger-button"
-            disabled={!canMutate}
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            Delete level {state.level}
-          </button>
-        ) : null}
-      </section>
-
       <section
         className="editor-section deck-cards"
         aria-labelledby="deck-cards-heading"
       >
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Derived from the rules engine</p>
-            <h2 id="deck-cards-heading">Your deck</h2>
-          </div>
-          <span className="editor-count">
-            {state.deck.length} / {character.handSize} cards
-          </span>
-        </div>
+        <h2 id="deck-cards-heading" className="visually-hidden">
+          Your deck
+        </h2>
         {state.deck.length > 0 ? (
           <div className="deck-card-list">
             {state.deck.map((card) => (
@@ -213,7 +179,9 @@ export function DeckView({
                 <CardGrid
                   cards={[card]}
                   actionLabel={(candidate) => `Open ${candidate.name} details`}
-                  stateLabel={() => "In deck"}
+                  stateLabel={() =>
+                    state.applied.added.includes(card.id) ? "NEW" : undefined
+                  }
                   onAction={openCardDetail}
                 />
                 {showGuidance ? (
@@ -237,6 +205,30 @@ export function DeckView({
       </section>
 
       <ChangesSection build={build} state={state} cardById={cardById} />
+      <section className="deck-toolbar" aria-label="Deck actions">
+        <Link
+          className="button-link secondary-button"
+          to={
+            state.level === build.startLevel
+              ? startEditorPath(build)
+              : levelUpPath(character.id, build.id, state.level)
+          }
+        >
+          {state.level === build.startLevel
+            ? "Edit starting deck"
+            : "Edit this level"}
+        </Link>
+        {highestLevel === state.level && state.level > build.startLevel ? (
+          <button
+            type="button"
+            className="danger-button"
+            disabled={!canMutate}
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            Delete level {state.level}
+          </button>
+        ) : null}
+      </section>
       <DeleteLevelDialog
         level={state.level}
         open={deleteDialogOpen}

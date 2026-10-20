@@ -233,7 +233,7 @@ function LevelUpEditor({
   }
 
   function scrollToDeckOnSmallScreen(): void {
-    if (typeof window === "undefined" || window.innerWidth > 650) {
+    if (typeof window === "undefined" || window.innerWidth >= 1240) {
       return;
     }
     const heading = deckHeadingRef.current;
@@ -451,7 +451,17 @@ function LevelUpEditor({
       className="page-content level-up-editor"
       aria-labelledby="level-up-heading"
     >
-      <section className="level-up-status" aria-label="Level-up status">
+      <section
+        className="level-up-status"
+        aria-label="Level-up status"
+        data-tone={
+          doneEnabled
+            ? "complete"
+            : selectedPick === null
+              ? "pick"
+              : "incomplete"
+        }
+      >
         <div>
           <p className="eyebrow">
             Level {level} · {build.name}
@@ -486,43 +496,20 @@ function LevelUpEditor({
       <RepairIssues build={build} character={character} state={state} />
 
       <div className="level-up-groups">
-        <section
-          className="editor-section level-up-group"
-          aria-labelledby="newly-unlocked-heading"
-        >
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">First choice</p>
-              <h2 id="newly-unlocked-heading">Newly unlocked</h2>
+        <div className="level-up-picks">
+          <section
+            className="editor-section level-up-group"
+            aria-labelledby="newly-unlocked-heading"
+          >
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">First choice</p>
+                <h2 id="newly-unlocked-heading">Newly unlocked</h2>
+              </div>
+              <span className="editor-count">Level {level}</span>
             </div>
-            <span className="editor-count">Level {level}</span>
-          </div>
-          <CandidateGrid
-            cards={newlyUnlocked}
-            selection="pick"
-            selectedPick={selectedPick}
-            added={activeAdded}
-            canMutate={canMutate}
-            motivationText={motivationText}
-            onPick={choosePick}
-            onAdd={toggleExtra}
-            onMotivation={updateMotivation}
-          />
-        </section>
-
-        <section
-          className="editor-section level-up-group"
-          aria-labelledby="earlier-picks-heading"
-        >
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Skipped options</p>
-              <h2 id="earlier-picks-heading">Earlier, not yet picked</h2>
-            </div>
-          </div>
-          {earlierPicks.length > 0 ? (
             <CandidateGrid
-              cards={earlierPicks}
+              cards={newlyUnlocked}
               selection="pick"
               selectedPick={selectedPick}
               added={activeAdded}
@@ -532,93 +519,121 @@ function LevelUpEditor({
               onAdd={toggleExtra}
               onMotivation={updateMotivation}
             />
-          ) : (
-            <p className="empty-inline">
-              All earlier eligible cards have already been picked.
-            </p>
-          )}
-        </section>
+          </section>
 
-        <section
-          className="editor-section level-up-group level-up-deck"
-          aria-labelledby="your-deck-heading"
-        >
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Current hand</p>
-              <h2 id="your-deck-heading" ref={deckHeadingRef} tabIndex={-1}>
-                Your deck
-              </h2>
-            </div>
-            <span className="editor-count">
-              {state.deck.length} / {handSize}
-            </span>
-          </div>
-          <div className="level-up-card-grid">
-            {visibleDeck.map((card) => {
-              const isNew = newCards.has(card.id);
-              const isDropped = droppedCards.has(card.id);
-              return (
-                <div className="level-up-deck-card" key={card.id}>
-                  <CardTile
-                    card={card}
-                    actionLabel={
-                      isDropped
-                        ? `Keep ${card.name}`
-                        : isNew
-                          ? `Keep ${card.name} new`
-                          : `Drop ${card.name}`
-                    }
-                    stateLabel={
-                      isDropped
-                        ? "Dropped"
-                        : isNew
-                          ? "NEW — undo in its section"
-                          : "In deck"
-                    }
-                    disabled={!canMutate || isNew}
-                    onAction={() => toggleDrop(card)}
-                  />
-                  {isDropped ? (
-                    <MotivationInput
-                      card={card}
-                      kind="drop"
-                      value={motivationText(card.id, "drop")}
-                      disabled={!canMutate}
-                      onChange={(text) => updateMotivation(card, "drop", text)}
-                    />
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section
-          className="editor-section level-up-group swap-group"
-          aria-labelledby="swap-heading"
-        >
-          <details
-            open={swapOpen}
-            onToggle={(event) => setSwapOpen(event.currentTarget.open)}
+          <section
+            className="editor-section level-up-group"
+            aria-labelledby="earlier-picks-heading"
           >
-            <summary id="swap-heading">Swap more cards from the pool</summary>
-            <p className="section-description">
-              Add another pool card, then remove a card from your deck.
-            </p>
-            <CandidateGrid
-              cards={swapCandidates}
-              selection="add"
-              selectedPick={selectedPick}
-              added={activeAdded}
-              canMutate={canMutate}
-              motivationText={motivationText}
-              onPick={choosePick}
-              onAdd={toggleExtra}
-              onMotivation={updateMotivation}
-            />
-          </details>
-        </section>
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Skipped options</p>
+                <h2 id="earlier-picks-heading">Earlier, not yet picked</h2>
+              </div>
+            </div>
+            {earlierPicks.length > 0 ? (
+              <CandidateGrid
+                cards={earlierPicks}
+                selection="pick"
+                selectedPick={selectedPick}
+                added={activeAdded}
+                canMutate={canMutate}
+                motivationText={motivationText}
+                onPick={choosePick}
+                onAdd={toggleExtra}
+                onMotivation={updateMotivation}
+              />
+            ) : (
+              <p className="empty-inline">
+                All earlier eligible cards have already been picked.
+              </p>
+            )}
+          </section>
+        </div>
+        <div className="level-up-hand">
+          <section
+            className="editor-section level-up-group level-up-deck"
+            aria-labelledby="your-deck-heading"
+          >
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Current hand</p>
+                <h2 id="your-deck-heading" ref={deckHeadingRef} tabIndex={-1}>
+                  Your deck
+                </h2>
+              </div>
+              <span className="editor-count">
+                {state.deck.length} / {handSize}
+              </span>
+            </div>
+            <div className="level-up-card-grid">
+              {visibleDeck.map((card) => {
+                const isNew = newCards.has(card.id);
+                const isDropped = droppedCards.has(card.id);
+                return (
+                  <div className="level-up-deck-card" key={card.id}>
+                    <CardTile
+                      card={card}
+                      actionLabel={
+                        isDropped
+                          ? `Keep ${card.name}`
+                          : isNew
+                            ? `Keep ${card.name} new`
+                            : `Drop ${card.name}`
+                      }
+                      stateLabel={
+                        isDropped
+                          ? "Dropped"
+                          : isNew
+                            ? "NEW — undo in its section"
+                            : "In deck"
+                      }
+                      disabled={!canMutate || isNew}
+                      onAction={() => toggleDrop(card)}
+                    />
+                    {isDropped ? (
+                      <MotivationInput
+                        card={card}
+                        kind="drop"
+                        value={motivationText(card.id, "drop")}
+                        disabled={!canMutate}
+                        onChange={(text) =>
+                          updateMotivation(card, "drop", text)
+                        }
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section
+            className="editor-section level-up-group swap-group"
+            aria-labelledby="swap-heading"
+          >
+            <details
+              open={swapOpen}
+              onToggle={(event) => setSwapOpen(event.currentTarget.open)}
+            >
+              <summary id="swap-heading">Swap more cards from the pool</summary>
+              <p className="section-description">
+                Add another pool card, then remove a card from your deck.
+              </p>
+              <CandidateGrid
+                cards={swapCandidates}
+                selection="add"
+                selectedPick={selectedPick}
+                added={activeAdded}
+                canMutate={canMutate}
+                motivationText={motivationText}
+                onPick={choosePick}
+                onAdd={toggleExtra}
+                onMotivation={updateMotivation}
+              />
+            </details>
+          </section>
+        </div>
       </div>
     </main>
   );
