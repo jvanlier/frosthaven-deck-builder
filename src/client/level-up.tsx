@@ -187,17 +187,11 @@ function LevelUpEditor({
   const selectedCard = selectedPick
     ? character.cards.find((card) => card.id === selectedPick)
     : undefined;
-  const newlyUnlocked = cardsInGroups(
-    pickCandidates,
-    selectedCard,
-    (card) => card.level === level,
-  );
-  const earlierPicks = cardsInGroups(
-    pickCandidates,
-    selectedCard,
-    (card) => effectiveCardLevel(card) < level,
-  ).filter(
-    (card) => !newlyUnlocked.some((candidate) => candidate.id === card.id),
+  const availableCards = uniqueCards([
+    ...pickCandidates,
+    ...(selectedCard ? [selectedCard] : []),
+  ]).sort(
+    (left, right) => effectiveCardLevel(right) - effectiveCardLevel(left),
   );
   const swapCandidates = addOptions(build, character, level).filter(
     (card) => card.id !== selectedPick,
@@ -493,23 +487,31 @@ function LevelUpEditor({
         </div>
       </section>
 
-      <RepairIssues build={build} character={character} state={state} />
+      <RepairIssues
+        build={build}
+        character={character}
+        state={{
+          ...state,
+          issues: state.issues.filter(
+            (issue) =>
+              issue.code !== "MISSING_PICK" &&
+              issue.code !== "DECK_TOO_SMALL" &&
+              issue.code !== "DECK_TOO_LARGE",
+          ),
+        }}
+      />
 
       <div className="level-up-groups">
         <div className="level-up-picks">
           <section
             className="editor-section level-up-group"
-            aria-labelledby="newly-unlocked-heading"
+            aria-labelledby="available-cards-heading"
           >
             <div className="section-heading">
-              <div>
-                <p className="eyebrow">First choice</p>
-                <h2 id="newly-unlocked-heading">Newly unlocked</h2>
-              </div>
-              <span className="editor-count">Level {level}</span>
+              <h2 id="available-cards-heading">Available cards</h2>
             </div>
             <CandidateGrid
-              cards={newlyUnlocked}
+              cards={availableCards}
               selection="pick"
               selectedPick={selectedPick}
               added={activeAdded}
@@ -519,35 +521,6 @@ function LevelUpEditor({
               onAdd={toggleExtra}
               onMotivation={updateMotivation}
             />
-          </section>
-
-          <section
-            className="editor-section level-up-group"
-            aria-labelledby="earlier-picks-heading"
-          >
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Skipped options</p>
-                <h2 id="earlier-picks-heading">Earlier, not yet picked</h2>
-              </div>
-            </div>
-            {earlierPicks.length > 0 ? (
-              <CandidateGrid
-                cards={earlierPicks}
-                selection="pick"
-                selectedPick={selectedPick}
-                added={activeAdded}
-                canMutate={canMutate}
-                motivationText={motivationText}
-                onPick={choosePick}
-                onAdd={toggleExtra}
-                onMotivation={updateMotivation}
-              />
-            ) : (
-              <p className="empty-inline">
-                All earlier eligible cards have already been picked.
-              </p>
-            )}
           </section>
         </div>
         <div className="level-up-hand">
@@ -702,22 +675,6 @@ function CandidateGrid({
       })}
     </div>
   );
-}
-
-function cardsInGroups(
-  cards: Card[],
-  selected: Card | undefined,
-  predicate: (card: Card) => boolean,
-): Card[] {
-  const candidates = cards.filter(predicate);
-  if (
-    selected &&
-    predicate(selected) &&
-    !candidates.some((card) => card.id === selected.id)
-  ) {
-    return [selected, ...candidates];
-  }
-  return candidates;
 }
 
 function uniqueCards(cards: Card[]): Card[] {

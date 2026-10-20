@@ -80,7 +80,9 @@ export function RepairIssues({
 
   return (
     <section className="deck-issues" aria-labelledby="repair-issues-heading">
-      <h2 id="repair-issues-heading">Needs attention</h2>
+      <h2 id="repair-issues-heading" className="visually-hidden">
+        Needs attention
+      </h2>
       <ul className="issue-list repair-list">
         {state.issues.map((issue, index) => {
           const cardName = issue.cardId
@@ -93,7 +95,12 @@ export function RepairIssues({
               className={`issue-${issue.severity}`}
               key={`${issue.code}-${issue.cardId ?? index}-${issue.operation?.index ?? ""}`}
             >
-              <span>{issue.message}</span>
+              <span>
+                {issue.code === "DECK_TOO_SMALL" ||
+                issue.code === "DECK_TOO_LARGE"
+                  ? `${state.deck.length} / ${character.handSize} cards`
+                  : issue.message}
+              </span>
               <button
                 type="button"
                 className="secondary-button repair-button"

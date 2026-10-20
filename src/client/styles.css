@@ -68,7 +68,6 @@ button:disabled {
   opacity: 0.4;
 }
 button:not([class]),
-.dialog-action,
 .level-up-actions button:last-child,
 .build-list-intro > button {
   border-color: transparent;
@@ -559,16 +558,29 @@ textarea {
 }
 .deck-issues {
   margin-block: 14px;
-  padding: 12px;
-  border: 1px solid #f8717166;
-  border-radius: 14px;
-  background: #f8717111;
 }
-.deck-issues h2 {
-  margin: 0 0 8px;
+.deck-view > .deck-issues,
+.starting-hand-status {
+  position: sticky;
+  z-index: 3;
+  top: calc(var(--header-height) + 12px);
 }
 .deck-issues .issue-list {
+  width: 100%;
   margin: 0;
+}
+.repair-list li > span,
+.starting-hand-status li {
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fbbf2422;
+  font-size: 14px;
+  font-weight: 700;
+}
+.repair-list .issue-invalid > span,
+.starting-hand-status .issue-invalid {
+  background: #f8717122;
 }
 .repair-list li {
   display: flex;
@@ -591,7 +603,6 @@ textarea {
 .deck-badges:empty {
   display: none;
 }
-.deck-summary,
 .deck-badges {
   display: flex;
   flex-wrap: wrap;
@@ -617,23 +628,6 @@ textarea {
 .status-badge.invalid {
   color: var(--bad);
   border-color: #f8717166;
-}
-.deck-level-navigation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 12px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.deck-level-navigation a {
-  color: var(--ice);
-  text-decoration: none;
-}
-.level-navigation-disabled {
-  color: var(--muted);
-  opacity: 0.5;
 }
 .deck-toolbar {
   display: flex;
@@ -780,7 +774,9 @@ textarea {
 }
 .card-tile[data-state="Picked"] .card-state,
 .card-tile[data-state="Added"] .card-state,
-.card-tile[data-state="In starting deck"] .card-state {
+.card-tile[data-state="In starting deck"] .card-state,
+.card-tile[data-state="Dropped"] .card-state,
+.starting-deck-card .card-tile[data-state="Excluded"] .card-state {
   top: -11px;
   left: 50%;
   transform: translateX(-50%);
@@ -803,18 +799,15 @@ textarea {
 .starting-deck-card[data-excluded="true"] .card-action img {
   filter: grayscale(1);
 }
+.starting-deck-card[data-excluded="true"] .card-action:disabled {
+  opacity: 1;
+}
+.starting-deck-card[data-excluded="true"] .card-action:disabled img {
+  opacity: 0.4;
+}
 .card-tile[data-state="Dropped"] .card-state {
-  top: 26%;
-  left: 8px;
-  right: 8px;
-  max-width: none;
-  padding: 6px 0;
-  text-align: center;
   color: white;
   background: #b73939;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
 .card-tile[data-state="Dropped"] .card-state::before {
   content: "✕ ";
@@ -885,17 +878,38 @@ textarea {
 .level-up-status {
   position: sticky;
   z-index: 3;
-  top: var(--header-height);
+  top: calc(var(--header-height) + 12px);
+}
+.level-up-status,
+.deck-issues,
+.starting-hand-status {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
   padding: 10px 12px;
-  margin-bottom: 6px;
+  margin-bottom: 24px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #0b1220f2;
   box-shadow: 0 10px 30px #000a;
+}
+.starting-hand-status {
+  margin-top: 16px;
+  flex-wrap: nowrap;
+}
+.starting-hand-status .issue-list {
+  flex: 1;
+  min-width: 0;
+  align-content: center;
+  margin: 0;
+}
+.starting-hand-status > button {
+  margin-left: auto;
+}
+.starting-hand-status .starting-hand-ready {
+  color: var(--ok);
+  background: #4ade8022;
 }
 .level-up-status h1,
 .level-up-status .eyebrow {
@@ -997,7 +1011,8 @@ textarea {
   resize: none;
   background: rgb(3 17 31 / 35%);
 }
-.motivation-input[data-kind="exclude"] {
+.motivation-input[data-kind="exclude"],
+.starting-deck-card .card-tile[data-state="Excluded"] .card-state {
   color: var(--warn);
   border-color: #fbbf2488;
   background: rgb(42 27 12 / 75%);
@@ -1174,9 +1189,6 @@ textarea {
   border-radius: 18px;
   box-shadow: 0 20px 60px #000;
 }
-.dialog-action {
-  justify-self: center;
-}
 .overview-scroll {
   overflow: auto;
   border: 1px solid var(--line);
@@ -1333,6 +1345,9 @@ textarea {
   }
 }
 @media (max-width: 650px) {
+  .starting-hand-status .issue-list {
+    min-height: 48px;
+  }
   .header-utilities {
     gap: 8px;
   }

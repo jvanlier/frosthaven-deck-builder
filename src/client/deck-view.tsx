@@ -68,13 +68,6 @@ export function DeckView({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
   const cardById = new Map(character.cards.map((card) => [card.id, card]));
-  const levels = [
-    build.startLevel,
-    ...build.levelUps.map((levelUp) => levelUp.level),
-  ];
-  const levelIndex = levels.indexOf(state.level);
-  const previousLevel = levels[levelIndex - 1];
-  const nextLevel = levels[levelIndex + 1];
   const invalid = state.issues.some((issue) => issue.severity === "invalid");
   const incomplete = state.issues.some(
     (issue) => issue.severity === "incomplete",
@@ -116,16 +109,6 @@ export function DeckView({
         <h1 id="deck-heading" className="visually-hidden">
           Deck: {build.name}
         </h1>
-        <div className="deck-summary">
-          <span
-            className={`status-badge ${state.deck.length === character.handSize ? "complete" : "incomplete"}`}
-          >
-            {state.deck.length} / {character.handSize} cards
-          </span>
-          <span className="status-badge pool-badge">
-            Pool {state.pool.length}
-          </span>
-        </div>
         <div className="deck-badges" aria-label="Deck status">
           {incomplete ? (
             <span className="status-badge incomplete">Incomplete</span>
@@ -143,25 +126,6 @@ export function DeckView({
           Show guidance
         </label>
       </section>
-
-      <nav
-        className="deck-level-navigation"
-        aria-label="Previous and next deck levels"
-      >
-        <LevelNavigationLink
-          direction="Previous"
-          level={previousLevel}
-          build={build}
-          character={character}
-        />
-        <span aria-current="page">Level {state.level}</span>
-        <LevelNavigationLink
-          direction="Next"
-          level={nextLevel}
-          build={build}
-          character={character}
-        />
-      </nav>
 
       <RepairIssues build={build} character={character} state={state} />
 
@@ -584,7 +548,6 @@ function ChangeListItem({
   const { canMutate, updateData } = useAppData();
   const [enlarged, setEnlarged] = useState(false);
   const enlargeButtonRef = useRef<HTMLButtonElement>(null);
-  const navigate = useNavigate();
   const detailPath = cardDetailPath(
     build.characterId,
     build.id,
@@ -662,39 +625,8 @@ function ChangeListItem({
           onChange={updateMotivation}
         />
       </div>
-      <CardDialog
-        card={card}
-        open={enlarged}
-        actionLabel={`Open ${card.name} details`}
-        onAction={() => navigate(detailPath)}
-        onClose={closeDialog}
-      />
+      <CardDialog card={card} open={enlarged} onClose={closeDialog} />
     </li>
-  );
-}
-
-function LevelNavigationLink({
-  direction,
-  level,
-  build,
-  character,
-}: {
-  direction: "Previous" | "Next";
-  level: number | undefined;
-  build: Build;
-  character: Character;
-}) {
-  if (level === undefined) {
-    return (
-      <span className="level-navigation-disabled" aria-disabled="true">
-        {direction} level
-      </span>
-    );
-  }
-  return (
-    <Link to={deckPath(character.id, build.id, level)}>
-      {direction} level ({level})
-    </Link>
   );
 }
 
