@@ -907,7 +907,7 @@ textarea {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  min-height: 54px;
+  min-height: 56px;
   padding: 10px 12px;
   margin-bottom: 24px;
   border: 1px solid var(--line);

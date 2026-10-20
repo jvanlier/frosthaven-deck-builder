@@ -165,13 +165,16 @@ for (const view of ["starting", "deck"] as const) {
     );
     await expect(bar).toBeVisible();
     if (view === "starting") {
-      const initialOffset = await bar.evaluate((element) =>
-        Math.abs(
-          element.getBoundingClientRect().top -
-            Number.parseFloat(getComputedStyle(element).top),
-        ),
-      );
-      expect(initialOffset).toBeLessThan(2);
+      await expect
+        .poll(() =>
+          bar.evaluate((element) =>
+            Math.abs(
+              element.getBoundingClientRect().top -
+                Number.parseFloat(getComputedStyle(element).top),
+            ),
+          ),
+        )
+        .toBeLessThan(2);
     }
     await bar.evaluate((element) => {
       window.scrollTo(
