@@ -464,7 +464,10 @@ function LevelUpEditor({
               role="status"
               aria-live="polite"
             >
-              Pick a card for level {level}
+              {
+                state.issues.find((issue) => issue.code === "MISSING_PICK")
+                  ?.message
+              }
             </p>
           ) : null}
         </div>

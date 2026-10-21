@@ -921,7 +921,9 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await page.getByRole("link", { name: "Edit this level" }).click();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Level up" })).toBeVisible();
-  await expect(page.getByText("Pick a card for level 2")).toBeVisible();
+  await expect(
+    page.getByText("Level 2 pick has not been chosen"),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await page.getByText("Swap more cards from the pool").click();
@@ -930,12 +932,59 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await page
     .getByRole("button", { name: "Reset (current edit)", exact: true })
     .click();
-  await expect(page.getByText("Pick a card for level 2")).toBeVisible();
+  await expect(
+    page.getByText("Level 2 pick has not been chosen"),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[0])
     .toMatchObject({ pick: null, added: [], dropped: [] });
   await expect(persisted.builds[0]?.motivations).toEqual([]);
+});
+
+test("places deck issue badges beside each other when there is room", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps = [
+    {
+      level: 2,
+      pick: null,
+      added: ["white-winds"],
+      dropped: [],
+    },
+  ];
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.setViewportSize({ width: 1240, height: 900 });
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  const badges = page.locator(".repair-list li > span");
+  await expect(badges).toHaveCount(2);
+  const first = await badges.nth(0).boundingBox();
+  const second = await badges.nth(1).boundingBox();
+  expect(Math.abs(first!.y - second!.y)).toBeLessThan(2);
+  expect(second!.x).toBeGreaterThanOrEqual(first!.x + first!.width);
+  const badgeAppearance = (elements: Element[]) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element);
+      return {
+        text: element.textContent?.trim(),
+        color: style.color,
+        background: style.backgroundColor,
+        padding: style.padding,
+        borderRadius: style.borderRadius,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+      };
+    });
+  const viewBadges = await badges.evaluateAll(badgeAppearance);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  const editBadges = page.locator(".level-up-instruction, .level-up-counter");
+  await expect(editBadges).toHaveCount(2);
+  expect(await editBadges.evaluateAll(badgeAppearance)).toEqual(viewBadges);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+    .toBe(320);
 });
 
 test("shows amber overfull counts without redundant deck instructions", async ({
