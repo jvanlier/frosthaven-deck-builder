@@ -1414,7 +1414,6 @@ textarea {
     grid-template-columns: minmax(0, 1fr);
   }
   .level-up-status {
-    flex-wrap: nowrap;
     gap: 6px;
     padding: 8px;
   }
