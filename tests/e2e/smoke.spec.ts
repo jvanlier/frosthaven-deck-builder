@@ -828,6 +828,7 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
   await page.getByRole("link", { name: "Edit this level" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
   await expect(page.locator(".level-up-deck .card-name")).toHaveText([
+    "Birds in a Tempest",
     "Cold Therapy",
     "Whiteout",
     "Snowball",
@@ -839,7 +840,6 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
     "Enticing Breeze",
     "Gathering Force",
     "Nature's Breath",
-    "Birds in a Tempest",
   ]);
   const swapSection = page.getByText("Swap more cards from the pool");
   await swapSection.click();
@@ -1721,6 +1721,32 @@ test("sorts Your deck and the deck view by descending level with X last", async 
         (right === "X" ? 0 : Number(right)) - (left === "X" ? 0 : Number(left)),
     ),
   );
+});
+
+test("styles NEW badges as centered pills while preserving their colors", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({ json: deckFixtureData }),
+  );
+  for (const route of ["2", "2/level-up"]) {
+    await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
+    const badge = page
+      .locator('.card-tile[data-state^="NEW"] .card-state')
+      .first();
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveCSS("top", "-11px");
+    await expect(badge).toHaveCSS("border-radius", "99px");
+    await expect(badge).toHaveCSS("font-size", "12px");
+    await expect(badge).toHaveCSS("color", "rgb(125, 211, 252)");
+    await expect(badge).toHaveCSS("background-color", "rgba(3, 17, 31, 0.867)");
+    const offset = await badge.evaluate((element) => {
+      const badge = element.getBoundingClientRect();
+      const card = element.closest(".card-tile")!.getBoundingClientRect();
+      return Math.abs(badge.x + badge.width / 2 - card.x - card.width / 2);
+    });
+    expect(offset).toBeLessThan(2);
+  }
 });
 
 test("combines available cards in descending level order", async ({ page }) => {

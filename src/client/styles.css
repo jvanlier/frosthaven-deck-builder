@@ -772,7 +772,8 @@ textarea {
 .card-tile[data-state="Added"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.card-tile[data-state="Excluded"] .card-state {
+.card-tile[data-state="Excluded"] .card-state,
+.card-tile[data-state^="NEW"] .card-state {
   top: -11px;
   left: 50%;
   transform: translateX(-50%);
@@ -780,9 +781,13 @@ textarea {
   width: max-content;
   padding: 3px 10px;
   border-radius: 99px;
+  font-size: 12px;
+}
+.card-tile[data-state="Picked"] .card-state,
+.card-tile[data-state="Added"] .card-state,
+.card-tile[data-state="In starting deck"] .card-state {
   color: #03111f;
   background: var(--ice);
-  font-size: 12px;
 }
 .card-tile[data-state="Picked"] .card-state::before,
 .card-tile[data-state="Added"] .card-state::before,
