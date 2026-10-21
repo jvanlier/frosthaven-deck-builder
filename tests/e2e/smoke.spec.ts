@@ -1347,6 +1347,47 @@ test("keeps starting pick slot context in overview cells and summaries", async (
   ).toBeVisible();
 });
 
+test("marks incomplete and invalid levels amber in the header", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps.push(
+    { level: 3, pick: null, added: [], dropped: [] },
+    {
+      level: 4,
+      pick: "polar-vortex",
+      added: ["polar-vortex", "unknown-card"],
+      dropped: ["snowball"],
+    },
+  );
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3`);
+  const nav = page.getByRole("navigation", { name: "Level navigation" });
+  for (const level of [1, 2]) {
+    await expect(
+      nav.getByRole("link", { name: `Level ${level}`, exact: true }),
+    ).not.toHaveAttribute("data-needs-attention");
+  }
+  for (const level of [3, 4]) {
+    const link = nav.getByRole("link", { name: `Level ${level}`, exact: true });
+    await expect(link).toHaveAttribute("data-needs-attention", "true");
+    await expect(link).toHaveAccessibleDescription(
+      `Level ${level} needs attention`,
+    );
+  }
+  const selected = nav.getByRole("link", { name: "Level 3", exact: true });
+  await expect(selected).toHaveAttribute("aria-current", "page");
+  await expect(selected).toHaveCSS("background-color", "rgb(251, 191, 36)");
+  await expect(
+    nav.getByRole("link", { name: "Level 4", exact: true }),
+  ).toHaveCSS("color", "rgb(251, 191, 36)");
+  await nav.getByRole("link", { name: "Level 2", exact: true }).click();
+  await expect(
+    nav.getByRole("link", { name: "Level 2", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(selected).toHaveCSS("color", "rgb(251, 191, 36)");
+});
+
 test("flags an invalid overview column without hiding its applied state", async ({
   page,
 }) => {
@@ -1711,6 +1752,9 @@ test("sorts Your deck and the deck view by descending level with X last", async 
       images.map((image) => image.getAttribute("alt")!.split("level ")[1]!),
     );
   await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.locator(".deck-card-list .card-action img")).toHaveCount(
+    levels.length,
+  );
   const viewLevels = await page
     .locator(".deck-card-list .card-action img")
     .evaluateAll((images) =>

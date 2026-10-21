@@ -287,6 +287,26 @@ p {
   border-color: transparent;
   box-shadow: 0 6px 20px #38bdf855;
 }
+.level-switcher a[data-needs-attention] {
+  position: relative;
+  color: var(--warn);
+  background: #fbbf2422;
+  border-color: #fbbf2488;
+}
+.level-switcher a[data-needs-attention]::after {
+  content: "!";
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 10px;
+  line-height: 1;
+}
+.level-switcher a[data-needs-attention][aria-current="page"] {
+  color: #03111f;
+  background: var(--warn);
+  border-color: var(--warn);
+  box-shadow: 0 6px 20px #fbbf2455;
+}
 .level-switcher .future-level {
   border-style: dashed;
   color: var(--muted);
