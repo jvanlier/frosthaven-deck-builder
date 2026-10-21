@@ -192,6 +192,12 @@ for (const view of ["starting", "deck"] as const) {
       .toBeLessThan(2);
     if (view === "deck") {
       await expect(bar.getByRole("button").first()).toBeVisible();
+      await expect(
+        bar.getByRole("button", { name: /^Edit level/ }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("link", { name: "Edit this level" }),
+      ).toBeAttached();
     } else {
       await expect(bar).toContainText("0 / 11 cards");
       await bar.evaluate((element) => {
@@ -214,20 +220,19 @@ for (const view of ["starting", "deck"] as const) {
         );
       });
       expect(barCoversZoom).toBe(true);
-      const editorHeight = await bar.evaluate(
-        (element) => element.getBoundingClientRect().height,
-      );
       await bar.getByRole("button", { name: "Done", exact: true }).click();
       await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
       await expect(
         page.getByText("0 / 11 cards", { exact: true }),
       ).toBeVisible();
-      if (page.viewportSize()!.width > 650) {
-        const viewHeight = await page
+      await expect(
+        page
           .locator(".deck-issues")
-          .evaluate((element) => element.getBoundingClientRect().height);
-        expect(viewHeight).toBe(editorHeight);
-      }
+          .getByRole("button", { name: /^Edit level/ }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("link", { name: "Edit starting deck" }),
+      ).toBeVisible();
     }
   });
 }
@@ -487,9 +492,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   await expect(
     excluded.getByRole("button", { name: "Pick Tornado", exact: true }),
   ).toBeEnabled();
-  await excluded
-    .getByLabel("Why exclude Tornado?")
-    .fill("Prefer the other card.");
+  await excluded.getByLabel("Why not Tornado?").fill("Prefer the other card.");
   await expect
     .poll(() => persisted.builds[0]!.motivations)
     .toContainEqual(
@@ -501,7 +504,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
       }),
     );
   await page.reload();
-  await expect(excluded.getByLabel("Why exclude Tornado?")).toHaveValue(
+  await expect(excluded.getByLabel("Why not Tornado?")).toHaveValue(
     "Prefer the other card.",
   );
   await expect(page.locator(".level-up-editor .deck-issues")).toHaveCount(0);
@@ -509,6 +512,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
     page.getByRole("button", { name: "Drop Blizzard" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await expect(page.locator(".level-up-instruction")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await page.getByRole("button", { name: "Done" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
@@ -775,7 +779,9 @@ test("resets during an in-flight save without losing unrelated fields or notes",
   await page.getByRole("button", { name: "Pick Tornado" }).click();
   await page.getByLabel("Why add Tornado?").fill("Temporary note");
   await expect.poll(() => firstPutStarted).toBe(true);
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page
+    .getByRole("button", { name: "Reset (current edit)", exact: true })
+    .click();
   releaseFirstPut?.();
 
   await expect.poll(() => putCount).toBe(2);
@@ -822,6 +828,7 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
   await page.getByRole("link", { name: "Edit this level" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
   await expect(page.locator(".level-up-deck .card-name")).toHaveText([
+    "Birds in a Tempest",
     "Cold Therapy",
     "Whiteout",
     "Snowball",
@@ -833,7 +840,6 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
     "Enticing Breeze",
     "Gathering Force",
     "Nature's Breath",
-    "Birds in a Tempest",
   ]);
   const swapSection = page.getByText("Swap more cards from the pool");
   await swapSection.click();
@@ -905,22 +911,158 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
   await page.getByRole("link", { name: "Level up" }).click();
   await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(1);
-  await expect(page.getByRole("button", { name: "Done" })).toBeDisabled();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(page.locator(".deck-issues")).toContainText(
+    "Level 2 pick has not been chosen",
+  );
+  await page.getByRole("link", { name: "Edit this level" }).click();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Level up" })).toBeVisible();
-  await expect(page.getByText("Pick a card for level 2")).toBeVisible();
+  await expect(
+    page.getByText("Level 2 pick has not been chosen"),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await page.getByText("Swap more cards from the pool").click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
   await page.getByLabel("Why add White Winds?").fill("Temporary note");
-  await page.getByRole("button", { name: "Reset" }).click();
-  await expect(page.getByText("Pick a card for level 2")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Done" })).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Reset (current edit)", exact: true })
+    .click();
+  await expect(
+    page.getByText("Level 2 pick has not been chosen"),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[0])
     .toMatchObject({ pick: null, added: [], dropped: [] });
   await expect(persisted.builds[0]?.motivations).toEqual([]);
+});
+
+test("colors a full card count green even when the pick is missing or invalid", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps = [
+    {
+      level: 2,
+      pick: null,
+      added: ["birds-in-a-tempest"],
+      dropped: [],
+    },
+  ];
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.locator(".level-up-instruction")).toHaveText(
+    "Level 2 pick has not been chosen",
+  );
+  await expect(page.locator(".level-up-instruction")).toHaveCSS(
+    "color",
+    "rgb(251, 191, 36)",
+  );
+  await expect(page.locator(".level-up-counter")).toHaveText("11 / 11 cards");
+  await expect(page.locator(".level-up-counter")).toHaveCSS(
+    "color",
+    "rgb(74, 222, 128)",
+  );
+  await expect(page.locator(".level-up-counter")).toHaveCSS(
+    "background-color",
+    "rgba(74, 222, 128, 0.133)",
+  );
+  await expect(page.locator(".deck-issues")).toContainText(
+    "Birds in a Tempest is not in the pool",
+  );
+});
+
+test("places deck issue badges beside each other when there is room", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps = [
+    {
+      level: 2,
+      pick: null,
+      added: ["white-winds"],
+      dropped: [],
+    },
+  ];
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.setViewportSize({ width: 1240, height: 900 });
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  const badges = page.locator(".repair-list li > span");
+  await expect(badges).toHaveCount(2);
+  const first = await badges.nth(0).boundingBox();
+  const second = await badges.nth(1).boundingBox();
+  expect(Math.abs(first!.y - second!.y)).toBeLessThan(2);
+  expect(second!.x).toBeGreaterThanOrEqual(first!.x + first!.width);
+  const badgeAppearance = (elements: Element[]) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element);
+      return {
+        text: element.textContent?.trim(),
+        color: style.color,
+        background: style.backgroundColor,
+        padding: style.padding,
+        borderRadius: style.borderRadius,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+      };
+    });
+  const viewBadges = await badges.evaluateAll(badgeAppearance);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  const editBadges = page.locator(".level-up-instruction, .level-up-counter");
+  await expect(editBadges).toHaveCount(2);
+  expect(await editBadges.evaluateAll(badgeAppearance)).toEqual(viewBadges);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+    .toBe(320);
+});
+
+test("shows amber overfull counts without redundant deck instructions", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData);
+  data.builds[0]!.levelUps = [
+    {
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: [],
+    },
+  ];
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.locator(".level-up-counter")).toHaveText("12 / 11 cards");
+  await expect(page.locator(".level-up-instruction")).toHaveCount(0);
+  await page.getByRole("button", { name: "Done" }).click();
+  const issue = page.locator('.repair-list [data-issue-code="DECK_TOO_LARGE"]');
+  await expect(issue).toHaveText("12 / 11 cards");
+  const colors = await issue.evaluate((element) => ({
+    actual: getComputedStyle(element).color,
+    warning: getComputedStyle(element.closest(".issue-list")!).color,
+    background: getComputedStyle(element.querySelector("span")!)
+      .backgroundColor,
+  }));
+  expect(colors.actual).toBe(colors.warning);
+  expect(colors.background).toBe("rgba(251, 191, 36, 0.133)");
+});
+
+test("allows leaving an invalid level-up deck with Done", async ({ page }) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(invalidDeckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page.locator(".deck-issues")).toContainText(
+    "Picked card birds-in-a-tempest must be added to the deck",
+  );
 });
 
 test("scopes editor reset and appending to the current level", async ({
@@ -958,7 +1100,9 @@ test("scopes editor reset and appending to the current level", async ({
   await page.getByRole("link", { name: "Level up" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
   await page.getByRole("button", { name: "Pick Cold Snap" }).click();
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page
+    .getByRole("button", { name: "Reset (current edit)", exact: true })
+    .click();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[1])
     .toMatchObject({ pick: null, added: [], dropped: [] });
@@ -1089,7 +1233,7 @@ test("renders a derived deck view and links to the overview", async ({
     page.getByRole("heading", { name: "Deck: Freeze control" }),
   ).toBeVisible();
   await expect(page.getByText("0 / 11 cards", { exact: true })).toBeVisible();
-  await expect(page.getByText("Incomplete", { exact: true })).toBeVisible();
+  await expect(page.getByText("Incomplete", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Edit starting deck" }),
   ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
@@ -1203,6 +1347,47 @@ test("keeps starting pick slot context in overview cells and summaries", async (
   ).toBeVisible();
 });
 
+test("marks incomplete and invalid levels amber in the header", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps.push(
+    { level: 3, pick: null, added: [], dropped: [] },
+    {
+      level: 4,
+      pick: "polar-vortex",
+      added: ["polar-vortex", "unknown-card"],
+      dropped: ["snowball"],
+    },
+  );
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3`);
+  const nav = page.getByRole("navigation", { name: "Level navigation" });
+  for (const level of [1, 2]) {
+    await expect(
+      nav.getByRole("link", { name: `Level ${level}`, exact: true }),
+    ).not.toHaveAttribute("data-needs-attention");
+  }
+  for (const level of [3, 4]) {
+    const link = nav.getByRole("link", { name: `Level ${level}`, exact: true });
+    await expect(link).toHaveAttribute("data-needs-attention", "true");
+    await expect(link).toHaveAccessibleDescription(
+      `Level ${level} needs attention`,
+    );
+  }
+  const selected = nav.getByRole("link", { name: "Level 3", exact: true });
+  await expect(selected).toHaveAttribute("aria-current", "page");
+  await expect(selected).toHaveCSS("background-color", "rgb(251, 191, 36)");
+  await expect(
+    nav.getByRole("link", { name: "Level 4", exact: true }),
+  ).toHaveCSS("color", "rgb(251, 191, 36)");
+  await nav.getByRole("link", { name: "Level 2", exact: true }).click();
+  await expect(
+    nav.getByRole("link", { name: "Level 2", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(selected).toHaveCSS("color", "rgb(251, 191, 36)");
+});
+
 test("flags an invalid overview column without hiding its applied state", async ({
   page,
 }) => {
@@ -1242,6 +1427,7 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   ).toBeVisible();
   const deckCardNames = page.locator(".deck-card-list .card-name");
   await expect(deckCardNames).toHaveText([
+    "Birds in a Tempest",
     "Cold Therapy",
     "Snowball",
     "Lifting Gust",
@@ -1252,7 +1438,6 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
     "Enticing Breeze",
     "Gathering Force",
     "Nature's Breath",
-    "Birds in a Tempest",
   ]);
   await expect(page.locator(".deck-intro .status-badge")).toHaveCount(0);
   await expect(page.getByText("Level 2 changes")).toBeVisible();
@@ -1270,6 +1455,9 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   await page.getByRole("checkbox", { name: "Show guidance" }).check();
   await expect(page.getByText("Use early.")).toBeVisible();
   await expect(page.getByText("Pair with Snowball.")).toBeVisible();
+  const emptyGuidance = page.locator(".guidance-note em").first();
+  await expect(emptyGuidance).toHaveText("none");
+  await expect(emptyGuidance).toHaveCSS("font-style", "italic");
 
   await page
     .getByRole("button", { name: "Open Birds in a Tempest details" })
@@ -1289,7 +1477,7 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   ).toBeVisible();
 });
 
-test("renders invalid badges and specific replay validation messages", async ({
+test("renders replay validation messages without redundant invalid badges", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -1300,7 +1488,7 @@ test("renders invalid badges and specific replay validation messages", async ({
     }),
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
-  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
   await expect(
     page.getByText("Picked card birds-in-a-tempest must be added to the deck", {
       exact: true,
@@ -1332,7 +1520,10 @@ test("removes an invalid downstream operation without changing its neighbors", a
   });
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
-  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Remove added card Tornado" }),
+  ).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(320);
@@ -1500,6 +1691,111 @@ test("restores a picked card when its stored add is missing", async ({
   await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
+test("asks for available-card motivations only at the current level", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps.push({
+    level: 3,
+    pick: "polar-vortex",
+    added: ["polar-vortex"],
+    dropped: ["snowball"],
+  });
+  data.builds[0]!.motivations.push({
+    level: 2,
+    cardId: "tornado",
+    kind: "exclude",
+    text: "Already explained at level 2",
+    updatedAt: "2024-01-02T03:04:05.000Z",
+  });
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  const available = page.getByRole("region", {
+    name: "Available cards",
+    exact: true,
+  });
+  await expect(available.getByLabel("Why add Polar Vortex?")).toBeVisible();
+  await expect(available.getByLabel("Why not Cold Snap?")).toBeVisible();
+  const tornado = available.locator(".level-up-candidate").filter({
+    has: page.getByRole("button", { name: "Pick Tornado", exact: true }),
+  });
+  await expect(tornado.locator(".card-tile")).toHaveAttribute(
+    "data-state",
+    "Excluded",
+  );
+  await expect(
+    tornado.getByRole("button", { name: "Pick Tornado", exact: true }),
+  ).toBeEnabled();
+  await expect(tornado.getByRole("textbox")).toHaveCount(0);
+  await expect(available.getByRole("textbox")).toHaveCount(2);
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.getByLabel("Why not Tornado?")).toHaveValue(
+    "Already explained at level 2",
+  );
+});
+
+test("sorts Your deck and the deck view by descending level with X last", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps.push({
+    level: 3,
+    pick: "polar-vortex",
+    added: ["polar-vortex", "white-winds"],
+    dropped: [],
+  });
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  const levels = await page
+    .locator(".level-up-deck .card-action img")
+    .evaluateAll((images) =>
+      images.map((image) => image.getAttribute("alt")!.split("level ")[1]!),
+    );
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.locator(".deck-card-list .card-action img")).toHaveCount(
+    levels.length,
+  );
+  const viewLevels = await page
+    .locator(".deck-card-list .card-action img")
+    .evaluateAll((images) =>
+      images.map((image) => image.getAttribute("alt")!.split("level ")[1]!),
+    );
+  expect(viewLevels).toEqual(levels);
+  expect(levels).toEqual(expect.arrayContaining(["3", "2", "1", "X"]));
+  expect(levels).toEqual(
+    [...levels].sort(
+      (left, right) =>
+        (right === "X" ? 0 : Number(right)) - (left === "X" ? 0 : Number(left)),
+    ),
+  );
+});
+
+test("styles NEW badges as centered pills while preserving their colors", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({ json: deckFixtureData }),
+  );
+  for (const route of ["2", "2/level-up"]) {
+    await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
+    const badge = page
+      .locator('.card-tile[data-state^="NEW"] .card-state')
+      .first();
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveCSS("top", "-11px");
+    await expect(badge).toHaveCSS("border-radius", "99px");
+    await expect(badge).toHaveCSS("font-size", "12px");
+    await expect(badge).toHaveCSS("color", "rgb(125, 211, 252)");
+    await expect(badge).toHaveCSS("background-color", "rgba(3, 17, 31, 0.867)");
+    const offset = await badge.evaluate((element) => {
+      const badge = element.getBoundingClientRect();
+      const card = element.closest(".card-tile")!.getBoundingClientRect();
+      return Math.abs(badge.x + badge.width / 2 - card.x - card.width / 2);
+    });
+    expect(offset).toBeLessThan(2);
+  }
+});
+
 test("combines available cards in descending level order", async ({ page }) => {
   await page.route("**/api/data", (route) =>
     route.fulfill({
@@ -1525,6 +1821,51 @@ test("combines available cards in descending level order", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Earlier, not yet picked" }),
   ).toHaveCount(0);
+});
+
+test("shares content width across starting and level-up views and editors", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  for (const width of [390, 900, 1240]) {
+    await page.setViewportSize({ width, height: 900 });
+    const bounds = [];
+    for (const [route, selector] of [
+      ["1", ".deck-intro"],
+      ["1/start", ".starting-hand-status"],
+      ["2", ".deck-intro"],
+      ["2/level-up", ".level-up-status"],
+    ]) {
+      await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
+      const section = page.locator(selector!);
+      await expect(section).toBeVisible();
+      if (route === "2/level-up") {
+        const available = await page.locator(".level-up-picks").boundingBox();
+        const deck = await page.locator(".level-up-hand").boundingBox();
+        expect(deck!.y).toBeGreaterThanOrEqual(
+          available!.y + available!.height,
+        );
+        expect(Math.abs(deck!.x - available!.x)).toBeLessThan(2);
+        expect(Math.abs(deck!.width - available!.width)).toBeLessThan(2);
+      }
+      bounds.push(
+        await section.evaluate((element) => {
+          const { left, right } = element.getBoundingClientRect();
+          return { left, right };
+        }),
+      );
+    }
+    for (const bound of bounds.slice(1)) {
+      expect(Math.abs(bound.left - bounds[0]!.left)).toBeLessThan(2);
+      expect(Math.abs(bound.right - bounds[0]!.right)).toBeLessThan(2);
+    }
+  }
 });
 
 test("switches between stored levels using the header navigation", async ({
@@ -2315,7 +2656,7 @@ test("offers sequential legal picks for a higher starting level", async ({
   await expect(
     page.getByRole("button", { name: "Cold Snap is not in the starting pool" }),
   ).toBeDisabled();
-  await expect(page.getByLabel("Why exclude Cold Snap?")).toBeVisible();
+  await expect(page.getByLabel("Why not Cold Snap?")).toBeVisible();
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await expect
     .poll(async () =>
@@ -2543,9 +2884,9 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
     "filter",
     "grayscale(1)",
   );
-  const unpickedNote = unpicked.getByLabel("Why exclude Tornado?");
+  const unpickedNote = unpicked.getByLabel("Why not Tornado?");
   await expect(unpickedNote).toBeEnabled();
-  await expect(excluded.getByLabel("Why exclude White Winds?")).toHaveCount(0);
+  await expect(excluded.getByLabel("Why not White Winds?")).toHaveCount(0);
   await unpickedNote.fill("I prefer the other level-two card.");
   await expect
     .poll(() => persisted.builds[0]!.motivations)
@@ -2564,7 +2905,7 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await page
     .getByRole("button", { name: "Add Whiteout to starting deck" })
     .click();
-  const note = excluded.getByLabel("Why exclude White Winds?");
+  const note = excluded.getByLabel("Why not White Winds?");
   await expect(note).toBeEnabled();
   await expect(excluded.locator(".card-action")).toBeDisabled();
   await expect(excluded.locator(".card-action img")).toHaveCSS(
@@ -2766,7 +3107,7 @@ test("edits starting exclusion and initial-pick motivations", async ({
 
   const buildId = persisted.builds[0]!.id;
   await page.goto(`/c/SD/b/${buildId}/l/3/start`);
-  const exclusion = page.getByLabel("Why exclude Cold Snap?");
+  const exclusion = page.getByLabel("Why not Cold Snap?");
   await exclusion.fill("Not for this build.");
   await expect
     .poll(async () => persisted.builds[0]?.motivations)
@@ -2912,7 +3253,7 @@ test("pauses note editors after save failures and conflicts", async ({
     await page.getByRole("link", { name: "Level 1", exact: true }).click();
     await page.getByRole("link", { name: "Edit starting deck" }).click();
     await expect(page.getByLabel("Why include Cold Therapy?")).toBeDisabled();
-    await expect(page.getByLabel("Why exclude White Winds?")).toBeDisabled();
+    await expect(page.getByLabel("Why not White Winds?")).toBeDisabled();
     await page.unrouteAll({ behavior: "ignoreErrors" });
   }
 });

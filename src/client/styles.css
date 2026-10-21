@@ -287,6 +287,26 @@ p {
   border-color: transparent;
   box-shadow: 0 6px 20px #38bdf855;
 }
+.level-switcher a[data-needs-attention] {
+  position: relative;
+  color: var(--warn);
+  background: #fbbf2422;
+  border-color: #fbbf2488;
+}
+.level-switcher a[data-needs-attention]::after {
+  content: "!";
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 10px;
+  line-height: 1;
+}
+.level-switcher a[data-needs-attention][aria-current="page"] {
+  color: #03111f;
+  background: var(--warn);
+  border-color: var(--warn);
+  box-shadow: 0 6px 20px #fbbf2455;
+}
 .level-switcher .future-level {
   border-style: dashed;
   color: var(--muted);
@@ -554,7 +574,7 @@ textarea {
   color: var(--warn);
   list-style: none;
 }
-.issue-invalid {
+.issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) {
   color: var(--bad);
 }
 .deck-issues {
@@ -571,7 +591,9 @@ textarea {
   margin: 0;
 }
 .repair-list li > span,
-.starting-hand-status li {
+.starting-hand-status li,
+.level-up-instruction,
+.level-up-counter {
   width: fit-content;
   padding: 6px 12px;
   border-radius: 999px;
@@ -579,11 +601,16 @@ textarea {
   font-size: 14px;
   font-weight: 700;
 }
-.repair-list .issue-invalid > span,
-.starting-hand-status .issue-invalid {
+.repair-list .issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) > span,
+.starting-hand-status .issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) {
   background: #f8717122;
 }
+.repair-list {
+  display: flex;
+  flex-wrap: wrap;
+}
 .repair-list li {
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -595,13 +622,15 @@ textarea {
 }
 @media (min-width: 521px) {
   .deck-view,
-  .starting-hand {
+  .starting-hand,
+  .level-up-editor {
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--card-width));
     column-gap: 14px;
   }
   .deck-view > *,
-  .starting-hand > * {
+  .starting-hand > *,
+  .level-up-editor > * {
     grid-column: 1 / -1;
   }
 }
@@ -612,35 +641,6 @@ textarea {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 12px;
-}
-.deck-badges:empty {
-  display: none;
-}
-.deck-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.status-badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted);
-  background: var(--bg2);
-  font-size: 12px;
-}
-.status-badge.complete {
-  color: var(--ok);
-  border-color: #4ade8066;
-}
-.status-badge.incomplete {
-  color: var(--warn);
-  border-color: #fbbf2466;
-}
-.status-badge.invalid {
-  color: var(--bad);
-  border-color: #f8717166;
 }
 .deck-toolbar {
   display: flex;
@@ -792,7 +792,8 @@ textarea {
 .card-tile[data-state="Added"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.card-tile[data-state="Excluded"] .card-state {
+.card-tile[data-state="Excluded"] .card-state,
+.card-tile[data-state^="NEW"] .card-state {
   top: -11px;
   left: 50%;
   transform: translateX(-50%);
@@ -800,9 +801,13 @@ textarea {
   width: max-content;
   padding: 3px 10px;
   border-radius: 99px;
+  font-size: 12px;
+}
+.card-tile[data-state="Picked"] .card-state,
+.card-tile[data-state="Added"] .card-state,
+.card-tile[data-state="In starting deck"] .card-state {
   color: #03111f;
   background: var(--ice);
-  font-size: 12px;
 }
 .card-tile[data-state="Picked"] .card-state::before,
 .card-tile[data-state="Added"] .card-state::before,
@@ -944,23 +949,11 @@ textarea {
 }
 .level-up-instruction {
   margin: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  color: var(--ice);
-  background: #38bdf822;
-  font-size: 14px;
-  font-weight: 700;
+  color: var(--warn);
 }
-.level-up-status[data-tone="complete"] .level-up-instruction {
+.level-up-counter[data-tone="complete"] {
   color: var(--ok);
   background: #4ade8022;
-}
-.level-up-status[data-tone="incomplete"] .level-up-instruction {
-  color: var(--warn);
-  background: #fbbf2422;
-}
-.level-up-status[data-tone="complete"] .level-up-counter {
-  color: var(--ok);
 }
 .level-up-counter {
   color: var(--warn);
@@ -1357,17 +1350,6 @@ textarea {
   font-size: 12px;
 }
 
-@media (min-width: 1240px) {
-  .level-up-groups {
-    grid-template-columns: calc(var(--card-width) * 2 + 14px) minmax(0, 1fr);
-  }
-  .level-up-hand {
-    margin-top: 0;
-    padding-left: 20px;
-    border-top: 0;
-    border-left: 1px solid #2f4466;
-  }
-}
 @media (max-width: 650px) {
   .starting-hand-status .issue-list {
     min-height: 48px;
@@ -1432,7 +1414,6 @@ textarea {
     grid-template-columns: minmax(0, 1fr);
   }
   .level-up-status {
-    flex-wrap: nowrap;
     gap: 6px;
     padding: 8px;
   }

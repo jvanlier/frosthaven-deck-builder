@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CardDialog, CardGrid, CardImage } from "./cards";
+import {
+  CardDialog,
+  CardGrid,
+  CardImage,
+  compareCardLevelsDescending,
+} from "./cards";
 import { useAppData } from "./app-data";
 import {
   GuidanceInput,
@@ -68,10 +73,6 @@ export function DeckView({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
   const cardById = new Map(character.cards.map((card) => [card.id, card]));
-  const invalid = state.issues.some((issue) => issue.severity === "invalid");
-  const incomplete = state.issues.some(
-    (issue) => issue.severity === "incomplete",
-  );
 
   useEffect(() => {
     rememberLastPosition({
@@ -109,14 +110,6 @@ export function DeckView({
         <h1 id="deck-heading" className="visually-hidden">
           Deck: {build.name}
         </h1>
-        <div className="deck-badges" aria-label="Deck status">
-          {incomplete ? (
-            <span className="status-badge incomplete">Incomplete</span>
-          ) : null}
-          {invalid ? (
-            <span className="status-badge invalid">Invalid</span>
-          ) : null}
-        </div>
         <label className="guidance-toggle">
           <input
             type="checkbox"
@@ -150,7 +143,7 @@ export function DeckView({
         </h2>
         {state.deck.length > 0 ? (
           <div className="deck-card-list">
-            {state.deck.map((card) => (
+            {[...state.deck].sort(compareCardLevelsDescending).map((card) => (
               <div className="deck-card-item" key={card.id}>
                 <CardGrid
                   cards={[card]}
@@ -164,8 +157,7 @@ export function DeckView({
                   <div className="guidance-note">
                     <strong>Guidance</strong>
                     <p className="plain-text">
-                      {build.guidance[card.id]?.text ??
-                        "No guidance recorded for this card yet."}
+                      {build.guidance[card.id]?.text ?? <em>none</em>}
                     </p>
                   </div>
                 ) : null}

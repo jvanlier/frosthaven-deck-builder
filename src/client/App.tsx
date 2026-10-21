@@ -23,6 +23,7 @@ import { OverviewRoute } from "./overview-view";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
+import { replayBuild } from "../shared/rules/index.js";
 
 const healthMessages = {
   loading: "Checking server…",
@@ -164,6 +165,13 @@ function AppHeader({
   const levelUpTo = workspace.build
     ? levelUpDestination(workspace.build, character)
     : null;
+  const levelsNeedingAttention = new Set(
+    workspace.build
+      ? replayBuild(workspace.build, character)
+          .levels.filter((state) => state.issues.length > 0)
+          .map((state) => state.level)
+      : [],
+  );
   const highestLevel = workspace.levels.at(-1) ?? 1;
   const canPlanNext =
     levelUpTo?.endsWith(`/l/${highestLevel + 1}/level-up`) ?? false;
@@ -194,6 +202,14 @@ function AppHeader({
                   key={level}
                   to={workspaceDeckPath(workspace, level)}
                   aria-label={`Level ${level}`}
+                  data-needs-attention={
+                    levelsNeedingAttention.has(level) || undefined
+                  }
+                  title={
+                    levelsNeedingAttention.has(level)
+                      ? `Level ${level} needs attention`
+                      : undefined
+                  }
                   aria-current={level === workspace.level ? "page" : undefined}
                 >
                   {level}

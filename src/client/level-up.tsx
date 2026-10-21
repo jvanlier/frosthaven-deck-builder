@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { CardTile } from "./cards";
+import { CardTile, compareCardLevelsDescending } from "./cards";
 import { MotivationInput, type EditableMotivationKind } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
@@ -190,9 +190,7 @@ function LevelUpEditor({
   const availableCards = uniqueCards([
     ...pickCandidates,
     ...(selectedCard ? [selectedCard] : []),
-  ]).sort(
-    (left, right) => effectiveCardLevel(right) - effectiveCardLevel(left),
-  );
+  ]).sort(compareCardLevelsDescending);
   const swapCandidates = addOptions(build, character, level).filter(
     (card) => card.id !== selectedPick,
   );
@@ -203,7 +201,7 @@ function LevelUpEditor({
   const visibleDeck = uniqueCards([
     ...previousState.deck,
     ...state.deck.filter((card) => newCards.has(card.id)),
-  ]);
+  ]).sort(compareCardLevelsDescending);
 
   function mutateBuild(mutator: (current: Build) => Build): void {
     updateData((current) => {
@@ -432,43 +430,36 @@ function LevelUpEditor({
   }
 
   const handSize = character.handSize;
-  const instruction =
-    selectedPick === null
-      ? `Pick a card for level ${level}`
-      : state.deck.length > handSize
-        ? `Remove ${state.deck.length - handSize} card${state.deck.length - handSize === 1 ? "" : "s"}`
-        : "Choose your deck";
-  const doneEnabled =
-    selectedPick !== null &&
-    state.deck.length === handSize &&
-    state.issues.length === 0;
 
   return (
     <main
       className="page-content level-up-editor"
       aria-labelledby="level-up-heading"
     >
-      <section
-        className="level-up-status"
-        aria-label="Level-up status"
-        data-tone={
-          doneEnabled
-            ? "complete"
-            : selectedPick === null
-              ? "pick"
-              : "incomplete"
-        }
-      >
+      <section className="level-up-status" aria-label="Level-up status">
         <div>
           <p className="eyebrow">
             Level {level} · {build.name}
           </p>
           <h1 id="level-up-heading">Level up</h1>
-          <p className="level-up-instruction" role="status" aria-live="polite">
-            {instruction}
-          </p>
+          {selectedPick === null ? (
+            <p
+              className="level-up-instruction"
+              role="status"
+              aria-live="polite"
+            >
+              {
+                state.issues.find((issue) => issue.code === "MISSING_PICK")
+                  ?.message
+              }
+            </p>
+          ) : null}
         </div>
-        <strong className="level-up-counter" aria-live="polite">
+        <strong
+          className="level-up-counter"
+          data-tone={state.deck.length === handSize ? "complete" : "incomplete"}
+          aria-live="polite"
+        >
           {state.deck.length} / {handSize} cards
         </strong>
         <div className="level-up-actions">
@@ -478,12 +469,11 @@ function LevelUpEditor({
             onClick={resetEditor}
             disabled={!canMutate}
           >
-            Reset
+            Reset (current edit)
           </button>
           <button
             type="button"
             onClick={() => navigate(deckPath(character.id, build.id, level))}
-            disabled={!doneEnabled}
           >
             Done
           </button>
@@ -515,6 +505,7 @@ function LevelUpEditor({
             </div>
             <CandidateGrid
               cards={availableCards}
+              level={level}
               selection="pick"
               selectedPick={selectedPick}
               added={activeAdded}
@@ -538,9 +529,6 @@ function LevelUpEditor({
                   Your deck
                 </h2>
               </div>
-              <span className="editor-count">
-                {state.deck.length} / {handSize}
-              </span>
             </div>
             <div className="level-up-card-grid">
               {visibleDeck.map((card) => {
@@ -598,6 +586,7 @@ function LevelUpEditor({
               </p>
               <CandidateGrid
                 cards={swapCandidates}
+                level={level}
                 selection="add"
                 selectedPick={selectedPick}
                 added={activeAdded}
@@ -617,6 +606,7 @@ function LevelUpEditor({
 
 function CandidateGrid({
   cards,
+  level,
   selection,
   selectedPick,
   added,
@@ -627,6 +617,7 @@ function CandidateGrid({
   onMotivation,
 }: {
   cards: Card[];
+  level: number;
   selection: "pick" | "add";
   selectedPick: string | null;
   added: Set<string>;
@@ -646,6 +637,7 @@ function CandidateGrid({
   return (
     <div className="level-up-card-grid" role="list">
       {cards.map((card) => {
+        const showMotivation = selection !== "pick" || card.level === level;
         const isPicked = selectedPick === card.id;
         const isAdded = added.has(card.id) && !isPicked;
         const isExcluded =
@@ -680,8 +672,8 @@ function CandidateGrid({
                 selection === "pick" ? onPick(card) : onAdd(card)
               }
             />
-            {((isPicked || isAdded) && selection !== "pick") ||
-            (isPicked && selection === "pick") ? (
+            {showMotivation &&
+            (isPicked || (isAdded && selection !== "pick")) ? (
               <MotivationInput
                 card={card}
                 kind="add"
@@ -689,7 +681,7 @@ function CandidateGrid({
                 disabled={!canMutate}
                 onChange={(text) => onMotivation(card, "add", text)}
               />
-            ) : isExcluded ? (
+            ) : isExcluded && showMotivation ? (
               <MotivationInput
                 card={card}
                 kind="exclude"
@@ -726,10 +718,6 @@ function cloneLevelUp(levelUp: LevelUp): LevelUp {
 
 function cloneMotivation(motivation: Motivation): Motivation {
   return { ...motivation };
-}
-
-function effectiveCardLevel(card: Card): number {
-  return card.level === "X" ? 1 : card.level;
 }
 
 function deckPath(characterId: string, buildId: string, level: number): string {
