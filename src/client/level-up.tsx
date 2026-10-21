@@ -538,9 +538,6 @@ function LevelUpEditor({
                   Your deck
                 </h2>
               </div>
-              <span className="editor-count">
-                {state.deck.length} / {handSize}
-              </span>
             </div>
             <div className="level-up-card-grid">
               {visibleDeck.map((card) => {

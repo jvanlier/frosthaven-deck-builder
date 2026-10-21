@@ -595,13 +595,15 @@ textarea {
 }
 @media (min-width: 521px) {
   .deck-view,
-  .starting-hand {
+  .starting-hand,
+  .level-up-editor {
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--card-width));
     column-gap: 14px;
   }
   .deck-view > *,
-  .starting-hand > * {
+  .starting-hand > *,
+  .level-up-editor > * {
     grid-column: 1 / -1;
   }
 }
@@ -1328,17 +1330,6 @@ textarea {
   font-size: 12px;
 }
 
-@media (min-width: 1240px) {
-  .level-up-groups {
-    grid-template-columns: calc(var(--card-width) * 2 + 14px) minmax(0, 1fr);
-  }
-  .level-up-hand {
-    margin-top: 0;
-    padding-left: 20px;
-    border-top: 0;
-    border-left: 1px solid #2f4466;
-  }
-}
 @media (max-width: 650px) {
   .starting-hand-status .issue-list {
     min-height: 48px;

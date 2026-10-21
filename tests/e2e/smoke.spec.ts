@@ -1535,6 +1535,51 @@ test("combines available cards in descending level order", async ({ page }) => {
   ).toHaveCount(0);
 });
 
+test("shares content width across starting and level-up views and editors", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(deckFixtureData),
+    }),
+  );
+  for (const width of [390, 900, 1240]) {
+    await page.setViewportSize({ width, height: 900 });
+    const bounds = [];
+    for (const [route, selector] of [
+      ["1", ".deck-intro"],
+      ["1/start", ".starting-hand-status"],
+      ["2", ".deck-intro"],
+      ["2/level-up", ".level-up-status"],
+    ]) {
+      await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
+      const section = page.locator(selector!);
+      await expect(section).toBeVisible();
+      if (route === "2/level-up") {
+        const available = await page.locator(".level-up-picks").boundingBox();
+        const deck = await page.locator(".level-up-hand").boundingBox();
+        expect(deck!.y).toBeGreaterThanOrEqual(
+          available!.y + available!.height,
+        );
+        expect(Math.abs(deck!.x - available!.x)).toBeLessThan(2);
+        expect(Math.abs(deck!.width - available!.width)).toBeLessThan(2);
+      }
+      bounds.push(
+        await section.evaluate((element) => {
+          const { left, right } = element.getBoundingClientRect();
+          return { left, right };
+        }),
+      );
+    }
+    for (const bound of bounds.slice(1)) {
+      expect(Math.abs(bound.left - bounds[0]!.left)).toBeLessThan(2);
+      expect(Math.abs(bound.right - bounds[0]!.right)).toBeLessThan(2);
+    }
+  }
+});
+
 test("switches between stored levels using the header navigation", async ({
   page,
 }) => {
