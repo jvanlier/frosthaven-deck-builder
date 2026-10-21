@@ -514,6 +514,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
     page.getByRole("button", { name: "Drop Blizzard" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Drop Blizzard" }).click();
+  await expect(page.locator(".level-up-instruction")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await page.getByRole("button", { name: "Done" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
@@ -935,6 +936,35 @@ test("appends unfinished levels, resumes them after reload and resets only this 
     .poll(async () => persisted.builds[0]?.levelUps[0])
     .toMatchObject({ pick: null, added: [], dropped: [] });
   await expect(persisted.builds[0]?.motivations).toEqual([]);
+});
+
+test("shows amber overfull counts without redundant deck instructions", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData);
+  data.builds[0]!.levelUps = [
+    {
+      level: 2,
+      pick: "birds-in-a-tempest",
+      added: ["birds-in-a-tempest"],
+      dropped: [],
+    },
+  ];
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.locator(".level-up-counter")).toHaveText("12 / 11 cards");
+  await expect(page.locator(".level-up-instruction")).toHaveCount(0);
+  await page.getByRole("button", { name: "Done" }).click();
+  const issue = page.locator('.repair-list [data-issue-code="DECK_TOO_LARGE"]');
+  await expect(issue).toHaveText("12 / 11 cards");
+  const colors = await issue.evaluate((element) => ({
+    actual: getComputedStyle(element).color,
+    warning: getComputedStyle(element.closest(".issue-list")!).color,
+    background: getComputedStyle(element.querySelector("span")!)
+      .backgroundColor,
+  }));
+  expect(colors.actual).toBe(colors.warning);
+  expect(colors.background).toBe("rgba(251, 191, 36, 0.133)");
 });
 
 test("allows leaving an invalid level-up deck with Done", async ({ page }) => {

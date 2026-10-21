@@ -432,12 +432,6 @@ function LevelUpEditor({
   }
 
   const handSize = character.handSize;
-  const instruction =
-    selectedPick === null
-      ? `Pick a card for level ${level}`
-      : state.deck.length > handSize
-        ? `Remove ${state.deck.length - handSize} card${state.deck.length - handSize === 1 ? "" : "s"}`
-        : "Choose your deck";
   const isComplete =
     selectedPick !== null &&
     state.deck.length === handSize &&
@@ -464,9 +458,15 @@ function LevelUpEditor({
             Level {level} · {build.name}
           </p>
           <h1 id="level-up-heading">Level up</h1>
-          <p className="level-up-instruction" role="status" aria-live="polite">
-            {instruction}
-          </p>
+          {selectedPick === null ? (
+            <p
+              className="level-up-instruction"
+              role="status"
+              aria-live="polite"
+            >
+              Pick a card for level {level}
+            </p>
+          ) : null}
         </div>
         <strong className="level-up-counter" aria-live="polite">
           {state.deck.length} / {handSize} cards

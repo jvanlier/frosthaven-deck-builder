@@ -93,6 +93,7 @@ export function RepairIssues({
           return (
             <li
               className={`issue-${issue.severity}`}
+              data-issue-code={issue.code}
               key={`${issue.code}-${issue.cardId ?? index}-${issue.operation?.index ?? ""}`}
             >
               <span>

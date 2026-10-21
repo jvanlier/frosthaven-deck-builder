@@ -554,7 +554,7 @@ textarea {
   color: var(--warn);
   list-style: none;
 }
-.issue-invalid {
+.issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) {
   color: var(--bad);
 }
 .deck-issues {
@@ -579,8 +579,8 @@ textarea {
   font-size: 14px;
   font-weight: 700;
 }
-.repair-list .issue-invalid > span,
-.starting-hand-status .issue-invalid {
+.repair-list .issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) > span,
+.starting-hand-status .issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) {
   background: #f8717122;
 }
 .repair-list li {
@@ -923,14 +923,6 @@ textarea {
   background: #38bdf822;
   font-size: 14px;
   font-weight: 700;
-}
-.level-up-status[data-tone="complete"] .level-up-instruction {
-  color: var(--ok);
-  background: #4ade8022;
-}
-.level-up-status[data-tone="incomplete"] .level-up-instruction {
-  color: var(--warn);
-  background: #fbbf2422;
 }
 .level-up-status[data-tone="complete"] .level-up-counter {
   color: var(--ok);

@@ -647,6 +647,7 @@ export function StartingEditor({
               startState.issues.map((issue, index) => (
                 <li
                   className={`issue-${issue.severity}`}
+                  data-issue-code={issue.code}
                   key={`${issue.code}-${issue.cardId ?? index}`}
                 >
                   {issue.code === "DECK_TOO_SMALL" ||
