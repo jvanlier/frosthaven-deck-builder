@@ -780,7 +780,9 @@ test("resets during an in-flight save without losing unrelated fields or notes",
   await page.getByRole("button", { name: "Pick Tornado" }).click();
   await page.getByLabel("Why add Tornado?").fill("Temporary note");
   await expect.poll(() => firstPutStarted).toBe(true);
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page
+    .getByRole("button", { name: "Reset (current edit)", exact: true })
+    .click();
   releaseFirstPut?.();
 
   await expect.poll(() => putCount).toBe(2);
@@ -910,7 +912,12 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
   await page.getByRole("link", { name: "Level up" }).click();
   await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(1);
-  await expect(page.getByRole("button", { name: "Done" })).toBeDisabled();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
+  await expect(page.locator(".deck-issues")).toContainText(
+    "Level 2 pick has not been chosen",
+  );
+  await page.getByRole("link", { name: "Edit this level" }).click();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Level up" })).toBeVisible();
   await expect(page.getByText("Pick a card for level 2")).toBeVisible();
@@ -919,13 +926,31 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await page.getByText("Swap more cards from the pool").click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
   await page.getByLabel("Why add White Winds?").fill("Temporary note");
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page
+    .getByRole("button", { name: "Reset (current edit)", exact: true })
+    .click();
   await expect(page.getByText("Pick a card for level 2")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Done" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[0])
     .toMatchObject({ pick: null, added: [], dropped: [] });
   await expect(persisted.builds[0]?.motivations).toEqual([]);
+});
+
+test("allows leaving an invalid level-up deck with Done", async ({ page }) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(invalidDeckFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await expect(page.locator(".deck-issues")).toContainText(
+    "Picked card birds-in-a-tempest must be added to the deck",
+  );
 });
 
 test("scopes editor reset and appending to the current level", async ({
@@ -963,7 +988,9 @@ test("scopes editor reset and appending to the current level", async ({
   await page.getByRole("link", { name: "Level up" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
   await page.getByRole("button", { name: "Pick Cold Snap" }).click();
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page
+    .getByRole("button", { name: "Reset (current edit)", exact: true })
+    .click();
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[1])
     .toMatchObject({ pick: null, added: [], dropped: [] });

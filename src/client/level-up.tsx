@@ -438,7 +438,7 @@ function LevelUpEditor({
       : state.deck.length > handSize
         ? `Remove ${state.deck.length - handSize} card${state.deck.length - handSize === 1 ? "" : "s"}`
         : "Choose your deck";
-  const doneEnabled =
+  const isComplete =
     selectedPick !== null &&
     state.deck.length === handSize &&
     state.issues.length === 0;
@@ -452,7 +452,7 @@ function LevelUpEditor({
         className="level-up-status"
         aria-label="Level-up status"
         data-tone={
-          doneEnabled
+          isComplete
             ? "complete"
             : selectedPick === null
               ? "pick"
@@ -478,12 +478,11 @@ function LevelUpEditor({
             onClick={resetEditor}
             disabled={!canMutate}
           >
-            Reset
+            Reset (current edit)
           </button>
           <button
             type="button"
             onClick={() => navigate(deckPath(character.id, build.id, level))}
-            disabled={!doneEnabled}
           >
             Done
           </button>
