@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CardDialog, CardGrid, CardImage } from "./cards";
+import {
+  CardDialog,
+  CardGrid,
+  CardImage,
+  compareCardLevelsDescending,
+} from "./cards";
 import { useAppData } from "./app-data";
 import {
   GuidanceInput,
@@ -138,7 +143,7 @@ export function DeckView({
         </h2>
         {state.deck.length > 0 ? (
           <div className="deck-card-list">
-            {state.deck.map((card) => (
+            {[...state.deck].sort(compareCardLevelsDescending).map((card) => (
               <div className="deck-card-item" key={card.id}>
                 <CardGrid
                   cards={[card]}

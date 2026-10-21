@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { CardTile } from "./cards";
+import { CardTile, compareCardLevelsDescending } from "./cards";
 import { MotivationInput, type EditableMotivationKind } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
@@ -190,9 +190,7 @@ function LevelUpEditor({
   const availableCards = uniqueCards([
     ...pickCandidates,
     ...(selectedCard ? [selectedCard] : []),
-  ]).sort(
-    (left, right) => effectiveCardLevel(right) - effectiveCardLevel(left),
-  );
+  ]).sort(compareCardLevelsDescending);
   const swapCandidates = addOptions(build, character, level).filter(
     (card) => card.id !== selectedPick,
   );
@@ -203,7 +201,7 @@ function LevelUpEditor({
   const visibleDeck = uniqueCards([
     ...previousState.deck,
     ...state.deck.filter((card) => newCards.has(card.id)),
-  ]);
+  ]).sort(compareCardLevelsDescending);
 
   function mutateBuild(mutator: (current: Build) => Build): void {
     updateData((current) => {
@@ -720,10 +718,6 @@ function cloneLevelUp(levelUp: LevelUp): LevelUp {
 
 function cloneMotivation(motivation: Motivation): Motivation {
   return { ...motivation };
-}
-
-function effectiveCardLevel(card: Card): number {
-  return card.level === "X" ? 1 : card.level;
 }
 
 function deckPath(characterId: string, buildId: string, level: number): string {

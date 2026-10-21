@@ -1386,6 +1386,7 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   ).toBeVisible();
   const deckCardNames = page.locator(".deck-card-list .card-name");
   await expect(deckCardNames).toHaveText([
+    "Birds in a Tempest",
     "Cold Therapy",
     "Snowball",
     "Lifting Gust",
@@ -1396,7 +1397,6 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
     "Enticing Breeze",
     "Gathering Force",
     "Nature's Breath",
-    "Birds in a Tempest",
   ]);
   await expect(page.locator(".deck-intro .status-badge")).toHaveCount(0);
   await expect(page.getByText("Level 2 changes")).toBeVisible();
@@ -1687,6 +1687,39 @@ test("asks for available-card motivations only at the current level", async ({
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
   await expect(page.getByLabel("Why not Tornado?")).toHaveValue(
     "Already explained at level 2",
+  );
+});
+
+test("sorts Your deck and the deck view by descending level with X last", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps.push({
+    level: 3,
+    pick: "polar-vortex",
+    added: ["polar-vortex", "white-winds"],
+    dropped: [],
+  });
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  const levels = await page
+    .locator(".level-up-deck .card-action img")
+    .evaluateAll((images) =>
+      images.map((image) => image.getAttribute("alt")!.split("level ")[1]!),
+    );
+  await page.getByRole("button", { name: "Done" }).click();
+  const viewLevels = await page
+    .locator(".deck-card-list .card-action img")
+    .evaluateAll((images) =>
+      images.map((image) => image.getAttribute("alt")!.split("level ")[1]!),
+    );
+  expect(viewLevels).toEqual(levels);
+  expect(levels).toEqual(expect.arrayContaining(["3", "2", "1", "X"]));
+  expect(levels).toEqual(
+    [...levels].sort(
+      (left, right) =>
+        (right === "X" ? 0 : Number(right)) - (left === "X" ? 0 : Number(left)),
+    ),
   );
 });
 

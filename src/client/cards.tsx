@@ -3,6 +3,13 @@ import type { Card } from "../shared/character.js";
 
 const CARD_BACK = "/cards/SD/fh-sd-back.jpeg";
 
+export function compareCardLevelsDescending(left: Card, right: Card): number {
+  return (
+    (right.level === "X" ? 0 : right.level) -
+    (left.level === "X" ? 0 : left.level)
+  );
+}
+
 export interface CardTileProps {
   card: Card;
   actionLabel?: string;
