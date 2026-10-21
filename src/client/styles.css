@@ -853,7 +853,6 @@ textarea {
   border-radius: 10px;
   color: white;
   background: #03111fcc;
-  backdrop-filter: blur(4px);
 }
 .enlarge-button:hover,
 .enlarge-button:focus-visible {
