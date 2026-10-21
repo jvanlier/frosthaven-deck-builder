@@ -68,10 +68,6 @@ export function DeckView({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
   const cardById = new Map(character.cards.map((card) => [card.id, card]));
-  const invalid = state.issues.some((issue) => issue.severity === "invalid");
-  const incomplete = state.issues.some(
-    (issue) => issue.severity === "incomplete",
-  );
 
   useEffect(() => {
     rememberLastPosition({
@@ -109,14 +105,6 @@ export function DeckView({
         <h1 id="deck-heading" className="visually-hidden">
           Deck: {build.name}
         </h1>
-        <div className="deck-badges" aria-label="Deck status">
-          {incomplete ? (
-            <span className="status-badge incomplete">Incomplete</span>
-          ) : null}
-          {invalid ? (
-            <span className="status-badge invalid">Invalid</span>
-          ) : null}
-        </div>
         <label className="guidance-toggle">
           <input
             type="checkbox"

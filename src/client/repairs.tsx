@@ -101,22 +101,24 @@ export function RepairIssues({
                   ? `${state.deck.length} / ${character.handSize} cards`
                   : issue.message}
               </span>
-              <button
-                type="button"
-                className="secondary-button repair-button"
-                disabled={!canMutate}
-                onClick={() => {
-                  if (action.kind === "remove") {
-                    removeOperation(issue);
-                  } else if (action.kind === "restore") {
-                    restorePick(issue);
-                  } else {
-                    openEditor(issue);
-                  }
-                }}
-              >
-                {action.label}
-              </button>
+              {action ? (
+                <button
+                  type="button"
+                  className="secondary-button repair-button"
+                  disabled={!canMutate}
+                  onClick={() => {
+                    if (action.kind === "remove") {
+                      removeOperation(issue);
+                    } else if (action.kind === "restore") {
+                      restorePick(issue);
+                    } else {
+                      openEditor(issue);
+                    }
+                  }}
+                >
+                  {action.label}
+                </button>
+              ) : null}
             </li>
           );
         })}
@@ -139,7 +141,7 @@ function canRemoveOperation(operation: BuildOperationIdentity): boolean {
 function repairAction(
   issue: RuleIssue,
   cardName: string | undefined,
-): { kind: "remove" | "restore" | "edit"; label: string } {
+): { kind: "remove" | "restore" | "edit"; label: string } | null {
   if (issue.code === "PICK_NOT_ADDED" && issue.cardId) {
     return { kind: "restore", label: `Restore ${cardName} to deck` };
   }
@@ -157,12 +159,11 @@ function repairAction(
               : "added";
     return { kind: "remove", label: `Remove ${prefix} card ${subject}` };
   }
-  return {
-    kind: "edit",
-    label:
-      issue.operation?.kind === "start-pick" ||
-      issue.operation?.kind === "start-deck"
-        ? "Edit starting choices"
-        : `Edit level ${issue.level}`,
-  };
+  if (
+    issue.operation?.kind === "start-pick" ||
+    issue.operation?.kind === "start-deck"
+  ) {
+    return { kind: "edit", label: "Edit starting choices" };
+  }
+  return null;
 }

@@ -192,6 +192,12 @@ for (const view of ["starting", "deck"] as const) {
       .toBeLessThan(2);
     if (view === "deck") {
       await expect(bar.getByRole("button").first()).toBeVisible();
+      await expect(
+        bar.getByRole("button", { name: /^Edit level/ }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("link", { name: "Edit this level" }),
+      ).toBeAttached();
     } else {
       await expect(bar).toContainText("0 / 11 cards");
       await bar.evaluate((element) => {
@@ -214,20 +220,19 @@ for (const view of ["starting", "deck"] as const) {
         );
       });
       expect(barCoversZoom).toBe(true);
-      const editorHeight = await bar.evaluate(
-        (element) => element.getBoundingClientRect().height,
-      );
       await bar.getByRole("button", { name: "Done", exact: true }).click();
       await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
       await expect(
         page.getByText("0 / 11 cards", { exact: true }),
       ).toBeVisible();
-      if (page.viewportSize()!.width > 650) {
-        const viewHeight = await page
+      await expect(
+        page
           .locator(".deck-issues")
-          .evaluate((element) => element.getBoundingClientRect().height);
-        expect(viewHeight).toBe(editorHeight);
-      }
+          .getByRole("button", { name: /^Edit level/ }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("link", { name: "Edit starting deck" }),
+      ).toBeVisible();
     }
   });
 }
@@ -1089,7 +1094,7 @@ test("renders a derived deck view and links to the overview", async ({
     page.getByRole("heading", { name: "Deck: Freeze control" }),
   ).toBeVisible();
   await expect(page.getByText("0 / 11 cards", { exact: true })).toBeVisible();
-  await expect(page.getByText("Incomplete", { exact: true })).toBeVisible();
+  await expect(page.getByText("Incomplete", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Edit starting deck" }),
   ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
@@ -1289,7 +1294,7 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   ).toBeVisible();
 });
 
-test("renders invalid badges and specific replay validation messages", async ({
+test("renders replay validation messages without redundant invalid badges", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -1300,7 +1305,7 @@ test("renders invalid badges and specific replay validation messages", async ({
     }),
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
-  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
   await expect(
     page.getByText("Picked card birds-in-a-tempest must be added to the deck", {
       exact: true,
@@ -1332,7 +1337,10 @@ test("removes an invalid downstream operation without changing its neighbors", a
   });
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/2`);
-  await expect(page.getByText("Invalid", { exact: true })).toBeVisible();
+  await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Remove added card Tornado" }),
+  ).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(320);
