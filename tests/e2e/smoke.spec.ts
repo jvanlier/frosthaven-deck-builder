@@ -1414,6 +1414,9 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   await page.getByRole("checkbox", { name: "Show guidance" }).check();
   await expect(page.getByText("Use early.")).toBeVisible();
   await expect(page.getByText("Pair with Snowball.")).toBeVisible();
+  const emptyGuidance = page.locator(".guidance-note em").first();
+  await expect(emptyGuidance).toHaveText("none");
+  await expect(emptyGuidance).toHaveCSS("font-style", "italic");
 
   await page
     .getByRole("button", { name: "Open Birds in a Tempest details" })

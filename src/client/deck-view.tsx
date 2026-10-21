@@ -157,8 +157,7 @@ export function DeckView({
                   <div className="guidance-note">
                     <strong>Guidance</strong>
                     <p className="plain-text">
-                      {build.guidance[card.id]?.text ??
-                        "No guidance recorded for this card yet."}
+                      {build.guidance[card.id]?.text ?? <em>none</em>}
                     </p>
                   </div>
                 ) : null}
