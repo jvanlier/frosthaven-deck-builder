@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardGrid, CardTile } from "./cards";
+import { deckPath } from "./deck-view";
 import { MotivationInput } from "./notes";
 import { ImportDataError, parseImportFile, useAppData } from "./app-data";
 import {
@@ -411,6 +412,7 @@ export function StartingEditor({
   focusForLevel?: number;
 }) {
   const { updateData, canMutate } = useAppData();
+  const navigate = useNavigate();
   const projection = replayBuild(build, character);
   const startState = projection.levels[0]!;
   const startPoolIds = new Set(startState.pool.map((card) => card.id));
@@ -532,28 +534,13 @@ export function StartingEditor({
       className="page-content starting-editor"
       aria-labelledby="starting-heading"
     >
-      <div className="editor-toolbar">
-        <Link
-          className="button-link secondary-button"
-          to={`/c/${character.id}`}
-        >
-          Back to builds
-        </Link>
-        <span className="save-hint">Changes save automatically.</span>
-      </div>
-      <section className="page-intro">
-        <p className="eyebrow">
-          {character.name} · Starting level {build.startLevel}
-        </p>
-        <h1 id="starting-heading" aria-label={`Starting deck: ${build.name}`}>
-          Starting deck
-        </h1>
-        <p>
-          Choose one card at each starting pick, then choose up to{" "}
-          {character.handSize} cards for the hand. You can leave an incomplete
-          build and return later.
-        </p>
-      </section>
+      <h1
+        id="starting-heading"
+        className="visually-hidden"
+        aria-label={`Starting deck: ${build.name}`}
+      >
+        Starting deck
+      </h1>
 
       {build.startPicks.length > 0 ? (
         <section
@@ -644,34 +631,45 @@ export function StartingEditor({
       ) : null}
 
       <section
-        className="editor-section"
+        className="starting-hand"
         aria-labelledby="starting-hand-heading"
       >
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Starting hand</p>
-            <h2 id="starting-hand-heading">Choose your deck</h2>
-          </div>
-          <span className="editor-count" aria-live="polite">
-            {selectedDeck.size} / {character.handSize} cards
-          </span>
-        </div>
-        <p className="section-description">
-          Select up to {character.handSize} cards from the level{" "}
-          {build.startLevel} pool.
-        </p>
-        {startState.issues.length > 0 ? (
-          <ul className="issue-list" aria-label="Starting build issues">
-            {startState.issues.map((issue, index) => (
-              <li
-                className={`issue-${issue.severity}`}
-                key={`${issue.code}-${issue.cardId ?? index}`}
-              >
-                {issue.message}
+        <h2 id="starting-hand-heading" className="visually-hidden">
+          Choose your deck
+        </h2>
+        <div className="starting-hand-status">
+          <ul
+            className="issue-list"
+            aria-label="Starting build status"
+            aria-live="polite"
+          >
+            {startState.issues.length > 0 ? (
+              startState.issues.map((issue, index) => (
+                <li
+                  className={`issue-${issue.severity}`}
+                  key={`${issue.code}-${issue.cardId ?? index}`}
+                >
+                  {issue.code === "DECK_TOO_SMALL" ||
+                  issue.code === "DECK_TOO_LARGE"
+                    ? `${selectedDeck.size} / ${character.handSize} cards`
+                    : issue.message}
+                </li>
+              ))
+            ) : (
+              <li className="starting-hand-ready">
+                {selectedDeck.size} / {character.handSize} cards
               </li>
-            ))}
+            )}
           </ul>
-        ) : null}
+          <button
+            type="button"
+            onClick={() =>
+              navigate(deckPath(character.id, build.id, build.startLevel))
+            }
+          >
+            Done
+          </button>
+        </div>
         <div className="card-grid" role="list">
           {eligibleCards.map((card) => {
             const selected = selectedDeck.has(card.id);

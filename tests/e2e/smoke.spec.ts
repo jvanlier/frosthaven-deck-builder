@@ -144,6 +144,150 @@ const invalidDeckFixtureData = {
   ],
 };
 
+for (const view of ["starting", "deck"] as const) {
+  test(`keeps ${view} issues below the header while scrolling`, async ({
+    page,
+  }) => {
+    await page.route("**/api/data", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          view === "starting" ? fixtureData : invalidDeckFixtureData,
+        ),
+      }),
+    );
+    await page.goto(
+      `/c/SD/b/${fixtureBuildId}/l/${view === "starting" ? "1/start" : "2"}`,
+    );
+    const bar = page.locator(
+      view === "starting" ? ".starting-hand-status" : ".deck-issues",
+    );
+    await expect(bar).toBeVisible();
+    if (view === "starting") {
+      await expect
+        .poll(() =>
+          bar.evaluate((element) =>
+            Math.abs(
+              element.getBoundingClientRect().top -
+                Number.parseFloat(getComputedStyle(element).top),
+            ),
+          ),
+        )
+        .toBeLessThan(2);
+    }
+    await bar.evaluate((element) => {
+      window.scrollTo(
+        0,
+        window.scrollY + element.getBoundingClientRect().top + 200,
+      );
+    });
+    await expect
+      .poll(async () =>
+        bar.evaluate((element) => {
+          const top = Number.parseFloat(getComputedStyle(element).top);
+          return Math.abs(element.getBoundingClientRect().top - top);
+        }),
+      )
+      .toBeLessThan(2);
+    if (view === "deck") {
+      await expect(bar.getByRole("button").first()).toBeVisible();
+    } else {
+      await expect(bar).toContainText("0 / 11 cards");
+      await bar.evaluate((element) => {
+        const zoom = document.querySelectorAll(
+          ".starting-hand .enlarge-button",
+        )[4]!;
+        const targetY = element.getBoundingClientRect().top + 20;
+        window.scrollBy(0, zoom.getBoundingClientRect().top + 18 - targetY);
+      });
+      const barCoversZoom = await bar.evaluate((element) => {
+        const zoom = document.querySelectorAll(
+          ".starting-hand .enlarge-button",
+        )[4]!;
+        const box = zoom.getBoundingClientRect();
+        return element.contains(
+          document.elementFromPoint(
+            box.x + box.width / 2,
+            box.y + box.height / 2,
+          ),
+        );
+      });
+      expect(barCoversZoom).toBe(true);
+      const editorHeight = await bar.evaluate(
+        (element) => element.getBoundingClientRect().height,
+      );
+      await bar.getByRole("button", { name: "Done", exact: true }).click();
+      await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
+      await expect(
+        page.getByText("0 / 11 cards", { exact: true }),
+      ).toBeVisible();
+      if (page.viewportSize()!.width > 650) {
+        const viewHeight = await page
+          .locator(".deck-issues")
+          .evaluate((element) => element.getBoundingClientRect().height);
+        expect(viewHeight).toBe(editorHeight);
+      }
+    }
+  });
+}
+
+test("keeps starting cards in place when the deck becomes incomplete", async ({
+  page,
+}) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        route.request().method() === "GET" ? deckFixtureData : { revision: 1 },
+      ),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
+  const status = page.getByRole("list", { name: "Starting build status" });
+  await expect(status).toContainText("11 / 11 cards");
+  const done = page.getByRole("button", { name: "Done", exact: true });
+  await expect(done).toBeEnabled();
+  const grid = page.locator(".starting-hand > .card-grid");
+  const barRight = await page
+    .locator(".starting-hand-status")
+    .evaluate((element) => element.getBoundingClientRect().right);
+  const cardsRight = await grid
+    .locator(".card-tile")
+    .evaluateAll((cards) =>
+      Math.max(...cards.map((card) => card.getBoundingClientRect().right)),
+    );
+  expect(Math.abs(barRight - cardsRight)).toBeLessThan(2);
+  const gridTop = () =>
+    grid.evaluate(
+      (element) => element.getBoundingClientRect().top + window.scrollY,
+    );
+  const initialTop = await gridTop();
+  await page
+    .getByRole("button", {
+      name: "Remove Cold Therapy from starting deck",
+      exact: true,
+    })
+    .click();
+  await expect(status).toContainText("10 / 11 cards");
+  await expect(done).toBeEnabled();
+  expect(Math.abs((await gridTop()) - initialTop)).toBeLessThan(2);
+  await page
+    .getByRole("button", {
+      name: "Add Cold Therapy to starting deck",
+      exact: true,
+    })
+    .click();
+  await expect(status).toContainText("11 / 11 cards");
+  expect(Math.abs((await gridTop()) - initialTop)).toBeLessThan(2);
+  await done.click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
+  await expect(
+    page.getByRole("heading", { name: "Deck: Freeze control" }),
+  ).toBeAttached();
+});
+
 const lastPositionStorageKey = "frosthaven-deck-builder:last-position";
 const levelUpBuildId = "123e4567-e89b-42d3-a456-426614174002";
 const levelUpBaseBuild = {
@@ -251,17 +395,12 @@ test("matches the compact image-first mockup on desktop and phone", async ({
     const imageBox = (await image.boundingBox())!;
     expect(Math.abs(cardBox.height - imageBox.height)).toBeLessThan(3);
     if (width > 520) expect(cardBox.width).toBe(220);
-    if (width >= 1240) {
-      const newly = (await page
-        .locator(".level-up-picks .level-up-group")
-        .first()
-        .boundingBox())!;
-      const earlier = (await page
-        .locator(".level-up-picks .level-up-group")
-        .nth(1)
-        .boundingBox())!;
-      expect(earlier.y - (newly.y + newly.height)).toBeLessThan(60);
-    }
+    await expect(page.locator(".level-up-picks .level-up-group")).toHaveCount(
+      1,
+    );
+    await expect(
+      page.getByRole("heading", { name: "Available cards" }),
+    ).toBeVisible();
     const zoomBox = (await candidate.locator(".enlarge-button").boundingBox())!;
     expect(zoomBox.y).toBeLessThan(cardBox.y + 16);
     expect(zoomBox.x + zoomBox.width).toBeLessThanOrEqual(
@@ -330,7 +469,10 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   await page.getByRole("link", { name: "Level up" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
   await expect(
-    page.getByRole("heading", { name: "Newly unlocked" }),
+    page.getByRole("heading", { name: "Earlier, not yet picked" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Available cards" }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Pick Birds in a Tempest" }),
@@ -338,6 +480,31 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await expect(page.getByText("12 / 11 cards", { exact: true })).toBeVisible();
+  const excluded = page.locator(
+    '.level-up-candidate:has([data-card-id="tornado"])',
+  );
+  await expect(excluded.getByRole("status")).toHaveText("Excluded");
+  await expect(
+    excluded.getByRole("button", { name: "Pick Tornado", exact: true }),
+  ).toBeEnabled();
+  await excluded
+    .getByLabel("Why exclude Tornado?")
+    .fill("Prefer the other card.");
+  await expect
+    .poll(() => persisted.builds[0]!.motivations)
+    .toContainEqual(
+      expect.objectContaining({
+        cardId: "tornado",
+        level: 2,
+        kind: "exclude",
+        text: "Prefer the other card.",
+      }),
+    );
+  await page.reload();
+  await expect(excluded.getByLabel("Why exclude Tornado?")).toHaveValue(
+    "Prefer the other card.",
+  );
+  await expect(page.locator(".level-up-editor .deck-issues")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Drop Blizzard" }),
   ).toBeVisible();
@@ -420,7 +587,7 @@ test("scrolls and moves focus to the deck after a mobile pick", async ({
     .toBeLessThanOrEqual(0);
 });
 
-test("moves focus to the deck after picking from an enlarged card", async ({
+test("keeps enlarged cards view-only and restores focus before picking", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
@@ -483,8 +650,13 @@ test("moves focus to the deck after picking from an enlarged card", async ({
   await enlargeButton.click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(dialog.getByRole("button")).toHaveCount(1);
+  await dialog.getByRole("button", { name: "Close", exact: true }).click();
   await expect(dialog).toBeHidden();
+  await expect(enlargeButton).toBeFocused();
+  await page
+    .getByRole("button", { name: "Pick Birds in a Tempest", exact: true })
+    .click();
   await expect(page.getByRole("heading", { name: "Your deck" })).toBeFocused();
 });
 
@@ -865,7 +1037,8 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   await expect(firstEnlarge).toBeFocused();
 
   await firstEnlarge.click();
-  await dialog.getByRole("button", { name: firstLabel! }).click();
+  await expect(dialog.getByRole("button")).toHaveCount(1);
+  await dialog.getByRole("button", { name: "Close", exact: true }).click();
   await expect(dialog).toBeHidden();
   await expect(firstEnlarge).toBeFocused();
 
@@ -881,13 +1054,14 @@ test("keeps card actions separate from enlarge and provides an image fallback", 
   await expect(pausedCard.locator(".card-action")).toBeDisabled();
   await pausedCard.getByRole("button", { name: /Enlarge/ }).click();
   const pausedDialog = page.getByRole("dialog");
-  const pausedAction = pausedDialog.getByRole("button", { name: /Open/ });
-  await expect(pausedAction).toBeDisabled();
+  await expect(pausedDialog.getByRole("button")).toHaveCount(1);
   await page
     .getByRole("button", { name: "Toggle paused card" })
     .evaluate((button) => (button as HTMLButtonElement).click());
-  await expect(pausedAction).toBeEnabled();
-  await pausedAction.click();
+  await expect(pausedDialog.getByRole("button")).toHaveCount(1);
+  await pausedDialog
+    .getByRole("button", { name: "Close", exact: true })
+    .click();
   await expect(pausedDialog).toBeHidden();
   await expect(
     pausedCard.getByRole("button", { name: /Enlarge/ }),
@@ -908,10 +1082,9 @@ test("renders a derived deck view and links to the overview", async ({
 
   await expect(page.getByText("Freeze control", { exact: true })).toBeVisible();
   await expect(
-    page
-      .getByRole("navigation", { name: "Previous and next deck levels" })
-      .getByText("Level 1", { exact: true }),
-  ).toBeVisible();
+    page.getByRole("navigation", { name: "Previous and next deck levels" }),
+  ).toHaveCount(0);
+  await expect(page.locator(".pool-badge")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Deck: Freeze control" }),
   ).toBeVisible();
@@ -1081,7 +1254,7 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
     "Nature's Breath",
     "Birds in a Tempest",
   ]);
-  await expect(page.getByText("11 / 11 cards", { exact: true })).toBeVisible();
+  await expect(page.locator(".deck-intro .status-badge")).toHaveCount(0);
   await expect(page.getByText("Level 2 changes")).toBeVisible();
   await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
   await expect(page.getByText("Dropped: Whiteout")).toBeVisible();
@@ -1327,7 +1500,34 @@ test("restores a picked card when its stored add is missing", async ({
   await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
-test("switches between stored levels with previous, next and direct navigation", async ({
+test("combines available cards in descending level order", async ({ page }) => {
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(fullFixtureData),
+    }),
+  );
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  const available = page.getByRole("region", {
+    name: "Available cards",
+    exact: true,
+  });
+  await expect(available).toBeVisible();
+  const levels = await available
+    .locator(".card-action img")
+    .evaluateAll((images) =>
+      images.map((image) =>
+        Number(image.getAttribute("alt")!.split("level ")[1]),
+      ),
+    );
+  expect(levels).toEqual([3, 3, 2, 2]);
+  await expect(
+    page.getByRole("heading", { name: "Earlier, not yet picked" }),
+  ).toHaveCount(0);
+});
+
+test("switches between stored levels using the header navigation", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -1338,13 +1538,18 @@ test("switches between stored levels with previous, next and direct navigation",
     }),
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
-  await page.getByRole("link", { name: "Next level (2)" }).click();
+  const editRight = await page
+    .locator(".deck-intro > .button-link")
+    .evaluate((element) => element.getBoundingClientRect().right);
+  const cardsRight = await page
+    .locator(".deck-card-list .card-tile")
+    .evaluateAll((cards) =>
+      Math.max(...cards.map((card) => card.getBoundingClientRect().right)),
+    );
+  expect(Math.abs(editRight - cardsRight)).toBeLessThan(2);
+  await page.getByRole("link", { name: "Level 2", exact: true }).click();
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
   await page.getByRole("link", { name: "Level 1", exact: true }).click();
-  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
-  await page.getByRole("link", { name: "Next level (2)" }).click();
-  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
-  await page.getByRole("link", { name: "Previous level (1)" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
 });
 
@@ -1369,7 +1574,9 @@ test("resumes the last valid deck position and safely falls back for invalid sto
   ).toBeVisible();
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
   await expect(page).toHaveURL(`/c/SD`);
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
@@ -1661,21 +1868,21 @@ test("creates a starting build, caps the hand, and restores it after reload", as
       .getByRole("button", { name: `Add ${name} to starting deck` })
       .click();
   }
-  await expect(page.getByText("9 / 11 cards")).toBeVisible();
+  await expect(page.getByText("9 / 11 cards", { exact: true })).toBeVisible();
   await expect
     .poll(async () => persisted.builds[0]?.startDeck.length ?? 0, {
       timeout: 5_000,
     })
     .toBe(9);
   await page.reload();
-  await expect(page.getByText("9 / 11 cards")).toBeVisible();
+  await expect(page.getByText("9 / 11 cards", { exact: true })).toBeVisible();
 
   for (const name of ["Snowball", "Whiteout"]) {
     await page
       .getByRole("button", { name: `Add ${name} to starting deck` })
       .click();
   }
-  await expect(page.getByText("11 / 11 cards")).toBeVisible();
+  await expect(page.getByText("11 / 11 cards", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Add Blinding Vortex to starting deck" }),
   ).toBeDisabled();
@@ -1686,7 +1893,7 @@ test("creates a starting build, caps the hand, and restores it after reload", as
     })
     .toBe(11);
   await page.reload();
-  await expect(page.getByText("11 / 11 cards")).toBeVisible();
+  await expect(page.getByText("11 / 11 cards", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Starting deck: Freeze control" }),
   ).toBeVisible();
@@ -1921,7 +2128,9 @@ test("renames, copies, and confirms build deletion", async ({ page }) => {
       ["Cold control", []],
       ["Independent copy", ["blizzard"]],
     ]);
-  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
   await expect(
     page.getByText("Independent copy", { exact: true }),
   ).toBeVisible();
@@ -2007,7 +2216,9 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
   const createDialog = page.getByRole("dialog", { name: "Create build" });
   await createDialog.getByLabel("Build name").fill("Pending build");
   await createDialog.getByRole("button", { name: "Create build" }).click();
-  await page.getByRole("link", { name: "Back to builds" }).click();
+  await page
+    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
+    .click();
   await page.getByRole("button", { name: "Create build" }).click();
   await expect.poll(() => Boolean(releaseSave)).toBe(true);
   releaseSave();
@@ -2348,7 +2559,7 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
     );
   await unpicked.getByRole("button", { name: "Enlarge Tornado" }).click();
   const zoom = page.getByRole("dialog");
-  await expect(zoom.locator(".dialog-action")).toBeDisabled();
+  await expect(zoom.getByRole("button")).toHaveCount(1);
   await zoom.getByRole("button", { name: "Close", exact: true }).click();
   await page
     .getByRole("button", { name: "Add Whiteout to starting deck" })
@@ -2698,7 +2909,7 @@ test("pauses note editors after save failures and conflicts", async ({
       page.getByLabel("Motivation for Birds in a Tempest (Add motivation)"),
     ).toBeDisabled();
     await page.getByRole("link", { name: "Deck", exact: true }).click();
-    await page.getByRole("link", { name: "Previous level (1)" }).click();
+    await page.getByRole("link", { name: "Level 1", exact: true }).click();
     await page.getByRole("link", { name: "Edit starting deck" }).click();
     await expect(page.getByLabel("Why include Cold Therapy?")).toBeDisabled();
     await expect(page.getByLabel("Why exclude White Winds?")).toBeDisabled();

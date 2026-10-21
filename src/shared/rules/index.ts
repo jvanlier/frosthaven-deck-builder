@@ -586,6 +586,13 @@ function applicableMotivationContextsForState(
   if (state.applied.dropped.includes(cardId)) {
     contexts.push({ kind: "drop", level: state.level });
   }
+  if (
+    state.applied.pick &&
+    cardLevel(card) <= state.level &&
+    !state.pool.some((candidate) => candidate.id === cardId)
+  ) {
+    contexts.push({ kind: "exclude", level: state.level });
+  }
   return contexts;
 }
 

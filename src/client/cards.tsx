@@ -79,17 +79,7 @@ export function CardTile({
           <path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6" />
         </svg>
       </button>
-      <CardDialog
-        card={card}
-        open={enlarged}
-        actionLabel={actionLabel}
-        onAction={() => {
-          closeDialog();
-          onAction?.();
-        }}
-        onClose={closeDialog}
-        disabled={disabled}
-      />
+      <CardDialog card={card} open={enlarged} onClose={closeDialog} />
     </article>
   );
 }
@@ -129,17 +119,11 @@ export function CardGrid({
 export function CardDialog({
   card,
   open,
-  actionLabel,
-  onAction,
   onClose,
-  disabled = false,
 }: {
   card: Card;
   open: boolean;
-  actionLabel: string;
-  onAction: () => void;
   onClose: () => void;
-  disabled?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -162,6 +146,14 @@ export function CardDialog({
       ref={dialogRef}
       className="card-dialog"
       aria-labelledby={titleId}
+      onKeyDown={(event) => {
+        if (event.key === "Tab") {
+          event.preventDefault();
+          event.currentTarget
+            .querySelector<HTMLButtonElement>("button")
+            ?.focus();
+        }
+      }}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -184,14 +176,6 @@ export function CardDialog({
           card={card}
           alt={`${card.name}, level ${formatCardLevel(card)}`}
         />
-        <button
-          className="dialog-action"
-          type="button"
-          onClick={onAction}
-          disabled={disabled}
-        >
-          {actionLabel}
-        </button>
       </div>
     </dialog>
   );
