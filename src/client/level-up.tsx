@@ -432,27 +432,13 @@ function LevelUpEditor({
   }
 
   const handSize = character.handSize;
-  const isComplete =
-    selectedPick !== null &&
-    state.deck.length === handSize &&
-    state.issues.length === 0;
 
   return (
     <main
       className="page-content level-up-editor"
       aria-labelledby="level-up-heading"
     >
-      <section
-        className="level-up-status"
-        aria-label="Level-up status"
-        data-tone={
-          isComplete
-            ? "complete"
-            : selectedPick === null
-              ? "pick"
-              : "incomplete"
-        }
-      >
+      <section className="level-up-status" aria-label="Level-up status">
         <div>
           <p className="eyebrow">
             Level {level} · {build.name}
@@ -471,7 +457,11 @@ function LevelUpEditor({
             </p>
           ) : null}
         </div>
-        <strong className="level-up-counter" aria-live="polite">
+        <strong
+          className="level-up-counter"
+          data-tone={state.deck.length === handSize ? "complete" : "incomplete"}
+          aria-live="polite"
+        >
           {state.deck.length} / {handSize} cards
         </strong>
         <div className="level-up-actions">

@@ -926,7 +926,7 @@ textarea {
   margin: 0;
   color: var(--warn);
 }
-.level-up-status[data-tone="complete"] .level-up-counter {
+.level-up-counter[data-tone="complete"] {
   color: var(--ok);
   background: #4ade8022;
 }

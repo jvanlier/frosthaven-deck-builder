@@ -942,6 +942,41 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await expect(persisted.builds[0]?.motivations).toEqual([]);
 });
 
+test("colors a full card count green even when the pick is missing or invalid", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps = [
+    {
+      level: 2,
+      pick: null,
+      added: ["birds-in-a-tempest"],
+      dropped: [],
+    },
+  ];
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.locator(".level-up-instruction")).toHaveText(
+    "Level 2 pick has not been chosen",
+  );
+  await expect(page.locator(".level-up-instruction")).toHaveCSS(
+    "color",
+    "rgb(251, 191, 36)",
+  );
+  await expect(page.locator(".level-up-counter")).toHaveText("11 / 11 cards");
+  await expect(page.locator(".level-up-counter")).toHaveCSS(
+    "color",
+    "rgb(74, 222, 128)",
+  );
+  await expect(page.locator(".level-up-counter")).toHaveCSS(
+    "background-color",
+    "rgba(74, 222, 128, 0.133)",
+  );
+  await expect(page.locator(".deck-issues")).toContainText(
+    "Birds in a Tempest is not in the pool",
+  );
+});
+
 test("places deck issue badges beside each other when there is room", async ({
   page,
 }) => {
