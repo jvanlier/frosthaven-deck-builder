@@ -507,6 +507,7 @@ function LevelUpEditor({
             </div>
             <CandidateGrid
               cards={availableCards}
+              level={level}
               selection="pick"
               selectedPick={selectedPick}
               added={activeAdded}
@@ -587,6 +588,7 @@ function LevelUpEditor({
               </p>
               <CandidateGrid
                 cards={swapCandidates}
+                level={level}
                 selection="add"
                 selectedPick={selectedPick}
                 added={activeAdded}
@@ -606,6 +608,7 @@ function LevelUpEditor({
 
 function CandidateGrid({
   cards,
+  level,
   selection,
   selectedPick,
   added,
@@ -616,6 +619,7 @@ function CandidateGrid({
   onMotivation,
 }: {
   cards: Card[];
+  level: number;
   selection: "pick" | "add";
   selectedPick: string | null;
   added: Set<string>;
@@ -635,6 +639,7 @@ function CandidateGrid({
   return (
     <div className="level-up-card-grid" role="list">
       {cards.map((card) => {
+        const showMotivation = selection !== "pick" || card.level === level;
         const isPicked = selectedPick === card.id;
         const isAdded = added.has(card.id) && !isPicked;
         const isExcluded =
@@ -669,8 +674,8 @@ function CandidateGrid({
                 selection === "pick" ? onPick(card) : onAdd(card)
               }
             />
-            {((isPicked || isAdded) && selection !== "pick") ||
-            (isPicked && selection === "pick") ? (
+            {showMotivation &&
+            (isPicked || (isAdded && selection !== "pick")) ? (
               <MotivationInput
                 card={card}
                 kind="add"
@@ -678,7 +683,7 @@ function CandidateGrid({
                 disabled={!canMutate}
                 onChange={(text) => onMotivation(card, "add", text)}
               />
-            ) : isExcluded ? (
+            ) : isExcluded && showMotivation ? (
               <MotivationInput
                 card={card}
                 kind="exclude"

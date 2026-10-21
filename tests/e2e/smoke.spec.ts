@@ -492,9 +492,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   await expect(
     excluded.getByRole("button", { name: "Pick Tornado", exact: true }),
   ).toBeEnabled();
-  await excluded
-    .getByLabel("Why exclude Tornado?")
-    .fill("Prefer the other card.");
+  await excluded.getByLabel("Why not Tornado?").fill("Prefer the other card.");
   await expect
     .poll(() => persisted.builds[0]!.motivations)
     .toContainEqual(
@@ -506,7 +504,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
       }),
     );
   await page.reload();
-  await expect(excluded.getByLabel("Why exclude Tornado?")).toHaveValue(
+  await expect(excluded.getByLabel("Why not Tornado?")).toHaveValue(
     "Prefer the other card.",
   );
   await expect(page.locator(".level-up-editor .deck-issues")).toHaveCount(0);
@@ -1649,6 +1647,49 @@ test("restores a picked card when its stored add is missing", async ({
   await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
+test("asks for available-card motivations only at the current level", async ({
+  page,
+}) => {
+  const data = structuredClone(deckFixtureData) as AppData;
+  data.builds[0]!.levelUps.push({
+    level: 3,
+    pick: "polar-vortex",
+    added: ["polar-vortex"],
+    dropped: ["snowball"],
+  });
+  data.builds[0]!.motivations.push({
+    level: 2,
+    cardId: "tornado",
+    kind: "exclude",
+    text: "Already explained at level 2",
+    updatedAt: "2024-01-02T03:04:05.000Z",
+  });
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  const available = page.getByRole("region", {
+    name: "Available cards",
+    exact: true,
+  });
+  await expect(available.getByLabel("Why add Polar Vortex?")).toBeVisible();
+  await expect(available.getByLabel("Why not Cold Snap?")).toBeVisible();
+  const tornado = available.locator(".level-up-candidate").filter({
+    has: page.getByRole("button", { name: "Pick Tornado", exact: true }),
+  });
+  await expect(tornado.locator(".card-tile")).toHaveAttribute(
+    "data-state",
+    "Excluded",
+  );
+  await expect(
+    tornado.getByRole("button", { name: "Pick Tornado", exact: true }),
+  ).toBeEnabled();
+  await expect(tornado.getByRole("textbox")).toHaveCount(0);
+  await expect(available.getByRole("textbox")).toHaveCount(2);
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+  await expect(page.getByLabel("Why not Tornado?")).toHaveValue(
+    "Already explained at level 2",
+  );
+});
+
 test("combines available cards in descending level order", async ({ page }) => {
   await page.route("**/api/data", (route) =>
     route.fulfill({
@@ -2509,7 +2550,7 @@ test("offers sequential legal picks for a higher starting level", async ({
   await expect(
     page.getByRole("button", { name: "Cold Snap is not in the starting pool" }),
   ).toBeDisabled();
-  await expect(page.getByLabel("Why exclude Cold Snap?")).toBeVisible();
+  await expect(page.getByLabel("Why not Cold Snap?")).toBeVisible();
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await expect
     .poll(async () =>
@@ -2737,9 +2778,9 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
     "filter",
     "grayscale(1)",
   );
-  const unpickedNote = unpicked.getByLabel("Why exclude Tornado?");
+  const unpickedNote = unpicked.getByLabel("Why not Tornado?");
   await expect(unpickedNote).toBeEnabled();
-  await expect(excluded.getByLabel("Why exclude White Winds?")).toHaveCount(0);
+  await expect(excluded.getByLabel("Why not White Winds?")).toHaveCount(0);
   await unpickedNote.fill("I prefer the other level-two card.");
   await expect
     .poll(() => persisted.builds[0]!.motivations)
@@ -2758,7 +2799,7 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await page
     .getByRole("button", { name: "Add Whiteout to starting deck" })
     .click();
-  const note = excluded.getByLabel("Why exclude White Winds?");
+  const note = excluded.getByLabel("Why not White Winds?");
   await expect(note).toBeEnabled();
   await expect(excluded.locator(".card-action")).toBeDisabled();
   await expect(excluded.locator(".card-action img")).toHaveCSS(
@@ -2960,7 +3001,7 @@ test("edits starting exclusion and initial-pick motivations", async ({
 
   const buildId = persisted.builds[0]!.id;
   await page.goto(`/c/SD/b/${buildId}/l/3/start`);
-  const exclusion = page.getByLabel("Why exclude Cold Snap?");
+  const exclusion = page.getByLabel("Why not Cold Snap?");
   await exclusion.fill("Not for this build.");
   await expect
     .poll(async () => persisted.builds[0]?.motivations)
@@ -3106,7 +3147,7 @@ test("pauses note editors after save failures and conflicts", async ({
     await page.getByRole("link", { name: "Level 1", exact: true }).click();
     await page.getByRole("link", { name: "Edit starting deck" }).click();
     await expect(page.getByLabel("Why include Cold Therapy?")).toBeDisabled();
-    await expect(page.getByLabel("Why exclude White Winds?")).toBeDisabled();
+    await expect(page.getByLabel("Why not White Winds?")).toBeDisabled();
     await page.unrouteAll({ behavior: "ignoreErrors" });
   }
 });

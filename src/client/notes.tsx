@@ -45,7 +45,7 @@ export function MotivationInput({
 }) {
   const defaultLabel =
     kind === "exclude"
-      ? `Why exclude ${card.name}?`
+      ? `Why not ${card.name}?`
       : kind === "drop"
         ? `Why drop ${card.name}?`
         : `Why add ${card.name}?`;
