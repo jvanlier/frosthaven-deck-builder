@@ -149,9 +149,36 @@ variants within a level.
 
 ### 4.4 Start level
 
-- **F5** For start level N > 1: one pick slot per level 2..N ("Level 2 pick", …). Each
-  slot offers only options valid per R2/R3 given the preceding slots. Later stored
-  choices never silently constrain or rewrite an earlier slot.
+- **F5** For start level N > 1: choose starting pool cards from the highest pick
+  slot down (N..2), then assemble the starting hand. Only the active slot shows
+  candidates, grouped by card level, highest first. A slot L offers unpicked cards
+  of levels 2..L, excluding cards reserved in higher slots. Spending a slot closes
+  access to its level's remaining cards, even when a lower-level card was chosen.
+  Lower-slot choices never constrain revisions to higher slots. Conflicting lower
+  choices stay saved and are flagged for replacement; nothing is silently reset.
+  A compact stepper and editable pick summary replace future-slot placeholders.
+  One status bar at the top of the editor stays sticky beneath the app header.
+  It shows a “n / total level-up cards picked” badge (green when complete, amber
+  otherwise), the hand count during hand assembly, and the current next/finish
+  action. There is no separate hand status bar or “Build your starting hand” heading.
+  The “Level-up card picks” disclosure has a bordered container and indented
+  contents, so its collapsed scope is clear without repeating the status count.
+  Each new pick enters the starting hand. In hand assembly, clicking a selected
+  picked card opens its pick slot instead of removing it; only starter cards can
+  be freely added or removed here. Revising a pick offers Return to hand once all
+  slots are valid, preserving starter selections and notes. Conflicts guide the
+  user through the affected lower slots before returning. This is an editor
+  interaction constraint, not an additional game rule.
+  Picking shows an inline motivation overlay on that card,
+  even for a lower-level choice. Unselected cards at the slot's level get inline
+  exclusion notes because no lower slot can acquire them; lower-level alternatives
+  are only grayed out, without exclusion inputs, until their last eligible slot.
+  These overlays share the normal level-up component and saved motivations.
+  Next advances explicitly, while reload resumes at the
+  highest unfinished or invalid slot. Done is available at every setup step,
+  including incomplete or invalid builds, and returns to the deck for later
+  continuation. Validation and attention indicators remain visible. Autosave
+  continues throughout; Done is not a save operation.
 - **F6** Select up to `handSize` cards from the pool for the starting deck, with a counter
   (`9 / 11`). Selecting more than `handSize` isn't possible. The grid also shows
   eligible-but-unpicked cards outside the starting pool, gray and unselectable; their

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardTile, compareCardLevelsDescending } from "./cards";
+import { CandidateGrid } from "./candidate-grid";
 import { MotivationInput, type EditableMotivationKind } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
@@ -601,99 +602,6 @@ function LevelUpEditor({
         </div>
       </div>
     </main>
-  );
-}
-
-function CandidateGrid({
-  cards,
-  level,
-  selection,
-  selectedPick,
-  added,
-  canMutate,
-  motivationText,
-  onPick,
-  onAdd,
-  onMotivation,
-}: {
-  cards: Card[];
-  level: number;
-  selection: "pick" | "add";
-  selectedPick: string | null;
-  added: Set<string>;
-  canMutate: boolean;
-  motivationText: (cardId: string, kind: EditableMotivationKind) => string;
-  onPick: (card: Card) => void;
-  onAdd: (card: Card) => void;
-  onMotivation: (
-    card: Card,
-    kind: EditableMotivationKind,
-    text: string,
-  ) => void;
-}) {
-  if (cards.length === 0) {
-    return <p className="empty-inline">No eligible cards are available.</p>;
-  }
-  return (
-    <div className="level-up-card-grid" role="list">
-      {cards.map((card) => {
-        const showMotivation = selection !== "pick" || card.level === level;
-        const isPicked = selectedPick === card.id;
-        const isAdded = added.has(card.id) && !isPicked;
-        const isExcluded =
-          selection === "pick" &&
-          selectedPick !== null &&
-          !isPicked &&
-          !isAdded;
-        return (
-          <div className="level-up-candidate" role="listitem" key={card.id}>
-            <CardTile
-              card={card}
-              actionLabel={
-                selection === "pick"
-                  ? isPicked
-                    ? `Unpick ${card.name}`
-                    : `Pick ${card.name}`
-                  : isAdded
-                    ? `Remove ${card.name} from deck`
-                    : `Add ${card.name} to deck`
-              }
-              stateLabel={
-                isPicked
-                  ? "Picked"
-                  : isAdded
-                    ? "Added"
-                    : isExcluded
-                      ? "Excluded"
-                      : undefined
-              }
-              disabled={!canMutate}
-              onAction={() =>
-                selection === "pick" ? onPick(card) : onAdd(card)
-              }
-            />
-            {showMotivation &&
-            (isPicked || (isAdded && selection !== "pick")) ? (
-              <MotivationInput
-                card={card}
-                kind="add"
-                value={motivationText(card.id, "add")}
-                disabled={!canMutate}
-                onChange={(text) => onMotivation(card, "add", text)}
-              />
-            ) : isExcluded && showMotivation ? (
-              <MotivationInput
-                card={card}
-                kind="exclude"
-                value={motivationText(card.id, "exclude")}
-                disabled={!canMutate}
-                onChange={(text) => onMotivation(card, "exclude", text)}
-              />
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
   );
 }
 

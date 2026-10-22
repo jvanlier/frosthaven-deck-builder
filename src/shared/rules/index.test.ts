@@ -8,6 +8,7 @@ import {
   canAppendLevel,
   deck,
   pickOptions,
+  startingPickOptions,
   pool,
   replayBuild,
   validateBuild,
@@ -92,6 +93,30 @@ describe("Snowdancer rules engine", () => {
       "polar-vortex",
       "cold-snap",
     ]);
+  });
+
+  it("works downward through starting picks, reserving higher-slot choices only", () => {
+    const build = makeBuild(7);
+    const ids = (level: number) =>
+      startingPickOptions(build, character, level).map((card) => card.id);
+    expect(ids(7)).toContain("storm-wall");
+    expect(ids(7)).not.toContain("blizzard");
+    expect(ids(7)).not.toContain("white-winds");
+    build.startPicks[5]!.cardId = "storm-wall";
+    expect(ids(6)).not.toContain("freezing-storm");
+    expect(ids(6)).not.toContain("storm-wall");
+    build.startPicks[4]!.cardId = "shifting-snow";
+    expect(ids(5)).toContain("whipping-gale");
+    expect(ids(5)).not.toContain("shifting-snow");
+    expect(ids(5)).not.toContain("frozen-brand");
+    expect(ids(5)).not.toContain("refreshing-flurry");
+    build.startPicks[3]!.cardId = "cold-snap";
+    expect(ids(4)).toContain("polar-vortex");
+    expect(ids(4)).not.toContain("whipping-gale");
+    // Revising a higher slot must not be constrained by a lower-slot choice.
+    expect(ids(7)).toContain("cold-snap");
+    expect(ids(1)).toEqual([]);
+    expect(ids(8)).toEqual([]);
   });
 
   it("replays valid picks and normalized deck changes without storing derived decks", () => {

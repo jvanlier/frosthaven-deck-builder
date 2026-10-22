@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CardGrid, CardTile } from "./cards";
+import { CardTile, compareCardLevelsDescending } from "./cards";
+import { CandidateGrid } from "./candidate-grid";
+import { RepairIssues } from "./repairs";
 import { deckPath } from "./deck-view";
 import { MotivationInput } from "./notes";
 import { ImportDataError, parseImportFile, useAppData } from "./app-data";
@@ -15,7 +17,7 @@ import {
 } from "../shared/builds.js";
 import { characters } from "../shared/data/characters/index.js";
 import {
-  pickOptions,
+  startingPickOptions,
   replayBuild,
   sortedCards,
 } from "../shared/rules/index.js";
@@ -428,34 +430,43 @@ export function StartingEditor({
   const startPoolIds = new Set(startState.pool.map((card) => card.id));
   const selectedDeck = new Set(startState.deck.map((card) => card.id));
   const handFull = selectedDeck.size >= character.handSize;
-  const [editingSlot, setEditingSlot] = useState<number | null>(null);
-  const firstIncompleteSlot = build.startPicks.findIndex(
-    (pick) => pick.cardId === null,
+  const picks = [...build.startPicks].reverse();
+  const validPickLevels = new Set(
+    picks
+      .filter((pick) =>
+        startingPickOptions(build, character, pick.forLevel).some(
+          (card) => card.id === pick.cardId,
+        ),
+      )
+      .map((pick) => pick.forLevel),
   );
-  const focusedSlot =
-    focusForLevel === undefined
-      ? -1
-      : build.startPicks.findIndex((pick) => pick.forLevel === focusForLevel);
-  const activeSlot =
-    editingSlot ??
-    (focusedSlot !== -1
-      ? focusedSlot
-      : firstIncompleteSlot === -1
-        ? Math.max(build.startPicks.length - 1, 0)
-        : firstIncompleteSlot);
+  const firstUnfinished = picks.find(
+    (pick) => !validPickLevels.has(pick.forLevel),
+  );
+  const [editingLevel, setEditingLevel] = useState<number | null>(
+    focusForLevel ?? firstUnfinished?.forLevel ?? null,
+  );
+  const activeLevel = focusForLevel ?? editingLevel;
+  const activePick = picks.find((pick) => pick.forLevel === activeLevel);
+  const showHand = !activePick;
+  const [handVisited, setHandVisited] = useState(!firstUnfinished);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    if (focusForLevel === undefined) {
-      return;
+    stepHeading.current?.focus({ preventScroll: true });
+  }, [activeLevel]);
+
+  const openStep = (level: number | null) => {
+    if (level === null) {
+      setHandVisited(true);
     }
-    const section = document.querySelector<HTMLElement>(
-      `[data-pick-level="${focusForLevel}"]`,
-    );
-    const target =
-      section?.querySelector<HTMLButtonElement>(".card-action") ??
-      section?.querySelector<HTMLElement>("h3");
-    target?.focus();
-  }, [focusForLevel]);
+    setEditingLevel(level);
+    // Clear repair deep-link focus when moving to another setup step.
+    if (focusForLevel !== undefined) {
+      navigate(startEditorPath(build), { replace: true });
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
 
   const updateBuild = (nextBuild: Build) => {
     updateData((current) => ({
@@ -471,10 +482,22 @@ export function StartingEditor({
       return;
     }
     const current = build.startPicks.find((pick) => pick.forLevel === forLevel);
-    updateBuild(
-      setStartPick(build, forLevel, current?.cardId === cardId ? null : cardId),
+    const next = setStartPick(
+      build,
+      forLevel,
+      current?.cardId === cardId ? null : cardId,
     );
-    setEditingSlot(null);
+    // Replacing/unpicking a pool card also removes it from the hand, unless
+    // another slot still owns it. Leave unrelated invalid entries and notes alone.
+    const nextDeck = build.startDeck.filter(
+      (id) =>
+        id !== current?.cardId ||
+        next.startPicks.some((pick) => pick.cardId === id),
+    );
+    if (current?.cardId !== cardId && !nextDeck.includes(cardId)) {
+      nextDeck.push(cardId);
+    }
+    updateBuild(setStartDeck(next, nextDeck));
   };
 
   const toggleDeckCard = (card: Card) => {
@@ -482,6 +505,11 @@ export function StartingEditor({
       return;
     }
     const isSelected = selectedDeck.has(card.id);
+    const pickedSlot = picks.find((pick) => pick.cardId === card.id);
+    if (isSelected && pickedSlot) {
+      openStep(pickedSlot.forLevel);
+      return;
+    }
     if (!isSelected && handFull) {
       return;
     }
@@ -523,7 +551,9 @@ export function StartingEditor({
     const selected = build.startPicks.find(
       (pick) => pick.forLevel === forLevel,
     )?.cardId;
-    const options = pickOptions(build, character, forLevel);
+    const options = startingPickOptions(build, character, forLevel).sort(
+      compareCardLevelsDescending,
+    );
     if (selected && !options.some((card) => card.id === selected)) {
       const selectedCard = character.cards.find((card) => card.id === selected);
       if (selectedCard) {
@@ -537,7 +567,19 @@ export function StartingEditor({
     character.cards.filter(
       (card) => effectiveCardLevel(card) <= build.startLevel,
     ),
-  );
+  ).sort(compareCardLevelsDescending);
+  const nextPick = activePick
+    ? (picks.find(
+        (pick) =>
+          pick.forLevel < activePick.forLevel &&
+          !validPickLevels.has(pick.forLevel),
+      ) ??
+      picks.find(
+        (pick) =>
+          pick.forLevel !== activePick.forLevel &&
+          !validPickLevels.has(pick.forLevel),
+      ))
+    : undefined;
 
   return (
     <main
@@ -552,126 +594,66 @@ export function StartingEditor({
         Starting deck
       </h1>
 
-      {build.startPicks.length > 0 ? (
-        <section
-          className="editor-section"
-          aria-labelledby="starting-picks-heading"
-        >
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Prosperity picks</p>
-              <h2 id="starting-picks-heading">Starting picks</h2>
-            </div>
-            <span className="editor-count">
-              {build.startPicks.filter((pick) => pick.cardId !== null).length} /{" "}
-              {build.startPicks.length} picked
-            </span>
-          </div>
-          <div className="pick-list">
-            {build.startPicks.map((pick, index) => {
-              const selected = pick.cardId
-                ? character.cards.find((card) => card.id === pick.cardId)
-                : undefined;
-              const isActive = index === activeSlot;
-              return (
-                <article
-                  className={`pick-section${isActive ? " active" : ""}`}
-                  data-pick-level={pick.forLevel}
-                  key={pick.forLevel}
-                >
-                  <div className="pick-heading">
-                    <h3 tabIndex={-1}>Level {pick.forLevel} pick</h3>
-                    {selected && !isActive ? (
-                      <button
-                        type="button"
-                        onClick={() => setEditingSlot(index)}
-                        disabled={!canMutate}
-                      >
-                        Change pick
-                      </button>
-                    ) : null}
-                  </div>
-                  {selected && !isActive ? (
-                    <p className="selected-pick">
-                      Picked: <strong>{selected.name}</strong>
-                    </p>
-                  ) : !isActive ? (
-                    <p className="pick-waiting">
-                      Complete the earlier pick to see legal choices.
-                    </p>
-                  ) : (
-                    <CardGrid
-                      cards={pickCards(pick.forLevel)}
-                      actionLabel={(card) =>
-                        pick.cardId === card.id
-                          ? `Unpick ${card.name}`
-                          : `Pick ${card.name}`
-                      }
-                      stateLabel={(card) =>
-                        pick.cardId === card.id ? "Picked" : undefined
-                      }
-                      disabled={!canMutate}
-                      onAction={(card) => choosePick(pick.forLevel, card.id)}
-                    />
-                  )}
-                  {isActive &&
-                  pick.cardId === null &&
-                  pickCards(pick.forLevel).length === 0 ? (
-                    <p className="issue-message">
-                      No legal cards are available for this pick.
-                    </p>
-                  ) : null}
-                  {selected ? (
-                    <MotivationInput
-                      card={selected}
-                      kind="add"
-                      label={`Why add ${selected.name}?`}
-                      value={motivationText(selected.id, "add")}
-                      disabled={!canMutate}
-                      onChange={(text) =>
-                        updateMotivation(selected, "add", text, pick.forLevel)
-                      }
-                    />
-                  ) : null}
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
       <section
-        className="starting-hand"
-        aria-labelledby="starting-hand-heading"
+        className="starting-hand-status starting-setup-status"
+        aria-label="Starting setup"
       >
-        <h2 id="starting-hand-heading" className="visually-hidden">
-          Choose your deck
-        </h2>
-        <div className="starting-hand-status">
+        {picks.length > 0 ? (
+          <strong
+            className="level-up-counter"
+            data-tone={firstUnfinished ? "incomplete" : "complete"}
+            aria-live="polite"
+          >
+            {validPickLevels.size} / {picks.length} level-up cards picked
+          </strong>
+        ) : null}
+        {showHand ? (
           <ul
             className="issue-list"
             aria-label="Starting build status"
             aria-live="polite"
           >
-            {startState.issues.length > 0 ? (
-              startState.issues.map((issue, index) => (
-                <li
-                  className={`issue-${issue.severity}`}
-                  data-issue-code={issue.code}
-                  key={`${issue.code}-${issue.cardId ?? index}`}
-                >
-                  {issue.code === "DECK_TOO_SMALL" ||
-                  issue.code === "DECK_TOO_LARGE"
-                    ? `${selectedDeck.size} / ${character.handSize} cards`
-                    : issue.message}
-                </li>
-              ))
+            {startState.issues.some((issue) => issue.severity !== "invalid") ? (
+              startState.issues
+                .filter((issue) => issue.severity !== "invalid")
+                .map((issue, index) => (
+                  <li
+                    className={`issue-${issue.severity}`}
+                    data-issue-code={issue.code}
+                    key={`${issue.code}-${issue.cardId ?? index}`}
+                  >
+                    {issue.code === "DECK_TOO_SMALL" ||
+                    issue.code === "DECK_TOO_LARGE"
+                      ? `${selectedDeck.size} / ${character.handSize} cards`
+                      : issue.message}
+                  </li>
+                ))
             ) : (
               <li className="starting-hand-ready">
                 {selectedDeck.size} / {character.handSize} cards
               </li>
             )}
           </ul>
+        ) : null}
+        <div className="level-up-actions">
+          {!showHand ? (
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={
+                !canMutate ||
+                !activePick ||
+                !validPickLevels.has(activePick.forLevel)
+              }
+              onClick={() => openStep(nextPick?.forLevel ?? null)}
+            >
+              {nextPick
+                ? "Next pick"
+                : handVisited
+                  ? "Return to hand"
+                  : "Build starting hand"}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() =>
@@ -681,62 +663,254 @@ export function StartingEditor({
             Done
           </button>
         </div>
-        <div className="card-grid" role="list">
-          {eligibleCards.map((card) => {
-            const selected = selectedDeck.has(card.id);
-            const inPool = startPoolIds.has(card.id);
-            const excluded = !selected && (handFull || !inPool);
-            return (
-              <div
-                className="starting-deck-card"
-                data-excluded={excluded}
-                role="listitem"
-                key={card.id}
-              >
-                <CardTile
-                  card={card}
-                  actionLabel={
-                    !inPool
-                      ? `${card.name} is not in the starting pool`
-                      : selected
-                        ? `Remove ${card.name} from starting deck`
-                        : `Add ${card.name} to starting deck`
-                  }
-                  stateLabel={
-                    selected
-                      ? "In starting deck"
-                      : !inPool
-                        ? "Not in pool"
-                        : excluded
-                          ? "Excluded"
-                          : undefined
-                  }
-                  disabled={!canMutate || !inPool || (!selected && handFull)}
-                  onAction={() => toggleDeckCard(card)}
-                />
-                {selected ? (
-                  <MotivationInput
-                    card={card}
-                    kind="add"
-                    label={`Why include ${card.name}?`}
-                    value={motivationText(card.id, "add")}
-                    disabled={!canMutate}
-                    onChange={(text) => updateMotivation(card, "add", text)}
-                  />
-                ) : excluded ? (
-                  <MotivationInput
-                    card={card}
-                    kind="exclude"
-                    value={motivationText(card.id, "exclude")}
-                    disabled={!canMutate}
-                    onChange={(text) => updateMotivation(card, "exclude", text)}
-                  />
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
       </section>
+
+      {picks.length > 0 ? (
+        <>
+          <nav className="starting-stepper" aria-label="Starting setup steps">
+            {picks.map((pick, index) => (
+              <button
+                key={pick.forLevel}
+                type="button"
+                className="secondary-button"
+                aria-label={`Level ${pick.forLevel} pick${validPickLevels.has(pick.forLevel) ? ", complete" : pick.cardId ? ", needs attention" : ""}`}
+                aria-current={
+                  activeLevel === pick.forLevel ? "step" : undefined
+                }
+                disabled={
+                  !canMutate ||
+                  picks
+                    .slice(0, index)
+                    .some((earlier) => !validPickLevels.has(earlier.forLevel))
+                }
+                onClick={() => openStep(pick.forLevel)}
+              >
+                {pick.forLevel}
+                {validPickLevels.has(pick.forLevel)
+                  ? " ✓"
+                  : pick.cardId
+                    ? " !"
+                    : ""}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="secondary-button"
+              aria-label="Starting hand"
+              aria-current={showHand ? "step" : undefined}
+              disabled={!!firstUnfinished}
+              onClick={() => openStep(null)}
+            >
+              Hand
+            </button>
+          </nav>
+          <details className="starting-pick-summary" open={showHand}>
+            <summary>Level-up card picks</summary>
+            <ul>
+              {picks
+                .filter((pick) => pick.cardId)
+                .map((pick) => (
+                  <li key={pick.forLevel}>
+                    <span>
+                      Level {pick.forLevel}:{" "}
+                      <strong>
+                        {character.cards.find((card) => card.id === pick.cardId)
+                          ?.name ?? pick.cardId}
+                      </strong>
+                      {!validPickLevels.has(pick.forLevel)
+                        ? " — choose a replacement"
+                        : ""}
+                    </span>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={!canMutate}
+                      onClick={() => openStep(pick.forLevel)}
+                    >
+                      Change level {pick.forLevel} pick
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          </details>
+          {activePick ? (
+            <section
+              className="editor-section"
+              data-pick-level={activePick.forLevel}
+              aria-labelledby="starting-picks-heading"
+            >
+              <h2 id="starting-picks-heading" ref={stepHeading} tabIndex={-1}>
+                Level {activePick.forLevel} pick
+              </h2>
+              <p>Choose one card of level {activePick.forLevel} or lower.</p>
+              {activePick.cardId &&
+              !validPickLevels.has(activePick.forLevel) ? (
+                <p className="issue-message" role="alert">
+                  This pick is no longer available. Choose a replacement; your
+                  other choices are preserved.
+                </p>
+              ) : null}
+              {Array.from(
+                new Set(
+                  pickCards(activePick.forLevel).map((card) =>
+                    effectiveCardLevel(card),
+                  ),
+                ),
+              ).map((level) => (
+                <section
+                  className="starting-candidate-group"
+                  key={level}
+                  aria-label={`Level ${level} cards`}
+                >
+                  <h3>Level {level} cards</h3>
+                  <CandidateGrid
+                    cards={pickCards(activePick.forLevel).filter(
+                      (card) => effectiveCardLevel(card) === level,
+                    )}
+                    level={activePick.forLevel}
+                    selection="pick"
+                    selectedPick={activePick.cardId}
+                    canMutate={canMutate}
+                    motivationText={motivationText}
+                    onPick={(card) => choosePick(activePick.forLevel, card.id)}
+                    onMotivation={(card, kind, text) =>
+                      updateMotivation(card, kind, text, activePick.forLevel)
+                    }
+                  />
+                </section>
+              ))}
+              {pickCards(activePick.forLevel).length === 0 ? (
+                <p className="issue-message">
+                  No legal cards are available for this pick.
+                </p>
+              ) : null}
+              <details className="starting-unavailable">
+                <summary>Show unavailable cards</summary>
+                <ul>
+                  {character.cards
+                    .filter(
+                      (card) =>
+                        effectiveCardLevel(card) > 1 &&
+                        effectiveCardLevel(card) <= build.startLevel &&
+                        !pickCards(activePick.forLevel).some(
+                          (option) => option.id === card.id,
+                        ),
+                    )
+                    .sort(compareCardLevelsDescending)
+                    .map((card) => (
+                      <li key={card.id}>
+                        {card.name} · Level {card.level} —{" "}
+                        {picks.some(
+                          (pick) =>
+                            pick.forLevel > activePick.forLevel &&
+                            pick.cardId === card.id,
+                        )
+                          ? "Already picked"
+                          : "No remaining pick can select this card"}
+                      </li>
+                    ))}
+                </ul>
+              </details>
+            </section>
+          ) : null}
+        </>
+      ) : null}
+
+      {showHand ? (
+        <section
+          className="starting-hand"
+          aria-labelledby="starting-hand-heading"
+        >
+          <h2
+            id="starting-hand-heading"
+            ref={showHand ? stepHeading : undefined}
+            tabIndex={-1}
+            className={picks.length ? undefined : "visually-hidden"}
+          >
+            {picks.length
+              ? `Complement your picks · Level ${build.startLevel} hand`
+              : "Choose your deck"}
+          </h2>
+          {picks.length ? (
+            <p>
+              Your picked cards stay in the hand. Click one to change its pick.
+              Add or remove complementary level 1 and X cards here.
+            </p>
+          ) : null}
+          <RepairIssues
+            build={build}
+            character={character}
+            state={{
+              ...startState,
+              issues: startState.issues.filter(
+                (issue) => issue.severity === "invalid",
+              ),
+            }}
+          />
+          <div className="card-grid" role="list">
+            {eligibleCards.map((card) => {
+              const selected = selectedDeck.has(card.id);
+              const pickedSlot = picks.find((pick) => pick.cardId === card.id);
+              const inPool = startPoolIds.has(card.id);
+              const excluded = !selected && (handFull || !inPool);
+              return (
+                <div
+                  className="starting-deck-card"
+                  data-excluded={excluded}
+                  role="listitem"
+                  key={card.id}
+                >
+                  <CardTile
+                    card={card}
+                    actionLabel={
+                      !inPool
+                        ? `${card.name} is not in the starting pool`
+                        : selected && pickedSlot
+                          ? `Change level ${pickedSlot.forLevel} pick for ${card.name}`
+                          : selected
+                            ? `Remove ${card.name} from starting deck`
+                            : `Add ${card.name} to starting deck`
+                    }
+                    stateLabel={
+                      selected && pickedSlot
+                        ? "Picked · Change"
+                        : selected
+                          ? "In starting deck"
+                          : !inPool
+                            ? "Not in pool"
+                            : excluded
+                              ? "Excluded"
+                              : undefined
+                    }
+                    disabled={!canMutate || !inPool || (!selected && handFull)}
+                    onAction={() => toggleDeckCard(card)}
+                  />
+                  {selected ? (
+                    <MotivationInput
+                      card={card}
+                      kind="add"
+                      label={`Why include ${card.name}?`}
+                      value={motivationText(card.id, "add")}
+                      disabled={!canMutate}
+                      onChange={(text) => updateMotivation(card, "add", text)}
+                    />
+                  ) : excluded ? (
+                    <MotivationInput
+                      card={card}
+                      kind="exclude"
+                      value={motivationText(card.id, "exclude")}
+                      disabled={!canMutate}
+                      onChange={(text) =>
+                        updateMotivation(card, "exclude", text)
+                      }
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

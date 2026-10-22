@@ -775,6 +775,28 @@ export function pickOptions(
   ).filter((card) => cards.has(card.id));
 }
 
+/** Starting setup works downward: higher slots reserve cards, lower slots do not. */
+export function startingPickOptions(
+  build: Build,
+  character: Character,
+  forLevel: number,
+): Card[] {
+  if (!build.startPicks.some((pick) => pick.forLevel === forLevel)) {
+    return [];
+  }
+  const reserved = new Set(
+    build.startPicks
+      .filter((pick) => pick.forLevel > forLevel)
+      .map((pick) => pick.cardId),
+  );
+  return sortedCards(character.cards).filter(
+    (card) =>
+      cardLevel(card) > 1 &&
+      cardLevel(card) <= forLevel &&
+      !reserved.has(card.id),
+  );
+}
+
 export function addOptions(
   build: Build,
   character: Character,

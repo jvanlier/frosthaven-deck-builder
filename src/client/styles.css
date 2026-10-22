@@ -627,6 +627,7 @@ textarea {
 }
 @media (min-width: 521px) {
   .deck-view,
+  .starting-editor,
   .starting-hand,
   .level-up-editor {
     display: grid;
@@ -634,6 +635,7 @@ textarea {
     column-gap: 14px;
   }
   .deck-view > *,
+  .starting-editor > *,
   .starting-hand > *,
   .level-up-editor > * {
     grid-column: 1 / -1;
@@ -784,7 +786,7 @@ textarea {
   overflow: hidden;
   clip-path: inset(50%);
 }
-.card-tile[data-state="Picked"] img,
+.card-tile[data-state^="Picked"] img,
 .card-tile[data-state="Added"] img,
 .card-tile[data-state="In starting deck"] img {
   outline: 3px solid var(--ice);
@@ -793,7 +795,7 @@ textarea {
     0 0 0 7px #38bdf833,
     0 0 40px #38bdf855;
 }
-.card-tile[data-state="Picked"] .card-state,
+.card-tile[data-state^="Picked"] .card-state,
 .card-tile[data-state="Added"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
@@ -808,13 +810,13 @@ textarea {
   border-radius: 99px;
   font-size: 12px;
 }
-.card-tile[data-state="Picked"] .card-state,
+.card-tile[data-state^="Picked"] .card-state,
 .card-tile[data-state="Added"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state {
   color: #03111f;
   background: var(--ice);
 }
-.card-tile[data-state="Picked"] .card-state::before,
+.card-tile[data-state^="Picked"] .card-state::before,
 .card-tile[data-state="Added"] .card-state::before,
 .card-tile[data-state="In starting deck"] .card-state::before {
   content: "✓ ";
@@ -927,13 +929,81 @@ textarea {
 .starting-editor {
   padding-top: var(--status-bar-gap);
 }
+.starting-setup-status .level-up-counter {
+  white-space: normal;
+}
+.starting-setup-status .level-up-actions button {
+  min-height: 44px;
+  max-width: 130px;
+  padding: 8px;
+  font-size: 13px;
+}
+.starting-editor h2[tabindex] {
+  width: fit-content;
+}
+.starting-editor [data-pick-level] {
+  margin-top: 12px;
+  padding-top: 12px;
+}
+.starting-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 16px;
+}
+.starting-stepper button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+.starting-stepper [aria-current="step"] {
+  color: var(--text);
+  outline: 2px solid var(--ice);
+  outline-offset: 2px;
+}
+.starting-pick-summary,
+.starting-unavailable {
+  margin-block: 16px;
+}
+.starting-pick-summary {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.starting-pick-summary summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.starting-pick-summary ul {
+  margin: 12px 0 0 8px;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--line);
+  list-style: none;
+}
+.starting-pick-summary li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.starting-candidate-group {
+  margin-block: 20px;
+}
+.starting-candidate-group h3 {
+  margin-bottom: 10px;
+}
 .starting-hand-status {
   margin-top: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 .starting-hand-status .issue-list {
-  flex: 1;
-  min-width: 0;
+  flex: 1 0 auto;
+  min-width: min-content;
   align-content: center;
   margin: 0;
 }
