@@ -144,6 +144,176 @@ const invalidDeckFixtureData = {
   ],
 };
 
+for (const { name, startLevel, latestLevel } of [
+  { name: "Testlvl1", startLevel: 1, latestLevel: 5 },
+  { name: "demo", startLevel: 1, latestLevel: 3 },
+  { name: "Higher starting level", startLevel: 4, latestLevel: 6 },
+  { name: "New level one", startLevel: 1, latestLevel: 1 },
+  { name: "New level four", startLevel: 4, latestLevel: 4 },
+]) {
+  test(`opens ${name} at its incomplete starting level`, async ({ page }) => {
+    await page.route("**/api/data", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ...fixtureData,
+          builds: [
+            {
+              ...fixtureData.builds[0],
+              name,
+              startLevel,
+              startPicks: Array.from(
+                { length: startLevel - 1 },
+                (_, index) => ({
+                  forLevel: index + 2,
+                  cardId: null,
+                }),
+              ),
+              levelUps: Array.from(
+                { length: latestLevel - startLevel },
+                (_, index) => ({
+                  level: startLevel + index + 1,
+                  pick: null,
+                  added: [],
+                  dropped: [],
+                }),
+              ),
+            },
+          ],
+        }),
+      }),
+    );
+    await page.goto("/c/SD");
+    await page
+      .getByRole("link", {
+        name: `${name} Level: start ${startLevel} · latest ${latestLevel}`,
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL(
+      `/c/SD/b/${fixtureBuildId}/l/${startLevel}${latestLevel === startLevel ? "/start" : ""}`,
+    );
+  });
+}
+
+for (const firstInvalidLevel of [null, 2, 3]) {
+  test(`opens a build at ${firstInvalidLevel === null ? "the latest valid level" : `the first issue at level ${firstInvalidLevel}`}`, async ({
+    page,
+  }) => {
+    const data = structuredClone(overviewFixtureData);
+    if (firstInvalidLevel !== null) {
+      for (const levelUp of data.builds[0]!.levelUps) {
+        if (levelUp.level >= firstInvalidLevel) {
+          levelUp.dropped = [];
+        }
+      }
+    }
+    await page.route("**/api/data", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(data),
+      }),
+    );
+    await page.goto("/c/SD");
+    const attention = page.locator(".build-attention");
+    if (firstInvalidLevel === null) {
+      await expect(
+        page.getByRole("link", {
+          name: "Freeze control Level: start 1 · latest 3",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(attention).toHaveCount(0);
+    } else {
+      await expect(attention).toHaveText("Needs attention");
+    }
+    await page
+      .getByRole("link", {
+        name: "Freeze control Level: start 1 · latest 3",
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL(
+      `/c/SD/b/${fixtureBuildId}/l/${firstInvalidLevel ?? 3}`,
+    );
+  });
+}
+
+for (const firstInvalidLevel of [1, 2, null]) {
+  test(`shows the lowest earlier level needing repair (${firstInvalidLevel})`, async ({
+    page,
+  }) => {
+    const data = structuredClone(overviewFixtureData);
+    if (firstInvalidLevel === 1) {
+      data.builds[0]!.startDeck = [];
+    } else if (firstInvalidLevel === 2) {
+      data.builds[0]!.levelUps[0]!.dropped = [];
+    }
+    await page.route("**/api/data", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(data),
+      }),
+    );
+    await page.goto(`/c/SD/b/${fixtureBuildId}/l/3`);
+    await expect(
+      page.getByRole("heading", { name: "Deck: Freeze control" }),
+    ).toBeAttached();
+    const badge = page
+      .locator(".deck-issues")
+      .getByText(/^Fix level \d+ first$/);
+    if (firstInvalidLevel === null) {
+      await expect(badge).toHaveCount(0);
+    } else {
+      await expect(badge).toHaveText(`Fix level ${firstInvalidLevel} first`);
+      await page.goto(`/c/SD/b/${fixtureBuildId}/l/${firstInvalidLevel}`);
+      await expect(
+        page.getByRole("heading", { name: "Deck: Freeze control" }),
+      ).toBeAttached();
+      await expect(badge).toHaveCount(0);
+    }
+  });
+}
+
+for (const valid of [true, false]) {
+  test(`opens a ${valid ? "valid" : "invalid"} starting-only deck in ${valid ? "view" : "the editor"}`, async ({
+    page,
+  }) => {
+    const build = deckFixtureData.builds[0]!;
+    await page.route("**/api/data", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ...deckFixtureData,
+          builds: [
+            {
+              ...build,
+              levelUps: [],
+              startDeck: valid
+                ? build.startDeck
+                : [...build.startDeck.slice(1), "unknown-card"],
+            },
+          ],
+        }),
+      }),
+    );
+    await page.goto("/c/SD");
+    await page
+      .getByRole("link", {
+        name: "Freeze control Level: start 1 · latest 1",
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL(
+      `/c/SD/b/${fixtureBuildId}/l/1${valid ? "" : "/start"}`,
+    );
+  });
+}
+
 for (const view of ["starting", "deck"] as const) {
   test(`keeps ${view} issues below the header while scrolling`, async ({
     page,
@@ -1629,7 +1799,9 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
     });
 });
 
-test("focuses the selected starting-pick repair", async ({ page }) => {
+test("keeps starting-pick warnings without redundant edit buttons", async ({
+  page,
+}) => {
   const persisted = structuredClone(startThreeFixtureData) as AppData;
   persisted.builds[0]!.startPicks = [
     { forLevel: 2, cardId: null },
@@ -1648,15 +1820,10 @@ test("focuses the selected starting-pick repair", async ({ page }) => {
   );
   await expect(
     page.getByRole("button", { name: "Edit starting choices" }),
-  ).toHaveCount(2);
-  await page
-    .getByRole("button", { name: "Edit starting choices" })
-    .nth(1)
-    .click();
-  await expect(page).toHaveURL(/focus=3$/);
-  await expect(
-    page.locator('[data-pick-level="3"] .card-action').first(),
-  ).toBeFocused();
+  ).toHaveCount(0);
+  await expect(page.locator('[data-issue-code="MISSING_PICK"]')).toHaveCount(2);
+  await page.getByRole("link", { name: "Edit starting deck" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${persisted.builds[0]!.id}/l/3/start`);
 });
 
 test("restores a picked card when its stored add is missing", async ({

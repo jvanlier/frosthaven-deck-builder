@@ -118,42 +118,52 @@ export function BuildList() {
         </section>
       ) : (
         <ul className="build-list">
-          {builds.map((build) => (
-            <li key={build.id}>
-              <div className="build-list-item">
-                <Link to={startEditorPath(build)}>
-                  <strong>{build.name}</strong>
-                  <span>Starting level {build.startLevel}</span>
-                </Link>
-                <div
-                  className="build-actions"
-                  aria-label={`${build.name} actions`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => openRename(build)}
-                    disabled={!canMutate}
+          {builds.map((build) => {
+            const levels = replayBuild(build, character).levels;
+            const firstIssue = levels.find((state) => state.issues.length > 0);
+            return (
+              <li key={build.id}>
+                <div className="build-list-item">
+                  <Link to={buildEntryPath(build, levels)}>
+                    <strong>{build.name}</strong>
+                    <span>
+                      Level: start {build.startLevel} · latest{" "}
+                      {levels.at(-1)!.level}
+                    </span>
+                  </Link>
+                  {firstIssue ? (
+                    <span className="build-attention">Needs attention</span>
+                  ) : null}
+                  <div
+                    className="build-actions"
+                    aria-label={`${build.name} actions`}
                   >
-                    Rename
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openCopy(build)}
-                    disabled={!canMutate}
-                  >
-                    Copy
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBuildToDelete(build)}
-                    disabled={!canMutate}
-                  >
-                    Delete
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => openRename(build)}
+                      disabled={!canMutate}
+                    >
+                      Rename
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openCopy(build)}
+                      disabled={!canMutate}
+                    >
+                      Copy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBuildToDelete(build)}
+                      disabled={!canMutate}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
       <NameDialog
@@ -929,6 +939,21 @@ function UnavailableStartingView() {
         </Link>
       </section>
     </main>
+  );
+}
+
+function buildEntryPath(
+  build: Build,
+  levels: ReturnType<typeof replayBuild>["levels"],
+): string {
+  const firstIssue = levels.find((state) => state.issues.length > 0);
+  if (build.levelUps.length === 0 && firstIssue) {
+    return startEditorPath(build);
+  }
+  return deckPath(
+    build.characterId,
+    build.id,
+    firstIssue?.level ?? levels.at(-1)!.level,
   );
 }
 

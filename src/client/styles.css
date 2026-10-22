@@ -467,6 +467,11 @@ p {
 .build-list span {
   color: var(--muted);
 }
+.build-list .build-attention {
+  color: var(--warn);
+  font-size: 13px;
+  font-weight: 600;
+}
 .build-actions button {
   font-size: 13px;
 }

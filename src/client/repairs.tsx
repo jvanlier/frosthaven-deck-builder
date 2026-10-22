@@ -6,7 +6,11 @@ import {
 } from "../shared/builds.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
-import type { RuleIssue, RuleLevelState } from "../shared/rules/index.js";
+import {
+  replayBuild,
+  type RuleIssue,
+  type RuleLevelState,
+} from "../shared/rules/index.js";
 import { useAppData } from "./app-data";
 import { startEditorPath } from "./build-editor";
 
@@ -22,7 +26,13 @@ export function RepairIssues({
   const { canMutate, updateData } = useAppData();
   const navigate = useNavigate();
 
-  if (state.issues.length === 0) {
+  const firstIssue = replayBuild(build, character).levels.find(
+    (level) => level.issues.length > 0,
+  );
+  const earlierIssue =
+    firstIssue && firstIssue.level < state.level ? firstIssue : undefined;
+
+  if (state.issues.length === 0 && !earlierIssue) {
     return null;
   }
 
@@ -84,6 +94,11 @@ export function RepairIssues({
         Needs attention
       </h2>
       <ul className="issue-list repair-list">
+        {earlierIssue ? (
+          <li className="issue-incomplete">
+            <span>Fix level {earlierIssue.level} first</span>
+          </li>
+        ) : null}
         {state.issues.map((issue, index) => {
           const cardName = issue.cardId
             ? (character.cards.find((card) => card.id === issue.cardId)?.name ??
@@ -110,10 +125,8 @@ export function RepairIssues({
                   onClick={() => {
                     if (action.kind === "remove") {
                       removeOperation(issue);
-                    } else if (action.kind === "restore") {
-                      restorePick(issue);
                     } else {
-                      openEditor(issue);
+                      restorePick(issue);
                     }
                   }}
                 >
@@ -142,7 +155,7 @@ function canRemoveOperation(operation: BuildOperationIdentity): boolean {
 function repairAction(
   issue: RuleIssue,
   cardName: string | undefined,
-): { kind: "remove" | "restore" | "edit"; label: string } | null {
+): { kind: "remove" | "restore"; label: string } | null {
   if (issue.code === "PICK_NOT_ADDED" && issue.cardId) {
     return { kind: "restore", label: `Restore ${cardName} to deck` };
   }
@@ -159,12 +172,6 @@ function repairAction(
               ? "pick"
               : "added";
     return { kind: "remove", label: `Remove ${prefix} card ${subject}` };
-  }
-  if (
-    issue.operation?.kind === "start-pick" ||
-    issue.operation?.kind === "start-deck"
-  ) {
-    return { kind: "edit", label: "Edit starting choices" };
   }
   return null;
 }
