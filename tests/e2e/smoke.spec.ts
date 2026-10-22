@@ -1611,8 +1611,38 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
   ]);
   await expect(page.locator(".deck-intro .status-badge")).toHaveCount(0);
   await expect(page.getByText("Level 2 changes")).toBeVisible();
-  await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
-  await expect(page.getByText("Dropped: Whiteout")).toBeVisible();
+  const choices = page.getByRole("region", { name: "Level 2 changes" });
+  await expect(
+    choices.getByRole("heading", { name: "Birds in a Tempest" }),
+  ).toBeVisible();
+  await expect(
+    choices.getByRole("heading", { name: "Whiteout" }),
+  ).toBeVisible();
+  await expect(choices.locator(".change-level-badge")).toHaveText([
+    "Level 2",
+    "Level 2",
+  ]);
+  await expect(choices.getByText("Picked", { exact: true })).toBeVisible();
+  await expect(choices.getByText("Dropped", { exact: true })).toBeVisible();
+  const droppedChoice = choices.getByRole("listitem").filter({
+    has: page.getByRole("heading", { name: "Whiteout" }),
+  });
+  await expect(droppedChoice).toHaveAttribute("data-kind", "drop");
+  await expect(droppedChoice.getByText("Drop motivation")).toBeVisible();
+  await expect(droppedChoice.locator(".change-kind")).toHaveCSS(
+    "color",
+    "rgb(255, 255, 255)",
+  );
+  await expect(droppedChoice.locator(".change-kind")).toHaveCSS(
+    "background-color",
+    "rgb(183, 57, 57)",
+  );
+  await expect(choices.locator('[data-kind="add"] .change-kind')).toHaveCSS(
+    "background-color",
+    "rgb(125, 211, 252)",
+  );
+  await expect(choices.getByText("The best level-up pick.")).toHaveCount(1);
+  await expect(choices.getByRole("textbox")).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Open Whiteout details" }),
   ).toBeVisible();
@@ -2955,20 +2985,18 @@ test("edits motivations and guidance from the notes and card detail views", asyn
     .toBe(false);
 
   await page.getByRole("link", { name: "Back to level 2 deck" }).click();
-  const deckChangeMotivation = page.getByLabel(
-    "Motivation for Birds in a Tempest",
-  );
-  await deckChangeMotivation.fill("Deck change reason");
-  await expect
-    .poll(
-      async () =>
-        persisted.builds[0]?.motivations.find(
-          (motivation) =>
-            motivation.cardId === "birds-in-a-tempest" &&
-            motivation.kind === "add",
-        )?.text,
-    )
-    .toBe("Deck change reason");
+  const recordedChoices = page.getByRole("region", {
+    name: "Level 2 changes",
+  });
+  await expect(recordedChoices.getByRole("textbox")).toHaveCount(0);
+  await expect(
+    recordedChoices.getByText(
+      "<script>alert(1)</script>\nPrefer the top action.",
+    ),
+  ).toBeVisible();
+  await expect(
+    recordedChoices.getByRole("button", { name: "Enlarge Birds in a Tempest" }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Open Birds in a Tempest details" })
     .click();

@@ -439,7 +439,7 @@ function ChangesSection({
   const changes = [
     ...(state.level === build.startLevel
       ? state.applied.startingPicks.map((pick) => ({
-          label: `Level ${pick.forLevel} pick`,
+          label: "Picked",
           cardId: pick.cardId,
           kind: "add" as const,
           forLevel: pick.forLevel,
@@ -475,15 +475,14 @@ function ChangesSection({
       aria-labelledby="changes-heading"
     >
       <div className="section-heading">
-        <div>
-          <p className="eyebrow">Recorded choices</p>
-          <h2 id="changes-heading">
-            {state.level === build.startLevel
-              ? "Starting choices"
-              : `Level ${state.level} changes`}
-          </h2>
-        </div>
-        <span className="editor-count">{changes.length} changes</span>
+        <h2 id="changes-heading">
+          {state.level === build.startLevel
+            ? "Starting choices"
+            : `Level ${state.level} changes`}
+        </h2>
+        <span className="editor-count">
+          {changes.length} {changes.length === 1 ? "choice" : "choices"}
+        </span>
       </div>
       {changes.length > 0 ? (
         <ul className="change-list">
@@ -504,9 +503,9 @@ function ChangesSection({
                 state={state}
                 card={card}
                 label={change.label}
-                motivation={motivation}
                 kind={change.kind}
-                forLevel={change.forLevel}
+                level={change.forLevel ?? state.level}
+                motivation={motivation}
               />
             );
           })}
@@ -525,19 +524,18 @@ function ChangeListItem({
   state,
   card,
   label,
-  motivation,
   kind,
-  forLevel,
+  level,
+  motivation,
 }: {
   build: Build;
   state: RuleLevelState;
   card: Card;
   label: string;
-  motivation: Motivation | undefined;
   kind: "add" | "drop";
-  forLevel?: number;
+  level: number;
+  motivation: Motivation | undefined;
 }) {
-  const { canMutate, updateData } = useAppData();
   const [enlarged, setEnlarged] = useState(false);
   const enlargeButtonRef = useRef<HTMLButtonElement>(null);
   const detailPath = cardDetailPath(
@@ -551,25 +549,8 @@ function ChangeListItem({
     requestAnimationFrame(() => enlargeButtonRef.current?.focus());
   };
 
-  function updateMotivation(text: string): void {
-    if (!canMutate) {
-      return;
-    }
-    updateData((current) =>
-      updateBuildData(current, build.id, (currentBuild) =>
-        upsertMotivation(currentBuild, {
-          kind,
-          cardId: card.id,
-          text,
-          level: state.level,
-          forLevel,
-        }),
-      ),
-    );
-  }
-
   return (
-    <li>
+    <li data-kind={kind}>
       <div className="change-card-media">
         <Link
           className="change-card-link"
@@ -592,14 +573,21 @@ function ChangeListItem({
           <span aria-hidden="true">⌕</span> Enlarge
         </button>
       </div>
-      <div>
-        <Link className="change-card-name" to={detailPath}>
-          <strong>
-            {label}: {card.name}
-          </strong>
-        </Link>
+      <div className="change-card-copy">
+        <div className="change-card-meta">
+          <span className="change-level-badge">Level {level}</span>
+          <span className="change-kind">{label}</span>
+        </div>
+        <h3>
+          <Link className="change-card-name" to={detailPath}>
+            {card.name}
+          </Link>
+        </h3>
         {motivation ? (
           <>
+            {kind === "drop" && (
+              <span className="change-motivation-label">Drop motivation</span>
+            )}
             <p className="plain-text">{motivation.text}</p>
             <time dateTime={motivation.updatedAt}>
               Updated {formatNoteTimestamp(motivation.updatedAt)}
@@ -608,14 +596,6 @@ function ChangeListItem({
         ) : (
           <p className="change-note-empty">No motivation recorded.</p>
         )}
-        <MotivationInput
-          card={card}
-          kind={kind}
-          label={`Motivation for ${card.name}`}
-          value={motivation?.text ?? ""}
-          disabled={!canMutate}
-          onChange={updateMotivation}
-        />
       </div>
       <CardDialog card={card} open={enlarged} onClose={closeDialog} />
     </li>
