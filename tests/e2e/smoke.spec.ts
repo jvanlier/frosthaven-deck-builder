@@ -2687,11 +2687,24 @@ test("copies a higher starting level with its pick slots intact", async ({
   await expect(
     page.getByRole("heading", { name: "Starting deck: Higher copy" }),
   ).toBeVisible();
-  await expect(page.locator(".pick-section")).toHaveCount(2);
-  await expect(page.getByText("Picked: Birds in a Tempest")).toBeVisible();
   await expect(
-    page.locator(".pick-section").nth(1).getByRole("status"),
-  ).toHaveText("Picked");
+    page
+      .getByRole("navigation", { name: "Starting setup steps" })
+      .getByRole("button"),
+  ).toHaveCount(3);
+  await expect(
+    page
+      .locator(".starting-pick-summary")
+      .getByText("Birds in a Tempest", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator(".starting-pick-summary")
+      .getByText("Tornado", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Complement your picks · Level 3 hand" }),
+  ).toBeVisible();
   await expect
     .poll(async () => {
       const build = persisted.builds.find(
@@ -2739,7 +2752,7 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
   await expect(page).toHaveURL(/\/c\/SD$/);
 });
 
-test("preserves a later starting pick while surfacing an earlier conflict", async ({
+test("preserves a lower starting pick while surfacing a higher-slot conflict", async ({
   page,
 }) => {
   let persisted = startThreeFixtureData;
@@ -2762,21 +2775,34 @@ test("preserves a later starting pick while surfacing an earlier conflict", asyn
   });
 
   await page.goto(`/c/SD/b/${startThreeFixtureData.builds[0].id}/l/3/start`);
+  await page.getByRole("button", { name: "Change level 3 pick" }).click();
   await page
-    .locator(".pick-section")
-    .first()
-    .getByRole("button", { name: "Change pick" })
+    .getByRole("button", { name: "Pick Birds in a Tempest", exact: true })
     .click();
-  await page.getByRole("button", { name: "Pick Tornado" }).click();
-  await expect(page.locator(".pick-section").nth(1)).toContainText("Picked");
-  await expect(page.locator(".pick-section").nth(1)).toContainText("Tornado");
-  await expect(page.getByText("is already in the pool")).toBeVisible();
+  await page.getByRole("button", { name: "Next pick" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Level 2 pick" }),
+  ).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText("no longer available");
+  await expect(
+    page.getByRole("button", { name: "Return to hand", exact: true }),
+  ).toBeDisabled();
   await expect
     .poll(async () => {
       const build = persisted.builds[0];
       return [build?.startPicks[0]?.cardId, build?.startPicks[1]?.cardId];
     })
-    .toEqual(["tornado", "tornado"]);
+    .toEqual(["birds-in-a-tempest", "birds-in-a-tempest"]);
+  await page.getByRole("button", { name: "Pick Tornado", exact: true }).click();
+  await expect
+    .poll(() => persisted.builds[0]!.startDeck)
+    .toEqual(expect.arrayContaining(["birds-in-a-tempest", "tornado"]));
+  await page
+    .getByRole("button", { name: "Return to hand", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Complement your picks · Level 3 hand" }),
+  ).toBeVisible();
 });
 
 test("offers sequential legal picks for a higher starting level", async ({
@@ -2812,40 +2838,48 @@ test("offers sequential legal picks for a higher starting level", async ({
   await dialog.getByRole("button", { name: "Create build" }).click();
 
   await expect(
-    page.getByRole("heading", { name: "Level 2 pick" }),
+    page.getByRole("heading", { name: "Level 3 pick" }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Pick Birds in a Tempest" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Pick Tornado" }),
+    page.getByRole("button", { name: "Pick Cold Snap" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Cold Snap is not in the starting pool" }),
-  ).toBeDisabled();
-  await expect(page.getByLabel("Why not Cold Snap?")).toBeVisible();
-  await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  await expect(page.locator(".starting-hand")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Pick Cold Snap", exact: true })
+    .click();
   await expect
     .poll(async () =>
       persisted.builds[0]?.startPicks.map((pick) => pick.cardId),
     )
-    .toEqual(["birds-in-a-tempest", null]);
+    .toEqual([null, "cold-snap"]);
   await page.reload();
-  await expect(page.locator(".pick-section").first()).toContainText(
-    "Picked: Birds in a Tempest",
-  );
   await expect(
-    page.getByRole("heading", { name: "Level 3 pick" }),
+    page.getByRole("heading", { name: "Level 2 pick" }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Pick Tornado" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Pick Cold Snap" }),
+    page.getByRole("button", { name: "Pick Polar Vortex" }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Pick Birds in a Tempest", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Build starting hand", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Change level 3 pick for Cold Snap" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Pick Polar Vortex" }),
+    page.getByRole("button", {
+      name: "Change level 2 pick for Birds in a Tempest",
+    }),
   ).toBeVisible();
+  await expect(page.getByLabel("Why not Polar Vortex?")).toBeVisible();
 });
 
 test("edits motivations and guidance from the notes and card detail views", async ({
@@ -3123,7 +3157,11 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await page.reload();
   await expect(note).toHaveValue("Not enough room in this hand.");
   await expect(unpickedNote).toHaveValue("I prefer the other level-two card.");
+  await page.getByRole("button", { name: "Change level 2 pick" }).click();
   await page.getByRole("button", { name: "Pick Tornado", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Return to hand", exact: true })
+    .click();
   await expect(
     page.getByRole("button", {
       name: "Birds in a Tempest is not in the starting pool",
@@ -3133,12 +3171,9 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
     .getByRole("button", { name: "Remove Whiteout from starting deck" })
     .click();
   await expect(
-    page.getByRole("button", { name: "Add Tornado to starting deck" }),
+    page.getByRole("button", { name: "Change level 2 pick for Tornado" }),
   ).toBeEnabled();
   await expect(unpickedNote).toHaveCount(0);
-  await page
-    .getByRole("button", { name: "Add Tornado to starting deck" })
-    .click();
   await expect(page.getByLabel("Why include Tornado?")).toHaveValue("");
   await expect.poll(() => persisted.builds[0]!.startDeck).toContain("tornado");
   expect(persisted.builds[0]!.motivations).toContainEqual(
@@ -3183,7 +3218,9 @@ for (const startLevel of [1, 3]) {
     const note = page.getByLabel("Why include Cold Therapy?");
     await expect(note).toBeVisible();
     await expect(
-      page.locator(".starting-deck-card > .motivation-input").first(),
+      page
+        .locator('.starting-deck-card > .motivation-input[data-kind="add"]')
+        .first(),
     ).toHaveCSS("background-color", "rgba(11, 18, 32, 0.75)");
     await expect(note).toHaveCSS("background-color", "rgba(3, 17, 31, 0.35)");
     const cardBox = (await page
@@ -3287,7 +3324,7 @@ test("edits starting exclusion and initial-pick motivations", async ({
       }),
     );
 
-  await page.getByRole("button", { name: "Change pick" }).first().click();
+  await page.getByRole("button", { name: "Change level 2 pick" }).click();
   await expect(page.getByLabel("Why add Birds in a Tempest?")).toBeVisible();
   await page.getByLabel("Why add Birds in a Tempest?").fill("Slot two reason");
   await expect
@@ -3301,6 +3338,9 @@ test("edits starting exclusion and initial-pick motivations", async ({
       }),
     );
   await page
+    .getByRole("button", { name: "Return to hand", exact: true })
+    .click();
+  await page
     .getByRole("button", { name: "Remove Blizzard from starting deck" })
     .click();
   await page
@@ -3309,6 +3349,9 @@ test("edits starting exclusion and initial-pick motivations", async ({
   const includedPick = page.getByLabel("Why include Birds in a Tempest?");
   await expect(includedPick).toHaveValue("Slot two reason");
   await includedPick.fill("Shared pick and inclusion reason");
+  await page
+    .getByRole("button", { name: "Change level 2 pick", exact: true })
+    .click();
   await expect(page.getByLabel("Why add Birds in a Tempest?")).toHaveValue(
     "Shared pick and inclusion reason",
   );
