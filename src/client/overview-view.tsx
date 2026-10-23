@@ -1,6 +1,8 @@
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router-dom";
 import { useAppData } from "./app-data";
-import { deckPath } from "./deck-view";
+import { cardDetailPath, deckPath } from "./deck-view";
 import {
   buildOverviewModel,
   type OverviewCell,
@@ -8,8 +10,8 @@ import {
   type OverviewLevel,
 } from "./overview";
 import { characters } from "../shared/data/characters/index.js";
-import type { Character } from "../shared/character.js";
-import type { Build, Motivation } from "../shared/schema/index.js";
+import type { Card, Character } from "../shared/character.js";
+import type { Build, CardNote } from "../shared/schema/index.js";
 
 const character = characters[0]!;
 
@@ -83,7 +85,9 @@ export function OverviewView({
                 key={group.level}
                 group={group}
                 levels={model.levels}
-                build={build}
+                detailPath={(cardId) =>
+                  cardDetailPath(character.id, build.id, cardId)
+                }
               />
             ))}
             <OverviewSummaryRow levels={model.levels} character={character} />
@@ -97,11 +101,11 @@ export function OverviewView({
 function OverviewGroupRows({
   group,
   levels,
-  build,
+  detailPath,
 }: {
   group: OverviewGroup;
   levels: OverviewLevel[];
-  build: Build;
+  detailPath: (cardId: string) => string;
 }) {
   return (
     <>
@@ -113,7 +117,9 @@ function OverviewGroupRows({
       {group.cards.map((card) => (
         <tr key={card.id}>
           <th scope="row" className="overview-card-name">
-            <span>{card.name}</span>
+            <Link to={detailPath(card.id)} state={{ from: "overview" }}>
+              {card.name}
+            </Link>
             <small>Initiative {card.initiative}</small>
           </th>
           {levels.map((level) => {
@@ -121,12 +127,7 @@ function OverviewGroupRows({
               (candidate) => candidate.card.id === card.id,
             );
             return cell ? (
-              <OverviewCellView
-                key={`${level.level}-${card.id}`}
-                cell={cell}
-                level={level.level}
-                build={build}
-              />
+              <OverviewCellView key={`${level.level}-${card.id}`} cell={cell} />
             ) : (
               <td key={`${level.level}-${card.id}`}>—</td>
             );
@@ -137,25 +138,12 @@ function OverviewGroupRows({
   );
 }
 
-function OverviewCellView({
-  cell,
-  level,
-  build,
-}: {
-  cell: OverviewCell;
-  level: number;
-  build: Build;
-}) {
+function OverviewCellView({ cell }: { cell: OverviewCell }) {
   const markerLabel = cell.marker
     ? markerText(cell.marker, cell.markerForLevel)
     : "";
   const membershipLabel = membershipText(cell.membership);
-  const noteLabel =
-    cell.motivations.length === 0
-      ? ""
-      : `${cell.motivations.length} motivation${
-          cell.motivations.length === 1 ? "" : "s"
-        }`;
+  const noteLabel = cell.note ? "card note" : "";
   const label = [membershipLabel, markerLabel, noteLabel]
     .filter(Boolean)
     .join("; ");
@@ -171,23 +159,121 @@ function OverviewCellView({
           {markerSymbol(cell.marker, cell.membership)}
         </span>
         <span className="visually-hidden">{label}</span>
-        {cell.motivations.length > 0 ? (
-          <span className="overview-motivation-links">
-            {cell.motivations.map((motivation) => (
-              <Link
-                key={`${motivation.level}-${motivation.cardId}-${motivation.kind}`}
-                className="overview-motivation-link"
-                to={motivationPath(build, motivation, level)}
-                aria-label={`Open ${cell.card.name} ${motivation.kind} motivation`}
-              >
-                <span aria-hidden="true">✎</span>
-                <span className="visually-hidden">{motivation.kind} note</span>
-              </Link>
-            ))}
-          </span>
-        ) : null}
+        {cell.note ? <OverviewNote card={cell.card} note={cell.note} /> : null}
       </span>
     </td>
+  );
+}
+
+/**
+ * Shows a recorded card note on hover or focus, and toggles it on tap. The
+ * tooltip is portalled into the page's main landmark with fixed positioning so
+ * the scrolling matrix cannot clip it; it follows the button while scrolling.
+ */
+function OverviewNote({ card, note }: { card: Card; note: CardNote }) {
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const [pinned, setPinned] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipId = useId();
+
+  const show = () =>
+    setAnchor(buttonRef.current?.getBoundingClientRect() ?? null);
+  const hide = () => {
+    setAnchor(null);
+    setPinned(false);
+  };
+
+  const open = anchor !== null;
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    // Follow the button: focusing it may scroll the matrix into view.
+    const reposition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (rect) {
+        setAnchor(rect);
+      }
+    };
+    // Touch browsers may not focus buttons, so blur alone cannot close a tap.
+    const closeOutside = (event: PointerEvent) => {
+      if (!buttonRef.current?.contains(event.target as Node)) {
+        setAnchor(null);
+        setPinned(false);
+      }
+    };
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+    document.addEventListener("pointerdown", closeOutside);
+    return () => {
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+      document.removeEventListener("pointerdown", closeOutside);
+    };
+  }, [open]);
+
+  const width = Math.min(280, window.innerWidth - 16);
+  const placeAbove = anchor ? anchor.bottom + 200 > window.innerHeight : false;
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        className="overview-note-button"
+        aria-label={`Card note for ${card.name} at level ${note.level}`}
+        aria-expanded={open}
+        aria-describedby={anchor ? tooltipId : undefined}
+        onMouseEnter={show}
+        onMouseLeave={() => {
+          if (!pinned) {
+            hide();
+          }
+        }}
+        onFocus={show}
+        onBlur={hide}
+        onClick={() => {
+          if (pinned) {
+            hide();
+          } else {
+            setPinned(true);
+            show();
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            hide();
+          }
+        }}
+      >
+        <span aria-hidden="true">✎</span>
+      </button>
+      {anchor
+        ? createPortal(
+            <div
+              id={tooltipId}
+              role="tooltip"
+              className="overview-note-tooltip plain-text"
+              style={{
+                width,
+                left: Math.max(
+                  8,
+                  Math.min(
+                    anchor.left + anchor.width / 2 - width / 2,
+                    window.innerWidth - width - 8,
+                  ),
+                ),
+                ...(placeAbove
+                  ? { bottom: window.innerHeight - anchor.top + 6 }
+                  : { top: anchor.bottom + 6 }),
+              }}
+            >
+              {note.text}
+            </div>,
+            buttonRef.current?.closest("main") ?? document.body,
+          )
+        : null}
+    </>
   );
 }
 
@@ -210,29 +296,41 @@ function OverviewSummaryRow({
   );
 }
 
+const legendItems: {
+  membership: OverviewCell["membership"];
+  marker?: OverviewCell["marker"];
+  note?: boolean;
+  label: string;
+}[] = [
+  { membership: "deck", label: "In deck" },
+  { membership: "pool", label: "In pool, not in deck" },
+  { membership: "not-in-pool", label: "Not in pool" },
+  { membership: "deck", marker: "picked", label: "Picked" },
+  { membership: "deck", marker: "added", label: "Added from pool" },
+  { membership: "pool", marker: "dropped", label: "Dropped" },
+  { membership: "pool", note: true, label: "Has a card note" },
+];
+
 function OverviewLegend() {
   return (
-    <div className="overview-legend" aria-label="Overview legend">
-      <span>
-        <span className="overview-cell overview-deck" aria-hidden="true">
-          ●
-        </span>{" "}
-        In deck
-      </span>
-      <span>
-        <span className="overview-cell overview-pool" aria-hidden="true">
-          ○
-        </span>{" "}
-        In pool, not deck
-      </span>
-      <span>
-        <span className="overview-cell overview-not-in-pool" aria-hidden="true">
-          ·
-        </span>{" "}
-        Not in pool
-      </span>
-      <span>★ picked · + added · − dropped · ✎ motivation</span>
-    </div>
+    <ul className="overview-legend" aria-label="Overview legend">
+      {legendItems.map((item) => (
+        <li key={item.label}>
+          <span
+            className={`overview-cell overview-${item.membership}`}
+            aria-hidden="true"
+          >
+            {markerSymbol(item.marker, item.membership)}
+            {item.note ? (
+              <span className="overview-note-button overview-legend-note">
+                ✎
+              </span>
+            ) : null}
+          </span>
+          {item.label}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -317,21 +415,6 @@ function markerSymbol(
     return "−";
   }
   return membership === "deck" ? "●" : membership === "pool" ? "○" : "·";
-}
-
-function motivationPath(
-  build: Build,
-  motivation: Motivation,
-  level: number,
-): string {
-  const params = new URLSearchParams({
-    level: String(level),
-    cardId: motivation.cardId,
-    kind: motivation.kind,
-  });
-  return `/c/${encodeURIComponent(build.characterId)}/b/${encodeURIComponent(
-    build.id,
-  )}/motivations?${params.toString()}`;
 }
 
 export function UnavailableOverviewView() {

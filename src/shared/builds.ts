@@ -6,16 +6,13 @@ import {
   MAX_OPERATION_ENTRIES,
   identifierSchema,
   levelSchema,
-  motivationKey,
-  motivationKindSchema,
   noteTextSchema,
   type Build,
+  type CardNote,
   type LevelUp,
-  type MotivationKind,
 } from "./schema/index.js";
 
-export { motivationKey } from "./schema/index.js";
-export type { Build, LevelUp, MotivationKind } from "./schema/index.js";
+export type { Build, CardNote, LevelUp } from "./schema/index.js";
 
 export interface CreateBuildInput {
   characterId: string;
@@ -28,15 +25,6 @@ export interface BuildMutationOptions {
   id?: () => string;
   uuid?: () => string;
   generateId?: () => string;
-}
-
-export interface MotivationInput {
-  kind: MotivationKind;
-  cardId: string;
-  text: string;
-  level?: number;
-  /** The slot level of an initial pick. Its stored motivation uses startLevel. */
-  forLevel?: number;
 }
 
 export type BuildOperationKind =
@@ -86,8 +74,7 @@ export function createBuild(
     })),
     startDeck: [],
     levelUps: [],
-    motivations: [],
-    guidance: {},
+    cardNotes: [],
     createdAt: timestamp,
     updatedAt: timestamp,
   });
@@ -306,9 +293,7 @@ export function deleteHighestLevel(
   return buildSchema.parse({
     ...build,
     levelUps: build.levelUps.slice(0, -1).map(cloneLevelUp),
-    motivations: build.motivations.filter(
-      (motivation) => motivation.level !== highest.level,
-    ),
+    cardNotes: build.cardNotes.filter((note) => note.level !== highest.level),
     updatedAt: getNow(options),
   });
 }
@@ -348,13 +333,7 @@ export function copyBuild(
       added: [...levelUp.added],
       dropped: [...levelUp.dropped],
     })),
-    motivations: build.motivations.map((motivation) => ({ ...motivation })),
-    guidance: Object.fromEntries(
-      Object.entries(build.guidance).map(([cardId, note]) => [
-        cardId,
-        { ...note },
-      ]),
-    ),
+    cardNotes: build.cardNotes.map((note) => ({ ...note })),
     createdAt: timestamp,
     updatedAt: timestamp,
   });
@@ -368,121 +347,94 @@ export function deleteBuild(builds: Build[], buildId: string): Build[] {
   return builds.filter((build) => build.id !== buildId);
 }
 
-export function upsertNote(
+/**
+ * The note that applies to a card at a level: the one recorded at the highest
+ * level up to and including that level. Notes record synergies, so they carry
+ * forward until a later level records a new version.
+ */
+export function effectiveCardNote(
   build: Build,
   cardId: string,
+  level: number,
+): CardNote | undefined {
+  let effective: CardNote | undefined;
+  for (const note of build.cardNotes) {
+    if (
+      note.cardId === cardId &&
+      note.level <= level &&
+      (!effective || note.level > effective.level)
+    ) {
+      effective = note;
+    }
+  }
+  return effective;
+}
+
+/** Every recorded version of a card's note, from lowest to highest level. */
+export function cardNoteHistory(build: Build, cardId: string): CardNote[] {
+  return build.cardNotes
+    .filter((note) => note.cardId === cardId)
+    .sort((left, right) => left.level - right.level);
+}
+
+/**
+ * Records a card's note at a level. Text that matches what the level would
+ * inherit anyway removes that level's version instead, so an empty note is
+ * only stored when it clears an inherited one.
+ */
+export function setCardNote(
+  build: Build,
+  cardId: string,
+  level: number,
   text: string,
   options: Pick<BuildMutationOptions, "now"> = {},
 ): Build {
-  cardIdSchema.parse(cardId);
-  noteTextSchema.parse(text);
-  const existing = build.guidance[cardId];
-  if (text === "" && existing === undefined) {
+  const noteCardId = cardIdSchema.parse(cardId);
+  const noteLevel = levelSchema.parse(level);
+  const noteText = noteTextSchema.parse(text);
+  const existing = build.cardNotes.find(
+    (note) => note.cardId === noteCardId && note.level === noteLevel,
+  );
+  if (existing?.text === noteText) {
     return build;
   }
-  if (text !== "" && existing?.text === text) {
-    return build;
+  const inherited = effectiveCardNote(build, noteCardId, noteLevel - 1);
+  if (noteText === (inherited?.text ?? "")) {
+    return existing
+      ? removeCardNote(build, noteCardId, noteLevel, options)
+      : build;
   }
 
-  const guidance = cloneRecord(build.guidance);
-  if (text === "") {
-    delete guidance[cardId];
-  } else {
-    setRecordValue(guidance, cardId, {
-      text,
-      updatedAt: getNow(options),
-    });
-  }
+  const updatedAt = getNow(options);
+  const next = {
+    cardId: noteCardId,
+    level: noteLevel,
+    text: noteText,
+    updatedAt,
+  };
   return buildSchema.parse({
     ...build,
-    guidance,
-    updatedAt: guidance[cardId]?.updatedAt ?? getNow(options),
+    cardNotes: existing
+      ? build.cardNotes.map((note) => (note === existing ? next : { ...note }))
+      : [...build.cardNotes.map((note) => ({ ...note })), next],
+    updatedAt,
   });
 }
 
-export const upsertGuidance = upsertNote;
-
-export function upsertMotivation(
+/** Removes a level's version so the card falls back to its older note. */
+export function removeCardNote(
   build: Build,
-  input: MotivationInput,
+  cardId: string,
+  level: number,
   options: Pick<BuildMutationOptions, "now"> = {},
 ): Build {
-  const kind = motivationKindSchema.parse(input.kind);
-  const cardId = cardIdSchema.parse(input.cardId);
-  const level = resolveMotivationLevel(build, { ...input, kind });
-  const text = noteTextSchema.parse(input.text);
-  const key = motivationKey(level, cardId, kind);
-  const existingIndex = build.motivations.findIndex(
-    (motivation) =>
-      motivationKey(motivation.level, motivation.cardId, motivation.kind) ===
-      key,
+  const cardNotes = build.cardNotes.filter(
+    (note) => note.cardId !== cardId || note.level !== level,
   );
-  const existing =
-    existingIndex === -1 ? undefined : build.motivations[existingIndex];
-
-  if (text === "" && existing === undefined) {
+  if (cardNotes.length === build.cardNotes.length) {
     return build;
   }
-  if (text !== "" && existing?.text === text) {
-    return build;
-  }
-
-  const motivations = [...build.motivations];
-  let mutationTimestamp: string | undefined;
-  if (text === "") {
-    motivations.splice(existingIndex, 1);
-  } else {
-    mutationTimestamp = getNow(options);
-    const next = {
-      level,
-      cardId,
-      kind,
-      text,
-      updatedAt: mutationTimestamp,
-    };
-    if (existingIndex === -1) {
-      motivations.push(next);
-    } else {
-      motivations[existingIndex] = next;
-    }
-  }
-
-  return buildSchema.parse({
-    ...build,
-    motivations,
-    updatedAt: mutationTimestamp ?? getNow(options),
-  });
-}
-
-function resolveMotivationLevel(
-  build: Build,
-  input: MotivationInput & { kind: MotivationKind },
-): number {
-  const isInitialPick =
-    input.kind === "add" &&
-    input.level !== undefined &&
-    build.startPicks.some(
-      (pick) => pick.forLevel === input.level && pick.cardId === input.cardId,
-    );
-  if (
-    (input.kind === "exclude" && input.level === undefined) ||
-    input.forLevel !== undefined ||
-    isInitialPick
-  ) {
-    if (input.forLevel !== undefined) {
-      levelSchema.parse(input.forLevel);
-      if (input.forLevel < 2 || input.forLevel > build.startLevel) {
-        throw new Error(
-          "An initial pick slot must be between 2 and startLevel",
-        );
-      }
-    }
-    return build.startLevel;
-  }
-  if (input.level === undefined) {
-    throw new Error("A level is required for a non-initial motivation");
-  }
-  return levelSchema.parse(input.level);
+  return buildSchema.parse({ ...build, cardNotes, updatedAt: getNow(options) });
 }
 
 function cloneLevelUp(levelUp: LevelUp): LevelUp {
@@ -495,27 +447,6 @@ function cloneLevelUp(levelUp: LevelUp): LevelUp {
 
 function getNow(options: Pick<BuildMutationOptions, "now">): string {
   return options.now?.() ?? new Date().toISOString();
-}
-
-function cloneRecord<T>(record: Record<string, T>): Record<string, T> {
-  const clone = Object.create(null) as Record<string, T>;
-  for (const key of Object.keys(record)) {
-    setRecordValue(clone, key, record[key]!);
-  }
-  return clone;
-}
-
-function setRecordValue<T>(
-  record: Record<string, T>,
-  key: string,
-  value: T,
-): void {
-  Object.defineProperty(record, key, {
-    configurable: true,
-    enumerable: true,
-    value,
-    writable: true,
-  });
 }
 
 function getId(options: BuildMutationOptions): string {

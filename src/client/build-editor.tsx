@@ -4,7 +4,7 @@ import { CardTile, compareCardLevelsDescending } from "./cards";
 import { CandidateGrid } from "./candidate-grid";
 import { RepairIssues } from "./repairs";
 import { deckPath } from "./deck-view";
-import { MotivationInput } from "./notes";
+import { CardNoteInput } from "./notes";
 import { ImportDataError, parseImportFile, useAppData } from "./app-data";
 import {
   copyBuild,
@@ -12,8 +12,9 @@ import {
   deleteBuild,
   renameBuild,
   setStartDeck,
+  removeCardNote,
+  setCardNote,
   setStartPick,
-  upsertMotivation,
 } from "../shared/builds.js";
 import { characters } from "../shared/data/characters/index.js";
 import {
@@ -313,8 +314,8 @@ function DataBackupControls() {
         </div>
       </div>
       <p>
-        Export includes every build, motivation and guidance note. Import first
-        validates a backup, then replaces all saved data after confirmation.
+        Export includes every build and card note. Import first validates a
+        backup, then replaces all saved data after confirmation.
       </p>
       {error ? (
         <p className="form-error" role="alert">
@@ -354,14 +355,9 @@ function ImportConfirmationDialog({
     }
   }, [candidate]);
 
-  const motivationCount =
+  const cardNoteCount =
     candidate?.builds.reduce(
-      (total, build) => total + build.motivations.length,
-      0,
-    ) ?? 0;
-  const guidanceCount =
-    candidate?.builds.reduce(
-      (total, build) => total + Object.keys(build.guidance).length,
+      (total, build) => total + build.cardNotes.length,
       0,
     ) ?? 0;
 
@@ -380,8 +376,7 @@ function ImportConfirmationDialog({
         <p>This will replace all data currently saved on the server.</p>
         <ul>
           <li>{candidate?.builds.length ?? 0} builds</li>
-          <li>{motivationCount} motivations</li>
-          <li>{guidanceCount} guidance notes</li>
+          <li>{cardNoteCount} card notes</li>
         </ul>
         <p>
           The backup&apos;s revision is ignored. The current server revision is
@@ -519,33 +514,24 @@ export function StartingEditor({
     updateBuild(setStartDeck(build, nextDeck));
   };
 
-  const updateMotivation = (
-    card: Card,
-    kind: "exclude" | "add",
-    text: string,
-    forLevel?: number,
-  ) => {
-    if (!canMutate) {
-      return;
-    }
-    updateBuild(
-      upsertMotivation(build, {
-        kind,
-        cardId: card.id,
-        text,
-        forLevel,
-        level: forLevel ?? build.startLevel,
-      }),
-    );
-  };
-
-  const motivationText = (cardId: string, kind: "exclude" | "add") =>
-    build.motivations.find(
-      (motivation) =>
-        motivation.level === build.startLevel &&
-        motivation.cardId === cardId &&
-        motivation.kind === kind,
-    )?.text ?? "";
+  const renderNote = (card: Card) => (
+    <CardNoteInput
+      build={build}
+      card={card}
+      level={build.startLevel}
+      disabled={!canMutate}
+      onChange={(text) => {
+        if (canMutate) {
+          updateBuild(setCardNote(build, card.id, build.startLevel, text));
+        }
+      }}
+      onRevert={() => {
+        if (canMutate) {
+          updateBuild(removeCardNote(build, card.id, build.startLevel));
+        }
+      }}
+    />
+  );
 
   const pickCards = (forLevel: number): Card[] => {
     const selected = build.startPicks.find(
@@ -696,43 +682,14 @@ export function StartingEditor({
             <button
               type="button"
               className="secondary-button"
-              aria-label="Starting hand"
+              aria-label={`Starting hand${startState.issues.length === 0 ? ", complete" : ""}`}
               aria-current={showHand ? "step" : undefined}
               disabled={!!firstUnfinished}
               onClick={() => openStep(null)}
             >
-              Hand
+              Hand{startState.issues.length === 0 ? " ✓" : ""}
             </button>
           </nav>
-          <details className="starting-pick-summary" open={showHand}>
-            <summary>Level-up card picks</summary>
-            <ul>
-              {picks
-                .filter((pick) => pick.cardId)
-                .map((pick) => (
-                  <li key={pick.forLevel}>
-                    <span>
-                      Level {pick.forLevel}:{" "}
-                      <strong>
-                        {character.cards.find((card) => card.id === pick.cardId)
-                          ?.name ?? pick.cardId}
-                      </strong>
-                      {!validPickLevels.has(pick.forLevel)
-                        ? " — choose a replacement"
-                        : ""}
-                    </span>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      disabled={!canMutate}
-                      onClick={() => openStep(pick.forLevel)}
-                    >
-                      Change level {pick.forLevel} pick
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          </details>
           {activePick ? (
             <section
               className="editor-section"
@@ -742,7 +699,6 @@ export function StartingEditor({
               <h2 id="starting-picks-heading" ref={stepHeading} tabIndex={-1}>
                 Level {activePick.forLevel} pick
               </h2>
-              <p>Choose one card of level {activePick.forLevel} or lower.</p>
               {activePick.cardId &&
               !validPickLevels.has(activePick.forLevel) ? (
                 <p className="issue-message" role="alert">
@@ -750,67 +706,22 @@ export function StartingEditor({
                   other choices are preserved.
                 </p>
               ) : null}
-              {Array.from(
-                new Set(
-                  pickCards(activePick.forLevel).map((card) =>
-                    effectiveCardLevel(card),
-                  ),
-                ),
-              ).map((level) => (
-                <section
-                  className="starting-candidate-group"
-                  key={level}
-                  aria-label={`Level ${level} cards`}
-                >
-                  <h3>Level {level} cards</h3>
-                  <CandidateGrid
-                    cards={pickCards(activePick.forLevel).filter(
-                      (card) => effectiveCardLevel(card) === level,
-                    )}
-                    level={activePick.forLevel}
-                    selection="pick"
-                    selectedPick={activePick.cardId}
-                    canMutate={canMutate}
-                    motivationText={motivationText}
-                    onPick={(card) => choosePick(activePick.forLevel, card.id)}
-                    onMotivation={(card, kind, text) =>
-                      updateMotivation(card, kind, text, activePick.forLevel)
-                    }
-                  />
-                </section>
-              ))}
+              {pickCards(activePick.forLevel).length > 0 ? (
+                <CandidateGrid
+                  cards={pickCards(activePick.forLevel)}
+                  selection="pick"
+                  selectedPick={activePick.cardId}
+                  pickLevel={activePick.forLevel}
+                  canMutate={canMutate}
+                  renderNote={renderNote}
+                  onPick={(card) => choosePick(activePick.forLevel, card.id)}
+                />
+              ) : null}
               {pickCards(activePick.forLevel).length === 0 ? (
                 <p className="issue-message">
                   No legal cards are available for this pick.
                 </p>
               ) : null}
-              <details className="starting-unavailable">
-                <summary>Show unavailable cards</summary>
-                <ul>
-                  {character.cards
-                    .filter(
-                      (card) =>
-                        effectiveCardLevel(card) > 1 &&
-                        effectiveCardLevel(card) <= build.startLevel &&
-                        !pickCards(activePick.forLevel).some(
-                          (option) => option.id === card.id,
-                        ),
-                    )
-                    .sort(compareCardLevelsDescending)
-                    .map((card) => (
-                      <li key={card.id}>
-                        {card.name} · Level {card.level} —{" "}
-                        {picks.some(
-                          (pick) =>
-                            pick.forLevel > activePick.forLevel &&
-                            pick.cardId === card.id,
-                        )
-                          ? "Already picked"
-                          : "No remaining pick can select this card"}
-                      </li>
-                    ))}
-                </ul>
-              </details>
             </section>
           ) : null}
         </>
@@ -831,12 +742,6 @@ export function StartingEditor({
               ? `Complement your picks · Level ${build.startLevel} hand`
               : "Choose your deck"}
           </h2>
-          {picks.length ? (
-            <p>
-              Your picked cards stay in the hand. Click one to change its pick.
-              Add or remove complementary level 1 and X cards here.
-            </p>
-          ) : null}
           <RepairIssues
             build={build}
             character={character}
@@ -852,11 +757,11 @@ export function StartingEditor({
               const selected = selectedDeck.has(card.id);
               const pickedSlot = picks.find((pick) => pick.cardId === card.id);
               const inPool = startPoolIds.has(card.id);
-              const excluded = !selected && (handFull || !inPool);
+              const notInDeck = !selected && (handFull || !inPool);
               return (
                 <div
                   className="starting-deck-card"
-                  data-excluded={excluded}
+                  data-not-in-deck={notInDeck}
                   role="listitem"
                   key={card.id}
                 >
@@ -873,38 +778,19 @@ export function StartingEditor({
                     }
                     stateLabel={
                       selected && pickedSlot
-                        ? "Picked · Change"
+                        ? `Level ${pickedSlot.forLevel} pick`
                         : selected
                           ? "In starting deck"
                           : !inPool
                             ? "Not in pool"
-                            : excluded
-                              ? "Excluded"
+                            : notInDeck
+                              ? "Not in deck"
                               : undefined
                     }
                     disabled={!canMutate || !inPool || (!selected && handFull)}
                     onAction={() => toggleDeckCard(card)}
                   />
-                  {selected ? (
-                    <MotivationInput
-                      card={card}
-                      kind="add"
-                      label={`Why include ${card.name}?`}
-                      value={motivationText(card.id, "add")}
-                      disabled={!canMutate}
-                      onChange={(text) => updateMotivation(card, "add", text)}
-                    />
-                  ) : excluded ? (
-                    <MotivationInput
-                      card={card}
-                      kind="exclude"
-                      value={motivationText(card.id, "exclude")}
-                      disabled={!canMutate}
-                      onChange={(text) =>
-                        updateMotivation(card, "exclude", text)
-                      }
-                    />
-                  ) : null}
+                  {renderNote(card)}
                 </div>
               );
             })}

@@ -53,14 +53,7 @@ export function CardTile({
         <span className="visually-hidden">Level {level}</span>
         {stateLabel ? (
           <span className="card-state" role="status" title={stateLabel}>
-            {stateLabel.startsWith("NEW") ? (
-              <>
-                NEW
-                <span className="visually-hidden">{stateLabel.slice(3)}</span>
-              </>
-            ) : (
-              stateLabel
-            )}
+            {stateLabel}
           </span>
         ) : null}
       </button>

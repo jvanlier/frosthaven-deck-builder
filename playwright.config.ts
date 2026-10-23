@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "line" : "list",
   use: {
     baseURL: "http://127.0.0.1:5173",
@@ -33,7 +33,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    // CI serves the production build (run beforehand); it is much lighter than
+    // the dev server on small runners.
+    command: process.env.CI
+      ? 'PORT=5173 DATA_DIR="$(mktemp -d)" node dist/server/index.js'
+      : "npm run dev",
     url: "http://127.0.0.1:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

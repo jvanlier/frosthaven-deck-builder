@@ -664,7 +664,7 @@ textarea {
   padding: 6px 10px;
   font-size: 12px;
 }
-.guidance-toggle {
+.deck-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -672,7 +672,7 @@ textarea {
   font-size: 13px;
   cursor: pointer;
 }
-.guidance-toggle input {
+.deck-toggle input {
   appearance: none;
   position: relative;
   width: 38px;
@@ -684,7 +684,7 @@ textarea {
   background: var(--line);
   cursor: pointer;
 }
-.guidance-toggle input::after {
+.deck-toggle input::after {
   content: "";
   position: absolute;
   width: 16px;
@@ -695,16 +695,23 @@ textarea {
   background: white;
   transition: 0.2s;
 }
-.guidance-toggle input:checked {
+.deck-toggle input:checked {
   background: var(--ice2);
 }
-.guidance-toggle input:checked::after {
+.deck-toggle input:checked::after {
   left: 19px;
 }
 .deck-cards {
   margin-top: 0;
   padding-top: 0;
   border-top: 0;
+}
+.deck-card-item .card-grid {
+  padding-top: 0;
+}
+/* The status bar already sits apart from the toggles. */
+.deck-intro + .deck-issues {
+  margin-top: 0;
 }
 .deck-cards > .section-heading {
   margin: 0;
@@ -716,6 +723,16 @@ textarea {
   grid-template-columns: repeat(auto-fill, var(--card-width));
   gap: 14px;
   align-items: start;
+  /* Room for the state pills that overhang the first row of cards. */
+  padding-top: 12px;
+}
+/* Card notes belong to the card above them: keep each note close to its card
+   and separate rows clearly, so a note never reads as the next row's card's. */
+:is(.card-grid, .deck-card-list, .level-up-card-grid):has(
+  .card-note,
+  .card-note-input
+) {
+  row-gap: 32px;
 }
 .deck-card-item,
 .level-up-group,
@@ -747,7 +764,8 @@ textarea {
 .card-action:disabled {
   opacity: 0.4;
 }
-.card-tile[data-state^="NEW"] .card-action:disabled {
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-action:disabled,
+.card-tile[data-state="Added from pool"] .card-action:disabled {
   opacity: 1;
   cursor: default;
 }
@@ -777,8 +795,7 @@ textarea {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-.card-tile[data-state="In deck"] .card-state,
-.card-tile[data-state="Not in deck"] .card-state {
+.card-tile[data-state="In deck"] .card-state {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -786,77 +803,112 @@ textarea {
   overflow: hidden;
   clip-path: inset(50%);
 }
-.card-tile[data-state^="Picked"] img,
-.card-tile[data-state="Added"] img,
-.card-tile[data-state="In starting deck"] img {
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-action img,
+.card-tile[data-state="Added from pool"] .card-action img,
+.card-tile[data-state="In starting deck"] .card-action img {
   outline: 3px solid var(--ice);
   outline-offset: 2px;
   box-shadow:
     0 0 0 7px #38bdf833,
     0 0 40px #38bdf855;
 }
-.card-tile[data-state^="Picked"] .card-state,
-.card-tile[data-state="Added"] .card-state,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
+.card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.card-tile[data-state="Excluded"] .card-state,
-.card-tile[data-state^="NEW"] .card-state {
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
   top: -11px;
   left: 50%;
   transform: translateX(-50%);
   max-width: none;
   width: max-content;
 }
-.card-tile[data-state^="Picked"] .card-state,
-.card-tile[data-state="Added"] .card-state,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
+.card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.card-tile[data-state="Excluded"] .card-state,
-.card-tile[data-state^="NEW"] .card-state,
-.change-kind {
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
   padding: 3px 10px;
   border-radius: 99px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-.card-tile[data-state^="Picked"] .card-state,
-.card-tile[data-state="Added"] .card-state,
-.card-tile[data-state="In starting deck"] .card-state,
-.change-list li[data-kind="add"] .change-kind {
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
+.card-tile[data-state="Added from pool"] .card-state,
+.card-tile[data-state="In starting deck"] .card-state {
   color: #03111f;
   background: var(--ice);
 }
-.card-tile[data-state^="Picked"] .card-state::before,
-.card-tile[data-state="Added"] .card-state::before,
-.card-tile[data-state="In starting deck"] .card-state::before,
-.change-list li[data-kind="add"] .change-kind::before {
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state::before,
+.card-tile[data-state="Added from pool"] .card-state::before,
+.card-tile[data-state="In starting deck"] .card-state::before {
   content: "✓ ";
 }
-.card-tile[data-state="Dropped"] img {
+.card-tile[data-state="Dropped"] .card-action img {
   filter: grayscale(1) brightness(0.45);
 }
-.starting-deck-card[data-excluded="true"] .card-action img {
+.starting-deck-card[data-not-in-deck="true"] .card-action img {
   filter: grayscale(1);
 }
-.card-tile[data-state="Excluded"] img {
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-action
+  img {
   filter: grayscale(1);
   opacity: 0.4;
 }
-.starting-deck-card[data-excluded="true"] .card-action:disabled {
+.starting-deck-card[data-not-in-deck="true"] .card-action:disabled {
   opacity: 1;
 }
-.starting-deck-card[data-excluded="true"] .card-action:disabled img {
+.starting-deck-card[data-not-in-deck="true"] .card-action:disabled img {
   opacity: 0.4;
 }
-.card-tile[data-state="Dropped"] .card-state,
-.change-list li[data-kind="drop"] .change-kind {
+.card-tile[data-state="Dropped"] .card-state {
   color: white;
   background: #b73939;
 }
-.card-tile[data-state="Dropped"] .card-state::before,
-.change-list li[data-kind="drop"] .change-kind::before {
+.card-tile[data-state="Dropped"] .card-state::before {
   content: "✕ ";
+}
+/* Not-in-deck, not-in-pool and dropped cards get a frame in their pill colour. It sits on the
+   card button, not the image, so it lifts on hover but the image's grayscale
+   and opacity don't dim it. */
+/* Neutral greys: a card outside the deck or pool is a choice, not an error.
+   Not in deck is available and lighter; not in pool is unavailable and
+   darker. */
+.card-tile[data-state="Not in deck"] {
+  --frame: #475569;
+  --frame-glow: #64748b;
+  --state-fg: #e2e8f0;
+  --state-bg: #334155;
+}
+.card-tile[data-state="Not in pool"] {
+  --frame: #1e293b;
+  --frame-glow: #1e293b;
+  --state-fg: #94a3b8;
+  --state-bg: #1e293b;
+}
+.card-tile[data-state="Dropped"] {
+  --frame: #b73939;
+  --frame-glow: #b73939;
+  --state-fg: white;
+  --state-bg: #b73939;
+}
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-action::after,
+.card-tile[data-state="Dropped"] .card-action::after {
+  position: absolute;
+  z-index: 0;
+  inset: -5px;
+  border: 3px solid var(--frame);
+  border-radius: 17px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--frame-glow) 20%, transparent),
+    0 0 40px color-mix(in srgb, var(--frame-glow) 33%, transparent);
+  content: "";
+  pointer-events: none;
 }
 .enlarge-button {
   padding: 2px 0;
@@ -885,40 +937,196 @@ textarea {
   color: #03111f;
   background: var(--ice2);
 }
-.guidance-note {
-  margin-top: 6px;
+/* Tinted cards zoom in their pill's colours. */
+.card-tile > .enlarge-button:is(:hover, :focus-visible) {
+  color: var(--state-fg, #03111f);
+  border-color: var(--state-fg, #ffffff33);
+  background: var(--state-bg, var(--ice2));
+}
+/* A disabled not-in-pool card stays legible; only its image is dimmed. */
+.card-tile[data-state="Not in pool"] .card-action:disabled {
+  opacity: 1;
+}
+.card-note,
+.card-note-input {
+  --note-accent: var(--ice);
+  --note-border: #38bdf866;
+  --note-bg: #162238;
+  position: relative;
+  margin-top: 10px;
+}
+/* A note takes the colour scheme of its card's Not in deck, Not in pool or
+   Dropped state. */
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Not in deck"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #e2e8f0;
+  --note-border: #475569;
+  --note-bg: #1a2230;
+  --line: #3b4659;
+  --muted: #a3aebf;
+}
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Not in pool"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #94a3b8;
+  --note-border: #1e293b;
+  --note-bg: #121926;
+  --line: #273244;
+  --muted: #7d8899;
+}
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Dropped"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #f87171;
+  --note-border: #b7393999;
+  --note-bg: #26171b;
+  --line: #4f2a2e;
+  --muted: #c49a9a;
+}
+/* A notch on top points at the note's card. */
+.card-note::before,
+.card-note-input::before,
+.card-note::after,
+.card-note-input::after {
+  position: absolute;
+  left: 50%;
+  border: 8px solid transparent;
+  border-top: 0;
+  content: "";
+  transform: translateX(-50%);
+}
+.card-note::before,
+.card-note-input::before {
+  bottom: 100%;
+  border-bottom-color: var(--note-border);
+}
+.card-note::after,
+.card-note-input::after {
+  bottom: calc(100% - 1px);
+  border-bottom-color: var(--note-bg);
+}
+.card-note {
+  display: grid;
+  gap: 4px;
   padding: 8px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--note-border);
   border-radius: 10px;
-  color: var(--muted);
-  background: var(--panel);
-  font-size: 12px;
+  color: var(--text);
+  background: var(--note-bg);
+  font-size: 13px;
 }
-.guidance-note strong {
-  display: none;
-}
-.guidance-note p {
+.card-note p {
   margin: 0;
+  overflow-wrap: anywhere;
+}
+.card-note em {
+  color: var(--muted);
 }
 .plain-text {
   white-space: pre-wrap;
 }
-.motivation-input,
-.guidance-input {
+.card-note-input {
   display: grid;
   gap: 4px;
-  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--note-border);
+  border-radius: 10px;
+  color: var(--note-accent);
+  background: var(--note-bg);
+  font-size: 11px;
+  font-weight: 700;
+}
+.card-note-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+.card-note-header label {
+  margin-right: auto;
+}
+.card-note-level {
+  justify-self: start;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
   color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.card-note-level[data-current="true"] {
+  border-color: var(--note-accent);
+  color: var(--note-accent);
+}
+.card-note-revert {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: none;
   font-size: 13px;
 }
-.motivation-input textarea,
-.guidance-input textarea {
+.card-note-revert:hover:not(:disabled),
+.card-note-revert:focus-visible {
+  color: var(--note-accent);
+  border-color: var(--note-accent);
+}
+/* Keep the focus ring, but in the note's own colour scheme. */
+.card-note-input :focus-visible {
+  outline-color: var(--note-accent);
+}
+.card-note-input textarea {
   width: 100%;
+  min-height: 60px;
+  height: 60px;
   resize: vertical;
-  min-height: 52px;
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
+}
+.card-note-history {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.card-note-history li {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.card-note-history li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.card-note-history p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.deck-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
 }
 .level-up-status {
   position: sticky;
@@ -934,7 +1142,8 @@ textarea {
   gap: 10px;
   min-height: 56px;
   padding: 10px 12px;
-  margin-bottom: 24px;
+  /* Matches the gap above the bar (--status-bar-gap). */
+  margin-bottom: var(--status-bar-gap);
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #0b1220f2;
@@ -946,24 +1155,23 @@ textarea {
 .starting-setup-status .level-up-counter {
   white-space: normal;
 }
-.starting-setup-status .level-up-actions button {
-  min-height: 44px;
-  max-width: 130px;
-  padding: 8px;
-  font-size: 13px;
-}
 .starting-editor h2[tabindex] {
   width: fit-content;
 }
+/* Pick steps and the hand share one layout, so switching steps doesn't jump. */
 .starting-editor [data-pick-level] {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.starting-editor :is([data-pick-level], .starting-hand) > h2 {
+  margin-top: 5px;
 }
 .starting-stepper {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-block: 16px;
+  margin-block: 0 16px;
 }
 .starting-stepper button {
   min-width: 44px;
@@ -975,41 +1183,6 @@ textarea {
   color: var(--text);
   outline: 2px solid var(--ice);
   outline-offset: 2px;
-}
-.starting-pick-summary,
-.starting-unavailable {
-  margin-block: 16px;
-}
-.starting-pick-summary {
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--panel);
-}
-.starting-pick-summary summary {
-  cursor: pointer;
-  font-weight: 600;
-}
-.starting-pick-summary ul {
-  margin: 12px 0 0 8px;
-  padding: 0 0 0 12px;
-  border-left: 2px solid var(--line);
-  list-style: none;
-}
-.starting-pick-summary li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-block: 8px;
-  border-bottom: 1px solid var(--line);
-}
-.starting-candidate-group {
-  margin-block: 20px;
-}
-.starting-candidate-group h3 {
-  margin-bottom: 10px;
 }
 .starting-hand-status {
   margin-top: 0;
@@ -1089,203 +1262,10 @@ textarea {
 .starting-deck-card {
   position: relative;
 }
-.level-up-candidate > .motivation-input,
-.level-up-deck-card > .motivation-input,
-.starting-deck-card > .motivation-input {
-  position: absolute;
-  z-index: 2;
-  inset: auto 8px 8px;
-  margin: 0;
-  padding: 8px;
-  border: 1px solid #38bdf866;
-  border-radius: 10px;
-  color: var(--ice);
-  background: rgb(11 18 32 / 75%);
-  box-shadow: 0 6px 18px #000a;
-  font-size: 11px;
-  font-weight: 700;
-}
-.level-up-deck-card > .motivation-input {
-  color: var(--bad);
-  border-color: #f8717188;
-}
-.level-up-candidate > .motivation-input textarea,
-.level-up-deck-card > .motivation-input textarea,
-.starting-deck-card > .motivation-input textarea {
-  min-height: 60px;
-  height: 60px;
-  resize: none;
-  background: rgb(3 17 31 / 35%);
-}
-.motivation-input[data-kind="exclude"],
-.card-tile[data-state="Excluded"] .card-state {
-  color: var(--warn);
-  border-color: #fbbf2488;
-  background: rgb(42 27 12 / 75%);
-}
-.motivation-input[data-kind="exclude"] textarea {
-  color: #fde68a;
-  border-color: #fbbf2455;
-  background: rgb(42 27 12 / 35%);
-}
-.swap-group details {
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--panel);
-}
-.swap-group summary {
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 13px;
-}
-.swap-group .level-up-card-grid {
-  margin-top: 16px;
-}
-.change-section {
-  max-width: 780px;
-}
-.change-section .section-heading h2 {
-  color: var(--text);
-  font-size: 18px;
-  letter-spacing: normal;
-  text-transform: none;
-}
-.change-list,
-.motivation-list {
-  display: grid;
-  margin: 0;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--panel);
-  list-style: none;
-}
-.change-list li,
-.motivation-list li {
-  display: flex;
-  align-items: start;
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
-}
-.change-list li:first-child,
-.motivation-list li:first-child {
-  border-top: 0;
-}
-.change-list li > div {
-  min-width: 0;
-}
-.change-list p,
-.motivation-list p {
-  margin: 3px 0 0;
-  font-size: 14px;
-}
-.change-card-media {
-  display: grid;
-  justify-items: start;
-  gap: 3px;
-  flex: 0 0 auto;
-}
-.change-card-link,
-.motivation-thumbnail-link {
-  display: block;
-  border-radius: 6px;
-}
-.change-list {
-  padding: 0 16px;
-}
-.change-list li {
-  gap: 16px;
-  padding: 18px 10px;
-}
-.change-motivation-label {
-  color: var(--bad);
-  font-weight: 600;
-  display: block;
-  margin-bottom: 3px;
-  font-size: 12px;
-}
-.change-list .change-thumbnail {
-  display: block;
-  width: 56px;
-}
-.change-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.change-level-badge {
-  padding: 2px 7px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  color: var(--text);
-  background: var(--bg);
-  font-weight: 600;
-}
-.change-card-copy h3 {
-  margin: 0 0 6px;
-  font-size: 16px;
-  line-height: 1.3;
-}
-.change-card-name {
-  color: var(--text);
-  text-decoration: none;
-}
-.change-card-name:hover {
-  text-decoration: underline;
-}
-.change-card-copy .plain-text {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.change-list .change-card-copy time {
-  margin-top: 8px;
-}
-.change-thumbnail {
-  width: 46px;
-  aspect-ratio: 2 / 3;
-  border-radius: 6px;
-  object-fit: cover;
-}
-.note-button {
-  margin-top: 4px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: var(--muted);
-  background: none;
-  font-size: 13px;
-  text-decoration: underline dotted;
-  font-weight: 400;
-}
-.change-note-empty {
-  color: var(--muted);
-}
-.motivation-groups {
-  display: grid;
-  gap: 16px;
-}
-.motivation-group {
-  margin-top: 0;
-}
-.motivation-entry {
-  display: flex;
-  align-items: start;
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
-}
-.motivation-thumbnail-link {
-  flex: 0 0 auto;
-}
-.motivation-entry-content {
-  min-width: 0;
-  flex: 1;
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
+  color: var(--state-fg);
+  background: var(--state-bg);
 }
 .card-detail-layout {
   display: grid;
@@ -1313,9 +1293,7 @@ textarea {
   color: var(--muted);
   font-size: 13px;
 }
-.card-detail-copy time,
-.motivation-entry-content time,
-.change-list time {
+.card-detail-copy time {
   display: block;
   margin-top: 4px;
   color: var(--muted);
@@ -1417,9 +1395,19 @@ textarea {
   color: var(--text);
   font-weight: 400;
 }
-.overview-card-name span,
+.overview-card-name a,
 .overview-card-name small {
   display: inline;
+}
+.overview-card-name a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+.overview-card-name a:hover {
+  color: var(--ice);
+  text-decoration-color: currentColor;
 }
 .overview-card-name small {
   margin-left: 6px;
@@ -1455,23 +1443,44 @@ textarea {
 .overview-not-in-pool {
   color: #667c9c;
 }
-.overview-cell .overview-motivation-links {
+.overview-note-button {
   position: absolute;
   top: -6px;
   right: -6px;
-  display: flex;
-  gap: 2px;
-}
-.overview-motivation-link {
   display: inline-grid;
-  min-width: 18px;
-  min-height: 18px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
   place-items: center;
+  border: 0;
   border-radius: 50%;
   color: #03111f;
   background: var(--warn);
   font-size: 10px;
-  text-decoration: none;
+  cursor: pointer;
+}
+.overview-note-button::after {
+  /* Enlarge the touch target without growing the visible dot. */
+  position: absolute;
+  inset: -8px;
+  content: "";
+}
+.overview-note-tooltip {
+  position: fixed;
+  z-index: 20;
+  max-height: 40vh;
+  overflow: auto;
+  padding: 8px 10px;
+  border: 1px solid #38bdf866;
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--bg2);
+  box-shadow: 0 10px 30px #000a;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.4;
+  text-transform: none;
 }
 .overview-summary-row th,
 .overview-summary-row td {
@@ -1492,10 +1501,24 @@ textarea {
 .overview-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
-  margin: 12px 0;
+  gap: 10px 20px;
+  margin: 16px 0;
+  padding: 0;
   color: var(--muted);
   font-size: 12px;
+  list-style: none;
+}
+.overview-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* The matrix shows "not in pool" without a box; give its sample the same size. */
+.overview-legend .overview-not-in-pool {
+  border: 1.5px dashed var(--line);
+}
+.overview-legend-note {
+  cursor: default;
 }
 
 @media (max-width: 650px) {
@@ -1558,6 +1581,12 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
+  :is(.card-grid, .deck-card-list, .level-up-card-grid):has(
+    .card-note,
+    .card-note-input
+  ) {
+    row-gap: 24px;
+  }
   .deck-card-item .card-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1579,26 +1608,6 @@ textarea {
   .starting-hand-status > button {
     padding: 6px;
     font-size: 12px;
-  }
-  .level-up-candidate > .motivation-input,
-  .level-up-deck-card > .motivation-input,
-  .starting-deck-card > .motivation-input {
-    inset: auto 5px 5px;
-    padding: 6px;
-    font-size: 10px;
-  }
-  .level-up-candidate > .motivation-input span,
-  .level-up-deck-card > .motivation-input span,
-  .starting-deck-card > .motivation-input span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .level-up-candidate > .motivation-input textarea,
-  .level-up-deck-card > .motivation-input textarea,
-  .starting-deck-card > .motivation-input textarea {
-    height: 52px;
-    min-height: 52px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

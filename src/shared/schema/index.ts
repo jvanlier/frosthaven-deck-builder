@@ -45,73 +45,20 @@ const levelUpSchema = z
     }
   });
 
-const noteSchema = z
+const cardNoteSchema = z
   .object({
+    cardId: cardIdSchema,
+    level: levelSchema,
     text: noteTextSchema,
     updatedAt: timestampSchema,
   })
   .strict();
-
-type NoteValue = z.infer<typeof noteSchema>;
-const guidanceSchema = z
-  .unknown()
-  .superRefine((value, context) => {
-    if (value === null || typeof value !== "object" || Array.isArray(value)) {
-      context.addIssue({
-        code: "invalid_type",
-        expected: "record",
-        input: value,
-      });
-      return;
-    }
-    for (const key of Object.keys(value)) {
-      if (!identifierSchema.safeParse(key).success) {
-        context.addIssue({
-          code: "custom",
-          path: [key],
-          message: "Invalid guidance card ID",
-        });
-        continue;
-      }
-      const note = (value as Record<string, unknown>)[key];
-      if (!noteSchema.safeParse(note).success) {
-        context.addIssue({
-          code: "custom",
-          path: [key],
-          message: "Invalid guidance note",
-        });
-      }
-    }
-  })
-  .transform((value) => {
-    const safeRecord = Object.create(null) as Record<string, NoteValue>;
-    for (const key of Object.keys(value as object)) {
-      Object.defineProperty(safeRecord, key, {
-        configurable: true,
-        enumerable: true,
-        value: noteSchema.parse((value as Record<string, unknown>)[key]),
-        writable: true,
-      });
-    }
-    return safeRecord;
-  });
 
 export const buildNameSchema = z
   .string()
   .trim()
   .min(1)
   .max(MAX_IDENTIFIER_LENGTH);
-
-export const motivationKindSchema = z.enum(["exclude", "add", "drop"]);
-const motivationSchema = z
-  .object({
-    level: levelSchema,
-    cardId: cardIdSchema,
-    kind: motivationKindSchema,
-    text: noteTextSchema,
-    updatedAt: timestampSchema,
-  })
-  .strict();
 
 export const buildSchema = z
   .object({
@@ -122,8 +69,7 @@ export const buildSchema = z
     startPicks: z.array(pickSchema),
     startDeck: z.array(cardIdSchema).max(MAX_OPERATION_ENTRIES),
     levelUps: z.array(levelUpSchema),
-    motivations: z.array(motivationSchema),
-    guidance: guidanceSchema,
+    cardNotes: z.array(cardNoteSchema),
     createdAt: timestampSchema,
     updatedAt: timestampSchema,
   })
@@ -165,27 +111,25 @@ export const buildSchema = z
       });
     }
 
-    const motivationKeys = new Set<string>();
-    for (const [index, motivation] of build.motivations.entries()) {
-      const key = motivationKey(
-        motivation.level,
-        motivation.cardId,
-        motivation.kind,
-      );
-      if (motivationKeys.has(key)) {
+    const noteKeys = new Set<string>();
+    for (const [index, note] of build.cardNotes.entries()) {
+      const key = cardNoteKey(note.cardId, note.level);
+      if (noteKeys.has(key)) {
         context.addIssue({
           code: "custom",
-          path: ["motivations", index],
-          message: "Motivation keys must be unique",
+          path: ["cardNotes", index],
+          message: "A card can have only one note per level",
         });
       }
-      motivationKeys.add(key);
+      noteKeys.add(key);
     }
   });
 
-export const appDataSchema = z
+export const SCHEMA_VERSION = 2;
+
+const currentAppDataSchema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(SCHEMA_VERSION),
     revision: revisionSchema,
     builds: z.array(buildSchema),
   })
@@ -203,6 +147,9 @@ export const appDataSchema = z
       });
     }
   });
+
+/** Accepts current documents and upgrades older stored or imported ones. */
+export const appDataSchema = z.preprocess(upgradeAppData, currentAppDataSchema);
 
 export const putDataRequestSchema = z
   .object({
@@ -237,17 +184,69 @@ export type AppData = z.infer<typeof appDataSchema>;
 export type Build = z.infer<typeof buildSchema>;
 export type Pick = z.infer<typeof pickSchema>;
 export type LevelUp = z.infer<typeof levelUpSchema>;
-export type Motivation = z.infer<typeof motivationSchema>;
-export type MotivationKind = z.infer<typeof motivationKindSchema>;
-export type Note = z.infer<typeof noteSchema>;
+export type CardNote = z.infer<typeof cardNoteSchema>;
 export type PutDataRequest = z.infer<typeof putDataRequestSchema>;
 
-export function motivationKey(
-  level: number,
-  cardId: string,
-  kind: MotivationKind,
-): string {
-  return JSON.stringify([level, cardId, kind]);
+export function cardNoteKey(cardId: string, level: number): string {
+  return JSON.stringify([cardId, level]);
+}
+
+/**
+ * Schema version 1 kept motivations per (level, card, kind) and level-less
+ * guidance. Version 2 keeps one card note per (card, level). Guidance is
+ * discarded; colliding motivations keep the most recently updated text.
+ * Anything malformed is passed through unchanged so validation rejects it.
+ */
+function upgradeAppData(value: unknown): unknown {
+  if (!isRecord(value) || value.schemaVersion !== 1) {
+    return value;
+  }
+  if (!Array.isArray(value.builds)) {
+    return value;
+  }
+  return {
+    ...value,
+    schemaVersion: SCHEMA_VERSION,
+    builds: value.builds.map(upgradeBuild),
+  };
+}
+
+function upgradeBuild(build: unknown): unknown {
+  if (!isRecord(build) || !Array.isArray(build.motivations)) {
+    return build;
+  }
+  const { motivations, guidance: _guidance, ...rest } = build;
+  const notes = new Map<string, Record<string, unknown>>();
+  for (const motivation of motivations) {
+    if (
+      !isRecord(motivation) ||
+      typeof motivation.cardId !== "string" ||
+      typeof motivation.level !== "number" ||
+      typeof motivation.updatedAt !== "string"
+    ) {
+      return build;
+    }
+    const key = cardNoteKey(motivation.cardId, motivation.level);
+    const existing = notes.get(key);
+    if (
+      existing &&
+      Date.parse(existing.updatedAt as string) >=
+        Date.parse(motivation.updatedAt)
+    ) {
+      continue;
+    }
+    notes.set(key, {
+      cardId: motivation.cardId,
+      level: motivation.level,
+      text: motivation.text,
+      updatedAt: motivation.updatedAt,
+    });
+  }
+  return { ...rest, cardNotes: [...notes.values()] };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function addDuplicateIssues(

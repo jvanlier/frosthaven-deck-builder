@@ -9,8 +9,8 @@ Mandatory test-first, review and authorized merge policy: [`../AGENTS.md`](../AG
 ## 1. Purpose
 
 A personal web app for planning Frosthaven character "decks" (the hand of ability cards
-brought into a scenario) across levels 1–9, and for recording *why* cards were picked,
-dropped or left out, plus per-build guidance on how to play each card.
+brought into a scenario) across levels 1–9, and for recording per-card notes: why cards
+were picked, dropped or left out, and how they combine with the rest of the deck.
 
 Single user, personal use. Self-hosted on a Raspberry Pi on the home network, reached
 only via VPN, used from phone and desktop with shared server-side storage. No
@@ -144,7 +144,7 @@ variants within a level.
   exist in the build and are never asked for. The start level can't be changed later;
   create a new build to use a different start level.
 - **F4** **Copy build** deep-copies everything: start level, levels, picks, decks,
-  motivations and guidance. The user names the copy. Its build ID and build timestamps
+  and card notes. The user names the copy. Its build ID and build timestamps
   are new; copied note timestamps are preserved until those notes are edited.
 
 ### 4.4 Start level
@@ -161,19 +161,14 @@ variants within a level.
   It shows a “n / total level-up cards picked” badge (green when complete, amber
   otherwise), the hand count during hand assembly, and the current next/finish
   action. There is no separate hand status bar or “Build your starting hand” heading.
-  The “Level-up card picks” disclosure has a bordered container and indented
-  contents, so its collapsed scope is clear without repeating the status count.
   Each new pick enters the starting hand. In hand assembly, clicking a selected
   picked card opens its pick slot instead of removing it; only starter cards can
   be freely added or removed here. Revising a pick offers Return to hand once all
   slots are valid, preserving starter selections and notes. Conflicts guide the
   user through the affected lower slots before returning. This is an editor
   interaction constraint, not an additional game rule.
-  Picking shows an inline motivation overlay on that card,
-  even for a lower-level choice. Unselected cards at the slot's level get inline
-  exclusion notes because no lower slot can acquire them; lower-level alternatives
-  are only grayed out, without exclusion inputs, until their last eligible slot.
-  These overlays share the normal level-up component and saved motivations.
+  Every candidate has its card note (§4.8) below it, recorded at the start level.
+  Lower-level alternatives are grayed out until their last eligible slot.
   Next advances explicitly, while reload resumes at the
   highest unfinished or invalid slot. Done is available at every setup step,
   including incomplete or invalid builds, and returns to the deck for later
@@ -181,9 +176,8 @@ variants within a level.
   continues throughout; Done is not a save operation.
 - **F6** Select up to `handSize` cards from the pool for the starting deck, with a counter
   (`9 / 11`). Selecting more than `handSize` isn't possible. The grid also shows
-  eligible-but-unpicked cards outside the starting pool, gray and unselectable; their
-  exclusion notes are immediately editable. Cards already in the pool but left out of
-  the hand show exclusion notes once the hand reaches `handSize`.
+  eligible-but-unpicked cards outside the starting pool, gray and unselectable. Every
+  card in the grid has its card note below it, whether it's in the hand or not.
 
 ### 4.5 Level-up (L → L+1): happy path
 
@@ -213,33 +207,30 @@ necessarily on screen at once.
 1. **Pick a new pool card (R2).** Candidates:
    - **Newly unlocked**: the level L+1 cards, shown first and prominently.
    - **Earlier, not yet picked**: unpicked cards of level 2..L, in a secondary section.
-   - The picked card stays in place, marked *Picked*. Tapping it again un-picks it, and
+   - The picked card stays in place, marked *Level N pick* (N = the level it is picked for). Tapping it again un-picks it, and
      tapping another candidate changes the pick.
-2. **Added to deck.** The pick always enters the deck, marked **NEW**. The deck is now
+2. **Added to deck.** The pick always enters the deck, marked **Level L+1 pick**. The deck is now
    `handSize + 1`, and the status bar shows **"Remove 1 card — 12 / 11"**.
 3. **Drop one card.** Tap a deck card to drop it, and tap it again to keep it. Dropped
    cards stay in place, marked *Dropped*.
-   - Cards that are **NEW** (picked or added in this flow) can't be dropped. Undo them
+   - Cards marked as this level's pick or *Added from pool* in this flow can't be dropped. Undo them
      where they were chosen instead.
    - So a pick always enters the deck at its own level. It can be dropped at a later
      level.
 4. **Done.**
 
-**Swap more cards (secondary path).** A collapsible "Swap more cards from the pool"
-section lists every pool card that isn't in deck L. It behaves like the pick sections:
-- Tapping a card adds it to the deck (NEW) and marks it *Added* in place. Tapping it
+**Swap more cards (secondary path).** An "Other pool cards" section, always shown below
+the deck, lists every pool card that isn't in deck L. It behaves like the pick sections:
+- Tapping a card adds it to the deck and marks it *Added from pool*, both in place and
+  in the deck. Tapping it
   again removes it.
 - Then drop a card from the deck, repeated as needed.
-- The section stays open until the user closes it.
 - Dropped cards stay in the pool and can return at any later level.
 
-**Optional motivation fields** (§4.8) are shown **on the card they're about**, as a note
-box over the lower part of the card:
-- "Why X?" on the picked card and on each *Added* card in the candidate sections.
-- "Why drop X?" on each dropped deck card.
-
-NEW cards in the deck don't get a second note box. The app never prompts for these notes
-and never blocks on them. Typed text is kept while the user keeps editing in the flow.
+**Card notes** (§4.8) are shown **directly below every card** in the flow, headed "Card
+note". A card that is picked or added appears in both a candidate section and the deck;
+only its deck copy gets the note field. The app never prompts for notes and never
+blocks on them.
 
 **Enlarge.** Every card has an enlarge button (🔍) that shows the card at near full screen
 height, with the card's current action (e.g. *Drop this card*) and Close. In this flow, a
@@ -263,8 +254,9 @@ its reported problems instead of appending.
   the specific problem. Each problem has a one-tap fix: remove that change, or choose a
   replacement.
 - **F9** Only the highest level above the start level can be deleted, with confirmation.
-  Deleting a level also deletes its motivations, but retains build guidance. Removing
-  the starting level requires deleting the build.
+  Deleting a level also deletes the card notes recorded at that level; the confirmation
+  says so. Notes from earlier levels remain. Removing the starting level requires
+  deleting the build.
 
 ### 4.7 Views
 
@@ -272,61 +264,40 @@ its reported problems instead of appending.
   - The deck's cards as images, sorted by card level, then initiative.
   - A level switcher (previous/next, and a direct choice among existing levels).
   - Badges: **incomplete**, **invalid**.
-  - A **"Show guidance"** toggle that reveals each card's guidance with the card. Tapping
-    a card opens card detail (F12).
-  - This level's changes (pick, added, dropped) with their motivations.
-  - Entry points: level up, edit this level, overview, motivations.
+  - A **"Show card note"** toggle that shows each card's note for this level (§4.8) below
+    the card, with the level it was recorded at. Tapping a card opens card detail (F12).
+  - A **"Show dropped cards"** toggle (not at the start level) that also shows the cards
+    dropped at this level, marked *Dropped*.
+  - Cards picked or added at this level are marked *Level N pick* or *Added from pool*.
+    At the start level, each starting pick shows its slot level (e.g. *Level 2 pick*).
+  - Entry points: level up, edit this level, overview.
 - **F11 Build overview.** A matrix:
   - Rows = all cards, grouped by card level. Columns = the build's levels.
   - Each cell shows one of: *in deck*, *in pool but not in deck*, *not in pool*.
-  - Markers for *picked here*, *added here* and *dropped here*, plus an indicator for
-    cells that have a motivation. Tapping the indicator opens the motivation.
+  - Markers for *picked here*, *added here* and *dropped here*, plus a round ✎ indicator
+    on cells where a non-empty card note was recorded at that level. Hovering or
+    focusing the indicator shows the note; on touch screens a tap toggles it.
   - A per-level summary shows the pick and the number of swaps.
   - Tapping a column header opens that deck view.
-- **F12 Card detail.** Opens from anything that shows the card. Shows a large image,
-  editable guidance for this build, and currently applicable motivations about this card.
+- **F12 Card detail** (`…/b/:buildId/card/:cardId`, independent of level). Read-only:
+  a large image and every recorded version of the card's note, lowest level first.
 
-### 4.8 Motivations
+### 4.8 Card notes
 
-All optional, free text, stored per build:
-
-| Kind      | Key                      | Meaning                                                                                                                            |
-|-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| `exclude` | build, start level, card | Why this card was never a good fit for the build. Available for every card of level ≤ start level that's not in the starting deck. |
-| `add`     | build, level, card       | Why include this card in the starting hand, or why it is the best pool pick and/or addition to the deck at this level.             |
-| `drop`    | build, level, card       | Why this is the worst card and has to go.                                                                                          |
-
-- **F13** Where motivations can be entered:
-  - inline wherever the subject appears: in the level-up flow, on the card itself (§4.5);
-    in the deck view's changes; in card detail.
-  - in the starting-deck view, an optional "Why include [card]?" note over each selected
-    card, using the same on-card layout as level-up notes. "Why exclude [card]?" notes
-    appear on excluded cards in that same grid (§4.4), with amber text and translucent
-    amber boxes distinct from inclusion notes. There is no separate expandable list.
-  - A missing motivation is shown as a subtle "add note" affordance, never as a warning.
-- **F14 Motivations view** per build, to inspect and revise:
-  - Grouped as *Not in starting deck*, then per level *Picked / Added* and *Dropped*.
-  - Each entry shows a thumbnail and inline-editable text with its `updatedAt`.
-  - Only motivations that currently apply are listed.
-- **F15** If an edit means a motivation no longer applies (e.g. a different card is now
-  dropped), keep it in storage but hide it. It reappears if the same change is made
-  again.
-- Initial-pick `add` motivations are keyed to the build's start level, even when the
-  pick slot is for an earlier level; labels retain the slot's level (e.g. "Level 2 pick").
-  Initial picks need not be in the starting deck for their pick motivations to apply.
-  A picked card's inclusion field and pick field edit the same `add` motivation, not
-  separate notes. Other starting-hand `add` motivations apply only while the card is
-  included; removing it hides the note without deleting it, and reselecting restores it.
-- `exclude` motivations include eligible-but-unpicked cards outside the starting pool,
-  not just cards in the pool.
+- **F13** One optional free-text **card note** per build × card × level: why the card is
+  in or out of the deck, how it combines with other cards, how to play it. A note does
+  not depend on whether the card is in the deck, excluded or dropped.
+- **F14** Notes carry forward: the note for a card at level L is the one recorded at the
+  highest level ≤ L. Synergies change as the deck changes, so a later level can record
+  a new version while earlier versions stay intact.
+- **F15** Notes are edited only in the starting editor (at the start level) and the
+  level-up editor (at that level), below each card. The field is pre-filled with the
+  note the level inherits, and a chip shows its level (`from L3`). Typing records a
+  version at the current level (chip `L5`); ↺ removes that version, so the inherited
+  note applies again. Clearing an inherited note stores an empty version. Text equal to
+  the inherited note stores nothing.
 - **F16** v1 text is plain text with preserved line breaks, safely escaped. No Markdown
   rendering or raw HTML.
-
-### 4.9 Card guidance
-
-- **F17** One free-text guidance note per **build × card**: how to use it, when to play
-  top/bottom, combos. Edited in card detail, shown in the deck view behind "Show
-  guidance" (F10). Rendering follows F16.
 
 ### 4.10 Remember last position
 
@@ -347,10 +318,10 @@ design reference with sample data, not code to reuse. Its key decisions:
 - **Look:** dark, icy, image-first.
   - Header: the character's class icon (from `Character.icon`), the build name and the
     level switcher. Never show a class abbreviation like "SD".
-  - Bottom tabs: Deck, Level up, Overview, Notes.
+  - Bottom tabs: Deck, Level up, Overview.
 - **One card size everywhere** cards are shown as cards (deck view, level-up, swap):
   - 220 px wide on desktop, two per row on phones. Readable without extra action.
-  - Thumbnails in lists (changes, motivations) are the only exception.
+  - Thumbnails in lists are the only exception.
 - **Enlarge** is always an explicit button (🔍) on the card, never a long-press.
 - **Groups of cards** (e.g. the sections of the level-up flow) are separated by a visible
   divider.
@@ -362,7 +333,7 @@ design reference with sample data, not code to reuse. Its key decisions:
 
 ```ts
 interface AppData {
-  schemaVersion: 1;
+  schemaVersion: 2;                    // version 1 documents are upgraded on read
   revision: number;                    // set by the server, +1 per save
   builds: Build[];
 }
@@ -375,8 +346,7 @@ interface Build {
   startPicks: Pick[];                  // one per level 2..startLevel (empty if 1)
   startDeck: string[];                 // cardIds; UI limits to handSize, invalid stored data remains repairable
   levelUps: LevelUp[];                 // levels startLevel+1..max, contiguous, sorted
-  motivations: Motivation[];
-  guidance: Record<string, Note>;      // cardId -> note
+  cardNotes: CardNote[];
   createdAt: string; updatedAt: string; // ISO 8601
 }
 
@@ -389,15 +359,15 @@ interface LevelUp {
   dropped: string[];                   // cardIds leaving the deck vs. previous level
 }
 
-interface Motivation {
-  level: number;
+interface CardNote {
   cardId: string;
-  kind: "exclude" | "add" | "drop";
-  text: string;
+  level: number;                       // the level this version was recorded at
+  text: string;                        // "" clears an inherited note
   updatedAt: string;
-}                                      // unique per build: (level, cardId, kind)
+}                                      // unique per build: (cardId, level)
 
-interface Note { text: string; updatedAt: string }
+// Upgrading version 1: each motivation becomes the note at its (cardId, level); when
+// several collide, the most recently updated wins. Guidance is discarded.
 ```
 
 ### 5.2 Derived (never stored), the rules engine
@@ -492,7 +462,7 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
   - `/c/:characterId/b/:buildId/l/:level` (deck view)
   - `…/b/:buildId/l/:level/level-up`
   - `…/b/:buildId/overview`
-  - `…/b/:buildId/motivations`
+  - `…/b/:buildId/card/:cardId` (card detail)
   - `/about`
 - **Backend**: Hono on Node (`@hono/node-server`). It serves the `/api/*` routes above
   and the built static frontend (with SPA fallback to `index.html`).
@@ -537,29 +507,30 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 
 ## 8. Acceptance scenarios
 
-1. Create build "Freeze control" at start level 1 and choose 11 of 14 cards. A
-   collapsed "Not in deck" section offers optional notes for the other 3.
+1. Create build "Freeze control" at start level 1 and choose 11 of 14 cards. Every card,
+   including the 3 left out, has an optional card note below it.
 2. Create a build at start level 3:
    - The level 2 slot offers Birds in a Tempest and Tornado.
    - The level 3 slot offers the other level 2 card, Cold Snap and Polar Vortex.
    - Then choose 11 of 16 pool cards.
 3. Level-up 3 → 4: the status bar stays visible and the level 4 cards are shown first.
    Pick Biting Frost → "Remove 1 card — 12 / 11" → drop one → done. That takes ≤ 4
-   taps without typing. Biting Frost is marked NEW in the deck and can't be dropped.
+   taps without typing. Biting Frost is marked *Level 4 pick* in the deck and can't be
+   dropped.
 4. Extra swaps: pick and drop, then bring back an earlier dropped pool card from "Swap
    more" and drop another.
-   - The returned card stays in the swap section, marked *Added*, with its "Why…?" note
-     on the card. The section stays open.
+   - The returned card is marked *Added from pool*, with its card note below it in the
+     deck. The section stays open.
    - The overview shows 2 added and 2 dropped at that level.
 5. With levels 3–6 planned, change the level 4 pick:
    - Levels 5–6 update automatically.
    - If level 5 picked the card now picked at level 4, level 5 is flagged invalid with a
      fix action.
 6. Edit the starting deck to drop a card that level 5 also drops. Level 5 is flagged
-   invalid. After the "remove change" fix, that drop's motivation is hidden, not deleted.
+   invalid. The "remove change" fix keeps the card's notes.
 7. Save a starting deck with 9 / 11 cards. It shows **incomplete** and is still stored.
-8. "Show guidance" reveals this build's guidance for every card in the deck view. A copy
-   of the build has the same guidance, which can then be edited independently.
+8. "Show card note" reveals each card's note for that level in the deck view. A copy of
+   the build has the same notes, which can then be edited independently.
 9. Reopen the app on the same device: it opens the last viewed build and level.
 10. Data edited on desktop shows on phone after reload. A stale save from another device
     gets the 409 message, and no data is lost.
@@ -573,7 +544,6 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
 - Changing a build's start level.
 - Perks, attack modifiers, items, enhancements.
 - Offline editing.
-- Motivation/guidance history.
 - Re-basing a copied build onto a different start level.
 - Markdown formatting, offline persistence, custom blocked-label automation.
 - Hosted agent-dispatch infrastructure or automatic ticket-selection loops.

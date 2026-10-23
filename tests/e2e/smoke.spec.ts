@@ -5,7 +5,7 @@ import type { AppData } from "../../src/shared/schema";
 
 const fixtureBuildId = "123e4567-e89b-42d3-a456-426614174000";
 const fixtureData = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   revision: 0,
   builds: [
     {
@@ -16,8 +16,7 @@ const fixtureData = {
       startPicks: [],
       startDeck: [],
       levelUps: [],
-      motivations: [],
-      guidance: {},
+      cardNotes: [],
       createdAt: "2024-01-02T03:04:05.000Z",
       updatedAt: "2024-01-02T03:04:05.000Z",
     },
@@ -78,24 +77,22 @@ const deckFixtureData = {
           dropped: ["whiteout"],
         },
       ],
-      guidance: {
-        "cold-therapy": {
+      cardNotes: [
+        {
+          cardId: "cold-therapy",
+          level: 1,
           text: "Use early.\nPair with Snowball.",
           updatedAt: "2024-01-02T03:04:05.000Z",
         },
-      },
-      motivations: [
         {
-          level: 2,
           cardId: "birds-in-a-tempest",
-          kind: "add",
+          level: 2,
           text: "The best level-up pick.",
           updatedAt: "2024-01-02T03:04:05.000Z",
         },
         {
-          level: 2,
           cardId: "whiteout",
-          kind: "drop",
+          level: 2,
           text: "The weakest initiative.",
           updatedAt: "2024-01-02T03:04:05.000Z",
         },
@@ -535,17 +532,10 @@ const resetDuringSaveFixtureData = {
     {
       ...revisedLevelFixtureData.builds[0],
       name: "Keep this name",
-      guidance: {
-        blizzard: {
-          text: "Keep this guidance.",
-          updatedAt: "2024-01-02T03:04:05.000Z",
-        },
-      },
-      motivations: [
+      cardNotes: [
         {
-          level: 1,
           cardId: "tornado",
-          kind: "exclude",
+          level: 1,
           text: "Keep this unrelated note.",
           updatedAt: "2024-01-02T03:04:05.000Z",
         },
@@ -581,22 +571,20 @@ test("matches the compact image-first mockup on desktop and phone", async ({
     expect(zoomBox.x + zoomBox.width).toBeLessThanOrEqual(
       cardBox.x + cardBox.width,
     );
-    await expect(candidate.locator(".motivation-input")).toHaveCSS(
+    // Card notes sit below the card on an opaque panel, never over the art.
+    await expect(candidate.locator(".card-note-input")).toHaveCSS(
       "background-color",
-      "rgba(11, 18, 32, 0.75)",
+      "rgb(22, 34, 56)",
     );
     await expect(candidate.locator("textarea")).toHaveCSS(
       "background-color",
-      "rgba(3, 17, 31, 0.35)",
+      "rgb(11, 18, 32)",
     );
     const noteBox = (await candidate
-      .locator(".motivation-input")
+      .locator(".card-note-input")
       .boundingBox())!;
-    expect(noteBox.y).toBeGreaterThan(cardBox.y);
-    expect(noteBox.y + noteBox.height).toBeLessThanOrEqual(
-      cardBox.y + cardBox.height,
-    );
-    await expect(page.locator(".bottom-tabs").getByRole("link")).toHaveCount(4);
+    expect(noteBox.y).toBeGreaterThanOrEqual(cardBox.y + cardBox.height);
+    await expect(page.locator(".bottom-tabs").getByRole("link")).toHaveCount(3);
     expect(
       await page
         .locator(".app-header")
@@ -658,23 +646,24 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   const excluded = page.locator(
     '.level-up-candidate:has([data-card-id="tornado"])',
   );
-  await expect(excluded.getByRole("status")).toHaveText("Excluded");
+  await expect(excluded.getByRole("status")).toHaveText("Not in pool");
   await expect(
     excluded.getByRole("button", { name: "Pick Tornado", exact: true }),
   ).toBeEnabled();
-  await excluded.getByLabel("Why not Tornado?").fill("Prefer the other card.");
+  await excluded
+    .getByLabel("Card note for Tornado")
+    .fill("Prefer the other card.");
   await expect
-    .poll(() => persisted.builds[0]!.motivations)
+    .poll(() => persisted.builds[0]!.cardNotes)
     .toContainEqual(
       expect.objectContaining({
         cardId: "tornado",
         level: 2,
-        kind: "exclude",
         text: "Prefer the other card.",
       }),
     );
   await page.reload();
-  await expect(excluded.getByLabel("Why not Tornado?")).toHaveValue(
+  await expect(excluded.getByLabel("Card note for Tornado")).toHaveValue(
     "Prefer the other card.",
   );
   await expect(page.locator(".level-up-editor .deck-issues")).toHaveCount(0);
@@ -947,7 +936,7 @@ test("resets during an in-flight save without losing unrelated fields or notes",
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
   await page.getByRole("button", { name: "Pick Tornado" }).click();
-  await page.getByLabel("Why add Tornado?").fill("Temporary note");
+  await page.getByLabel("Card note for Tornado").first().fill("Temporary note");
   await expect.poll(() => firstPutStarted).toBe(true);
   await page
     .getByRole("button", { name: "Reset (current edit)", exact: true })
@@ -967,14 +956,11 @@ test("resets during an in-flight save without losing unrelated fields or notes",
           dropped: ["whiteout"],
         },
       ],
-      guidance: resetDuringSaveFixtureData.builds[0].guidance,
-      motivations: resetDuringSaveFixtureData.builds[0].motivations,
+      cardNotes: resetDuringSaveFixtureData.builds[0].cardNotes,
     });
 });
 
-test("keeps extra swaps open, notes stable and new cards undroppable", async ({
-  page,
-}) => {
+test("keeps swap notes stable and new cards removable", async ({ page }) => {
   let persisted = structuredClone(revisedLevelFixtureData);
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
@@ -1011,29 +997,45 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
     "Gathering Force",
     "Nature's Breath",
   ]);
-  const swapSection = page.getByText("Swap more cards from the pool");
-  await swapSection.click();
   const whiteout = page.getByRole("button", {
     name: "Add White Winds to deck",
   });
   await whiteout.click();
-  await expect(page.getByLabel("Why add White Winds?")).toBeVisible();
+  await expect(
+    page.getByLabel("Card note for White Winds").first(),
+  ).toBeVisible();
   await page
-    .getByLabel("Why add White Winds?")
+    .getByLabel("Card note for White Winds")
+    .first()
     .fill("Bring it back for control.");
   await page
+    .getByRole("region", { name: "Other pool cards" })
     .getByRole("button", { name: "Remove White Winds from deck" })
     .click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
-  await expect(page.getByLabel("Why add White Winds?")).toHaveValue(
-    "Bring it back for control.",
-  );
   await expect(
-    page.getByRole("button", { name: "Keep White Winds new" }),
-  ).toBeVisible();
+    page.getByLabel("Card note for White Winds").first(),
+  ).toHaveValue("Bring it back for control.");
+  // The added card is removable from both the pool and "Your deck".
+  const removeWhiteWinds = page.getByRole("button", {
+    name: "Remove White Winds from deck",
+  });
+  await expect(removeWhiteWinds).toHaveCount(2);
+  await page
+    .getByRole("region", { name: "Your deck" })
+    .getByRole("button", { name: "Remove White Winds from deck" })
+    .click();
+  await expect(removeWhiteWinds).toHaveCount(0);
+  await page.getByRole("button", { name: "Add White Winds to deck" }).click();
+  await expect(removeWhiteWinds).toHaveCount(2);
   await expect(
     page.getByRole("button", { name: "Drop Birds in a Tempest" }),
   ).toHaveCount(0);
+  await expect(
+    page
+      .locator(".level-up-deck")
+      .getByRole("button", { name: "Unpick Birds in a Tempest" }),
+  ).toBeEnabled();
   await page.getByRole("button", { name: "Drop Snowball" }).click();
   await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await page.getByRole("button", { name: "Done" }).click();
@@ -1045,11 +1047,10 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
         dropped: expect.arrayContaining(["whiteout", "snowball"]),
       }),
     );
-  await expect(persisted.builds[0]?.motivations).toEqual([
+  await expect(persisted.builds[0]?.cardNotes).toEqual([
     {
       level: 2,
       cardId: "white-winds",
-      kind: "add",
       text: "Bring it back for control.",
       updatedAt: expect.any(String),
     },
@@ -1094,9 +1095,11 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
-  await page.getByText("Swap more cards from the pool").click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
-  await page.getByLabel("Why add White Winds?").fill("Temporary note");
+  await page
+    .getByLabel("Card note for White Winds")
+    .first()
+    .fill("Temporary note");
   await page
     .getByRole("button", { name: "Reset (current edit)", exact: true })
     .click();
@@ -1107,7 +1110,7 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await expect
     .poll(async () => persisted.builds[0]?.levelUps[0])
     .toMatchObject({ pick: null, added: [], dropped: [] });
-  await expect(persisted.builds[0]?.motivations).toEqual([]);
+  await expect(persisted.builds[0]?.cardNotes).toEqual([]);
 });
 
 test("colors a full card count green even when the pick is missing or invalid", async ({
@@ -1429,7 +1432,7 @@ test("renders a derived deck view and links to the overview", async ({
   ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1`);
 });
 
-test("shows overview membership, applied markers, swap counts and note navigation", async ({
+test("shows overview membership, applied markers, swap counts and card notes", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -1477,19 +1480,23 @@ test("shows overview membership, applied markers, swap counts and note navigatio
     page.getByLabel("Snowball: In pool, not in deck; Dropped here"),
   ).toBeVisible();
 
-  const motivationLink = page.getByRole("link", {
-    name: "Open Whiteout drop motivation",
+  // Notes surface in the cell where they were recorded, without navigating.
+  await expect(page.getByRole("link", { name: /motivation/ })).toHaveCount(0);
+  const noteButton = page.getByRole("button", {
+    name: "Card note for Whiteout at level 2",
   });
-  await motivationLink.evaluate((link) =>
-    link.scrollIntoView({ block: "center", inline: "center" }),
-  );
-  await motivationLink.click();
-  await expect(page).toHaveURL(
-    `/c/SD/b/${fixtureBuildId}/motivations?level=2&cardId=whiteout&kind=drop`,
+  await noteButton.evaluate((button) =>
+    button.scrollIntoView({ block: "center", inline: "center" }),
   );
   await expect(
-    page.getByLabel("Motivation for Dropped: Whiteout"),
-  ).toBeFocused();
+    page.getByRole("button", { name: /^Card note for Whiteout/ }),
+  ).toHaveCount(1);
+  await noteButton.click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/overview`);
+  await expect(page.getByRole("tooltip")).toHaveText("The weakest initiative.");
+  await expect(noteButton).toHaveAttribute("aria-expanded", "true");
+  await noteButton.click();
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
 });
 
 test("keeps starting pick slot context in overview cells and summaries", async ({
@@ -1580,16 +1587,18 @@ test("flags an invalid overview column without hiding its applied state", async 
   ).toBeVisible();
 });
 
-test("shows sorted cards, changes, guidance and read-only card detail", async ({
+test("shows card notes, dropped cards and a read-only note history", async ({
   page,
 }) => {
-  await page.route("**/api/data", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(deckFixtureData),
-    }),
-  );
+  const data = structuredClone(deckFixtureData) as AppData;
+  // A later version must not leak into the level 2 deck view.
+  data.builds[0]!.cardNotes.push({
+    cardId: "cold-therapy",
+    level: 3,
+    text: "Later: heal the summon.",
+    updatedAt: "2024-01-02T03:04:05.000Z",
+  });
+  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
 
   await expect(
@@ -1610,71 +1619,77 @@ test("shows sorted cards, changes, guidance and read-only card detail", async ({
     "Nature's Breath",
   ]);
   await expect(page.locator(".deck-intro .status-badge")).toHaveCount(0);
-  await expect(page.getByText("Level 2 changes")).toBeVisible();
-  const choices = page.getByRole("region", { name: "Level 2 changes" });
-  await expect(
-    choices.getByRole("heading", { name: "Birds in a Tempest" }),
-  ).toBeVisible();
-  await expect(
-    choices.getByRole("heading", { name: "Whiteout" }),
-  ).toBeVisible();
-  await expect(choices.locator(".change-level-badge")).toHaveText([
-    "Level 2",
-    "Level 2",
-  ]);
-  await expect(choices.getByText("Picked", { exact: true })).toBeVisible();
-  await expect(choices.getByText("Dropped", { exact: true })).toBeVisible();
-  const droppedChoice = choices.getByRole("listitem").filter({
-    has: page.getByRole("heading", { name: "Whiteout" }),
-  });
-  await expect(droppedChoice).toHaveAttribute("data-kind", "drop");
-  await expect(droppedChoice.getByText("Drop motivation")).toBeVisible();
-  await expect(droppedChoice.locator(".change-kind")).toHaveCSS(
-    "color",
-    "rgb(255, 255, 255)",
+  await expect(page.locator(".change-section")).toHaveCount(0);
+  const birds = page.locator(
+    '.deck-card-item:has([data-card-id="birds-in-a-tempest"])',
   );
-  await expect(droppedChoice.locator(".change-kind")).toHaveCSS(
+  await expect(birds.locator(".card-state")).toHaveText("Level 2 pick");
+  await expect(page.getByText("NEW", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+
+  const showNotes = page.getByRole("checkbox", { name: "Show card note" });
+  await expect(showNotes).not.toBeChecked();
+  await expect(page.locator(".card-note")).toHaveCount(0);
+  await showNotes.check();
+  const coldTherapy = page.locator(
+    '.deck-card-item:has([data-card-id="cold-therapy"])',
+  );
+  await expect(coldTherapy.locator(".card-note")).toContainText("Use early.");
+  await expect(coldTherapy.locator(".card-note")).toContainText(
+    "Pair with Snowball.",
+  );
+  await expect(coldTherapy.locator(".card-note-level")).toHaveText("L1");
+  await expect(page.getByText("Later: heal the summon.")).toHaveCount(0);
+  await expect(birds.locator(".card-note")).toContainText(
+    "The best level-up pick.",
+  );
+  const emptyNote = page
+    .locator('.deck-card-item:has([data-card-id="snowball"]) .card-note em')
+    .first();
+  await expect(emptyNote).toHaveText("No card note");
+  await expect(emptyNote).toHaveCSS("font-style", "italic");
+
+  const showDropped = page.getByRole("checkbox", {
+    name: "Show dropped cards",
+  });
+  await expect(showDropped).not.toBeChecked();
+  await expect(page.locator('[data-card-id="whiteout"]')).toHaveCount(0);
+  await showDropped.check();
+  const whiteout = page.locator(
+    '.deck-card-item:has([data-card-id="whiteout"])',
+  );
+  await expect(whiteout.locator(".card-state")).toHaveText("Dropped");
+  await expect(whiteout.locator(".card-state")).toHaveCSS(
     "background-color",
     "rgb(183, 57, 57)",
   );
-  await expect(choices.locator('[data-kind="add"] .change-kind')).toHaveCSS(
-    "background-color",
-    "rgb(125, 211, 252)",
+  await expect(whiteout.locator(".card-note")).toContainText(
+    "The weakest initiative.",
   );
-  await expect(choices.getByText("The best level-up pick.")).toHaveCount(1);
-  await expect(choices.getByRole("textbox")).toHaveCount(0);
-  await expect(
-    page.getByRole("link", { name: "Open Whiteout details" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Enlarge Whiteout" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("checkbox", { name: "Show guidance" }),
-  ).not.toBeChecked();
-  await page.getByRole("checkbox", { name: "Show guidance" }).check();
-  await expect(page.getByText("Use early.")).toBeVisible();
-  await expect(page.getByText("Pair with Snowball.")).toBeVisible();
-  const emptyGuidance = page.locator(".guidance-note em").first();
-  await expect(emptyGuidance).toHaveText("none");
-  await expect(emptyGuidance).toHaveCSS("font-style", "italic");
 
-  await page
-    .getByRole("button", { name: "Open Birds in a Tempest details" })
-    .click();
-  await expect(page).toHaveURL(
-    `/c/SD/b/${fixtureBuildId}/l/2/card/birds-in-a-tempest`,
-  );
+  await page.getByRole("button", { name: "Open Cold Therapy details" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/card/cold-therapy`);
   await expect(
     page.getByRole("heading", { name: "Card detail" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Birds in a Tempest" }),
+    page.getByRole("heading", { name: "Cold Therapy" }),
   ).toBeVisible();
-  await expect(page.getByText("The best level-up pick.")).toBeVisible();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  const history = page.locator(".card-note-history li");
+  await expect(history).toHaveCount(2);
+  await expect(history.locator(".card-note-level")).toHaveText([
+    "Level 1",
+    "Level 3",
+  ]);
+  await expect(history.nth(1)).toContainText("Later: heal the summon.");
+  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
   await expect(
-    page.getByRole("link", { name: "Back to level 2 deck" }),
-  ).toBeVisible();
+    page.getByRole("checkbox", { name: "Show dropped cards" }),
+  ).toHaveCount(0);
 });
 
 test("renders replay validation messages without redundant invalid badges", async ({
@@ -1739,30 +1754,22 @@ test("removes an invalid downstream operation without changing its neighbors", a
   await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
-test("deletes only the highest level and its motivations", async ({ page }) => {
+test("deletes only the highest level and its card notes", async ({ page }) => {
   let persisted = structuredClone(plannedLaterFixtureData) as AppData;
-  persisted.builds[0]!.motivations = [
+  persisted.builds[0]!.cardNotes = [
     {
-      level: 2,
       cardId: "birds-in-a-tempest",
-      kind: "add",
+      level: 2,
       text: "Keep this note",
       updatedAt: "2024-01-02T03:04:05.000Z",
     },
     {
-      level: 3,
       cardId: "tornado",
-      kind: "drop",
+      level: 3,
       text: "Delete this note",
       updatedAt: "2024-01-02T03:04:05.000Z",
     },
   ];
-  persisted.builds[0]!.guidance = {
-    tornado: {
-      text: "Keep this guidance",
-      updatedAt: "2024-01-02T03:04:05.000Z",
-    },
-  };
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({
@@ -1790,6 +1797,9 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
   await expect(
     page.getByRole("dialog", { name: "Delete level 3?" }),
   ).toBeVisible();
+  await expect(page.getByRole("dialog")).toContainText(
+    "card notes recorded at level 3",
+  );
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Cancel" })
@@ -1814,18 +1824,13 @@ test("deletes only the highest level and its motivations", async ({ page }) => {
           dropped: ["whiteout"],
         },
       ],
-      motivations: [
+      cardNotes: [
         {
-          level: 2,
           cardId: "birds-in-a-tempest",
+          level: 2,
           text: "Keep this note",
         },
       ],
-      guidance: {
-        tornado: {
-          text: "Keep this guidance",
-        },
-      },
     });
 });
 
@@ -1888,45 +1893,115 @@ test("restores a picked card when its stored add is missing", async ({
   await expect(page.getByText("Invalid", { exact: true })).toHaveCount(0);
 });
 
-test("asks for available-card motivations only at the current level", async ({
+test("carries card notes forward and records a new version per level", async ({
   page,
 }) => {
-  const data = structuredClone(deckFixtureData) as AppData;
-  data.builds[0]!.levelUps.push({
+  let persisted = structuredClone(deckFixtureData) as AppData;
+  persisted.builds[0]!.levelUps.push({
     level: 3,
     pick: "polar-vortex",
     added: ["polar-vortex"],
     dropped: ["snowball"],
   });
-  data.builds[0]!.motivations.push({
-    level: 2,
+  persisted.builds[0]!.cardNotes.push({
     cardId: "tornado",
-    kind: "exclude",
+    level: 2,
     text: "Already explained at level 2",
     updatedAt: "2024-01-02T03:04:05.000Z",
   });
-  await page.route("**/api/data", (route) => route.fulfill({ json: data }));
+  await page.route("**/api/data", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({ json: persisted });
+      return;
+    }
+    const body = route.request().postDataJSON();
+    persisted = { ...body.data, revision: persisted.revision + 1 };
+    await route.fulfill({ json: { revision: persisted.revision } });
+  });
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
   const available = page.getByRole("region", {
     name: "Available cards",
     exact: true,
   });
-  await expect(available.getByLabel("Why add Polar Vortex?")).toBeVisible();
-  await expect(available.getByLabel("Why not Cold Snap?")).toBeVisible();
-  const tornado = available.locator(".level-up-candidate").filter({
+  // Every shown card can carry a note, including kept deck cards.
+  const candidates = available.locator(".level-up-candidate");
+  await expect(candidates.first()).toBeVisible();
+  await expect(available.getByRole("textbox")).toHaveCount(
+    await candidates.count(),
+  );
+  const deck = page.locator(".level-up-deck");
+  await expect(deck.getByRole("textbox")).toHaveCount(
+    await deck.locator(".level-up-deck-card").count(),
+  );
+  await expect(available.getByText("Card note", { exact: true })).toHaveCount(
+    await candidates.count(),
+  );
+
+  // A picked card shows the same note in both places, kept in sync.
+  const pickNotes = page.getByLabel("Card note for Polar Vortex");
+  await expect(pickNotes).toHaveCount(2);
+  await pickNotes.first().fill("Synced between both fields");
+  await expect(pickNotes.nth(1)).toHaveValue("Synced between both fields");
+  await pickNotes.nth(1).fill("");
+
+  const tornado = candidates.filter({
     has: page.getByRole("button", { name: "Pick Tornado", exact: true }),
   });
   await expect(tornado.locator(".card-tile")).toHaveAttribute(
     "data-state",
-    "Excluded",
+    "Not in pool",
   );
-  await expect(
-    tornado.getByRole("button", { name: "Pick Tornado", exact: true }),
-  ).toBeEnabled();
-  await expect(tornado.getByRole("textbox")).toHaveCount(0);
-  await expect(available.getByRole("textbox")).toHaveCount(2);
+  const tornadoNote = tornado.getByLabel("Card note for Tornado");
+  await expect(tornadoNote).toHaveValue("Already explained at level 2");
+  await expect(tornado.locator(".card-note-level")).toHaveText("from L2");
+  await expect(tornado.getByRole("button", { name: /Revert/ })).toHaveCount(0);
+
+  await tornadoNote.fill("Still skipping it at level 3");
+  await expect(tornado.locator(".card-note-level")).toHaveText("L3");
+  await expect
+    .poll(() =>
+      persisted.builds[0]!.cardNotes.filter(
+        (note) => note.cardId === "tornado",
+      ),
+    )
+    .toEqual([
+      expect.objectContaining({
+        level: 2,
+        text: "Already explained at level 2",
+      }),
+      expect.objectContaining({
+        level: 3,
+        text: "Still skipping it at level 3",
+      }),
+    ]);
+
+  await tornado
+    .getByRole("button", { name: "Revert Tornado note to level 2" })
+    .click();
+  await expect(tornadoNote).toHaveValue("Already explained at level 2");
+  await expect(tornado.locator(".card-note-level")).toHaveText("from L2");
+  await expect
+    .poll(() =>
+      persisted.builds[0]!.cardNotes.filter(
+        (note) => note.cardId === "tornado",
+      ),
+    )
+    .toEqual([expect.objectContaining({ level: 2 })]);
+
+  // Clearing an inherited note stores an empty version for this level.
+  await tornadoNote.fill("");
+  await expect(tornado.locator(".card-note-level")).toHaveText("L3");
+  await expect
+    .poll(
+      () =>
+        persisted.builds[0]!.cardNotes.find(
+          (note) => note.cardId === "tornado" && note.level === 3,
+        )?.text,
+    )
+    .toBe("");
+
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
-  await expect(page.getByLabel("Why not Tornado?")).toHaveValue(
+  await expect(page.getByLabel("Card note for Tornado")).toHaveValue(
     "Already explained at level 2",
   );
 });
@@ -1943,6 +2018,9 @@ test("sorts Your deck and the deck view by descending level with X last", async 
   });
   await page.route("**/api/data", (route) => route.fulfill({ json: data }));
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  await expect(
+    page.locator(".level-up-deck .card-action img").first(),
+  ).toBeVisible();
   const levels = await page
     .locator(".level-up-deck .card-action img")
     .evaluateAll((images) =>
@@ -1967,7 +2045,7 @@ test("sorts Your deck and the deck view by descending level with X last", async 
   );
 });
 
-test("styles NEW badges as centered pills while preserving their colors", async ({
+test("styles level-up pick badges as centered pills in view and edit", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -1976,14 +2054,14 @@ test("styles NEW badges as centered pills while preserving their colors", async 
   for (const route of ["2", "2/level-up"]) {
     await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
     const badge = page
-      .locator('.card-tile[data-state^="NEW"] .card-state')
+      .locator('.card-tile[data-card-id="birds-in-a-tempest"] .card-state')
       .first();
-    await expect(badge).toBeVisible();
+    await expect(badge).toHaveText("Level 2 pick");
     await expect(badge).toHaveCSS("top", "-11px");
     await expect(badge).toHaveCSS("border-radius", "99px");
     await expect(badge).toHaveCSS("font-size", "12px");
-    await expect(badge).toHaveCSS("color", "rgb(125, 211, 252)");
-    await expect(badge).toHaveCSS("background-color", "rgba(3, 17, 31, 0.867)");
+    await expect(badge).toHaveCSS("color", "rgb(3, 17, 31)");
+    await expect(badge).toHaveCSS("background-color", "rgb(125, 211, 252)");
     const offset = await badge.evaluate((element) => {
       const badge = element.getBoundingClientRect();
       const card = element.closest(".card-tile")!.getBoundingClientRect();
@@ -2722,16 +2800,14 @@ test("copies a higher starting level with its pick slots intact", async ({
       .getByRole("navigation", { name: "Starting setup steps" })
       .getByRole("button"),
   ).toHaveCount(3);
-  await expect(
-    page
-      .locator(".starting-pick-summary")
-      .getByText("Birds in a Tempest", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page
-      .locator(".starting-pick-summary")
-      .getByText("Tornado", { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator(".starting-pick-summary")).toHaveCount(0);
+  for (const level of [2, 3]) {
+    await expect(
+      page
+        .getByRole("navigation", { name: "Starting setup steps" })
+        .getByRole("button", { name: `Level ${level} pick, complete` }),
+    ).toBeVisible();
+  }
   await expect(
     page.getByRole("heading", { name: "Complement your picks · Level 3 hand" }),
   ).toBeVisible();
@@ -2805,7 +2881,10 @@ test("preserves a lower starting pick while surfacing a higher-slot conflict", a
   });
 
   await page.goto(`/c/SD/b/${startThreeFixtureData.builds[0].id}/l/3/start`);
-  await page.getByRole("button", { name: "Change level 3 pick" }).click();
+  await page
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 3 pick/ })
+    .click();
   await page
     .getByRole("button", { name: "Pick Birds in a Tempest", exact: true })
     .click();
@@ -2839,10 +2918,10 @@ test("offers sequential legal picks for a higher starting level", async ({
   page,
 }) => {
   let persisted: {
-    schemaVersion: 1;
+    schemaVersion: 2;
     revision: number;
     builds: Array<{ startPicks: Array<{ cardId: string | null }> }>;
-  } = { schemaVersion: 1, revision: 0, builds: [] };
+  } = { schemaVersion: 2, revision: 0, builds: [] };
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({
@@ -2909,10 +2988,10 @@ test("offers sequential legal picks for a higher starting level", async ({
       name: "Change level 2 pick for Birds in a Tempest",
     }),
   ).toBeVisible();
-  await expect(page.getByLabel("Why not Polar Vortex?")).toBeVisible();
+  await expect(page.getByLabel("Card note for Polar Vortex")).toBeVisible();
 });
 
-test("edits motivations and guidance from the notes and card detail views", async ({
+test("edits card notes only in editors and shows them read-only elsewhere", async ({
   page,
 }) => {
   let persisted = structuredClone(deckFixtureData) as AppData;
@@ -2935,151 +3014,97 @@ test("edits motivations and guidance from the notes and card detail views", asyn
   });
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
-  await page.getByRole("link", { name: "Notes" }).click();
-  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/motivations`);
-  await expect(
-    page.getByRole("heading", { name: "Build motivations" }),
-  ).toBeVisible();
-  const addMotivation = page.getByLabel(
-    "Motivation for Added: Birds in a Tempest",
-  );
-  await expect(addMotivation).toHaveValue("The best level-up pick.");
-  await addMotivation.fill("<script>alert(1)</script>\nPrefer the top action.");
-  await expect
-    .poll(async () => persisted.builds[0]?.motivations)
-    .toContainEqual(
-      expect.objectContaining({
-        cardId: "birds-in-a-tempest",
-        kind: "add",
-        text: "<script>alert(1)</script>\nPrefer the top action.",
-      }),
-    );
-  const dropMotivation = page.getByLabel("Motivation for Dropped: Whiteout");
-  const originalDropTimestamp = persisted.builds[0]!.motivations.find(
-    (motivation) =>
-      motivation.cardId === "whiteout" && motivation.kind === "drop",
-  )!.updatedAt;
-  await dropMotivation.fill("Updated drop reason");
-  await expect
-    .poll(async () =>
-      persisted.builds[0]?.motivations.find(
-        (motivation) =>
-          motivation.cardId === "whiteout" && motivation.kind === "drop",
-      ),
-    )
-    .toMatchObject({ text: "Updated drop reason" });
-  expect(
-    persisted.builds[0]!.motivations.find(
-      (motivation) =>
-        motivation.cardId === "whiteout" && motivation.kind === "drop",
-    )!.updatedAt,
-  ).not.toBe(originalDropTimestamp);
-  await dropMotivation.fill("");
-  await expect
-    .poll(async () =>
-      persisted.builds[0]?.motivations.some(
-        (motivation) =>
-          motivation.cardId === "whiteout" && motivation.kind === "drop",
-      ),
-    )
-    .toBe(false);
-
-  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
-  const recordedChoices = page.getByRole("region", {
-    name: "Level 2 changes",
+  const primaryNavigation = page.getByRole("navigation", {
+    name: "Primary navigation",
   });
-  await expect(recordedChoices.getByRole("textbox")).toHaveCount(0);
+  await expect(primaryNavigation.getByRole("link")).toHaveCount(3);
   await expect(
-    recordedChoices.getByText(
-      "<script>alert(1)</script>\nPrefer the top action.",
-    ),
-  ).toBeVisible();
-  await expect(
-    recordedChoices.getByRole("button", { name: "Enlarge Birds in a Tempest" }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Open Birds in a Tempest details" })
-    .click();
-  const cardDetailMotivation = page.getByLabel(
-    "Motivation for Birds in a Tempest (Add motivation)",
-  );
-  await cardDetailMotivation.fill("Card detail reason");
+    primaryNavigation.getByRole("link", { name: "Notes" }),
+  ).toHaveCount(0);
+  await page.getByRole("link", { name: "Edit this level" }).click();
+  const birdsNote = page
+    .locator(".level-up-deck")
+    .getByLabel("Card note for Birds in a Tempest");
+  await expect(birdsNote).toHaveValue("The best level-up pick.");
+  const originalTimestamp = persisted.builds[0]!.cardNotes.find(
+    (note) => note.cardId === "birds-in-a-tempest",
+  )!.updatedAt;
+  await birdsNote.fill("<b>Top</b>\nPair with Cold Therapy.");
   await expect
     .poll(
       async () =>
-        persisted.builds[0]?.motivations.find(
-          (motivation) =>
-            motivation.cardId === "birds-in-a-tempest" &&
-            motivation.kind === "add",
+        persisted.builds[0]?.cardNotes.find(
+          (note) => note.cardId === "birds-in-a-tempest" && note.level === 2,
         )?.text,
     )
-    .toBe("Card detail reason");
-  const guidance = page.getByLabel("Guidance for Birds in a Tempest");
-  await guidance.fill("<b>Top</b>\nPair with Cold Therapy.");
-  await expect
-    .poll(async () => persisted.builds[0]?.guidance["birds-in-a-tempest"]?.text)
     .toBe("<b>Top</b>\nPair with Cold Therapy.");
-  await expect(
-    page.getByText("<b>Top</b>\nPair with Cold Therapy."),
-  ).toBeVisible();
-  await page.getByRole("link", { name: "Back to level 2 deck" }).click();
-  await page.getByRole("checkbox", { name: "Show guidance" }).check();
+  expect(
+    persisted.builds[0]!.cardNotes.find(
+      (note) => note.cardId === "birds-in-a-tempest",
+    )!.updatedAt,
+  ).not.toBe(originalTimestamp);
+
+  await page.getByRole("button", { name: "Done" }).click();
+  await page.getByRole("checkbox", { name: "Show card note" }).check();
   await expect(
     page
-      .locator(".guidance-note .plain-text")
+      .locator(".card-note .plain-text")
       .filter({ hasText: "<b>Top</b>\nPair with Cold Therapy." }),
   ).toBeVisible();
-  await expect(page.locator(".guidance-note b")).toHaveCount(0);
+  await expect(page.locator(".card-note b")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Open Birds in a Tempest details" })
     .click();
   await page.reload();
-  await expect(guidance).toHaveValue("<b>Top</b>\nPair with Cold Therapy.");
-  await expect(cardDetailMotivation).toHaveValue("Card detail reason");
+  await expect(page.locator(".card-note-history")).toContainText(
+    "<b>Top</b>\nPair with Cold Therapy.",
+  );
 
-  await page
-    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
-    .click();
+  await page.goto(`/c/SD/b/${fixtureBuildId}/motivations`);
+  await expect(
+    page.getByRole("heading", { name: "Build motivations" }),
+  ).toHaveCount(0);
+
+  await page.goto(`/c/SD`);
   await page
     .locator("li")
     .filter({ hasText: "Freeze control" })
     .getByRole("button", { name: "Copy" })
     .click();
   const copyDialog = page.getByRole("dialog", { name: "Copy build" });
-  await copyDialog.getByLabel("Build name").fill("Independent guidance copy");
+  await copyDialog.getByLabel("Build name").fill("Independent notes copy");
   await copyDialog.getByRole("button", { name: "Copy build" }).click();
   await expect
     .poll(() =>
-      persisted.builds.find(
-        (build) => build.name === "Independent guidance copy",
-      ),
+      persisted.builds.find((build) => build.name === "Independent notes copy"),
     )
     .toBeDefined();
   const copiedBuild = persisted.builds.find(
-    (build) => build.name === "Independent guidance copy",
+    (build) => build.name === "Independent notes copy",
   )!;
-  await page.goto(`/c/SD/b/${copiedBuild.id}/l/2/card/birds-in-a-tempest`);
-  const copiedGuidance = page.getByLabel("Guidance for Birds in a Tempest");
-  await expect(copiedGuidance).toHaveValue(
-    "<b>Top</b>\nPair with Cold Therapy.",
-  );
-  await copiedGuidance.fill("Copy-only guidance");
+  await page.goto(`/c/SD/b/${copiedBuild.id}/l/2/level-up`);
+  const copiedNote = page
+    .locator(".level-up-deck")
+    .getByLabel("Card note for Birds in a Tempest");
+  await expect(copiedNote).toHaveValue("<b>Top</b>\nPair with Cold Therapy.");
+  await copiedNote.fill("Copy-only note");
   await expect
     .poll(
       async () =>
-        persisted.builds.find((build) => build.id === copiedBuild.id)?.guidance[
-          "birds-in-a-tempest"
-        ]?.text,
+        persisted.builds
+          .find((build) => build.id === copiedBuild.id)
+          ?.cardNotes.find((note) => note.cardId === "birds-in-a-tempest")
+          ?.text,
     )
-    .toBe("Copy-only guidance");
+    .toBe("Copy-only note");
   expect(
-    persisted.builds.find((build) => build.id === fixtureBuildId)?.guidance[
-      "birds-in-a-tempest"
-    ]?.text,
+    persisted.builds
+      .find((build) => build.id === fixtureBuildId)
+      ?.cardNotes.find((note) => note.cardId === "birds-in-a-tempest")?.text,
   ).toBe("<b>Top</b>\nPair with Cold Therapy.");
 });
 
-test("shows inline exclusion notes and keeps unpicked starting cards unavailable", async ({
+test("keeps one card note per card in the starting editor, whatever its state", async ({
   page,
 }) => {
   let persisted = structuredClone(deckFixtureData) as AppData;
@@ -3113,17 +3138,16 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
     "filter",
     "grayscale(1)",
   );
-  const unpickedNote = unpicked.getByLabel("Why not Tornado?");
+  const unpickedNote = unpicked.getByLabel("Card note for Tornado");
   await expect(unpickedNote).toBeEnabled();
-  await expect(excluded.getByLabel("Why not White Winds?")).toHaveCount(0);
+  await expect(excluded.getByLabel("Card note for White Winds")).toBeEnabled();
   await unpickedNote.fill("I prefer the other level-two card.");
   await expect
-    .poll(() => persisted.builds[0]!.motivations)
+    .poll(() => persisted.builds[0]!.cardNotes)
     .toContainEqual(
       expect.objectContaining({
         level: 2,
         cardId: "tornado",
-        kind: "exclude",
         text: "I prefer the other level-two card.",
       }),
     );
@@ -3134,38 +3158,37 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await page
     .getByRole("button", { name: "Add Whiteout to starting deck" })
     .click();
-  const note = excluded.getByLabel("Why not White Winds?");
+  const note = excluded.getByLabel("Card note for White Winds");
   await expect(note).toBeEnabled();
   await expect(excluded.locator(".card-action")).toBeDisabled();
   await expect(excluded.locator(".card-action img")).toHaveCSS(
     "filter",
     "grayscale(1)",
   );
-  const notePanel = excluded.locator(".motivation-input");
+  const notePanel = excluded.locator(".card-note-input");
   const inclusionPanel = page
     .locator(".starting-deck-card")
     .filter({ has: page.locator('.card-tile[data-card-id="cold-therapy"]') })
-    .locator(".motivation-input");
-  expect(await notePanel.evaluate((el) => getComputedStyle(el).color)).not.toBe(
-    await inclusionPanel.evaluate((el) => getComputedStyle(el).color),
-  );
+    .locator(".card-note-input");
+  // A not-in-deck card's note takes the Not in deck pill's colour scheme.
+  await expect(notePanel).toHaveCSS("color", "rgb(226, 232, 240)");
+  await expect(inclusionPanel).toHaveCSS("color", "rgb(125, 211, 252)");
   expect(
     await notePanel.evaluate((el) => getComputedStyle(el).backgroundColor),
   ).not.toBe(
     await inclusionPanel.evaluate((el) => getComputedStyle(el).backgroundColor),
   );
+  await expect(notePanel.getByText("Card note", { exact: true })).toBeVisible();
   const box = (await excluded.locator(".card-action").boundingBox())!;
   const noteBox = (await note.boundingBox())!;
-  expect(noteBox.y).toBeGreaterThan(box.y);
-  expect(noteBox.y + noteBox.height).toBeLessThanOrEqual(box.y + box.height);
+  expect(noteBox.y).toBeGreaterThanOrEqual(box.y + box.height);
   await note.fill("Not enough room in this hand.");
   await expect
-    .poll(() => persisted.builds[0]!.motivations)
+    .poll(() => persisted.builds[0]!.cardNotes)
     .toContainEqual(
       expect.objectContaining({
         level: 2,
         cardId: "white-winds",
-        kind: "exclude",
         text: "Not enough room in this hand.",
       }),
     );
@@ -3173,7 +3196,7 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await page
     .getByRole("button", { name: "Remove Whiteout from starting deck" })
     .click();
-  await expect(note).toHaveCount(0);
+  await expect(note).toHaveValue("Not enough room in this hand.");
   await expect(excluded.locator(".card-action")).toBeEnabled();
   await expect(unpicked.locator(".card-action")).toBeDisabled();
   await expect(unpickedNote).toHaveValue("I prefer the other level-two card.");
@@ -3185,7 +3208,10 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await page.reload();
   await expect(note).toHaveValue("Not enough room in this hand.");
   await expect(unpickedNote).toHaveValue("I prefer the other level-two card.");
-  await page.getByRole("button", { name: "Change level 2 pick" }).click();
+  await page
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 2 pick/ })
+    .click();
   await page.getByRole("button", { name: "Pick Tornado", exact: true }).click();
   await page
     .getByRole("button", { name: "Return to hand", exact: true })
@@ -3201,20 +3227,18 @@ test("shows inline exclusion notes and keeps unpicked starting cards unavailable
   await expect(
     page.getByRole("button", { name: "Change level 2 pick for Tornado" }),
   ).toBeEnabled();
-  await expect(unpickedNote).toHaveCount(0);
-  await expect(page.getByLabel("Why include Tornado?")).toHaveValue("");
+  await expect(unpickedNote).toHaveValue("I prefer the other level-two card.");
   await expect.poll(() => persisted.builds[0]!.startDeck).toContain("tornado");
-  expect(persisted.builds[0]!.motivations).toContainEqual(
+  expect(persisted.builds[0]!.cardNotes).toContainEqual(
     expect.objectContaining({
       cardId: "tornado",
-      kind: "exclude",
       text: "I prefer the other level-two card.",
     }),
   );
 });
 
 for (const startLevel of [1, 3]) {
-  test(`documents starting-hand inclusion reasons at start level ${startLevel}`, async ({
+  test(`documents starting-hand card notes at start level ${startLevel}`, async ({
     page,
   }) => {
     let persisted = structuredClone(fixtureData) as AppData;
@@ -3239,69 +3263,52 @@ for (const startLevel of [1, 3]) {
     const expectedNote = {
       level: startLevel,
       cardId: "cold-therapy",
-      kind: "add",
       text: reason,
     };
     await page.goto(startPath);
-    const note = page.getByLabel("Why include Cold Therapy?");
+    const note = page.getByLabel("Card note for Cold Therapy");
     await expect(note).toBeVisible();
     await expect(
       page
-        .locator('.starting-deck-card > .motivation-input[data-kind="add"]')
-        .first(),
-    ).toHaveCSS("background-color", "rgba(11, 18, 32, 0.75)");
-    await expect(note).toHaveCSS("background-color", "rgba(3, 17, 31, 0.35)");
+        .locator(".starting-deck-card")
+        .filter({
+          has: page.locator('.card-tile[data-card-id="cold-therapy"]'),
+        })
+        .locator(".card-note-input"),
+    ).toHaveCSS("background-color", "rgb(22, 34, 56)");
     const cardBox = (await page
       .locator('.starting-deck-card [data-card-id="cold-therapy"].card-action')
       .boundingBox())!;
     const noteBox = (await note.boundingBox())!;
-    expect(noteBox.y).toBeGreaterThan(cardBox.y);
-    expect(noteBox.y + noteBox.height).toBeLessThanOrEqual(
-      cardBox.y + cardBox.height,
-    );
-    await expect(page.getByLabel("Why include Whiteout?")).toHaveCount(0);
+    expect(noteBox.y).toBeGreaterThanOrEqual(cardBox.y + cardBox.height);
+    await expect(page.getByLabel("Card note for Whiteout")).toHaveValue("");
     await note.fill(reason);
     await expect
-      .poll(() => persisted.builds[0]!.motivations)
+      .poll(() => persisted.builds[0]!.cardNotes)
       .toContainEqual(expect.objectContaining(expectedNote));
     await page.reload();
     await expect(note).toHaveValue(reason);
     await page
       .getByRole("button", { name: "Remove Cold Therapy from starting deck" })
       .click();
-    await expect(note).toHaveCount(0);
-    await expect
-      .poll(() => persisted.builds[0]!.startDeck)
-      .not.toContain("cold-therapy");
-    expect(persisted.builds[0]!.motivations).toContainEqual(
-      expect.objectContaining(expectedNote),
-    );
-    await page.getByRole("link", { name: "Notes", exact: true }).click();
-    await expect(
-      page.getByLabel("Motivation for Added: Cold Therapy"),
-    ).toHaveCount(0);
-    await page.goto(startPath);
-    await page
-      .getByRole("button", { name: "Add Cold Therapy to starting deck" })
-      .click();
     await expect(note).toHaveValue(reason);
     await expect
       .poll(() => persisted.builds[0]!.startDeck)
-      .toContain("cold-therapy");
-    await page.getByRole("link", { name: "Notes", exact: true }).click();
-    await expect(
-      page.getByLabel("Motivation for Added: Cold Therapy"),
-    ).toHaveValue(reason);
-    await page.goto(
-      `/c/SD/b/${fixtureBuildId}/l/${startLevel}/card/cold-therapy`,
+      .not.toContain("cold-therapy");
+    expect(persisted.builds[0]!.cardNotes).toContainEqual(
+      expect.objectContaining(expectedNote),
     );
-    await expect(
-      page.getByLabel("Motivation for Cold Therapy (Add motivation)"),
-    ).toHaveValue(reason);
+    await page.goto(`/c/SD/b/${fixtureBuildId}/card/cold-therapy`);
+    await expect(page.locator(".card-note-history")).toContainText(
+      `Level ${startLevel}`,
+    );
+    await expect(page.locator(".card-note-history")).toContainText(
+      "<b>Keep for support.</b>",
+    );
   });
 }
 
-test("edits starting exclusion and initial-pick motivations", async ({
+test("edits starting exclusion and initial-pick card notes", async ({
   page,
 }) => {
   const initialPickData = structuredClone(startThreeFixtureData) as AppData;
@@ -3339,29 +3346,34 @@ test("edits starting exclusion and initial-pick motivations", async ({
 
   const buildId = persisted.builds[0]!.id;
   await page.goto(`/c/SD/b/${buildId}/l/3/start`);
-  const exclusion = page.getByLabel("Why not Cold Snap?");
+  const exclusion = page.getByLabel("Card note for Cold Snap");
   await exclusion.fill("Not for this build.");
   await expect
-    .poll(async () => persisted.builds[0]?.motivations)
+    .poll(async () => persisted.builds[0]?.cardNotes)
     .toContainEqual(
       expect.objectContaining({
         level: 3,
         cardId: "cold-snap",
-        kind: "exclude",
         text: "Not for this build.",
       }),
     );
 
-  await page.getByRole("button", { name: "Change level 2 pick" }).click();
-  await expect(page.getByLabel("Why add Birds in a Tempest?")).toBeVisible();
-  await page.getByLabel("Why add Birds in a Tempest?").fill("Slot two reason");
+  await page
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 2 pick/ })
+    .click();
+  await expect(
+    page.getByLabel("Card note for Birds in a Tempest"),
+  ).toBeVisible();
+  await page
+    .getByLabel("Card note for Birds in a Tempest")
+    .fill("Slot two reason");
   await expect
-    .poll(async () => persisted.builds[0]?.motivations)
+    .poll(async () => persisted.builds[0]?.cardNotes)
     .toContainEqual(
       expect.objectContaining({
         level: 3,
         cardId: "birds-in-a-tempest",
-        kind: "add",
         text: "Slot two reason",
       }),
     );
@@ -3374,19 +3386,20 @@ test("edits starting exclusion and initial-pick motivations", async ({
   await page
     .getByRole("button", { name: "Add Birds in a Tempest to starting deck" })
     .click();
-  const includedPick = page.getByLabel("Why include Birds in a Tempest?");
+  const includedPick = page.getByLabel("Card note for Birds in a Tempest");
   await expect(includedPick).toHaveValue("Slot two reason");
   await includedPick.fill("Shared pick and inclusion reason");
   await page
-    .getByRole("button", { name: "Change level 2 pick", exact: true })
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 2 pick/ })
     .click();
-  await expect(page.getByLabel("Why add Birds in a Tempest?")).toHaveValue(
+  await expect(page.getByLabel("Card note for Birds in a Tempest")).toHaveValue(
     "Shared pick and inclusion reason",
   );
   await expect
     .poll(() =>
-      persisted.builds[0]!.motivations.filter(
-        (note) => note.kind === "add" && note.cardId === "birds-in-a-tempest",
+      persisted.builds[0]!.cardNotes.filter(
+        (note) => note.cardId === "birds-in-a-tempest",
       ),
     )
     .toEqual([
@@ -3395,58 +3408,6 @@ test("edits starting exclusion and initial-pick motivations", async ({
         text: "Shared pick and inclusion reason",
       }),
     ]);
-});
-
-test("hides and restores a motivation without deleting its stored note", async ({
-  page,
-}) => {
-  let persisted = structuredClone(deckFixtureData) as AppData;
-  await page.route("**/api/data", async (route) => {
-    if (route.request().method() === "GET") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(persisted),
-      });
-      return;
-    }
-    const body = JSON.parse(route.request().postData() ?? "{}");
-    persisted = { ...body.data, revision: persisted.revision + 1 };
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ revision: persisted.revision }),
-    });
-  });
-
-  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await page
-    .getByRole("button", { name: "Remove Whiteout from starting deck" })
-    .click();
-  await expect
-    .poll(() => persisted.builds[0]?.startDeck)
-    .not.toContain("whiteout");
-  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
-  await expect(
-    page
-      .locator(".change-list p.plain-text")
-      .filter({ hasText: "The weakest initiative." }),
-  ).toHaveCount(0);
-  expect(persisted.builds[0]?.motivations).toContainEqual(
-    expect.objectContaining({ cardId: "whiteout", kind: "drop" }),
-  );
-
-  await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await page
-    .getByRole("button", { name: "Add Whiteout to starting deck" })
-    .click();
-  await expect.poll(() => persisted.builds[0]?.startDeck).toContain("whiteout");
-  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
-  await expect(
-    page
-      .locator(".change-list p.plain-text")
-      .filter({ hasText: "The weakest initiative." }),
-  ).toBeVisible();
 });
 
 test("pauses note editors after save failures and conflicts", async ({
@@ -3474,24 +3435,20 @@ test("pauses note editors after save failures and conflicts", async ({
       }
     });
 
-    await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/card/birds-in-a-tempest`);
-    await page
-      .getByLabel("Guidance for Birds in a Tempest")
-      .fill("Pending note");
+    await page.goto(`/c/SD/b/${fixtureBuildId}/l/2/level-up`);
+    const birdsNote = page
+      .locator(".level-up-deck")
+      .getByLabel("Card note for Birds in a Tempest");
+    await birdsNote.fill("Pending note");
     await expect(page.getByRole("alert")).toContainText(
       response === 409 ? "Changed on another device" : "Error saving",
     );
-    await expect(
-      page.getByLabel("Guidance for Birds in a Tempest"),
-    ).toBeDisabled();
-    await expect(
-      page.getByLabel("Motivation for Birds in a Tempest (Add motivation)"),
-    ).toBeDisabled();
+    await expect(birdsNote).toBeDisabled();
     await page.getByRole("link", { name: "Deck", exact: true }).click();
     await page.getByRole("link", { name: "Level 1", exact: true }).click();
     await page.getByRole("link", { name: "Edit starting deck" }).click();
-    await expect(page.getByLabel("Why include Cold Therapy?")).toBeDisabled();
-    await expect(page.getByLabel("Why not White Winds?")).toBeDisabled();
+    await expect(page.getByLabel("Card note for Cold Therapy")).toBeDisabled();
+    await expect(page.getByLabel("Card note for White Winds")).toBeDisabled();
     await page.unrouteAll({ behavior: "ignoreErrors" });
   }
 });
@@ -3753,11 +3710,15 @@ test("passes automated accessibility audits across the build workspace", async (
   await expect(
     page.getByRole("heading", { name: "Build overview" }),
   ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Card note for Whiteout at level 2" })
+    .focus();
+  await expect(page.getByRole("tooltip")).toBeVisible();
   await expectAccessible();
 
-  await page.goto(`/c/SD/b/${fixtureBuildId}/motivations`);
+  await page.goto(`/c/SD/b/${fixtureBuildId}/card/birds-in-a-tempest`);
   await expect(
-    page.getByRole("heading", { name: "Build motivations" }),
+    page.getByRole("heading", { name: "Card detail" }),
   ).toBeVisible();
   await expectAccessible();
 });

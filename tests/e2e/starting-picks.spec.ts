@@ -7,7 +7,7 @@ test("builds a level-seven hand from highest picks down, including lower-level c
   page,
 }) => {
   let persisted: AppData = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     revision: 0,
     builds: [
       createBuild({ characterId: "SD", name: "Top down", startLevel: 7 }),
@@ -53,7 +53,7 @@ test("builds a level-seven hand from highest picks down, including lower-level c
     .getByRole("button", { name: "Level 7 pick, complete", exact: true })
     .click();
   await page
-    .getByLabel("Why add Freezing Storm?")
+    .getByLabel("Card note for Freezing Storm")
     .fill("Keep this reason if I change my mind.");
   await page
     .getByRole("button", { name: "Unpick Freezing Storm", exact: true })
@@ -71,11 +71,12 @@ test("builds a level-seven hand from highest picks down, including lower-level c
   const picked = page
     .locator(".level-up-candidate")
     .filter({ has: page.locator('.card-tile[data-card-id="storm-wall"]') });
-  await expect(picked.getByLabel("Why add Storm Wall?")).toBeVisible();
-  const rejected = page.getByLabel("Why not Freezing Storm?");
-  await expect(rejected).toBeVisible();
+  await expect(picked.getByLabel("Card note for Storm Wall")).toBeVisible();
+  // The card's note follows it from picked to not in deck.
+  const rejected = page.getByLabel("Card note for Freezing Storm");
+  await expect(rejected).toHaveValue("Keep this reason if I change my mind.");
   await rejected.fill("Storm Wall defines this build.");
-  await expect(page.getByLabel("Why not Frozen Brand?")).toHaveCount(0);
+  await expect(page.getByLabel("Card note for Frozen Brand")).toBeVisible();
   const deferred = page.locator('.card-tile[data-card-id="frozen-brand"]');
   await expect(deferred.locator(".card-action img")).toHaveCSS(
     "filter",
@@ -83,26 +84,21 @@ test("builds a level-seven hand from highest picks down, including lower-level c
   );
   await expect(deferred.locator(".card-action")).toBeEnabled();
   const cardBox = (await picked.locator(".card-action").boundingBox())!;
-  const noteBox = (await picked.locator(".motivation-input").boundingBox())!;
-  expect(noteBox.y).toBeGreaterThan(cardBox.y);
-  expect(noteBox.y + noteBox.height).toBeLessThanOrEqual(
-    cardBox.y + cardBox.height,
-  );
+  const noteBox = (await picked.locator(".card-note-input").boundingBox())!;
+  expect(noteBox.y).toBeGreaterThanOrEqual(cardBox.y + cardBox.height);
   await expect
-    .poll(() => persisted.builds[0]!.motivations)
+    .poll(() => persisted.builds[0]!.cardNotes)
     .toContainEqual(
       expect.objectContaining({
-        kind: "exclude",
         cardId: "freezing-storm",
         text: "Storm Wall defines this build.",
       }),
     );
-  expect(persisted.builds[0]!.motivations).toContainEqual(
-    expect.objectContaining({
-      cardId: "freezing-storm",
-      text: "Keep this reason if I change my mind.",
-    }),
-  );
+  expect(
+    persisted.builds[0]!.cardNotes.filter(
+      (note) => note.cardId === "freezing-storm",
+    ),
+  ).toHaveLength(1);
   await page.getByRole("button", { name: "Next pick", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Level 6 pick" }),
@@ -116,11 +112,12 @@ test("builds a level-seven hand from highest picks down, including lower-level c
   await page
     .getByRole("button", { name: "Pick Shifting Snow", exact: true })
     .click();
-  await expect(page.getByLabel("Why add Shifting Snow?")).toBeVisible();
-  await expect(page.getByLabel("Why not Frozen Brand?")).toBeVisible();
-  await expect(page.getByLabel("Why not Refreshing Flurry?")).toBeVisible();
-  await expect(page.getByLabel("Why not Whipping Gale?")).toHaveCount(0);
-  await expect(page.getByLabel("Why not Cold Snap?")).toHaveCount(0);
+  await expect(page.getByLabel("Card note for Shifting Snow")).toBeVisible();
+  await expect(page.getByLabel("Card note for Frozen Brand")).toBeVisible();
+  await expect(
+    page.getByLabel("Card note for Refreshing Flurry"),
+  ).toBeVisible();
+  await expect(page.getByLabel("Card note for Whipping Gale")).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.getByRole("button", { name: "Next pick", exact: true }).click();
   await expect(
@@ -187,23 +184,10 @@ test("builds a level-seven hand from highest picks down, including lower-level c
     statusBar.getByText("6 / 6 level-up cards picked", { exact: true }),
   ).toHaveCSS("color", "rgb(74, 222, 128)");
   await expect(statusBar).toContainText("6 / 11 cards");
-  const disclosure = page.locator(".starting-pick-summary");
-  await expect(disclosure.locator("summary")).toHaveText("Level-up card picks");
-  await expect(disclosure).toHaveCSS("border-top-width", "1px");
-  const listBox = (await disclosure.locator("ul").boundingBox())!;
-  const disclosureBox = (await disclosure.boundingBox())!;
-  expect(listBox.x).toBeGreaterThan(disclosureBox.x + 12);
-  await disclosure.locator("summary").click();
-  await expect(
-    disclosure.getByRole("button", {
-      name: "Change level 2 pick",
-      exact: true,
-    }),
-  ).toBeHidden();
+  await expect(page.locator(".starting-pick-summary")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Complement your picks · Level 7 hand" }),
   ).toBeVisible();
-  await disclosure.locator("summary").click();
   await expect(
     statusBar.getByRole("button", { name: "Done", exact: true }),
   ).toBeVisible();
@@ -220,7 +204,7 @@ test("builds a level-seven hand from highest picks down, including lower-level c
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await expect(page).toHaveURL(path.replace("/start", ""));
   await page.goto(path);
-  await expect(page.getByLabel("Why not Freezing Storm?")).toHaveValue(
+  await expect(page.getByLabel("Card note for Freezing Storm")).toHaveValue(
     "Storm Wall defines this build.",
   );
   await expect(
@@ -254,7 +238,7 @@ test("builds a level-seven hand from highest picks down, including lower-level c
     }),
   ).toHaveCount(0);
   await page
-    .getByLabel("Why include Storm Wall?")
+    .getByLabel("Card note for Storm Wall")
     .fill("The build's main card.");
   await page
     .getByRole("button", {
@@ -268,7 +252,7 @@ test("builds a level-seven hand from highest picks down, including lower-level c
   await expect(
     page.getByRole("button", { name: "Unpick Storm Wall", exact: true }),
   ).toBeVisible();
-  await expect(page.getByLabel("Why add Storm Wall?")).toHaveValue(
+  await expect(page.getByLabel("Card note for Storm Wall")).toHaveValue(
     "The build's main card.",
   );
   await expect.poll(() => persisted.builds[0]!.startDeck.length).toBe(11);

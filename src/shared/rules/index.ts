@@ -1,11 +1,5 @@
 import type { Card, CardLevel, Character } from "../character.js";
-import type {
-  Build,
-  LevelUp,
-  Motivation,
-  Pick as BuildPick,
-  MotivationKind,
-} from "../schema/index.js";
+import type { Build, LevelUp, Pick as BuildPick } from "../schema/index.js";
 
 export type IssueSeverity = "incomplete" | "invalid";
 
@@ -65,14 +59,6 @@ export interface StoredOperations {
   dropped: string[];
 }
 
-export interface ApplicableMotivationContext {
-  kind: MotivationKind;
-  /** The stored motivation level, which is the start level for initial picks. */
-  level: number;
-  /** The displayed slot level for an initial pick. */
-  forLevel?: number;
-}
-
 export interface RuleLevelState {
   level: number;
   pool: Card[];
@@ -80,7 +66,6 @@ export interface RuleLevelState {
   issues: RuleIssue[];
   stored: StoredOperations;
   applied: AppliedOperations;
-  activeMotivations: Motivation[];
 }
 
 export interface ReplayResult {
@@ -527,75 +512,6 @@ function levelUpState(
   return { poolIds, deckIds, issues, applied };
 }
 
-function activeMotivations(
-  build: Build,
-  character: Character,
-  state: RuleLevelState,
-  startingPicks: AppliedStartingPick[],
-): Motivation[] {
-  return build.motivations.filter((motivation) =>
-    applicableMotivationContextsForState(
-      build,
-      character,
-      state,
-      startingPicks,
-      motivation.cardId,
-    ).some(
-      (context) =>
-        context.level === motivation.level && context.kind === motivation.kind,
-    ),
-  );
-}
-
-function applicableMotivationContextsForState(
-  build: Build,
-  character: Character,
-  state: RuleLevelState,
-  startingPicks: AppliedStartingPick[],
-  cardId: string,
-): ApplicableMotivationContext[] {
-  const card = cardMap(character).get(cardId);
-  if (!card) {
-    return [];
-  }
-
-  const contexts: ApplicableMotivationContext[] = [];
-  if (state.level === build.startLevel) {
-    const initialPick = startingPicks.find((pick) => pick.cardId === cardId);
-    if (initialPick) {
-      contexts.push({
-        kind: "add",
-        level: build.startLevel,
-        forLevel: initialPick.forLevel,
-      });
-    } else if (state.deck.some((candidate) => candidate.id === cardId)) {
-      contexts.push({ kind: "add", level: build.startLevel });
-    }
-    if (
-      cardLevel(card) <= build.startLevel &&
-      !state.deck.some((candidate) => candidate.id === cardId)
-    ) {
-      contexts.push({ kind: "exclude", level: build.startLevel });
-    }
-    return contexts;
-  }
-
-  if (state.applied.pick === cardId || state.applied.added.includes(cardId)) {
-    contexts.push({ kind: "add", level: state.level });
-  }
-  if (state.applied.dropped.includes(cardId)) {
-    contexts.push({ kind: "drop", level: state.level });
-  }
-  if (
-    state.applied.pick &&
-    cardLevel(card) <= state.level &&
-    !state.pool.some((candidate) => candidate.id === cardId)
-  ) {
-    contexts.push({ kind: "exclude", level: state.level });
-  }
-  return contexts;
-}
-
 export function replayBuild(build: Build, character: Character): ReplayResult {
   const cards = cardMap(character);
   const starting = replayStartingState(build, character, cards);
@@ -627,7 +543,6 @@ export function replayBuild(build: Build, character: Character): ReplayResult {
         added: [],
         dropped: [],
       },
-      activeMotivations: [],
     },
   ];
 
@@ -664,20 +579,10 @@ export function replayBuild(build: Build, character: Character): ReplayResult {
         dropped: [...levelUp.dropped],
       },
       applied: transition.applied,
-      activeMotivations: [],
     };
     levels.push(state);
     previousPool = transition.poolIds;
     previousDeck = transition.deckIds;
-  }
-
-  for (const state of levels) {
-    state.activeMotivations = activeMotivations(
-      build,
-      character,
-      state,
-      starting.applied,
-    );
   }
 
   return {
@@ -685,25 +590,6 @@ export function replayBuild(build: Build, character: Character): ReplayResult {
     issues: levels.flatMap((state) => state.issues),
     startingPicks: starting.applied,
   };
-}
-
-export function applicableMotivationContexts(
-  build: Build,
-  character: Character,
-  level: number,
-  cardId: string,
-): ApplicableMotivationContext[] {
-  const result = replayBuild(build, character);
-  const state = levelState(result, level);
-  return state
-    ? applicableMotivationContextsForState(
-        build,
-        character,
-        state,
-        result.startingPicks,
-        cardId,
-      )
-    : [];
 }
 
 export function validateBuild(build: Build, character: Character): RuleIssue[] {
@@ -904,15 +790,3 @@ export function canAppendLevel(build: Build, character: Character): boolean {
 }
 
 export const isAppendAllowed = canAppendLevel;
-
-export function applicableMotivations(
-  build: Build,
-  character: Character,
-  level?: number,
-): Motivation[] {
-  const result = replayBuild(build, character);
-  const state = levelState(result, level ?? build.startLevel);
-  return state?.activeMotivations ?? [];
-}
-
-export const getApplicableMotivations = applicableMotivations;

@@ -1,11 +1,11 @@
+import { useId } from "react";
 import type { Card } from "../shared/character.js";
+import { effectiveCardNote } from "../shared/builds.js";
 import {
   MAX_NOTE_LENGTH,
   type AppData,
   type Build,
 } from "../shared/schema/index.js";
-
-export type EditableMotivationKind = "exclude" | "add" | "drop";
 
 export function updateBuildData(
   data: AppData,
@@ -28,63 +28,76 @@ export function updateBuildData(
   };
 }
 
-export function MotivationInput({
+/**
+ * Edits a card's note at one level. The field is pre-filled with the note the
+ * level inherits; typing records a new version at this level, and revert drops
+ * that version so the older note applies again.
+ */
+export function CardNoteInput({
+  build,
   card,
-  kind,
-  value,
+  level,
   disabled,
   onChange,
-  label,
+  onRevert,
 }: {
+  build: Build;
   card: Card;
-  kind: EditableMotivationKind;
-  value: string;
+  level: number;
   disabled: boolean;
   onChange: (text: string) => void;
-  label?: string;
+  onRevert: () => void;
 }) {
-  const defaultLabel =
-    kind === "exclude"
-      ? `Why not ${card.name}?`
-      : kind === "drop"
-        ? `Why drop ${card.name}?`
-        : `Why add ${card.name}?`;
+  const id = useId();
+  const note = effectiveCardNote(build, card.id, level);
+  const recordedHere = note?.level === level;
+  const inherited = recordedHere
+    ? effectiveCardNote(build, card.id, level - 1)
+    : note;
   return (
-    <label className="motivation-input" data-kind={kind}>
-      <span title={label ?? defaultLabel}>{label ?? defaultLabel}</span>
+    <div className="card-note-input">
+      <div className="card-note-header">
+        <label htmlFor={id}>Card note</label>
+        {note && !recordedHere ? (
+          <span
+            className="card-note-level"
+            title={`Recorded at level ${note.level}`}
+          >
+            from L{note.level}
+          </span>
+        ) : null}
+        {recordedHere ? (
+          <span
+            className="card-note-level"
+            data-current="true"
+            title={`Recorded at level ${level}`}
+          >
+            L{level}
+          </span>
+        ) : null}
+        {recordedHere && inherited ? (
+          <button
+            type="button"
+            className="card-note-revert"
+            disabled={disabled}
+            onClick={onRevert}
+            aria-label={`Revert ${card.name} note to level ${inherited.level}`}
+            title={`Revert to level ${inherited.level} note`}
+          >
+            ↺
+          </button>
+        ) : null}
+      </div>
       <textarea
-        value={value}
+        id={id}
+        aria-label={`Card note for ${card.name}`}
+        value={note?.text ?? ""}
         maxLength={MAX_NOTE_LENGTH}
         rows={3}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
       />
-    </label>
-  );
-}
-
-export function GuidanceInput({
-  card,
-  value,
-  disabled,
-  onChange,
-}: {
-  card: Card;
-  value: string;
-  disabled: boolean;
-  onChange: (text: string) => void;
-}) {
-  return (
-    <label className="guidance-input">
-      Guidance for {card.name}
-      <textarea
-        value={value}
-        maxLength={MAX_NOTE_LENGTH}
-        rows={6}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
+    </div>
   );
 }
 
