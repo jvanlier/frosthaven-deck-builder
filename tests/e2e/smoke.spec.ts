@@ -1925,6 +1925,7 @@ test("carries card notes forward and records a new version per level", async ({
   });
   // Every shown card can carry a note, including kept deck cards.
   const candidates = available.locator(".level-up-candidate");
+  await expect(candidates.first()).toBeVisible();
   await expect(available.getByRole("textbox")).toHaveCount(
     await candidates.count(),
   );
@@ -2017,6 +2018,9 @@ test("sorts Your deck and the deck view by descending level with X last", async 
   });
   await page.route("**/api/data", (route) => route.fulfill({ json: data }));
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/3/level-up`);
+  await expect(
+    page.locator(".level-up-deck .card-action img").first(),
+  ).toBeVisible();
   const levels = await page
     .locator(".level-up-deck .card-action img")
     .evaluateAll((images) =>
