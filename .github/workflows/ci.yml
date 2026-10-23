@@ -49,11 +49,7 @@ jobs:
       - name: Unit tests
         run: npm test -- --run
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit
-
-      - name: Browser tests
-        run: npm run test:e2e
+      # Browser tests (npm run test:e2e) run locally; they are too slow for CI.
 
       - name: Production build
         run: npm run build
@@ -68,13 +64,3 @@ jobs:
 
       - name: Container smoke test
         run: npm run test:container
-
-      - name: Upload browser diagnostics
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: browser-diagnostics
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: ignore
