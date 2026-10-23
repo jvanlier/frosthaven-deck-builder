@@ -1,0 +1,23 @@
+[
+  {
+    "name": "ha-back",
+    "expansion": "Mercenary",
+    "image": "character-ability-cards/mercenary/HA/ha-back.jpeg",
+    "level": "-",
+    "initiative": "-"
+  },
+  {
+    "name": "gather reagents",
+    "expansion": "Mercenary",
+    "image": "character-ability-cards/mercenary/HA/gather-reagents.jpeg",
+    "level": "1",
+    "initiative": "21"
+  },
+  {
+    "name": "somewhere to be",
+    "expansion": "Mercenary",
+    "image": "character-ability-cards/mercenary/HA/somewhere-to-be.jpeg",
+    "level": "1",
+    "initiative": "10"
+  }
+]

@@ -1,0 +1,212 @@
+{
+  "id": "CA",
+  "name": "Cassandra",
+  "handSize": 10,
+  "icon": "CA.png",
+  "cardBack": "CA/ca-back.jpeg",
+  "cards": [
+    {
+      "id": "anticipate-intricacies",
+      "name": "Anticipate Intricacies",
+      "level": 1,
+      "initiative": 79,
+      "image": "CA/anticipate-intricacies.jpeg"
+    },
+    {
+      "id": "approach-of-the-void",
+      "name": "Approach of the Void",
+      "level": 1,
+      "initiative": 21,
+      "image": "CA/approach-of-the-void.jpeg"
+    },
+    {
+      "id": "call-of-the-nether",
+      "name": "Call of the Nether",
+      "level": "X",
+      "initiative": 87,
+      "image": "CA/call-of-the-nether.jpeg"
+    },
+    {
+      "id": "careful-attunement",
+      "name": "Careful Attunement",
+      "level": 6,
+      "initiative": 80,
+      "image": "CA/careful-attunement.jpeg"
+    },
+    {
+      "id": "cleansing-rite",
+      "name": "Cleansing Rite",
+      "level": 2,
+      "initiative": 23,
+      "image": "CA/cleansing-rite.jpeg"
+    },
+    {
+      "id": "constant-flux",
+      "name": "Constant Flux",
+      "level": 5,
+      "initiative": 37,
+      "image": "CA/constant-flux.jpeg"
+    },
+    {
+      "id": "convergence",
+      "name": "Convergence",
+      "level": 9,
+      "initiative": 91,
+      "image": "CA/convergence.jpeg"
+    },
+    {
+      "id": "cursed-ground",
+      "name": "Cursed Ground",
+      "level": 1,
+      "initiative": 5,
+      "image": "CA/cursed-ground.jpeg"
+    },
+    {
+      "id": "deep-contemplation",
+      "name": "Deep Contemplation",
+      "level": 8,
+      "initiative": 75,
+      "image": "CA/deep-contemplation.jpeg"
+    },
+    {
+      "id": "dimensional-divide",
+      "name": "Dimensional Divide",
+      "level": 2,
+      "initiative": 52,
+      "image": "CA/dimensional-divide.jpeg"
+    },
+    {
+      "id": "dimensional-transfer",
+      "name": "Dimensional Transfer",
+      "level": 1,
+      "initiative": 57,
+      "image": "CA/dimensional-transfer.jpeg"
+    },
+    {
+      "id": "duality-shards",
+      "name": "Duality Shards",
+      "level": 1,
+      "initiative": 39,
+      "image": "CA/duality-shards.jpeg"
+    },
+    {
+      "id": "enfeebling-hex",
+      "name": "Enfeebling Hex",
+      "level": 4,
+      "initiative": 25,
+      "image": "CA/enfeebling-hex.jpeg"
+    },
+    {
+      "id": "envision-the-course",
+      "name": "Envision the Course",
+      "level": 1,
+      "initiative": 8,
+      "image": "CA/envision-the-course.jpeg"
+    },
+    {
+      "id": "ethereal-vortex",
+      "name": "Ethereal Vortex",
+      "level": 3,
+      "initiative": 72,
+      "image": "CA/ethereal-vortex.jpeg"
+    },
+    {
+      "id": "hand-of-destiny",
+      "name": "Hand of Destiny",
+      "level": 9,
+      "initiative": 96,
+      "image": "CA/hand-of-destiny.jpeg"
+    },
+    {
+      "id": "inspiration-from-beyond",
+      "name": "Inspiration From Beyond",
+      "level": "X",
+      "initiative": 13,
+      "image": "CA/inspiration-from-beyond.jpeg"
+    },
+    {
+      "id": "otherworldly-journey",
+      "name": "Otherworldly Journey",
+      "level": 1,
+      "initiative": 34,
+      "image": "CA/otherworldly-journey.jpeg"
+    },
+    {
+      "id": "past-and-future",
+      "name": "Past and Future",
+      "level": 3,
+      "initiative": 40,
+      "image": "CA/past-and-future.jpeg"
+    },
+    {
+      "id": "peer-into-battle",
+      "name": "Peer Into Battle",
+      "level": 1,
+      "initiative": 82,
+      "image": "CA/peer-into-battle.jpeg"
+    },
+    {
+      "id": "planar-chaos",
+      "name": "Planar Chaos",
+      "level": 8,
+      "initiative": 14,
+      "image": "CA/planar-chaos.jpeg"
+    },
+    {
+      "id": "protective-aura",
+      "name": "Protective Aura",
+      "level": 4,
+      "initiative": 11,
+      "image": "CA/protective-aura.jpeg"
+    },
+    {
+      "id": "ray-of-light",
+      "name": "Ray of Light",
+      "level": 1,
+      "initiative": 48,
+      "image": "CA/ray-of-light.jpeg"
+    },
+    {
+      "id": "recurrence",
+      "name": "Recurrence",
+      "level": "X",
+      "initiative": 18,
+      "image": "CA/recurrence.jpeg"
+    },
+    {
+      "id": "seal-their-fate",
+      "name": "Seal Their Fate",
+      "level": 5,
+      "initiative": 20,
+      "image": "CA/seal-their-fate.jpeg"
+    },
+    {
+      "id": "tear-reality",
+      "name": "Tear Reality",
+      "level": 7,
+      "initiative": 59,
+      "image": "CA/tear-reality.jpeg"
+    },
+    {
+      "id": "tether-the-planes",
+      "name": "Tether the Planes",
+      "level": 6,
+      "initiative": 19,
+      "image": "CA/tether-the-planes.jpeg"
+    },
+    {
+      "id": "time-and-again",
+      "name": "Time and Again",
+      "level": 7,
+      "initiative": 7,
+      "image": "CA/time-and-again.jpeg"
+    },
+    {
+      "id": "void-snare",
+      "name": "Void Snare",
+      "level": 1,
+      "initiative": 17,
+      "image": "CA/void-snare.jpeg"
+    }
+  ]
+}

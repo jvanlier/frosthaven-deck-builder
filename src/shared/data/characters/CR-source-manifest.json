@@ -1,0 +1,181 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "blood-in-the-water",
+      "source": "character-ability-cards/frosthaven/CR/fh-blood-in-the-water.jpeg",
+      "sha256": "84359e94214928405e5c9e7871b1e943d66c8f0256ad74b6e5b563fac7658c71"
+    },
+    {
+      "id": "chaotic-refraction",
+      "source": "character-ability-cards/frosthaven/CR/fh-chaotic-refraction.jpeg",
+      "sha256": "e6349fe3f927903f81717f7fa9bafba49cff5d2f5c9a37f55427b5b35be94211"
+    },
+    {
+      "id": "clean-sweep",
+      "source": "character-ability-cards/frosthaven/CR/fh-clean-sweep.jpeg",
+      "sha256": "6e98f7649b64c65c3db63bffff9e58b6962b68d91b0524f1cd13c4aee31f911e"
+    },
+    {
+      "id": "cleansing-swell",
+      "source": "character-ability-cards/frosthaven/CR/fh-cleansing-swell.jpeg",
+      "sha256": "65315200ef77181c0878d191aa5c3c41701fa204633f06028c84f4575d10d059"
+    },
+    {
+      "id": "crashing-surge",
+      "source": "character-ability-cards/frosthaven/CR/fh-crashing-surge.jpeg",
+      "sha256": "e7f78d430ea00c48b68e6ebc73128817d371324640fc4b7bfdcd8f9e6a09b14d"
+    },
+    {
+      "id": "cresting-force",
+      "source": "character-ability-cards/frosthaven/CR/fh-cresting-force.jpeg",
+      "sha256": "9f2f4144642f9eef8162f7b3bf58e15b7fc9f542f0cc5b429c65daf70154e283"
+    },
+    {
+      "id": "crush-armor",
+      "source": "character-ability-cards/frosthaven/CR/fh-crush-armor.jpeg",
+      "sha256": "c3a801a50528473cb07450e2653dddedc175a605f995a31c5681a867b5727db6"
+    },
+    {
+      "id": "death-on-all-sides",
+      "source": "character-ability-cards/frosthaven/CR/fh-death-on-all-sides.jpeg",
+      "sha256": "441ae77ab348b71a22860dec005fe2a2241bb5ca0b9369304f6ff38256861bfb"
+    },
+    {
+      "id": "down-to-the-depths",
+      "source": "character-ability-cards/frosthaven/CR/fh-down-to-the-depths.jpeg",
+      "sha256": "0abe24aade8e84c1a5d476f6898ea44319d39c392e3bdd213c15f090b72baa0b"
+    },
+    {
+      "id": "drown-beneath-the-waves",
+      "source": "character-ability-cards/frosthaven/CR/fh-drown-beneath-the-waves.jpeg",
+      "sha256": "9a3d401035514ae4f48fa97992dd00d30eda9afa3c8d3be909f32825bab95635"
+    },
+    {
+      "id": "dug-in",
+      "source": "character-ability-cards/frosthaven/CR/fh-dug-in.jpeg",
+      "sha256": "ccbca4c221fef3b299c24823d878a94afa573c48f4b0b3078f437819d6cfa72e"
+    },
+    {
+      "id": "ebb-and-flow",
+      "source": "character-ability-cards/frosthaven/CR/fh-ebb-and-flow.jpeg",
+      "sha256": "d6b04ec53de93a58f2cab705c79418563334ace1a6e5000ed31d6efc1f05b20d"
+    },
+    {
+      "id": "endless-cycle",
+      "source": "character-ability-cards/frosthaven/CR/fh-endless-cycle.jpeg",
+      "sha256": "4c8a0d48656e0a42bb57a59a0d3b42acb55e6237ff8945aabd767df07929d64f"
+    },
+    {
+      "id": "high-tide",
+      "source": "character-ability-cards/frosthaven/CR/fh-high-tide.jpeg",
+      "sha256": "754eefc25b87fc5448b2d7a098ecd078d1b818447485884d382ddd3c6aaad487"
+    },
+    {
+      "id": "low-tide",
+      "source": "character-ability-cards/frosthaven/CR/fh-low-tide.jpeg",
+      "sha256": "8089a85722eeaf8622af602871839cafdd41b84ab582fd492641cd2f37858788"
+    },
+    {
+      "id": "mighty-claws",
+      "source": "character-ability-cards/frosthaven/CR/fh-mighty-claws.jpeg",
+      "sha256": "985f001ffb924fc0018e8cf52ccc8bc5ebf64a8bcce3b92648f44d9e5fd82264"
+    },
+    {
+      "id": "overwhelming-wave",
+      "source": "character-ability-cards/frosthaven/CR/fh-overwhelming-wave.jpeg",
+      "sha256": "e8a81042b8527fb9d164e280a3c24d125dd0614c325283d0a3b50c8f4498cee4"
+    },
+    {
+      "id": "pool-of-power",
+      "source": "character-ability-cards/frosthaven/CR/fh-pool-of-power.jpeg",
+      "sha256": "bfbda78f2dd5958e0cc53d2cb88bc2b1888e7e6b706b32ae9068fdf31557acbd"
+    },
+    {
+      "id": "powerful-pincer",
+      "source": "character-ability-cards/frosthaven/CR/fh-powerful-pincer.jpeg",
+      "sha256": "4c9fadbcceecb39474585e4d96e33c01d3f8b4b55482927a8ad420544a9c23f1"
+    },
+    {
+      "id": "rancid-brine",
+      "source": "character-ability-cards/frosthaven/CR/fh-rancid-brine.jpeg",
+      "sha256": "17d1bd76d822f8d11b8234dde11178fd6b76a86275f11bf66135b2c8e723c735"
+    },
+    {
+      "id": "rising-flood",
+      "source": "character-ability-cards/frosthaven/CR/fh-rising-flood.jpeg",
+      "sha256": "2aac812183cc910580dee1c360af16a5470de4ef99c2b6f9c55c801177ab51e9"
+    },
+    {
+      "id": "sharp-chitin",
+      "source": "character-ability-cards/frosthaven/CR/fh-sharp-chitin.jpeg",
+      "sha256": "4f9fed3dfab6464debd11f8f3336fe113935089d9366433597aad6f972fbc586"
+    },
+    {
+      "id": "shuck",
+      "source": "character-ability-cards/frosthaven/CR/fh-shuck.jpeg",
+      "sha256": "1071ab0d9ee8ac9de51e26087a4d8dd14751231fb298df1584a73d243baf5259"
+    },
+    {
+      "id": "skitter",
+      "source": "character-ability-cards/frosthaven/CR/fh-skitter.jpeg",
+      "sha256": "c830757da29983b2ef8f53ec04c67a5cb291293828a81e26d362c2cc83c49bf0"
+    },
+    {
+      "id": "smashing-torrent",
+      "source": "character-ability-cards/frosthaven/CR/fh-smashing-torrent.jpeg",
+      "sha256": "c80971bbfb3f897522c83d723f2956d70dca44bd447ccf2e998059ec05ad9258"
+    },
+    {
+      "id": "sodden-soil",
+      "source": "character-ability-cards/frosthaven/CR/fh-sodden-soil.jpeg",
+      "sha256": "fa1e28a22eaddb626b94ffe4eb4c63c872c4c87832ebbeb603c6e61722357c01"
+    },
+    {
+      "id": "soft-flesh",
+      "source": "character-ability-cards/frosthaven/CR/fh-soft-flesh.jpeg",
+      "sha256": "9de6018f6f1bc5d32ecf7289612dedd25bcdfb76f20b7127591c7b7eff07ed8b"
+    },
+    {
+      "id": "submerge",
+      "source": "character-ability-cards/frosthaven/CR/fh-submerge.jpeg",
+      "sha256": "5aa7fc3f7b5754cbd8c75f3fa0f48a1863bcec04d4872649eafca0c72acec402"
+    },
+    {
+      "id": "tidal-blast",
+      "source": "character-ability-cards/frosthaven/CR/fh-tidal-blast.jpeg",
+      "sha256": "0eb07d9537bb0de892e12b033100c11b87b3e79a4e4cdee619cca3b90456b8af"
+    },
+    {
+      "id": "twilight-grasp",
+      "source": "character-ability-cards/frosthaven/CR/fh-twilight-grasp.jpeg",
+      "sha256": "320733becf9d490c63ba7197da1d9754a86782f566ef7e85f4a9a69d233ce9d5"
+    },
+    {
+      "id": "undertow",
+      "source": "character-ability-cards/frosthaven/CR/fh-undertow.jpeg",
+      "sha256": "1fb262cb283eb020c77965b6643c6417a2170742955c0a63b74b9c9a8ee0d4a0"
+    },
+    {
+      "id": "cr-back",
+      "source": "character-ability-cards/frosthaven/CR/fh-cr-back.jpeg",
+      "sha256": "d6e921bf8181b56ee7968f080fb4dcd563b2fa0109b84540e858c4ada9e10e87"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/CR.png",
+    "sha256": "deb5c81a24ff65427623d2411eee4ce81e13afeed2e5bdf7c4831dbae0fca1b8"
+  }
+}

@@ -7,6 +7,7 @@ export type RuleIssueCode =
   | "MISSING_PICK"
   | "DECK_TOO_SMALL"
   | "DECK_TOO_LARGE"
+  | "FORM_IMBALANCE"
   | "UNKNOWN_CARD"
   | "PICK_TOO_HIGH"
   | "PICK_ALREADY_IN_POOL"
@@ -110,7 +111,9 @@ function compareCards(left: Card, right: Card): number {
     return printedDifference;
   }
 
-  const initiativeDifference = left.initiative - right.initiative;
+  const initiativeDifference =
+    parseInt(String(left.initiative), 10) -
+    parseInt(String(right.initiative), 10);
   if (initiativeDifference !== 0) {
     return initiativeDifference;
   }
@@ -169,9 +172,11 @@ function unknownCardIssue(
 
 function sizeIssues(
   level: number,
-  deckSize: number,
+  deckIds: Set<string>,
+  cards: Map<string, Card>,
   handSize: number,
 ): RuleIssue[] {
+  const deckSize = deckIds.size;
   if (deckSize < handSize) {
     return [
       issue(
@@ -189,6 +194,19 @@ function sizeIssues(
         "invalid",
         level,
         `Deck has ${deckSize} cards; ${handSize} are allowed`,
+      ),
+    ];
+  }
+  const deck = [...deckIds].map((id) => cards.get(id));
+  const melee = deck.filter((card) => card?.form === "melee").length;
+  const ranged = deck.filter((card) => card?.form === "ranged").length;
+  if (melee + ranged > 0 && (melee !== 7 || ranged !== 7)) {
+    return [
+      issue(
+        "FORM_IMBALANCE",
+        "invalid",
+        level,
+        `Geminate requires 7 melee and 7 ranged cards; this deck has ${melee} melee and ${ranged} ranged cards`,
       ),
     ];
   }
@@ -315,7 +333,7 @@ function replayStartingState(
   }
 
   issues.push(
-    ...sizeIssues(build.startLevel, deckIds.size, character.handSize),
+    ...sizeIssues(build.startLevel, deckIds, cards, character.handSize),
   );
   return { poolIds, deckIds, issues, applied };
 }
@@ -508,7 +526,7 @@ function levelUpState(
       ),
     );
   }
-  issues.push(...sizeIssues(level, deckIds.size, handSize));
+  issues.push(...sizeIssues(level, deckIds, cards, handSize));
   return { poolIds, deckIds, issues, applied };
 }
 

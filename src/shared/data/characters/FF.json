@@ -1,0 +1,198 @@
+{
+  "id": "FF",
+  "name": "Frozen Fist",
+  "handSize": 8,
+  "icon": "FF.png",
+  "cardBack": "FF/fh-ff-back.jpeg",
+  "cards": [
+    {
+      "id": "bring-down-the-mountain",
+      "name": "Bring Down the Mountain",
+      "level": 9,
+      "initiative": 9,
+      "image": "FF/fh-bring-down-the-mountain.jpeg"
+    },
+    {
+      "id": "cold-boulder",
+      "name": "Cold Boulder",
+      "level": 1,
+      "initiative": 70,
+      "image": "FF/fh-cold-boulder.jpeg"
+    },
+    {
+      "id": "crushing-crystals",
+      "name": "Crushing Crystals",
+      "level": 2,
+      "initiative": 67,
+      "image": "FF/fh-crushing-crystals.jpeg"
+    },
+    {
+      "id": "draw-of-the-bedrock",
+      "name": "Draw of the Bedrock",
+      "level": 2,
+      "initiative": 10,
+      "image": "FF/fh-draw-of-the-bedrock.jpeg"
+    },
+    {
+      "id": "draw-strength",
+      "name": "Draw Strength",
+      "level": 8,
+      "initiative": 28,
+      "image": "FF/fh-draw-strength.jpeg"
+    },
+    {
+      "id": "encased-punch",
+      "name": "Encased Punch",
+      "level": 1,
+      "initiative": 19,
+      "image": "FF/fh-encased-punch.jpeg"
+    },
+    {
+      "id": "freezing-shell",
+      "name": "Freezing Shell",
+      "level": "X",
+      "initiative": 17,
+      "image": "FF/fh-freezing-shell.jpeg"
+    },
+    {
+      "id": "frost-eruption",
+      "name": "Frost Eruption",
+      "level": 1,
+      "initiative": 61,
+      "image": "FF/fh-frost-eruption.jpeg"
+    },
+    {
+      "id": "frozen-over",
+      "name": "Frozen Over",
+      "level": 3,
+      "initiative": 20,
+      "image": "FF/fh-frozen-over.jpeg"
+    },
+    {
+      "id": "frozen-spike",
+      "name": "Frozen Spike",
+      "level": 9,
+      "initiative": 33,
+      "image": "FF/fh-frozen-spike.jpeg"
+    },
+    {
+      "id": "fury-of-the-mountain",
+      "name": "Fury of the Mountain",
+      "level": 1,
+      "initiative": 23,
+      "image": "FF/fh-fury-of-the-mountain.jpeg"
+    },
+    {
+      "id": "gift-of-the-mountain",
+      "name": "Gift of the Mountain",
+      "level": 7,
+      "initiative": 73,
+      "image": "FF/fh-gift-of-the-mountain.jpeg"
+    },
+    {
+      "id": "glacier-slam",
+      "name": "Glacier Slam",
+      "level": 6,
+      "initiative": 84,
+      "image": "FF/fh-glacier-slam.jpeg"
+    },
+    {
+      "id": "ice-blast",
+      "name": "Ice Blast",
+      "level": 1,
+      "initiative": 32,
+      "image": "FF/fh-ice-blast.jpeg"
+    },
+    {
+      "id": "ice-uppercut",
+      "name": "Ice Uppercut",
+      "level": 5,
+      "initiative": 15,
+      "image": "FF/fh-ice-uppercut.jpeg"
+    },
+    {
+      "id": "lacerating-eruption",
+      "name": "Lacerating Eruption",
+      "level": 3,
+      "initiative": 51,
+      "image": "FF/fh-lacerating-eruption.jpeg"
+    },
+    {
+      "id": "one-with-the-mountain",
+      "name": "One With the Mountain",
+      "level": 1,
+      "initiative": 83,
+      "image": "FF/fh-one-with-the-mountain.jpeg"
+    },
+    {
+      "id": "packed-solid",
+      "name": "Packed Solid",
+      "level": 4,
+      "initiative": 55,
+      "image": "FF/fh-packed-solid.jpeg"
+    },
+    {
+      "id": "piercing-pummel",
+      "name": "Piercing Pummel",
+      "level": 1,
+      "initiative": 30,
+      "image": "FF/fh-piercing-pummel.jpeg"
+    },
+    {
+      "id": "preserved-fury",
+      "name": "Preserved Fury",
+      "level": 5,
+      "initiative": 49,
+      "image": "FF/fh-preserved-fury.jpeg"
+    },
+    {
+      "id": "primal-bellow",
+      "name": "Primal Bellow",
+      "level": "X",
+      "initiative": 84,
+      "image": "FF/fh-primal-bellow.jpeg"
+    },
+    {
+      "id": "seeing-stars",
+      "name": "Seeing Stars",
+      "level": 7,
+      "initiative": 29,
+      "image": "FF/fh-seeing-stars.jpeg"
+    },
+    {
+      "id": "shard-launch",
+      "name": "Shard Launch",
+      "level": "X",
+      "initiative": 52,
+      "image": "FF/fh-shard-launch.jpeg"
+    },
+    {
+      "id": "shattering-blow",
+      "name": "Shattering Blow",
+      "level": 8,
+      "initiative": 18,
+      "image": "FF/fh-shattering-blow.jpeg"
+    },
+    {
+      "id": "the-mountains-fist",
+      "name": "The Mountain's Fist",
+      "level": 4,
+      "initiative": 16,
+      "image": "FF/fh-the-mountains-fist.jpeg"
+    },
+    {
+      "id": "thick-frost",
+      "name": "Thick Frost",
+      "level": 6,
+      "initiative": 21,
+      "image": "FF/fh-thick-frost.jpeg"
+    },
+    {
+      "id": "voice-from-below",
+      "name": "Voice From Below",
+      "level": 1,
+      "initiative": 22,
+      "image": "FF/fh-voice-from-below.jpeg"
+    }
+  ]
+}

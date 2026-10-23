@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/mercenary.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "8f11abb3c43e523dfc2160cbb7e265eca3036ee597d43d5e60bc228913adb08f"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "a-little-help-here",
+      "source": "character-ability-cards/mercenary/SA/a-little-help-here.jpeg",
+      "sha256": "fb14dae790a4e793b86dc4ecef54aa4f1c904b5f9a9107204003be371bf424ea"
+    },
+    {
+      "id": "armory",
+      "source": "character-ability-cards/mercenary/SA/armory.jpeg",
+      "sha256": "f7f7e57456d2daedd6c2e417cd8fe1e8e00abd9cd59225bfaadb2c7538ac8efe"
+    },
+    {
+      "id": "blade-of-the-north",
+      "source": "character-ability-cards/mercenary/SA/blade-of-the-north.jpeg",
+      "sha256": "7271123e5cccc97e7a68e6f0cb32ab0fde8a05fad3ba1474c815c5d77be50376"
+    },
+    {
+      "id": "bonded-through-battle",
+      "source": "character-ability-cards/mercenary/SA/bonded-through-battle.jpeg",
+      "sha256": "c31b32042cdad4c6b964302f36a03a8bb32d125962fdd6500017aab1089c84b1"
+    },
+    {
+      "id": "bring-them-down",
+      "source": "character-ability-cards/mercenary/SA/bring-them-down.jpeg",
+      "sha256": "5ac2dc5490a56ab8f2cf9464adbb8c6acbb851563353c2b7a8950d13411e33b6"
+    },
+    {
+      "id": "combined-might",
+      "source": "character-ability-cards/mercenary/SA/combined-might.jpeg",
+      "sha256": "317550143dede5bb879786da60fb07752b661b68ac842559696ed94e1bf7b16f"
+    },
+    {
+      "id": "crashing-steel",
+      "source": "character-ability-cards/mercenary/SA/crashing-steel.jpeg",
+      "sha256": "0265b9a1e156fd83671ad8f5e0bbc6a29106de18b50787174068f0b395700598"
+    },
+    {
+      "id": "dazing-sweep",
+      "source": "character-ability-cards/mercenary/SA/dazing-sweep.jpeg",
+      "sha256": "f17696331e7cca19ac2fdef295ee7884527970d1b0df7aa2ea786fb61d2ff98e"
+    },
+    {
+      "id": "defiance",
+      "source": "character-ability-cards/mercenary/SA/defiance.jpeg",
+      "sha256": "78d3bda488d31e638aadc63d85a229bedfd52839814d60a1fa16f7b9575a14f7"
+    },
+    {
+      "id": "emboldening-call",
+      "source": "character-ability-cards/mercenary/SA/emboldening-call.jpeg",
+      "sha256": "5c48aa346ece2f25fe94aba6b168950be6592b3a9668e7f3bdc2a2b549aa5c9a"
+    },
+    {
+      "id": "fight-as-one",
+      "source": "character-ability-cards/mercenary/SA/fight-as-one.jpeg",
+      "sha256": "a52327a0d8a37877c4bcf166a754b2929ae1cd9fb819bf5451c4544e2872dbbe"
+    },
+    {
+      "id": "for-frosthaven",
+      "source": "character-ability-cards/mercenary/SA/for-frosthaven.jpeg",
+      "sha256": "087d8298fc2c9d4d3c244abac0fba85c76439c97919604c51a9086726b46a383"
+    },
+    {
+      "id": "get-behind-me",
+      "source": "character-ability-cards/mercenary/SA/get-behind-me.jpeg",
+      "sha256": "d892dc0a50e758e88b2ef396d91fb971b9f9c5d08ca39596a787a535d42a07c7"
+    },
+    {
+      "id": "implacable-advance",
+      "source": "character-ability-cards/mercenary/SA/implacable-advance.jpeg",
+      "sha256": "87db2dec1e740cadfe87e000b4744c46427f2b9674deb36de25fa532f191f578"
+    },
+    {
+      "id": "lead-from-the-front",
+      "source": "character-ability-cards/mercenary/SA/lead-from-the-front.jpeg",
+      "sha256": "526e48668dfc12dc6eb68d829dae9a1a2f0b987cc67b3f19e20dec177b55b3de"
+    },
+    {
+      "id": "lead-the-charge",
+      "source": "character-ability-cards/mercenary/SA/lead-the-charge.jpeg",
+      "sha256": "7ca2363bf38a7c842a627ac0473a9242c38b49838219456d0c6e97236cadd975"
+    },
+    {
+      "id": "northern-valor",
+      "source": "character-ability-cards/mercenary/SA/northern-valor.jpeg",
+      "sha256": "74b3df1fcec600a129c553b996b3e61679788dc4c65d5ae4acf0fa0beda4ee00"
+    },
+    {
+      "id": "outmaneuver",
+      "source": "character-ability-cards/mercenary/SA/outmaneuver.jpeg",
+      "sha256": "225bddcf025f73b14eccc48ba25dc120030faff64da297f9bff263ca94bff515"
+    },
+    {
+      "id": "raze",
+      "source": "character-ability-cards/mercenary/SA/raze.jpeg",
+      "sha256": "696163b1807d88101dc06a4491a797ddb6b1cca98aabd5e94229f655c4059d38"
+    },
+    {
+      "id": "send-them-reeling",
+      "source": "character-ability-cards/mercenary/SA/send-them-reeling.jpeg",
+      "sha256": "c7686d529c6259a18b5fd4da41f6c791f23c25f8811d3f698a5895c32b8d09b0"
+    },
+    {
+      "id": "shared-glory",
+      "source": "character-ability-cards/mercenary/SA/shared-glory.jpeg",
+      "sha256": "1b3eac0ee26485973d6d916dd44ca589b213659244ee30a944f5d6460af7164b"
+    },
+    {
+      "id": "spur-their-spirits",
+      "source": "character-ability-cards/mercenary/SA/spur-their-spirits.jpeg",
+      "sha256": "72e18b26ded27f4a949b1ab2f3223cf3436d9a7e1ed3ca84c5a83eb99210f024"
+    },
+    {
+      "id": "stand-against-many",
+      "source": "character-ability-cards/mercenary/SA/stand-against-many.jpeg",
+      "sha256": "b8c2ce4cb0393ad04a30e9f3f3f0f5e298fa209cc201d3e6152bfade11f509f4"
+    },
+    {
+      "id": "stand-firm",
+      "source": "character-ability-cards/mercenary/SA/stand-firm.jpeg",
+      "sha256": "8b34ff73b113b19160cab9c70ccd56d94e3b329ad4f9a6fa67840973e5f44489"
+    },
+    {
+      "id": "strike-now",
+      "source": "character-ability-cards/mercenary/SA/strike-now.jpeg",
+      "sha256": "571457a0f9cf94b120c4cae38f53c40d472562f431491a5fd27142ceda3a13df"
+    },
+    {
+      "id": "take-command",
+      "source": "character-ability-cards/mercenary/SA/take-command.jpeg",
+      "sha256": "65d35e3290c172acf74d3f54c563f5e531d780f0a926b53d2d1f8ade71fae0ad"
+    },
+    {
+      "id": "unleash-the-archers",
+      "source": "character-ability-cards/mercenary/SA/unleash-the-archers.jpeg",
+      "sha256": "f36a6d11f151483c08401a1a37cf81523702017f7da9e56e6e99e1bea26040b0"
+    },
+    {
+      "id": "victory-rush",
+      "source": "character-ability-cards/mercenary/SA/victory-rush.jpeg",
+      "sha256": "71db64a654d3f39b97e689a7aae29023fdaad2f2579f729c17910f277179fdb7"
+    },
+    {
+      "id": "wolf-pack-tactics",
+      "source": "character-ability-cards/mercenary/SA/wolf-pack-tactics.jpeg",
+      "sha256": "2a0f4171751cfd3c15105db9e6bd40df990a150dba40b314c84002c27a288f3f"
+    },
+    {
+      "id": "sa-back",
+      "source": "character-ability-cards/mercenary/SA/sa-back.jpeg",
+      "sha256": "6b21f7f5526367507682148415d9dfc3813d316b11874b2734177b78d9d7c922"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/merc/SA.png",
+    "sha256": "62c2026c8168ff535e72821f78f7d949587fd971bb11a4237b77448d22006017"
+  }
+}

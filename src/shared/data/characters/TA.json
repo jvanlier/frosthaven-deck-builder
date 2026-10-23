@@ -1,0 +1,205 @@
+{
+  "id": "TA",
+  "name": "Trapper",
+  "handSize": 9,
+  "icon": "TA.png",
+  "cardBack": "TA/fh-ta-back.jpeg",
+  "cards": [
+    {
+      "id": "boar-catcher",
+      "name": "Boar Catcher",
+      "level": 1,
+      "initiative": 20,
+      "image": "TA/fh-boar-catcher.jpeg"
+    },
+    {
+      "id": "cage-of-thorns",
+      "name": "Cage of Thorns",
+      "level": 6,
+      "initiative": 55,
+      "image": "TA/fh-cage-of-thorns.jpeg"
+    },
+    {
+      "id": "caltrops",
+      "name": "Caltrops",
+      "level": 1,
+      "initiative": 25,
+      "image": "TA/fh-caltrops.jpeg"
+    },
+    {
+      "id": "dangerous-cargo",
+      "name": "Dangerous Cargo",
+      "level": 9,
+      "initiative": 23,
+      "image": "TA/fh-dangerous-cargo.jpeg"
+    },
+    {
+      "id": "dangerous-ground",
+      "name": "Dangerous Ground",
+      "level": 4,
+      "initiative": 31,
+      "image": "TA/fh-dangerous-ground.jpeg"
+    },
+    {
+      "id": "dismantle",
+      "name": "Dismantle",
+      "level": "X",
+      "initiative": 72,
+      "image": "TA/fh-dismantle.jpeg"
+    },
+    {
+      "id": "electrified-net",
+      "name": "Electrified Net",
+      "level": 1,
+      "initiative": 53,
+      "image": "TA/fh-electrified-net.jpeg"
+    },
+    {
+      "id": "enticing-bait",
+      "name": "Enticing Bait",
+      "level": 1,
+      "initiative": 30,
+      "image": "TA/fh-enticing-bait.jpeg"
+    },
+    {
+      "id": "exploding-decoy",
+      "name": "Exploding Decoy",
+      "level": 1,
+      "initiative": 62,
+      "image": "TA/fh-exploding-decoy.jpeg"
+    },
+    {
+      "id": "extra-teeth",
+      "name": "Extra Teeth",
+      "level": 3,
+      "initiative": 22,
+      "image": "TA/fh-extra-teeth.jpeg"
+    },
+    {
+      "id": "flurry-of-nails",
+      "name": "Flurry of Nails",
+      "level": 1,
+      "initiative": 68,
+      "image": "TA/fh-flurry-of-nails.jpeg"
+    },
+    {
+      "id": "foxhole",
+      "name": "Foxhole",
+      "level": 7,
+      "initiative": 90,
+      "image": "TA/fh-foxhole.jpeg"
+    },
+    {
+      "id": "furry-facade",
+      "name": "Furry Facade",
+      "level": 1,
+      "initiative": 85,
+      "image": "TA/fh-furry-facade.jpeg"
+    },
+    {
+      "id": "grasping-hazards",
+      "name": "Grasping Hazards",
+      "level": 7,
+      "initiative": 8,
+      "image": "TA/fh-grasping-hazards.jpeg"
+    },
+    {
+      "id": "honeypot",
+      "name": "Honeypot",
+      "level": 1,
+      "initiative": 18,
+      "image": "TA/fh-honeypot.jpeg"
+    },
+    {
+      "id": "improvised-improvement",
+      "name": "Improvised Improvement",
+      "level": "X",
+      "initiative": 58,
+      "image": "TA/fh-improvised-improvement.jpeg"
+    },
+    {
+      "id": "lure-of-the-snare",
+      "name": "Lure of the Snare",
+      "level": 5,
+      "initiative": 59,
+      "image": "TA/fh-lure-of-the-snare.jpeg"
+    },
+    {
+      "id": "magnetic-shards",
+      "name": "Magnetic Shards",
+      "level": 8,
+      "initiative": 37,
+      "image": "TA/fh-magnetic-shards.jpeg"
+    },
+    {
+      "id": "mother-of-all-traps",
+      "name": "Mother of All Traps",
+      "level": 9,
+      "initiative": 86,
+      "image": "TA/fh-mother-of-all-traps.jpeg"
+    },
+    {
+      "id": "path-of-pain",
+      "name": "Path of Pain",
+      "level": 2,
+      "initiative": 38,
+      "image": "TA/fh-path-of-pain.jpeg"
+    },
+    {
+      "id": "persistent-pitfalls",
+      "name": "Persistent Pitfalls",
+      "level": 6,
+      "initiative": 13,
+      "image": "TA/fh-persistent-pitfalls.jpeg"
+    },
+    {
+      "id": "proficient-hunter",
+      "name": "Proficient Hunter",
+      "level": 5,
+      "initiative": 26,
+      "image": "TA/fh-proficient-hunter.jpeg"
+    },
+    {
+      "id": "pyrotechnics",
+      "name": "Pyrotechnics",
+      "level": 3,
+      "initiative": 80,
+      "image": "TA/fh-pyrotechnics.jpeg"
+    },
+    {
+      "id": "spike-pit",
+      "name": "Spike Pit",
+      "level": 1,
+      "initiative": 47,
+      "image": "TA/fh-spike-pit.jpeg"
+    },
+    {
+      "id": "spike-strip",
+      "name": "Spike Strip",
+      "level": 8,
+      "initiative": 67,
+      "image": "TA/fh-spike-strip.jpeg"
+    },
+    {
+      "id": "spring-loaded",
+      "name": "Spring-loaded",
+      "level": "X",
+      "initiative": 15,
+      "image": "TA/fh-spring-loaded.jpeg"
+    },
+    {
+      "id": "stalkers-spoils",
+      "name": "Stalker's Spoils",
+      "level": 4,
+      "initiative": 10,
+      "image": "TA/fh-stalkers-spoils.jpeg"
+    },
+    {
+      "id": "unavoidable-outcome",
+      "name": "Unavoidable Outcome",
+      "level": 2,
+      "initiative": 45,
+      "image": "TA/fh-unavoidable-outcome.jpeg"
+    }
+  ]
+}

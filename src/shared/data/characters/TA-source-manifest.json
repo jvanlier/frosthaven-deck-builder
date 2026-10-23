@@ -1,0 +1,166 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "boar-catcher",
+      "source": "character-ability-cards/frosthaven/TA/fh-boar-catcher.jpeg",
+      "sha256": "db93eae9cb5cb1c76e4f71b53fd8d732dc101c99f6f760a165657554f5579012"
+    },
+    {
+      "id": "cage-of-thorns",
+      "source": "character-ability-cards/frosthaven/TA/fh-cage-of-thorns.jpeg",
+      "sha256": "3e332b522eb6362f509ff88a95fe0a0a6e28b319ff19c931bc6c191dc1c179ed"
+    },
+    {
+      "id": "caltrops",
+      "source": "character-ability-cards/frosthaven/TA/fh-caltrops.jpeg",
+      "sha256": "7ee4c62836df64025ac8fb30a1104afb1add654c6816182ff8e344885f4c78ce"
+    },
+    {
+      "id": "dangerous-cargo",
+      "source": "character-ability-cards/frosthaven/TA/fh-dangerous-cargo.jpeg",
+      "sha256": "d4faff87f74ede2da7d90947fc55f30cea6fc3d9adfec954513023562363cf20"
+    },
+    {
+      "id": "dangerous-ground",
+      "source": "character-ability-cards/frosthaven/TA/fh-dangerous-ground.jpeg",
+      "sha256": "c2f7b75c40e7244cde8395e7e1d4fc04dfa93e1c8017c2a5e0eca5826c868d41"
+    },
+    {
+      "id": "dismantle",
+      "source": "character-ability-cards/frosthaven/TA/fh-dismantle.jpeg",
+      "sha256": "e7f03fb14b2b8fe80a08256174cf8eb95cee26ba72070e219bf36d45b7a89f3d"
+    },
+    {
+      "id": "electrified-net",
+      "source": "character-ability-cards/frosthaven/TA/fh-electrified-net.jpeg",
+      "sha256": "a5440c8b32dc8cf71703c6a6e0b2bc53dd484b761913f261d3781b41269e6dde"
+    },
+    {
+      "id": "enticing-bait",
+      "source": "character-ability-cards/frosthaven/TA/fh-enticing-bait.jpeg",
+      "sha256": "5ed9b89c9fdef5a7461d16e47e3694f1d4a1525280a2f6503fd3603dcc82bd1c"
+    },
+    {
+      "id": "exploding-decoy",
+      "source": "character-ability-cards/frosthaven/TA/fh-exploding-decoy.jpeg",
+      "sha256": "045c6596a84ab395b7e0a769ae4dc0d15bb59d86b21bfda6925049cd0adf4b55"
+    },
+    {
+      "id": "extra-teeth",
+      "source": "character-ability-cards/frosthaven/TA/fh-extra-teeth.jpeg",
+      "sha256": "f6e005366829269f8ba4e26baeafd5834c7d3c2af7b9b1ea3c5614af4b90a435"
+    },
+    {
+      "id": "flurry-of-nails",
+      "source": "character-ability-cards/frosthaven/TA/fh-flurry-of-nails.jpeg",
+      "sha256": "5321a50a0808ff88d44a6e68773796c52cd15fdfc5c211a4e1dd429635def724"
+    },
+    {
+      "id": "foxhole",
+      "source": "character-ability-cards/frosthaven/TA/fh-foxhole.jpeg",
+      "sha256": "89a11a93f57dda095f00387251c8efe2ad4c4e3f9554fd1e2499ac5b130009d1"
+    },
+    {
+      "id": "furry-facade",
+      "source": "character-ability-cards/frosthaven/TA/fh-furry-facade.jpeg",
+      "sha256": "64a2d5b9b563cdb605edd749533c6cbdda6b11e3d21653fa3f87e2d2bdd581d1"
+    },
+    {
+      "id": "grasping-hazards",
+      "source": "character-ability-cards/frosthaven/TA/fh-grasping-hazards.jpeg",
+      "sha256": "8ce95f9c21c24160a8a0232b0ef81de76552a9e6bf8351779fea5b9e2f8b857b"
+    },
+    {
+      "id": "honeypot",
+      "source": "character-ability-cards/frosthaven/TA/fh-honeypot.jpeg",
+      "sha256": "e08a019491239eb078a3b687d4c6a228084d579536d687e1b1c3a88358bf75e1"
+    },
+    {
+      "id": "improvised-improvement",
+      "source": "character-ability-cards/frosthaven/TA/fh-improvised-improvement.jpeg",
+      "sha256": "ba8eb381447faed5b8c0e9701dce45a4badc77d0832e01b90c22dedb4ffc8069"
+    },
+    {
+      "id": "lure-of-the-snare",
+      "source": "character-ability-cards/frosthaven/TA/fh-lure-of-the-snare.jpeg",
+      "sha256": "da4d929bc52b30d3b5df5e310375b302bf7bbc0acaf7f473b6f8627b5849ff70"
+    },
+    {
+      "id": "magnetic-shards",
+      "source": "character-ability-cards/frosthaven/TA/fh-magnetic-shards.jpeg",
+      "sha256": "77fcc652cf58d5580e7e69fb2545d95cd43c363f2b00d014244f3ff1ff41fd31"
+    },
+    {
+      "id": "mother-of-all-traps",
+      "source": "character-ability-cards/frosthaven/TA/fh-mother-of-all-traps.jpeg",
+      "sha256": "0e72bb574485415afbc3e4c4eb48c3786a40a0fb1f688d6a205dd7d421efc609"
+    },
+    {
+      "id": "path-of-pain",
+      "source": "character-ability-cards/frosthaven/TA/fh-path-of-pain.jpeg",
+      "sha256": "07cdac4d6a026f84fe6ac769d28dc080fbdff42f3147295b61410591b1253404"
+    },
+    {
+      "id": "persistent-pitfalls",
+      "source": "character-ability-cards/frosthaven/TA/fh-persistent-pitfalls.jpeg",
+      "sha256": "c7e8cdbf577b382b970a873bf49ca925ff1ea7c56d6474037cfee1cab6e85a93"
+    },
+    {
+      "id": "proficient-hunter",
+      "source": "character-ability-cards/frosthaven/TA/fh-proficient-hunter.jpeg",
+      "sha256": "ff8ccb660fe3474e6d01c92701905e9f9b780e371bbea40e239287bfc554c434"
+    },
+    {
+      "id": "pyrotechnics",
+      "source": "character-ability-cards/frosthaven/TA/fh-pyrotechnics.jpeg",
+      "sha256": "41f55e47c379f91b07534fefbacc543829b18a3bf68fc648abd685f40197fc8e"
+    },
+    {
+      "id": "spike-pit",
+      "source": "character-ability-cards/frosthaven/TA/fh-spike-pit.jpeg",
+      "sha256": "5952149c9a798cd426a3c4db3def68d4deb9916c27089669e423c5e61c1a21c7"
+    },
+    {
+      "id": "spike-strip",
+      "source": "character-ability-cards/frosthaven/TA/fh-spike-strip.jpeg",
+      "sha256": "aa8a1e6b500c0562ec69ceebfd47fa8b73b616ece33bcc7e4357062acc2c0e1e"
+    },
+    {
+      "id": "spring-loaded",
+      "source": "character-ability-cards/frosthaven/TA/fh-spring-loaded.jpeg",
+      "sha256": "b12b767e5175264333a7fc7440b7f396d079ae30d32ef652315ad9bef360d7c5"
+    },
+    {
+      "id": "stalkers-spoils",
+      "source": "character-ability-cards/frosthaven/TA/fh-stalkers-spoils.jpeg",
+      "sha256": "93f63d4b294c79cea3d7387acac168d1e29d2265c3e34b56077d694944a56062"
+    },
+    {
+      "id": "unavoidable-outcome",
+      "source": "character-ability-cards/frosthaven/TA/fh-unavoidable-outcome.jpeg",
+      "sha256": "9e2e6cf19aa14e137592e1fc9d1c4fae04f0899e1668bf3fb7bd9b8872550c27"
+    },
+    {
+      "id": "ta-back",
+      "source": "character-ability-cards/frosthaven/TA/fh-ta-back.jpeg",
+      "sha256": "b3d4c7d1d52ea9a220bfa48851633559cd3fe18fdb3e46b0cad7302389572ef1"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/TA.png",
+    "sha256": "67728ee11b336df10811a8aaace45ab8aae4270548788b89aa38858a7d35b51f"
+  }
+}

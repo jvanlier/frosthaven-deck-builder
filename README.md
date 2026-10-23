@@ -1,6 +1,8 @@
 # Frosthaven Deck Builder
 
-A local, single-user Frosthaven Snowdancer deck planning app. The runtime is
+A local, single-user deck planning app for all 17 Frosthaven characters and
+the Gloomhaven Mercenary Pack classes: Anaphi, Cassandra, Hail, and Satha.
+Choose a character on the landing page to create or reopen its builds. The runtime is
 intended for a Raspberry Pi on a trusted LAN or VPN; it does not provide
 authentication, TLS, or offline editing.
 
@@ -108,18 +110,20 @@ npm run test:container
 
 ### Catalog import
 
-The committed Snowdancer catalog and all runtime artwork are local. To refresh
+The committed character catalogs and all runtime artwork are local. To refresh
 those generated files from the pinned upstream source, run:
 
 ```sh
 npm run import:cards
 ```
 
-The importer validates the complete 30-card catalog before downloading assets
-and writes the catalog, card back, class icon, and a source manifest only after
-the transaction is ready. `src/shared/data/characters/source-manifest.json`
-records the upstream revisions and SHA-256 checksums used for the committed
-files. Do not add an external runtime asset dependency.
+The importer validates each complete class catalog before downloading assets
+and writes its catalog, card back, class icon, and source manifest transactionally.
+`src/shared/data/characters/*-source-manifest.json` records the upstream revisions
+and SHA-256 checksums used for the committed files. Blinkblade cards retain both
+printed initiatives, and each class uses its own hand size (including Hive's
+9-card hand and Geminate's 14-card hand). Mercenary Pack classes use their
+own catalogs, icons, and card backs. Do not add an external runtime asset dependency.
 
 Behavior-changing pull requests follow test-first delivery: record the initial
 failing test command and its expected reason, then record the passing targeted

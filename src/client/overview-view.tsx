@@ -9,17 +9,19 @@ import {
   type OverviewGroup,
   type OverviewLevel,
 } from "./overview";
-import { characters } from "../shared/data/characters/index.js";
+import { getCharacter } from "../shared/data/characters/index.js";
 import type { Card, Character } from "../shared/character.js";
 import type { Build, CardNote } from "../shared/schema/index.js";
-
-const character = characters[0]!;
 
 export function OverviewRoute() {
   const { characterId, buildId } = useParams();
   const { data } = useAppData();
-  const build = data?.builds.find((candidate) => candidate.id === buildId);
-  if (characterId !== character.id || !build) {
+  const character = getCharacter(characterId ?? "");
+  const build = data?.builds.find(
+    (candidate) =>
+      candidate.id === buildId && candidate.characterId === character?.id,
+  );
+  if (!character || !build) {
     return <UnavailableOverviewView />;
   }
   return <OverviewView build={build} character={character} />;
@@ -418,14 +420,19 @@ function markerSymbol(
 }
 
 export function UnavailableOverviewView() {
+  const { characterId } = useParams();
+  const character = getCharacter(characterId ?? "");
   return (
     <main className="page-content narrow-content">
       <section className="empty-card">
         <p className="eyebrow">Overview</p>
         <h1>This overview is unavailable</h1>
         <p>Choose an existing build to compare its cards by level.</p>
-        <Link className="button-link" to={`/c/${character.id}`}>
-          Back to builds
+        <Link
+          className="button-link"
+          to={character ? `/c/${character.id}` : "/"}
+        >
+          {character ? "Back to builds" : "Choose a character"}
         </Link>
       </section>
     </main>

@@ -4,8 +4,9 @@ export interface Card {
   id: string;
   name: string;
   level: CardLevel;
-  initiative: number;
+  initiative: number | `${number}/${number}`;
   image: string;
+  form?: "melee" | "ranged";
 }
 
 export interface Character {
@@ -13,5 +14,6 @@ export interface Character {
   name: string;
   handSize: number;
   icon: string;
+  cardBack: string;
   cards: Card[];
 }

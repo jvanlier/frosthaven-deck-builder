@@ -1,0 +1,212 @@
+{
+  "id": "BB",
+  "name": "Blinkblade",
+  "handSize": 10,
+  "icon": "BB.png",
+  "cardBack": "BB/fh-bb-back.jpeg",
+  "cards": [
+    {
+      "id": "blurry-jab",
+      "name": "Blurry Jab",
+      "level": 1,
+      "initiative": "20/50",
+      "image": "BB/fh-blurry-jab.jpeg"
+    },
+    {
+      "id": "borrowed-time",
+      "name": "Borrowed Time",
+      "level": "X",
+      "initiative": "02/32",
+      "image": "BB/fh-borrowed-time.jpeg"
+    },
+    {
+      "id": "breakneck-speed",
+      "name": "Breakneck Speed",
+      "level": 5,
+      "initiative": "03/33",
+      "image": "BB/fh-breakneck-speed.jpeg"
+    },
+    {
+      "id": "cascading-reaction",
+      "name": "Cascading Reaction",
+      "level": 1,
+      "initiative": "19/49",
+      "image": "BB/fh-cascading-reaction.jpeg"
+    },
+    {
+      "id": "double-time",
+      "name": "Double Time",
+      "level": 3,
+      "initiative": "22/52",
+      "image": "BB/fh-double-time.jpeg"
+    },
+    {
+      "id": "drive-recharge",
+      "name": "Drive Recharge",
+      "level": 1,
+      "initiative": "69/99",
+      "image": "BB/fh-drive-recharge.jpeg"
+    },
+    {
+      "id": "experimental-adjustment",
+      "name": "Experimental Adjustment",
+      "level": "X",
+      "initiative": "12/42",
+      "image": "BB/fh-experimental-adjustment.jpeg"
+    },
+    {
+      "id": "fastest-alive",
+      "name": "Fastest Alive",
+      "level": 8,
+      "initiative": "01/31",
+      "image": "BB/fh-fastest-alive.jpeg"
+    },
+    {
+      "id": "flashing-flurry",
+      "name": "Flashing Flurry",
+      "level": 5,
+      "initiative": "40/70",
+      "image": "BB/fh-flashing-flurry.jpeg"
+    },
+    {
+      "id": "fractured-timeline",
+      "name": "Fractured Timeline",
+      "level": 9,
+      "initiative": "55/85",
+      "image": "BB/fh-fractured-timeline.jpeg"
+    },
+    {
+      "id": "hit-and-run",
+      "name": "Hit and Run",
+      "level": 1,
+      "initiative": "41/71",
+      "image": "BB/fh-hit-and-run.jpeg"
+    },
+    {
+      "id": "kinetic-transfer",
+      "name": "Kinetic Transfer",
+      "level": 1,
+      "initiative": "36/66",
+      "image": "BB/fh-kinetic-transfer.jpeg"
+    },
+    {
+      "id": "make-it-count",
+      "name": "Make It Count",
+      "level": 3,
+      "initiative": "51/81",
+      "image": "BB/fh-make-it-count.jpeg"
+    },
+    {
+      "id": "overdrive",
+      "name": "Overdrive",
+      "level": 1,
+      "initiative": "60/90",
+      "image": "BB/fh-overdrive.jpeg"
+    },
+    {
+      "id": "phasing-blades",
+      "name": "Phasing Blades",
+      "level": 7,
+      "initiative": "63/93",
+      "image": "BB/fh-phasing-blades.jpeg"
+    },
+    {
+      "id": "potential-energy",
+      "name": "Potential Energy",
+      "level": 4,
+      "initiative": "32/62",
+      "image": "BB/fh-potential-energy.jpeg"
+    },
+    {
+      "id": "power-leak",
+      "name": "Power Leak",
+      "level": 1,
+      "initiative": "17/47",
+      "image": "BB/fh-power-leak.jpeg"
+    },
+    {
+      "id": "precision-timing",
+      "name": "Precision Timing",
+      "level": 4,
+      "initiative": "15/45",
+      "image": "BB/fh-precision-timing.jpeg"
+    },
+    {
+      "id": "quantum-uncertainty",
+      "name": "Quantum Uncertainty",
+      "level": 8,
+      "initiative": "35/65",
+      "image": "BB/fh-quantum-uncertainty.jpeg"
+    },
+    {
+      "id": "reckless-augmentation",
+      "name": "Reckless Augmentation",
+      "level": 2,
+      "initiative": "10/40",
+      "image": "BB/fh-reckless-augmentation.jpeg"
+    },
+    {
+      "id": "reverse-the-flow",
+      "name": "Reverse the Flow",
+      "level": 9,
+      "initiative": "58/88",
+      "image": "BB/fh-reverse-the-flow.jpeg"
+    },
+    {
+      "id": "rushed-to-the-end",
+      "name": "Rushed To the End",
+      "level": 7,
+      "initiative": "32/62",
+      "image": "BB/fh-rushed-to-the-end.jpeg"
+    },
+    {
+      "id": "sand-in-the-hourglass",
+      "name": "Sand in the Hourglass",
+      "level": "X",
+      "initiative": "52/82",
+      "image": "BB/fh-sand-in-the-hourglass.jpeg"
+    },
+    {
+      "id": "sap-speed",
+      "name": "Sap Speed",
+      "level": 1,
+      "initiative": "45/75",
+      "image": "BB/fh-sap-speed.jpeg"
+    },
+    {
+      "id": "stab-them-all",
+      "name": "Stab Them All",
+      "level": 6,
+      "initiative": "04/34",
+      "image": "BB/fh-stab-them-all.jpeg"
+    },
+    {
+      "id": "systems-reboot",
+      "name": "Systems Reboot",
+      "level": 2,
+      "initiative": "57/87",
+      "image": "BB/fh-systems-reboot.jpeg"
+    },
+    {
+      "id": "temporal-displacement",
+      "name": "Temporal Displacement",
+      "level": 1,
+      "initiative": "44/74",
+      "image": "BB/fh-temporal-displacement.jpeg"
+    },
+    {
+      "id": "the-knifes-edge",
+      "name": "The Knife's Edge",
+      "level": 6,
+      "initiative": "65/95",
+      "image": "BB/fh-the-knifes-edge.jpeg"
+    },
+    {
+      "id": "twin-strike",
+      "name": "Twin Strike",
+      "level": 1,
+      "initiative": "24/54",
+      "image": "BB/fh-twin-strike.jpeg"
+    }
+  ]
+}

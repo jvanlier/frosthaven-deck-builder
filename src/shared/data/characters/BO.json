@@ -1,0 +1,226 @@
+{
+  "id": "BO",
+  "name": "Boneshaper",
+  "handSize": 12,
+  "icon": "BO.png",
+  "cardBack": "BO/fh-bo-back.jpeg",
+  "cards": [
+    {
+      "id": "angry-spirits",
+      "name": "Angry Spirits",
+      "level": 1,
+      "initiative": 76,
+      "image": "BO/fh-angry-spirits.jpeg"
+    },
+    {
+      "id": "approach-oblivion",
+      "name": "Approach Oblivion",
+      "level": "X",
+      "initiative": 53,
+      "image": "BO/fh-approach-oblivion.jpeg"
+    },
+    {
+      "id": "behold-the-shrouded-sun",
+      "name": "Behold the Shrouded Sun",
+      "level": 9,
+      "initiative": 10,
+      "image": "BO/fh-behold-the-shrouded-sun.jpeg"
+    },
+    {
+      "id": "bone-dagger",
+      "name": "Bone Dagger",
+      "level": 2,
+      "initiative": 29,
+      "image": "BO/fh-bone-dagger.jpeg"
+    },
+    {
+      "id": "command-the-wretched",
+      "name": "Command the Wretched",
+      "level": 1,
+      "initiative": 83,
+      "image": "BO/fh-command-the-wretched.jpeg"
+    },
+    {
+      "id": "critical-failure",
+      "name": "Critical Failure",
+      "level": 4,
+      "initiative": 95,
+      "image": "BO/fh-critical-failure.jpeg"
+    },
+    {
+      "id": "damned-horde",
+      "name": "Damned Horde",
+      "level": 1,
+      "initiative": 71,
+      "image": "BO/fh-damned-horde.jpeg"
+    },
+    {
+      "id": "dark-tidings",
+      "name": "Dark Tidings",
+      "level": 1,
+      "initiative": 43,
+      "image": "BO/fh-dark-tidings.jpeg"
+    },
+    {
+      "id": "decaying-will",
+      "name": "Decaying Will",
+      "level": 1,
+      "initiative": 46,
+      "image": "BO/fh-decaying-will.jpeg"
+    },
+    {
+      "id": "endless-numbers",
+      "name": "Endless Numbers",
+      "level": 8,
+      "initiative": 86,
+      "image": "BO/fh-endless-numbers.jpeg"
+    },
+    {
+      "id": "eternal-torment",
+      "name": "Eternal Torment",
+      "level": 1,
+      "initiative": 70,
+      "image": "BO/fh-eternal-torment.jpeg"
+    },
+    {
+      "id": "exploding-corpse",
+      "name": "Exploding Corpse",
+      "level": "X",
+      "initiative": 21,
+      "image": "BO/fh-exploding-corpse.jpeg"
+    },
+    {
+      "id": "fell-remedy",
+      "name": "Fell Remedy",
+      "level": 1,
+      "initiative": 30,
+      "image": "BO/fh-fell-remedy.jpeg"
+    },
+    {
+      "id": "flesh-shield",
+      "name": "Flesh Shield",
+      "level": 4,
+      "initiative": 16,
+      "image": "BO/fh-flesh-shield.jpeg"
+    },
+    {
+      "id": "flow-of-the-black-river",
+      "name": "Flow of the Black River",
+      "level": 1,
+      "initiative": 18,
+      "image": "BO/fh-flow-of-the-black-river.jpeg"
+    },
+    {
+      "id": "grave-digging",
+      "name": "Grave Digging",
+      "level": 3,
+      "initiative": 96,
+      "image": "BO/fh-grave-digging.jpeg"
+    },
+    {
+      "id": "life-in-death",
+      "name": "Life in Death",
+      "level": 1,
+      "initiative": 91,
+      "image": "BO/fh-life-in-death.jpeg"
+    },
+    {
+      "id": "malicious-conversion",
+      "name": "Malicious Conversion",
+      "level": 1,
+      "initiative": 26,
+      "image": "BO/fh-malicious-conversion.jpeg"
+    },
+    {
+      "id": "putrid-cloud",
+      "name": "Putrid Cloud",
+      "level": 3,
+      "initiative": 28,
+      "image": "BO/fh-putrid-cloud.jpeg"
+    },
+    {
+      "id": "recycled-limbs",
+      "name": "Recycled Limbs",
+      "level": 7,
+      "initiative": 52,
+      "image": "BO/fh-recycled-limbs.jpeg"
+    },
+    {
+      "id": "returned-servant",
+      "name": "Returned Servant",
+      "level": 1,
+      "initiative": 81,
+      "image": "BO/fh-returned-servant.jpeg"
+    },
+    {
+      "id": "rotting-multitude",
+      "name": "Rotting Multitude",
+      "level": 6,
+      "initiative": 66,
+      "image": "BO/fh-rotting-multitude.jpeg"
+    },
+    {
+      "id": "solid-bones",
+      "name": "Solid Bones",
+      "level": 5,
+      "initiative": 32,
+      "image": "BO/fh-solid-bones.jpeg"
+    },
+    {
+      "id": "soul-claim",
+      "name": "Soul Claim",
+      "level": 7,
+      "initiative": 23,
+      "image": "BO/fh-soul-claim.jpeg"
+    },
+    {
+      "id": "transfer-of-essence",
+      "name": "Transfer of Essence",
+      "level": 1,
+      "initiative": 62,
+      "image": "BO/fh-transfer-of-essence.jpeg"
+    },
+    {
+      "id": "twisted-decree",
+      "name": "Twisted Decree",
+      "level": 6,
+      "initiative": 85,
+      "image": "BO/fh-twisted-decree.jpeg"
+    },
+    {
+      "id": "unearthed-horror",
+      "name": "Unearthed Horror",
+      "level": 2,
+      "initiative": 94,
+      "image": "BO/fh-unearthed-horror.jpeg"
+    },
+    {
+      "id": "unforgivable-methods",
+      "name": "Unforgivable Methods",
+      "level": 5,
+      "initiative": 98,
+      "image": "BO/fh-unforgivable-methods.jpeg"
+    },
+    {
+      "id": "unholy-prowess",
+      "name": "Unholy Prowess",
+      "level": 9,
+      "initiative": 97,
+      "image": "BO/fh-unholy-prowess.jpeg"
+    },
+    {
+      "id": "wailing-from-beyond",
+      "name": "Wailing From Beyond",
+      "level": 8,
+      "initiative": 73,
+      "image": "BO/fh-wailing-from-beyond.jpeg"
+    },
+    {
+      "id": "wrath-of-the-turned-earth",
+      "name": "Wrath of the Turned Earth",
+      "level": "X",
+      "initiative": 80,
+      "image": "BO/fh-wrath-of-the-turned-earth.jpeg"
+    }
+  ]
+}

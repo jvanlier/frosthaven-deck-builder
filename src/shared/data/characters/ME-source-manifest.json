@@ -1,0 +1,166 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "ancient-drill",
+      "source": "character-ability-cards/frosthaven/ME/fh-ancient-drill.jpeg",
+      "sha256": "145f923651a38d10219e2fe2d3493c063c485b557bee3863b7d0251884d164c6"
+    },
+    {
+      "id": "beam-axe",
+      "source": "character-ability-cards/frosthaven/ME/fh-beam-axe.jpeg",
+      "sha256": "1dfb69f9aa9bd5bbf69ed6fd4685054b3949a54c09122628a8b529bbaf702e21"
+    },
+    {
+      "id": "bronze-plating",
+      "source": "character-ability-cards/frosthaven/ME/fh-bronze-plating.jpeg",
+      "sha256": "44019a1b8057d9be659738fa9f1021bdc5df668ea54225a7b95662cb657beea1"
+    },
+    {
+      "id": "cryogenic-hibernation",
+      "source": "character-ability-cards/frosthaven/ME/fh-cryogenic-hibernation.jpeg",
+      "sha256": "b3aebeb1f678a63f5e6b29604063bd939fc4c6d30c324ccf90be0a89c9d8a3cd"
+    },
+    {
+      "id": "curious-gear",
+      "source": "character-ability-cards/frosthaven/ME/fh-curious-gear.jpeg",
+      "sha256": "bede784e67edbeac2da512007ef4be1ad0dda379ed646c8f8d306ee80e41f75a"
+    },
+    {
+      "id": "curious-machinery",
+      "source": "character-ability-cards/frosthaven/ME/fh-curious-machinery.jpeg",
+      "sha256": "06d86cee9b3fcd4ad418bcc087542600733e05701819aae1cef655896b49f49c"
+    },
+    {
+      "id": "electrical-discharge",
+      "source": "character-ability-cards/frosthaven/ME/fh-electrical-discharge.jpeg",
+      "sha256": "020fada344d75ac9bd7feb72cb8c8e3a68f64d0d4698e71994434d5c87b272ff"
+    },
+    {
+      "id": "energy-conversion",
+      "source": "character-ability-cards/frosthaven/ME/fh-energy-conversion.jpeg",
+      "sha256": "7e1a7aa975bab67249ff41a99bef7ce6cc99c526e6c113f0b8461f81c9c4f02a"
+    },
+    {
+      "id": "heat-conduction",
+      "source": "character-ability-cards/frosthaven/ME/fh-heat-conduction.jpeg",
+      "sha256": "584b25a051e3c81dcf43caa39f18b020fa57a8fe74e5dd6ade9cc6e7974de297"
+    },
+    {
+      "id": "heated-drill",
+      "source": "character-ability-cards/frosthaven/ME/fh-heated-drill.jpeg",
+      "sha256": "85d9b5d6fd7e9eeafab59aa3e04666e976902748d5cc84652179f20d13ded296"
+    },
+    {
+      "id": "magnetic-field",
+      "source": "character-ability-cards/frosthaven/ME/fh-magnetic-field.jpeg",
+      "sha256": "8dbb323b97bd2970b15c4d8c3733f6d5610fe414909424fcbdddc3eb64331b02"
+    },
+    {
+      "id": "memory-drive",
+      "source": "character-ability-cards/frosthaven/ME/fh-memory-drive.jpeg",
+      "sha256": "42cbf28caa10486725be77ec428138d9bd42acb52e94967ba4d10ba0f7b36926"
+    },
+    {
+      "id": "piston-barrage",
+      "source": "character-ability-cards/frosthaven/ME/fh-piston-barrage.jpeg",
+      "sha256": "7f4a84a212581435804be3b01c165ba02c34002e023941213ac05e4a2e8655fa"
+    },
+    {
+      "id": "polarity-shift",
+      "source": "character-ability-cards/frosthaven/ME/fh-polarity-shift.jpeg",
+      "sha256": "2f821510c497719ccd6a73b5e02b39ab4bf5802345eaf37137c6c7ab52e00d89"
+    },
+    {
+      "id": "power-core",
+      "source": "character-ability-cards/frosthaven/ME/fh-power-core.jpeg",
+      "sha256": "bc6bdf1cb001f96e43ccd1e5bd95907a3d6d836d1913b4f8a2ef13401fc2f1fd"
+    },
+    {
+      "id": "pressure-build-up",
+      "source": "character-ability-cards/frosthaven/ME/fh-pressure-build-up.jpeg",
+      "sha256": "2812471d161cf2fa66fbf02e6ec5b14e6f36b16a0c98f4fdf9fbd5acd529a9f4"
+    },
+    {
+      "id": "processing",
+      "source": "character-ability-cards/frosthaven/ME/fh-processing.jpeg",
+      "sha256": "4958bab67f00bf6b93355f92db2c44cf0567bd3bf16050bb4ea4dba378e02f80"
+    },
+    {
+      "id": "radiation",
+      "source": "character-ability-cards/frosthaven/ME/fh-radiation.jpeg",
+      "sha256": "f6e1f93c8dd9ca4d6f5e0b323ce9258b16967c13bf3c0bebc2dcbd425cb86b57"
+    },
+    {
+      "id": "recursion",
+      "source": "character-ability-cards/frosthaven/ME/fh-recursion.jpeg",
+      "sha256": "097d3fb0a826c849641d779737ba0672f32a3c6cfdc65bed5b73df41818e8ec2"
+    },
+    {
+      "id": "release-valve",
+      "source": "character-ability-cards/frosthaven/ME/fh-release-valve.jpeg",
+      "sha256": "796ff75f837832fe8dbe03ef7a22cba03e3b647f173b72edead5a1c6f1f22ee2"
+    },
+    {
+      "id": "rocket-boots",
+      "source": "character-ability-cards/frosthaven/ME/fh-rocket-boots.jpeg",
+      "sha256": "4ebf46aec98bd2f89c1ae8801d68bff07c783ffcb8ae1884d9cd8ee9405c9b7a"
+    },
+    {
+      "id": "scalding-blast",
+      "source": "character-ability-cards/frosthaven/ME/fh-scalding-blast.jpeg",
+      "sha256": "c43c5483b704730992948faf6b213230ee969699964fff7935355db627b8c082"
+    },
+    {
+      "id": "steam-armor",
+      "source": "character-ability-cards/frosthaven/ME/fh-steam-armor.jpeg",
+      "sha256": "e7ce3278a17cde855e7eea458225914ebf6ef450d75951e37d49a994d3a47d20"
+    },
+    {
+      "id": "steam-core",
+      "source": "character-ability-cards/frosthaven/ME/fh-steam-core.jpeg",
+      "sha256": "a782af30a04fd4f14d1460391983148a5880b0655bf65572ddfc1cf247f4a770"
+    },
+    {
+      "id": "steel-piston",
+      "source": "character-ability-cards/frosthaven/ME/fh-steel-piston.jpeg",
+      "sha256": "90449df9d5da1580a1eec14f8edf67daf9ccf965a5442179b5c375582b29b857"
+    },
+    {
+      "id": "stress-vents",
+      "source": "character-ability-cards/frosthaven/ME/fh-stress-vents.jpeg",
+      "sha256": "5a55487de409f43a5066589928401fc94f7e876f02d3401990c8ed91bb6a5d80"
+    },
+    {
+      "id": "super-heat-transfer",
+      "source": "character-ability-cards/frosthaven/ME/fh-super-heat-transfer.jpeg",
+      "sha256": "0d5373c27bdd54016862637e80fd4f71dfd880854c2ebb70fb9b0e5519817ccb"
+    },
+    {
+      "id": "unstable-core",
+      "source": "character-ability-cards/frosthaven/ME/fh-unstable-core.jpeg",
+      "sha256": "6b3bd91cc320c820b64256f5b1930c4bd61a322256f751acb8d6cb3e27e9249d"
+    },
+    {
+      "id": "me-back",
+      "source": "character-ability-cards/frosthaven/ME/fh-me-back.jpeg",
+      "sha256": "ebf4b960727b137d1048708cbed5d6eaf0e63391eed2fe2020b846572845fae1"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/ME.png",
+    "sha256": "c22e3457dae93cdb943f4adb50e199cca7f6d86f73bc9c805592c1c71d9478a4"
+  }
+}

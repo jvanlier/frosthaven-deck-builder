@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { characters, getCharacter } from "./characters";
+import { characters, characterGroups, getCharacter } from "./characters";
 import { attribution } from "../attribution";
 import { validateCatalog } from "../../../scripts/import-cards";
-import manifest from "./characters/source-manifest.json";
+import manifest from "./characters/SD-source-manifest.json";
 
 function assetPath(relativePath: string): string {
   return fileURLToPath(new URL(`../../../${relativePath}`, import.meta.url));
@@ -24,10 +24,10 @@ describe("committed Snowdancer catalog", () => {
   });
 
   it("exports the data-driven character and handles unknown IDs", () => {
-    expect(characters).toHaveLength(1);
-    expect(getCharacter("SD")).toBe(characters[0]);
+    expect(characters).toHaveLength(21);
+    expect(getCharacter("SD")).toBe(characters.find(({ id }) => id === "SD"));
     expect(getCharacter("unknown")).toBeUndefined();
-    expect(characters[0]).toMatchObject({
+    expect(getCharacter("SD")).toMatchObject({
       id: "SD",
       name: "Snowdancer",
       handSize: 11,
@@ -35,8 +35,28 @@ describe("committed Snowdancer catalog", () => {
     });
   });
 
+  it("groups every character into its source game without duplicates", () => {
+    expect(
+      characterGroups.map(({ name, characters }) => ({
+        name,
+        count: characters.length,
+      })),
+    ).toEqual([
+      { name: "Frosthaven", count: 17 },
+      { name: "Mercenary Pack", count: 4 },
+    ]);
+    expect(characterGroups[0]!.characters).toContain(getCharacter("SD"));
+    expect(characterGroups[1]!.characters.map(({ id }) => id)).toEqual([
+      "AN",
+      "CA",
+      "HA",
+      "SA",
+    ]);
+    expect(new Set(characters.map(({ id }) => id)).size).toBe(21);
+  });
+
   it("contains the spec card counts and starting pool", () => {
-    const snowdancer = characters[0];
+    const snowdancer = getCharacter("SD")!;
     const counts = new Map<string | number, number>();
     for (const card of snowdancer.cards) {
       counts.set(card.level, (counts.get(card.level) ?? 0) + 1);
@@ -55,7 +75,7 @@ describe("committed Snowdancer catalog", () => {
   });
 
   it("includes every local card, back, and class icon with recorded checksums", async () => {
-    const snowdancer = characters[0];
+    const snowdancer = getCharacter("SD")!;
     const recordedAssets = new Map(
       manifest.assets.map((asset) => [asset.id, asset]),
     );

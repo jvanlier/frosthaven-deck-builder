@@ -6,7 +6,7 @@ import { formatNoteTimestamp } from "./notes";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
 import { levelUpPath } from "./level-up";
-import { characters } from "../shared/data/characters/index.js";
+import { getCharacter } from "../shared/data/characters/index.js";
 import {
   cardNoteHistory,
   deleteHighestLevel,
@@ -19,8 +19,6 @@ import type { Build } from "../shared/schema/index.js";
 export const LAST_POSITION_STORAGE_KEY =
   "frosthaven-deck-builder:last-position";
 
-const character = characters[0]!;
-
 interface LastPosition {
   characterId: string;
   buildId: string;
@@ -30,14 +28,19 @@ interface LastPosition {
 export function DeckRoute() {
   const { characterId, buildId, level } = useParams();
   const { data } = useAppData();
-  const build = data?.builds.find((candidate) => candidate.id === buildId);
+  const character = getCharacter(characterId ?? "");
+  const build = data?.builds.find(
+    (candidate) =>
+      candidate.id === buildId && candidate.characterId === character?.id,
+  );
   const parsedLevel = level === undefined ? Number.NaN : Number(level);
-  const projection = build ? replayBuild(build, character) : undefined;
+  const projection =
+    build && character ? replayBuild(build, character) : undefined;
   const state = projection?.levels.find(
     (candidate) => candidate.level === parsedLevel,
   );
 
-  if (characterId !== character.id || !build || !state) {
+  if (!character || !build || !state) {
     return <UnavailableDeckView />;
   }
 
@@ -237,10 +240,14 @@ export function DeckView({
 export function CardDetailRoute() {
   const { characterId, buildId, cardId } = useParams();
   const { data } = useAppData();
-  const build = data?.builds.find((candidate) => candidate.id === buildId);
-  const card = character.cards.find((candidate) => candidate.id === cardId);
+  const character = getCharacter(characterId ?? "");
+  const build = data?.builds.find(
+    (candidate) =>
+      candidate.id === buildId && candidate.characterId === character?.id,
+  );
+  const card = character?.cards.find((candidate) => candidate.id === cardId);
 
-  if (characterId !== character.id || !build || !card) {
+  if (!character || !build || !card) {
     return <UnavailableDeckView />;
   }
 
@@ -306,6 +313,7 @@ function CardDetailView({
           <h2 id="card-name-heading">{card.name}</h2>
           <p className="card-meta">
             Level {formatCardLevel(card)} · Initiative {card.initiative}
+            {card.form ? ` · ${card.form} form` : ""}
           </p>
           <section className="content-card" aria-labelledby="notes-heading">
             <h3 id="notes-heading">Card notes</h3>
@@ -402,6 +410,8 @@ function DeleteLevelDialog({
 }
 
 export function UnavailableDeckView() {
+  const { characterId } = useParams();
+  const character = getCharacter(characterId ?? "");
   return (
     <main className="page-content narrow-content">
       <section className="empty-card">
@@ -411,8 +421,11 @@ export function UnavailableDeckView() {
           That character, build or level does not exist. Your saved data is
           unchanged.
         </p>
-        <Link className="button-link" to={`/c/${character.id}`}>
-          Back to builds
+        <Link
+          className="button-link"
+          to={character ? `/c/${character.id}` : "/"}
+        >
+          {character ? "Back to builds" : "Choose a character"}
         </Link>
       </section>
     </main>

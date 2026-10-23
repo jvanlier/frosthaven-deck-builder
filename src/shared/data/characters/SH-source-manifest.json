@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "barbaric-yawp",
+      "source": "character-ability-cards/frosthaven/SH/fh-barbaric-yawp.jpeg",
+      "sha256": "bba3886d239ceb3c705fc1cbd1e5e40d58288739935544cd6e7035dae208ea27"
+    },
+    {
+      "id": "befuddling-bellow",
+      "source": "character-ability-cards/frosthaven/SH/fh-befuddling-bellow.jpeg",
+      "sha256": "2651ab3d0b0d22768b237cd5576575e971f5cbe94390d0e2ea1e4fa07fd13304"
+    },
+    {
+      "id": "calamitous-yawp",
+      "source": "character-ability-cards/frosthaven/SH/fh-calamitous-yawp.jpeg",
+      "sha256": "2e912ee7940a79d0aea7f789433ff40ed92aa466f3bb5aecf0544c4364f080a6"
+    },
+    {
+      "id": "cloaking-refraction",
+      "source": "character-ability-cards/frosthaven/SH/fh-cloaking-refraction.jpeg",
+      "sha256": "ada4cd23ff39718712d3b3a1f9b8875faa481e98f59dff51c33e26c0e60c994a"
+    },
+    {
+      "id": "concentrated-blast",
+      "source": "character-ability-cards/frosthaven/SH/fh-concentrated-blast.jpeg",
+      "sha256": "6adee4352dbe2a84f6b7252eedc3ff6fe78146056eca24642c5d983b17617e15"
+    },
+    {
+      "id": "devastating-shout",
+      "source": "character-ability-cards/frosthaven/SH/fh-devastating-shout.jpeg",
+      "sha256": "abf54b963db8182b9054c88b0777d369028b155479bf33e8f2f24f75d4ab075c"
+    },
+    {
+      "id": "din-of-battle",
+      "source": "character-ability-cards/frosthaven/SH/fh-din-of-battle.jpeg",
+      "sha256": "5d13a776d525226bb8a45c4815526973607ea3d3f6d6f9425b41f103c98fde9e"
+    },
+    {
+      "id": "elemental-pulse",
+      "source": "character-ability-cards/frosthaven/SH/fh-elemental-pulse.jpeg",
+      "sha256": "13333df0573d9fdbad6e085a81bee66a2801698ca02457b5fb6c2bb69b556589"
+    },
+    {
+      "id": "empowering-note",
+      "source": "character-ability-cards/frosthaven/SH/fh-empowering-note.jpeg",
+      "sha256": "caa6b6d1fe594dfee4d612e59f10f524c5c94cb1f42f9e42748cda231b74b57a"
+    },
+    {
+      "id": "empowering-pulse",
+      "source": "character-ability-cards/frosthaven/SH/fh-empowering-pulse.jpeg",
+      "sha256": "a5fa463f417ce7912b76c5688efa2692e588770edde3156e438879140742147f"
+    },
+    {
+      "id": "feedback",
+      "source": "character-ability-cards/frosthaven/SH/fh-feedback.jpeg",
+      "sha256": "385a4dad719a716d528795debdb9d703f9df5cb8b760031fbd192e834bd193e1"
+    },
+    {
+      "id": "forceful-vibrations",
+      "source": "character-ability-cards/frosthaven/SH/fh-forceful-vibrations.jpeg",
+      "sha256": "92ae9d99fc1f40a886e2d4b463ea5eea5b1b1a50f582a56c051a4e2070467443"
+    },
+    {
+      "id": "foreboding-tremors",
+      "source": "character-ability-cards/frosthaven/SH/fh-foreboding-tremors.jpeg",
+      "sha256": "2f1af88c01a5c693c138ab7302d534363aa9cd8421962487211760d16e4bda7b"
+    },
+    {
+      "id": "future-sense",
+      "source": "character-ability-cards/frosthaven/SH/fh-future-sense.jpeg",
+      "sha256": "ac19365c49e1df96644f7dd4fbe81665c4a226dd59bdde35745161872aa21a61"
+    },
+    {
+      "id": "heartening-harmony",
+      "source": "character-ability-cards/frosthaven/SH/fh-heartening-harmony.jpeg",
+      "sha256": "42f8f6148d52d48d12b90ad46392f081606279fee633c3266ef9d4e7380c27c4"
+    },
+    {
+      "id": "illuminative-tone",
+      "source": "character-ability-cards/frosthaven/SH/fh-illuminative-tone.jpeg",
+      "sha256": "68de64656c98549e79f393eaeb19c1feb23b611def7f08d9309407d7c8974e87"
+    },
+    {
+      "id": "lifting-voice",
+      "source": "character-ability-cards/frosthaven/SH/fh-lifting-voice.jpeg",
+      "sha256": "0582a88d2f4971d8831e438997b0b7173dd3899a23a26c5daa4af7471b038660"
+    },
+    {
+      "id": "precious-gems",
+      "source": "character-ability-cards/frosthaven/SH/fh-precious-gems.jpeg",
+      "sha256": "b4f08f9fbbd6401e02306e176c4c46446a80212800707ad55b81056e222c31b8"
+    },
+    {
+      "id": "resonant-frequency",
+      "source": "character-ability-cards/frosthaven/SH/fh-resonant-frequency.jpeg",
+      "sha256": "8f8cda527deabd21d542cecfcdcc3e8c9daa5f17483c7b454562f9ffe3cc970c"
+    },
+    {
+      "id": "shape-the-path",
+      "source": "character-ability-cards/frosthaven/SH/fh-shape-the-path.jpeg",
+      "sha256": "a70dc7d14d8186cc887025b25ec047745c730f2b0b2cbf438431841e2fa79b0a"
+    },
+    {
+      "id": "shrieking-chakram",
+      "source": "character-ability-cards/frosthaven/SH/fh-shrieking-chakram.jpeg",
+      "sha256": "8b2a39f9fa38804ecdc11e6f2dcffad62283ff2ebdb061d660315c465d89b7db"
+    },
+    {
+      "id": "soft-spots",
+      "source": "character-ability-cards/frosthaven/SH/fh-soft-spots.jpeg",
+      "sha256": "a747a3079b203ffd7161f8cbd05b74883478f2e62d33ab284b4665f48ff0c5ad"
+    },
+    {
+      "id": "sonic-shock",
+      "source": "character-ability-cards/frosthaven/SH/fh-sonic-shock.jpeg",
+      "sha256": "eb48d9ae51fa8f3e832db3d61980f1bde11607ee83fb0c8870ad3358bd3384db"
+    },
+    {
+      "id": "sound-therapy",
+      "source": "character-ability-cards/frosthaven/SH/fh-sound-therapy.jpeg",
+      "sha256": "582d8bd32346e752ad9a376c4f9035c392fdafade1c74dec4d011cb4bb5096ee"
+    },
+    {
+      "id": "stealth-vibrations",
+      "source": "character-ability-cards/frosthaven/SH/fh-stealth-vibrations.jpeg",
+      "sha256": "6d4c76e94a7ba091f2780e8d18d6825e0517b2cad9afc3994e9ebaeb82b132dd"
+    },
+    {
+      "id": "transparency",
+      "source": "character-ability-cards/frosthaven/SH/fh-transparency.jpeg",
+      "sha256": "996327d7a092df360b6739c16e740b8757f18be5360260b2abb55d044eaa33f5"
+    },
+    {
+      "id": "unrelenting-wail",
+      "source": "character-ability-cards/frosthaven/SH/fh-unrelenting-wail.jpeg",
+      "sha256": "ad7f40a8acfaf30e66a197ffd2ce07ee383eccf910095f80a2cdf571ff1e736e"
+    },
+    {
+      "id": "unsustainable-wave",
+      "source": "character-ability-cards/frosthaven/SH/fh-unsustainable-wave.jpeg",
+      "sha256": "5c4f657bcf789e3e294213320442bf18a77bc84b335299945b09cc42ac388327"
+    },
+    {
+      "id": "violent-vibrations",
+      "source": "character-ability-cards/frosthaven/SH/fh-violent-vibrations.jpeg",
+      "sha256": "85c724f1819bafcfc75b99e81c1866ae6d77a7db633bb094c879e5b1ddc00d3a"
+    },
+    {
+      "id": "sh-back",
+      "source": "character-ability-cards/frosthaven/SH/fh-sh-back.jpeg",
+      "sha256": "5c534b08a3330db605fe17ab82ec602f45e5b092d0fb34a7915665529a2e2ab9"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/SH.png",
+    "sha256": "82707927c682040a57a006f4664cbae61a21a156a5ff4a60e41009c7886dacd5"
+  }
+}

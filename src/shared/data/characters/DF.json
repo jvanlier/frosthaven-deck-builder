@@ -1,0 +1,226 @@
+{
+  "id": "DF",
+  "name": "Drifter",
+  "handSize": 12,
+  "icon": "DF.png",
+  "cardBack": "DF/fh-df-back.jpeg",
+  "cards": [
+    {
+      "id": "accurate-strikes",
+      "name": "Accurate Strikes",
+      "level": 6,
+      "initiative": 56,
+      "image": "DF/fh-accurate-strikes.jpeg"
+    },
+    {
+      "id": "against-all-odds",
+      "name": "Against All Odds",
+      "level": 8,
+      "initiative": 37,
+      "image": "DF/fh-against-all-odds.jpeg"
+    },
+    {
+      "id": "bloodletting",
+      "name": "Bloodletting",
+      "level": 1,
+      "initiative": 65,
+      "image": "DF/fh-bloodletting.jpeg"
+    },
+    {
+      "id": "break-through",
+      "name": "Break Through",
+      "level": 5,
+      "initiative": 34,
+      "image": "DF/fh-break-through.jpeg"
+    },
+    {
+      "id": "chunk-of-flesh",
+      "name": "Chunk of Flesh",
+      "level": 4,
+      "initiative": 62,
+      "image": "DF/fh-chunk-of-flesh.jpeg"
+    },
+    {
+      "id": "consume-stamina",
+      "name": "Consume Stamina",
+      "level": 6,
+      "initiative": 21,
+      "image": "DF/fh-consume-stamina.jpeg"
+    },
+    {
+      "id": "continuous-health",
+      "name": "Continuous Health",
+      "level": 1,
+      "initiative": 61,
+      "image": "DF/fh-continuous-health.jpeg"
+    },
+    {
+      "id": "crushing-weight",
+      "name": "Crushing Weight",
+      "level": 1,
+      "initiative": 71,
+      "image": "DF/fh-crushing-weight.jpeg"
+    },
+    {
+      "id": "deadly-shot",
+      "name": "Deadly Shot",
+      "level": 1,
+      "initiative": 32,
+      "image": "DF/fh-deadly-shot.jpeg"
+    },
+    {
+      "id": "destructive-fury",
+      "name": "Destructive Fury",
+      "level": "X",
+      "initiative": 19,
+      "image": "DF/fh-destructive-fury.jpeg"
+    },
+    {
+      "id": "draining-arrows",
+      "name": "Draining Arrows",
+      "level": 1,
+      "initiative": 23,
+      "image": "DF/fh-draining-arrows.jpeg"
+    },
+    {
+      "id": "dual-bow",
+      "name": "Dual Bow",
+      "level": 3,
+      "initiative": 26,
+      "image": "DF/fh-dual-bow.jpeg"
+    },
+    {
+      "id": "ever-forward",
+      "name": "Ever Forward",
+      "level": 2,
+      "initiative": 67,
+      "image": "DF/fh-ever-forward.jpeg"
+    },
+    {
+      "id": "everlasting",
+      "name": "Everlasting",
+      "level": 9,
+      "initiative": 96,
+      "image": "DF/fh-everlasting.jpeg"
+    },
+    {
+      "id": "fierce-barrage",
+      "name": "Fierce Barrage",
+      "level": 3,
+      "initiative": 32,
+      "image": "DF/fh-fierce-barrage.jpeg"
+    },
+    {
+      "id": "fortitude",
+      "name": "Fortitude",
+      "level": "X",
+      "initiative": 31,
+      "image": "DF/fh-fortitude.jpeg"
+    },
+    {
+      "id": "gift-of-the-prey",
+      "name": "Gift of the Prey",
+      "level": 4,
+      "initiative": 40,
+      "image": "DF/fh-gift-of-the-prey.jpeg"
+    },
+    {
+      "id": "inevitable-conclusion",
+      "name": "Inevitable Conclusion",
+      "level": 8,
+      "initiative": 29,
+      "image": "DF/fh-inevitable-conclusion.jpeg"
+    },
+    {
+      "id": "like-the-wind",
+      "name": "Like the Wind",
+      "level": 7,
+      "initiative": 77,
+      "image": "DF/fh-like-the-wind.jpeg"
+    },
+    {
+      "id": "no-remorse",
+      "name": "No Remorse",
+      "level": "X",
+      "initiative": 20,
+      "image": "DF/fh-no-remorse.jpeg"
+    },
+    {
+      "id": "precision-aim",
+      "name": "Precision Aim",
+      "level": 1,
+      "initiative": 66,
+      "image": "DF/fh-precision-aim.jpeg"
+    },
+    {
+      "id": "prudent-preparation",
+      "name": "Prudent Preparation",
+      "level": 1,
+      "initiative": 14,
+      "image": "DF/fh-prudent-preparation.jpeg"
+    },
+    {
+      "id": "relentless",
+      "name": "Relentless",
+      "level": 1,
+      "initiative": 89,
+      "image": "DF/fh-relentless.jpeg"
+    },
+    {
+      "id": "shockwave",
+      "name": "Shockwave",
+      "level": 2,
+      "initiative": 17,
+      "image": "DF/fh-shockwave.jpeg"
+    },
+    {
+      "id": "survivalist",
+      "name": "Survivalist",
+      "level": 5,
+      "initiative": 91,
+      "image": "DF/fh-survivalist.jpeg"
+    },
+    {
+      "id": "sustained-momentum",
+      "name": "Sustained Momentum",
+      "level": 1,
+      "initiative": 76,
+      "image": "DF/fh-sustained-momentum.jpeg"
+    },
+    {
+      "id": "unbreakable",
+      "name": "Unbreakable",
+      "level": 1,
+      "initiative": 90,
+      "image": "DF/fh-unbreakable.jpeg"
+    },
+    {
+      "id": "unending-fight",
+      "name": "Unending Fight",
+      "level": 7,
+      "initiative": 25,
+      "image": "DF/fh-unending-fight.jpeg"
+    },
+    {
+      "id": "use-every-part",
+      "name": "Use Every Part",
+      "level": 9,
+      "initiative": 18,
+      "image": "DF/fh-use-every-part.jpeg"
+    },
+    {
+      "id": "vile-assault",
+      "name": "Vile Assault",
+      "level": 1,
+      "initiative": 27,
+      "image": "DF/fh-vile-assault.jpeg"
+    },
+    {
+      "id": "violent-inheritance",
+      "name": "Violent Inheritance",
+      "level": 1,
+      "initiative": 70,
+      "image": "DF/fh-violent-inheritance.jpeg"
+    }
+  ]
+}

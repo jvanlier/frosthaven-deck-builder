@@ -5,21 +5,17 @@ import {
   Route,
   Routes,
   useLocation,
-  useNavigate,
+  useMatch,
   useParams,
 } from "react-router-dom";
 import { preventUnloadIfPending, useAppData } from "./app-data";
 import { CardGrid } from "./cards";
 import { BuildList, StartingEditor } from "./build-editor";
-import {
-  CardDetailRoute,
-  DeckRoute,
-  deckPath,
-  readLastPosition,
-} from "./deck-view";
+import { CardDetailRoute, DeckRoute } from "./deck-view";
+import { CharacterSelect } from "./character-select";
 import { LevelUpRoute, levelUpDestination } from "./level-up";
 import { OverviewRoute } from "./overview-view";
-import { characters } from "../shared/data/characters/index.js";
+import { getCharacter } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
 import { replayBuild } from "../shared/rules/index.js";
@@ -31,7 +27,6 @@ const healthMessages = {
 } as const;
 
 type HealthState = keyof typeof healthMessages;
-const character = characters[0]!;
 
 export default function App() {
   const appData = useAppData();
@@ -47,7 +42,7 @@ export default function App() {
   if (appData.data === null && appData.status === "loading") {
     return (
       <main className="shell loading-shell">
-        <AppHeading character={character} />
+        <AppHeading />
         <p role="status" aria-live="polite">
           Loading your deck workspace…
         </p>
@@ -58,7 +53,7 @@ export default function App() {
   if (appData.data === null && appData.status === "error") {
     return (
       <main className="shell error-shell">
-        <AppHeading character={character} />
+        <AppHeading />
         <section className="feedback-card" aria-labelledby="load-error-heading">
           <h1 id="load-error-heading">Your workspace is unavailable</h1>
           <p>
@@ -79,10 +74,10 @@ export default function App() {
 
   return (
     <div className="app-frame">
-      <AppHeader character={character} health={health} />
+      <AppHeader health={health} />
       <SaveFeedback />
       <Routes>
-        <Route path="/" element={<HomeRoute />} />
+        <Route path="/" element={<CharacterSelect />} />
         <Route path="/about" element={<AboutView />} />
         {/* Test previews: dev server and the CI e2e build only. */}
         {import.meta.env.DEV || import.meta.env.MODE === "e2e" ? (
@@ -122,11 +117,10 @@ export default function App() {
   );
 }
 
-function AppHeading({ character }: { character: Character }) {
+function AppHeading() {
   return (
     <header className="hero app-heading">
-      <img className="class-icon" src={`/icons/${character.icon}`} alt="" />
-      <p className="eyebrow">{character.name} · Frosthaven</p>
+      <p className="eyebrow">Frosthaven</p>
       <h1>Frosthaven Deck Builder</h1>
       <p className="intro">
         Plan your character&apos;s deck across every level.
@@ -135,14 +129,9 @@ function AppHeading({ character }: { character: Character }) {
   );
 }
 
-function AppHeader({
-  character,
-  health,
-}: {
-  character: Character;
-  health: HealthState;
-}) {
+function AppHeader({ health }: { health: HealthState }) {
   const workspace = useWorkspace();
+  const character = workspace.character;
   const headerRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const header = headerRef.current;
@@ -158,11 +147,12 @@ function AppHeader({
     observer.observe(header);
     return () => observer.disconnect();
   }, []);
-  const levelUpTo = workspace.build
-    ? levelUpDestination(workspace.build, character)
-    : null;
+  const levelUpTo =
+    workspace.build && character
+      ? levelUpDestination(workspace.build, character)
+      : null;
   const levelsNeedingAttention = new Set(
-    workspace.build
+    workspace.build && character
       ? replayBuild(workspace.build, character)
           .levels.filter((state) => state.issues.length > 0)
           .map((state) => state.level)
@@ -177,15 +167,21 @@ function AppHeader({
         <h1 className="visually-hidden">Frosthaven Deck Builder</h1>
         <Link
           className="brand"
-          to={`/c/${character.id}`}
-          aria-label="Frosthaven Deck Builder builds"
+          to={character ? `/c/${character.id}` : "/"}
+          aria-label={
+            character
+              ? "Frosthaven Deck Builder builds"
+              : "Frosthaven Deck Builder home"
+          }
         >
-          <img src={`/icons/${character.icon}`} alt="" />
+          {character ? <img src={`/icons/${character.icon}`} alt="" /> : null}
           <span>
-            <strong>{workspace.build?.name ?? character.name}</strong>
+            <strong>
+              {workspace.build?.name ?? character?.name ?? "Frosthaven"}
+            </strong>
             <small>
               {workspace.build
-                ? `${character.name} · started at level ${workspace.build.startLevel}`
+                ? `${character!.name} · started at level ${workspace.build.startLevel}`
                 : "Deck Builder"}
             </small>
           </span>
@@ -235,6 +231,7 @@ function AppHeader({
         </div>
         <div className="header-utilities">
           <HealthIndicator state={health} />
+          <Link to="/">Characters</Link>
           <Link to="/about">About</Link>
         </div>
       </div>
@@ -242,60 +239,16 @@ function AppHeader({
   );
 }
 
-function HomeRoute() {
-  const { data } = useAppData();
-  const navigate = useNavigate();
-  const [checkedResume, setCheckedResume] = useState(false);
-
-  useEffect(() => {
-    if (data === null || checkedResume) {
-      return;
-    }
-    const position = readLastPosition();
-    const build = position
-      ? data.builds.find(
-          (candidate) =>
-            candidate.id === position.buildId &&
-            candidate.characterId === position.characterId,
-        )
-      : undefined;
-    const levelExists =
-      build !== undefined &&
-      (build.startLevel === position?.level ||
-        build.levelUps.some((levelUp) => levelUp.level === position?.level));
-    if (position && build && levelExists) {
-      setCheckedResume(true);
-      navigate(
-        deckPath(position.characterId, position.buildId, position.level),
-        { replace: true },
-      );
-      return;
-    }
-    setCheckedResume(true);
-  }, [checkedResume, data, navigate]);
-
-  if (!checkedResume) {
-    return (
-      <main className="page-content" aria-labelledby="resume-heading">
-        <p id="resume-heading" role="status" aria-live="polite">
-          Opening your last deck…
-        </p>
-      </main>
-    );
-  }
-  return <BuildList />;
-}
-
 function StartingEditorRoute() {
   const { characterId, buildId, level } = useParams();
   const location = useLocation();
   const { data } = useAppData();
-  const build = data?.builds.find((candidate) => candidate.id === buildId);
-  if (
-    characterId !== character.id ||
-    !build ||
-    Number(level) !== build.startLevel
-  ) {
+  const character = getCharacter(characterId ?? "");
+  const build = data?.builds.find(
+    (candidate) =>
+      candidate.id === buildId && candidate.characterId === character?.id,
+  );
+  if (!character || !build || Number(level) !== build.startLevel) {
     return <UnavailableView />;
   }
   const focusValue = new URLSearchParams(location.search).get("focus");
@@ -312,6 +265,7 @@ function StartingEditorRoute() {
 }
 
 function CardPreview() {
+  const character = getCharacter("SD")!;
   const [selected, setSelected] = useState<string | null>(null);
   const [paused, setPaused] = useState(true);
   const previewCards = [
@@ -422,8 +376,8 @@ function UnavailableView() {
           Your saved data is safe. This route will become available when its
           editor is ready.
         </p>
-        <Link className="button-link" to={`/c/${character.id}`}>
-          Back to builds
+        <Link className="button-link" to="/">
+          Choose a character
         </Link>
       </section>
     </main>
@@ -432,6 +386,8 @@ function UnavailableView() {
 
 function BottomTabs() {
   const workspace = useWorkspace();
+  const character = workspace.character;
+  if (!character) return null;
   const hasWorkspace = workspace.build !== undefined;
   const deckLevel = workspace.level ?? workspace.build?.startLevel ?? 1;
   return (
@@ -502,6 +458,7 @@ function tabClassName({ isActive }: { isActive: boolean }): string {
 }
 
 interface Workspace {
+  character: Character | undefined;
   build: Build | undefined;
   buildId: string | null;
   characterId: string | null;
@@ -510,22 +467,25 @@ interface Workspace {
 }
 
 function useWorkspace(): Workspace {
-  const location = useLocation();
   const { data } = useAppData();
-  const match = /^\/c\/([^/]+)\/b\/([^/]+)(?:\/l\/(\d+))?/.exec(
-    location.pathname,
-  );
-  const characterId = match ? decodeURIComponent(match[1]!) : null;
-  const buildId = match ? decodeURIComponent(match[2]!) : null;
-  const level = match?.[3] === undefined ? null : Number(match[3]);
+  const characterMatch = useMatch("/c/:characterId/*");
+  const buildMatch = useMatch("/c/:characterId/b/:buildId/*");
+  const characterId = characterMatch?.params.characterId ?? null;
+  const character = getCharacter(characterId ?? "");
+  const buildId = buildMatch?.params.buildId ?? null;
+  const levelMatch = /^l\/(\d+)/.exec(buildMatch?.params["*"] ?? "");
+  const level = levelMatch ? Number(levelMatch[1]) : null;
   const build =
     buildId === null
       ? undefined
-      : data?.builds.find(({ id }) => id === buildId);
+      : data?.builds.find(
+          (build) =>
+            build.id === buildId && build.characterId === character?.id,
+        );
   const levels = build
     ? [build.startLevel, ...build.levelUps.map(({ level: value }) => value)]
     : [];
-  return { build, buildId, characterId, level, levels };
+  return { character, build, buildId, characterId, level, levels };
 }
 
 function workspaceDeckPath(workspace: Workspace, level: number): string {

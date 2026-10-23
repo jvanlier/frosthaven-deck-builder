@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { Card } from "../shared/character.js";
-
-const CARD_BACK = "/cards/SD/fh-sd-back.jpeg";
+import { getCharacter } from "../shared/data/characters/index.js";
 
 export function compareCardLevelsDescending(left: Card, right: Card): number {
   return (
@@ -28,7 +27,7 @@ export function CardTile({
   const [enlarged, setEnlarged] = useState(false);
   const enlargeButtonRef = useRef<HTMLButtonElement>(null);
   const level = formatCardLevel(card);
-  const alt = `${card.name}, level ${level}`;
+  const alt = `${card.name}, level ${level}${card.form ? `, ${card.form} form` : ""}`;
   const closeDialog = () => {
     setEnlarged(false);
     requestAnimationFrame(() => enlargeButtonRef.current?.focus());
@@ -190,8 +189,12 @@ export function CardImage({
   alt: string;
   className?: string;
 }) {
-  const [useFallback, setUseFallback] = useState(false);
-  const source = useFallback ? CARD_BACK : `/cards/${card.image}`;
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const character = getCharacter(card.image.split("/")[0]!);
+  const source =
+    failedImage === card.image && character
+      ? `/cards/${character.cardBack}`
+      : `/cards/${card.image}`;
 
   return (
     <img
@@ -199,7 +202,7 @@ export function CardImage({
       src={source}
       alt={alt}
       loading="lazy"
-      onError={() => setUseFallback(true)}
+      onError={() => setFailedImage(card.image)}
     />
   );
 }

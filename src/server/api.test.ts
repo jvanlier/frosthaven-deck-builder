@@ -19,6 +19,8 @@ import {
   type DataStoreFileSystem,
 } from "./storage";
 import { appDataSchema, type AppData } from "../shared/schema";
+import { characters } from "../shared/data/characters";
+import { createBuild } from "../shared/builds";
 
 const timestamp = "2024-01-02T03:04:05.000Z";
 const buildId = "123e4567-e89b-42d3-a456-426614174000";
@@ -97,6 +99,28 @@ describe("revision-safe data API", () => {
     expect((await stored.json()) as AppData).toMatchObject({
       revision: 1,
       builds: [{ name: "Freeze control", characterId: "SD" }],
+    });
+  });
+
+  it("saves and reloads builds for every supported character together", async () => {
+    const dataDir = await newDataDir();
+    const app = createApp({ dataDir });
+    const data: AppData = {
+      schemaVersion: 2,
+      revision: 0,
+      builds: characters.map((character) =>
+        createBuild({
+          characterId: character.id,
+          name: character.name,
+          startLevel: 1,
+        }),
+      ),
+    };
+    expect((await put(app, 0, data)).status).toBe(200);
+    const reloaded = createApp({ dataDir });
+    expect(await (await reloaded.request("/api/data")).json()).toEqual({
+      ...data,
+      revision: 1,
     });
   });
 

@@ -1,0 +1,219 @@
+{
+  "id": "DW",
+  "name": "Deathwalker",
+  "handSize": 11,
+  "icon": "DW.png",
+  "cardBack": "DW/fh-dw-back.jpeg",
+  "cards": [
+    {
+      "id": "anger-of-the-dead",
+      "name": "Anger of the Dead",
+      "level": 1,
+      "initiative": 14,
+      "image": "DW/fh-anger-of-the-dead.jpeg"
+    },
+    {
+      "id": "black-barrage",
+      "name": "Black Barrage",
+      "level": 1,
+      "initiative": 28,
+      "image": "DW/fh-black-barrage.jpeg"
+    },
+    {
+      "id": "black-lance",
+      "name": "Black Lance",
+      "level": 9,
+      "initiative": 16,
+      "image": "DW/fh-black-lance.jpeg"
+    },
+    {
+      "id": "call-of-doom",
+      "name": "Call of Doom",
+      "level": 1,
+      "initiative": 32,
+      "image": "DW/fh-call-of-doom.jpeg"
+    },
+    {
+      "id": "call-to-the-abyss",
+      "name": "Call To the Abyss",
+      "level": 1,
+      "initiative": 82,
+      "image": "DW/fh-call-to-the-abyss.jpeg"
+    },
+    {
+      "id": "dark-fog",
+      "name": "Dark Fog",
+      "level": 1,
+      "initiative": 46,
+      "image": "DW/fh-dark-fog.jpeg"
+    },
+    {
+      "id": "dead-bolt",
+      "name": "Dead Bolt",
+      "level": 3,
+      "initiative": 88,
+      "image": "DW/fh-dead-bolt.jpeg"
+    },
+    {
+      "id": "deepening-despair",
+      "name": "Deepening Despair",
+      "level": 2,
+      "initiative": 11,
+      "image": "DW/fh-deepening-despair.jpeg"
+    },
+    {
+      "id": "dominate",
+      "name": "Dominate",
+      "level": 5,
+      "initiative": 29,
+      "image": "DW/fh-dominate.jpeg"
+    },
+    {
+      "id": "eclipse",
+      "name": "Eclipse",
+      "level": 1,
+      "initiative": 86,
+      "image": "DW/fh-eclipse.jpeg"
+    },
+    {
+      "id": "fleeting-dusk",
+      "name": "Fleeting Dusk",
+      "level": 4,
+      "initiative": 36,
+      "image": "DW/fh-fleeting-dusk.jpeg"
+    },
+    {
+      "id": "fluid-night",
+      "name": "Fluid Night",
+      "level": 1,
+      "initiative": 24,
+      "image": "DW/fh-fluid-night.jpeg"
+    },
+    {
+      "id": "forceful-spirits",
+      "name": "Forceful Spirits",
+      "level": "X",
+      "initiative": 34,
+      "image": "DW/fh-forceful-spirits.jpeg"
+    },
+    {
+      "id": "frozen-in-fear",
+      "name": "Frozen in Fear",
+      "level": 8,
+      "initiative": 21,
+      "image": "DW/fh-frozen-in-fear.jpeg"
+    },
+    {
+      "id": "hungry-grasps",
+      "name": "Hungry Grasps",
+      "level": 7,
+      "initiative": 25,
+      "image": "DW/fh-hungry-grasps.jpeg"
+    },
+    {
+      "id": "lashing-tendrils",
+      "name": "Lashing Tendrils",
+      "level": 8,
+      "initiative": 80,
+      "image": "DW/fh-lashing-tendrils.jpeg"
+    },
+    {
+      "id": "lingering-rot",
+      "name": "Lingering Rot",
+      "level": 1,
+      "initiative": 64,
+      "image": "DW/fh-lingering-rot.jpeg"
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "level": 5,
+      "initiative": 55,
+      "image": "DW/fh-medium.jpeg"
+    },
+    {
+      "id": "proliferation-of-the-abyss",
+      "name": "Proliferation of the Abyss",
+      "level": 7,
+      "initiative": 38,
+      "image": "DW/fh-proliferation-of-the-abyss.jpeg"
+    },
+    {
+      "id": "pulled-across",
+      "name": "Pulled Across",
+      "level": 4,
+      "initiative": 77,
+      "image": "DW/fh-pulled-across.jpeg"
+    },
+    {
+      "id": "rest-in-the-shade",
+      "name": "Rest in the Shade",
+      "level": "X",
+      "initiative": 26,
+      "image": "DW/fh-rest-in-the-shade.jpeg"
+    },
+    {
+      "id": "restless-spirits",
+      "name": "Restless Spirits",
+      "level": 2,
+      "initiative": 20,
+      "image": "DW/fh-restless-spirits.jpeg"
+    },
+    {
+      "id": "ritual-sacrifice",
+      "name": "Ritual Sacrifice",
+      "level": 3,
+      "initiative": 13,
+      "image": "DW/fh-ritual-sacrifice.jpeg"
+    },
+    {
+      "id": "shadow-step",
+      "name": "Shadow Step",
+      "level": 1,
+      "initiative": 19,
+      "image": "DW/fh-shadow-step.jpeg"
+    },
+    {
+      "id": "strength-of-the-abyss",
+      "name": "Strength of the Abyss",
+      "level": 1,
+      "initiative": 50,
+      "image": "DW/fh-strength-of-the-abyss.jpeg"
+    },
+    {
+      "id": "sunless-apparition",
+      "name": "Sunless Apparition",
+      "level": 1,
+      "initiative": 96,
+      "image": "DW/fh-sunless-apparition.jpeg"
+    },
+    {
+      "id": "the-night-takes-shape",
+      "name": "The Night Takes Shape",
+      "level": 6,
+      "initiative": 94,
+      "image": "DW/fh-the-night-takes-shape.jpeg"
+    },
+    {
+      "id": "vengeful-storm",
+      "name": "Vengeful Storm",
+      "level": 6,
+      "initiative": 18,
+      "image": "DW/fh-vengeful-storm.jpeg"
+    },
+    {
+      "id": "wave-of-anguish",
+      "name": "Wave of Anguish",
+      "level": "X",
+      "initiative": 58,
+      "image": "DW/fh-wave-of-anguish.jpeg"
+    },
+    {
+      "id": "when-your-time-comes",
+      "name": "When Your Time Comes",
+      "level": 9,
+      "initiative": 72,
+      "image": "DW/fh-when-your-time-comes.jpeg"
+    }
+  ]
+}

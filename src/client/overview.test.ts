@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createBuild } from "../shared/builds";
-import { characters } from "../shared/data/characters";
+import { getCharacter } from "../shared/data/characters";
 import { buildSchema, type Build } from "../shared/schema";
 import { buildOverviewModel } from "./overview";
 
-const character = characters[0]!;
+const character = getCharacter("SD")!;
 const timestamp = "2024-01-02T03:04:05.000Z";
 const startingCards = [
   "blizzard",

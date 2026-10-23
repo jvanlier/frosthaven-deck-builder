@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "blurry-jab",
+      "source": "character-ability-cards/frosthaven/BB/fh-blurry-jab.jpeg",
+      "sha256": "f175d72d92914301cff168f134d04399a798cc7d3d4b4aaa0c1ef16dc5d4018f"
+    },
+    {
+      "id": "borrowed-time",
+      "source": "character-ability-cards/frosthaven/BB/fh-borrowed-time.jpeg",
+      "sha256": "f555bbf4de4c4206b6ef08afcb8cfe44d51d238ddec9553cb6edfecf28743727"
+    },
+    {
+      "id": "breakneck-speed",
+      "source": "character-ability-cards/frosthaven/BB/fh-breakneck-speed.jpeg",
+      "sha256": "8fcd5c4e387008398894be63fd5d4281cc174f1eef0c1264a7a552a9fb1002aa"
+    },
+    {
+      "id": "cascading-reaction",
+      "source": "character-ability-cards/frosthaven/BB/fh-cascading-reaction.jpeg",
+      "sha256": "afab099e04436cd64689530203f85272a7a33490158c32f476bf9610ea6e308b"
+    },
+    {
+      "id": "double-time",
+      "source": "character-ability-cards/frosthaven/BB/fh-double-time.jpeg",
+      "sha256": "04bd21ead6b0d00a86075f987a0a8b512cb0521e613bd5bbf72280246c8ca8fb"
+    },
+    {
+      "id": "drive-recharge",
+      "source": "character-ability-cards/frosthaven/BB/fh-drive-recharge.jpeg",
+      "sha256": "67a2ada7ec65f4689c10998f9ed10e76d67e4cd5e07178798bd371053077eb2a"
+    },
+    {
+      "id": "experimental-adjustment",
+      "source": "character-ability-cards/frosthaven/BB/fh-experimental-adjustment.jpeg",
+      "sha256": "24226b558b076f2df6579cf72fe8559a0375d9e4d5195bd5cfc0d14a2315ca43"
+    },
+    {
+      "id": "fastest-alive",
+      "source": "character-ability-cards/frosthaven/BB/fh-fastest-alive.jpeg",
+      "sha256": "b53fe3c6abfc1754973079710789a70a0420ccc335bc9804dc4ec664ca4af3ce"
+    },
+    {
+      "id": "flashing-flurry",
+      "source": "character-ability-cards/frosthaven/BB/fh-flashing-flurry.jpeg",
+      "sha256": "c972242c8d82439643c69cc437700ce1d01b5afcdd6bbacd7fe96a83af98c25a"
+    },
+    {
+      "id": "fractured-timeline",
+      "source": "character-ability-cards/frosthaven/BB/fh-fractured-timeline.jpeg",
+      "sha256": "9b44e34feeed22899564e65ab5f4a9a705d19631c009e9fd45026abe6281ed3d"
+    },
+    {
+      "id": "hit-and-run",
+      "source": "character-ability-cards/frosthaven/BB/fh-hit-and-run.jpeg",
+      "sha256": "64dbee0621c9dcfebb0db80b77e541eff5e3b548750ea4e36d8ece41b59f9ecd"
+    },
+    {
+      "id": "kinetic-transfer",
+      "source": "character-ability-cards/frosthaven/BB/fh-kinetic-transfer.jpeg",
+      "sha256": "f3a892de915860f1ce8065a6ac6449c7f452f40342963f8cc55a254c1a8f4cb1"
+    },
+    {
+      "id": "make-it-count",
+      "source": "character-ability-cards/frosthaven/BB/fh-make-it-count.jpeg",
+      "sha256": "08cf5fbbf2978ac2de062be5dbeab77131d352c52231cc777792710648d29d6f"
+    },
+    {
+      "id": "overdrive",
+      "source": "character-ability-cards/frosthaven/BB/fh-overdrive.jpeg",
+      "sha256": "3b63023d9a574fd67b0c7860c25af255aee23a3c0dd7ee26db9640cea7ee69e6"
+    },
+    {
+      "id": "phasing-blades",
+      "source": "character-ability-cards/frosthaven/BB/fh-phasing-blades.jpeg",
+      "sha256": "35ec9d6de0b475367d572195490c302bbc9def360c555158ee28442c61d1ba18"
+    },
+    {
+      "id": "potential-energy",
+      "source": "character-ability-cards/frosthaven/BB/fh-potential-energy.jpeg",
+      "sha256": "28a0c032072b3e2eee3925ed921c112fb952d590ddc55c210685730ccc6c40e5"
+    },
+    {
+      "id": "power-leak",
+      "source": "character-ability-cards/frosthaven/BB/fh-power-leak.jpeg",
+      "sha256": "9d236461974a010190528a262a99e5b8f6aa57a6d19113223e9aa981fb1ded0d"
+    },
+    {
+      "id": "precision-timing",
+      "source": "character-ability-cards/frosthaven/BB/fh-precision-timing.jpeg",
+      "sha256": "aa224957fe4536a24a6b3345cc6834d3b4f0f10a2bef19442e57aa7c13f19267"
+    },
+    {
+      "id": "quantum-uncertainty",
+      "source": "character-ability-cards/frosthaven/BB/fh-quantum-uncertainty.jpeg",
+      "sha256": "a50ef5334ca31a34644df08a255d122d38ed77807e605a64ef316d14f52817f3"
+    },
+    {
+      "id": "reckless-augmentation",
+      "source": "character-ability-cards/frosthaven/BB/fh-reckless-augmentation.jpeg",
+      "sha256": "de7dbd2c8e28fe9d6042736e5800a184270cab5c6e4ce9935668731197665ea8"
+    },
+    {
+      "id": "reverse-the-flow",
+      "source": "character-ability-cards/frosthaven/BB/fh-reverse-the-flow.jpeg",
+      "sha256": "b408250010c40e0b1f46f1a3eee043a1d7de64701e55f873543f5b97d09a27ee"
+    },
+    {
+      "id": "rushed-to-the-end",
+      "source": "character-ability-cards/frosthaven/BB/fh-rushed-to-the-end.jpeg",
+      "sha256": "5667d04ec95a33be35fb7cb78c3dc74d006274ff2841e38496fb6a926c665c8e"
+    },
+    {
+      "id": "sand-in-the-hourglass",
+      "source": "character-ability-cards/frosthaven/BB/fh-sand-in-the-hourglass.jpeg",
+      "sha256": "62337f0b8769ee2ecdbe2ef90ce3413db6d3d9f5ebb592714c5728671618c30c"
+    },
+    {
+      "id": "sap-speed",
+      "source": "character-ability-cards/frosthaven/BB/fh-sap-speed.jpeg",
+      "sha256": "4898b634e1ff6877048bbddc844010165ce7927c3fc7d0b6890e898ecf34fea7"
+    },
+    {
+      "id": "stab-them-all",
+      "source": "character-ability-cards/frosthaven/BB/fh-stab-them-all.jpeg",
+      "sha256": "cf945c689b7a9ebe2184ce66ae79c7c27830d5f5ca1946b0aa2005fac1e441be"
+    },
+    {
+      "id": "systems-reboot",
+      "source": "character-ability-cards/frosthaven/BB/fh-systems-reboot.jpeg",
+      "sha256": "461cb5fd5561f40e90686678f52a09df03ed608bf7de5f9a8fa10810d5b687de"
+    },
+    {
+      "id": "temporal-displacement",
+      "source": "character-ability-cards/frosthaven/BB/fh-temporal-displacement.jpeg",
+      "sha256": "9030968e210629c3ac770c02abbf26fc1ea978039282dbd7b7206b817dc6b1c0"
+    },
+    {
+      "id": "the-knifes-edge",
+      "source": "character-ability-cards/frosthaven/BB/fh-the-knifes-edge.jpeg",
+      "sha256": "11a60c4360bcbc3ea264d0c4991b112235ce773dfaf6af6fd347583ee64eed3e"
+    },
+    {
+      "id": "twin-strike",
+      "source": "character-ability-cards/frosthaven/BB/fh-twin-strike.jpeg",
+      "sha256": "fb28235c01de74d5a1b07b91dc8af8045c17e2b73bbc2500d830c31833f38b71"
+    },
+    {
+      "id": "bb-back",
+      "source": "character-ability-cards/frosthaven/BB/fh-bb-back.jpeg",
+      "sha256": "997bce1ff0ad088749b4f9fc7d63d5e3e716d17a0f8e5e01e34d43d127a2957c"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/BB.png",
+    "sha256": "ec4693f0cc73ce141a1ad4262fdc131dff3398f6c857fdea3c43edce052c356a"
+  }
+}

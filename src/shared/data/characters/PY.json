@@ -1,0 +1,212 @@
+{
+  "id": "PY",
+  "name": "Pyroclast",
+  "handSize": 10,
+  "icon": "PY.png",
+  "cardBack": "PY/fh-py-back.jpeg",
+  "cards": [
+    {
+      "id": "calamity",
+      "name": "Calamity",
+      "level": 9,
+      "initiative": 35,
+      "image": "PY/fh-calamity.jpeg"
+    },
+    {
+      "id": "cinder-lance",
+      "name": "Cinder Lance",
+      "level": 8,
+      "initiative": 90,
+      "image": "PY/fh-cinder-lance.jpeg"
+    },
+    {
+      "id": "cloud-of-ash",
+      "name": "Cloud of Ash",
+      "level": 1,
+      "initiative": 23,
+      "image": "PY/fh-cloud-of-ash.jpeg"
+    },
+    {
+      "id": "cooling",
+      "name": "Cooling",
+      "level": 1,
+      "initiative": 75,
+      "image": "PY/fh-cooling.jpeg"
+    },
+    {
+      "id": "deep-fury",
+      "name": "Deep Fury",
+      "level": 2,
+      "initiative": 38,
+      "image": "PY/fh-deep-fury.jpeg"
+    },
+    {
+      "id": "erupting-rage",
+      "name": "Erupting Rage",
+      "level": 7,
+      "initiative": 70,
+      "image": "PY/fh-erupting-rage.jpeg"
+    },
+    {
+      "id": "eruption",
+      "name": "Eruption",
+      "level": 1,
+      "initiative": 47,
+      "image": "PY/fh-eruption.jpeg"
+    },
+    {
+      "id": "feed-the-beast",
+      "name": "Feed the Beast",
+      "level": 8,
+      "initiative": 27,
+      "image": "PY/fh-feed-the-beast.jpeg"
+    },
+    {
+      "id": "flowing-fire",
+      "name": "Flowing Fire",
+      "level": 1,
+      "initiative": 20,
+      "image": "PY/fh-flowing-fire.jpeg"
+    },
+    {
+      "id": "force-of-the-earth",
+      "name": "Force of the Earth",
+      "level": "X",
+      "initiative": 15,
+      "image": "PY/fh-force-of-the-earth.jpeg"
+    },
+    {
+      "id": "hand-of-flame",
+      "name": "Hand of Flame",
+      "level": 4,
+      "initiative": 29,
+      "image": "PY/fh-hand-of-flame.jpeg"
+    },
+    {
+      "id": "hardened-spike",
+      "name": "Hardened Spike",
+      "level": 3,
+      "initiative": 80,
+      "image": "PY/fh-hardened-spike.jpeg"
+    },
+    {
+      "id": "heat-wave",
+      "name": "Heat Wave",
+      "level": 4,
+      "initiative": 8,
+      "image": "PY/fh-heat-wave.jpeg"
+    },
+    {
+      "id": "igneous-path",
+      "name": "Igneous Path",
+      "level": 1,
+      "initiative": 18,
+      "image": "PY/fh-igneous-path.jpeg"
+    },
+    {
+      "id": "lava-bomb",
+      "name": "Lava Bomb",
+      "level": 1,
+      "initiative": 53,
+      "image": "PY/fh-lava-bomb.jpeg"
+    },
+    {
+      "id": "liquid-stone",
+      "name": "Liquid Stone",
+      "level": 1,
+      "initiative": 28,
+      "image": "PY/fh-liquid-stone.jpeg"
+    },
+    {
+      "id": "living-magma",
+      "name": "Living Magma",
+      "level": 3,
+      "initiative": 22,
+      "image": "PY/fh-living-magma.jpeg"
+    },
+    {
+      "id": "magma-orbs",
+      "name": "Magma Orbs",
+      "level": 5,
+      "initiative": 82,
+      "image": "PY/fh-magma-orbs.jpeg"
+    },
+    {
+      "id": "melted-armor",
+      "name": "Melted Armor",
+      "level": 1,
+      "initiative": 62,
+      "image": "PY/fh-melted-armor.jpeg"
+    },
+    {
+      "id": "metamorphic-rock",
+      "name": "Metamorphic Rock",
+      "level": "X",
+      "initiative": 68,
+      "image": "PY/fh-metamorphic-rock.jpeg"
+    },
+    {
+      "id": "obsidian-shield",
+      "name": "Obsidian Shield",
+      "level": 6,
+      "initiative": 19,
+      "image": "PY/fh-obsidian-shield.jpeg"
+    },
+    {
+      "id": "quenched-rage",
+      "name": "Quenched Rage",
+      "level": 1,
+      "initiative": 30,
+      "image": "PY/fh-quenched-rage.jpeg"
+    },
+    {
+      "id": "rain-of-fire",
+      "name": "Rain of Fire",
+      "level": 5,
+      "initiative": 21,
+      "image": "PY/fh-rain-of-fire.jpeg"
+    },
+    {
+      "id": "return-to-the-source",
+      "name": "Return To the Source",
+      "level": 6,
+      "initiative": 14,
+      "image": "PY/fh-return-to-the-source.jpeg"
+    },
+    {
+      "id": "searing-smoke",
+      "name": "Searing Smoke",
+      "level": 2,
+      "initiative": 45,
+      "image": "PY/fh-searing-smoke.jpeg"
+    },
+    {
+      "id": "stone-armor",
+      "name": "Stone Armor",
+      "level": 9,
+      "initiative": 9,
+      "image": "PY/fh-stone-armor.jpeg"
+    },
+    {
+      "id": "swelter",
+      "name": "Swelter",
+      "level": 7,
+      "initiative": 32,
+      "image": "PY/fh-swelter.jpeg"
+    },
+    {
+      "id": "under-pressure",
+      "name": "Under Pressure",
+      "level": 1,
+      "initiative": 85,
+      "image": "PY/fh-under-pressure.jpeg"
+    },
+    {
+      "id": "wildfire",
+      "name": "Wildfire",
+      "level": "X",
+      "initiative": 72,
+      "image": "PY/fh-wildfire.jpeg"
+    }
+  ]
+}

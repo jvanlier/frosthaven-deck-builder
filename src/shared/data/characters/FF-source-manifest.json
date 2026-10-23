@@ -1,0 +1,161 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "bring-down-the-mountain",
+      "source": "character-ability-cards/frosthaven/FF/fh-bring-down-the-mountain.jpeg",
+      "sha256": "2edcc3adb3b840db4bc564b3682cdff0b4efea324f1ce84c4e2fcd7aba0622e6"
+    },
+    {
+      "id": "cold-boulder",
+      "source": "character-ability-cards/frosthaven/FF/fh-cold-boulder.jpeg",
+      "sha256": "fa6ff701ffd98dd897cd1e6e0c22f7acf695b042c6c2775434e690d2ead8ad89"
+    },
+    {
+      "id": "crushing-crystals",
+      "source": "character-ability-cards/frosthaven/FF/fh-crushing-crystals.jpeg",
+      "sha256": "ddb8f23b3efe28947000e5749a18a98ceccb41e902688f84822542a95eeba496"
+    },
+    {
+      "id": "draw-of-the-bedrock",
+      "source": "character-ability-cards/frosthaven/FF/fh-draw-of-the-bedrock.jpeg",
+      "sha256": "3f139527a974fae9197d99b347e9305ae5a985d1c54548ef9f9d5ca2be7ff173"
+    },
+    {
+      "id": "draw-strength",
+      "source": "character-ability-cards/frosthaven/FF/fh-draw-strength.jpeg",
+      "sha256": "27012334fd70a47c976f493e51865c409b3205d48caf6245470196d97310ee34"
+    },
+    {
+      "id": "encased-punch",
+      "source": "character-ability-cards/frosthaven/FF/fh-encased-punch.jpeg",
+      "sha256": "260af95eea0ba6cd2cff8820764e457e1c51925fffea60c7118cc2cf72a1020d"
+    },
+    {
+      "id": "freezing-shell",
+      "source": "character-ability-cards/frosthaven/FF/fh-freezing-shell.jpeg",
+      "sha256": "2c649e421ddb1fd63164cab122c13f71774e0f5b5bb46ca53f1ba8041afe4396"
+    },
+    {
+      "id": "frost-eruption",
+      "source": "character-ability-cards/frosthaven/FF/fh-frost-eruption.jpeg",
+      "sha256": "bcdfbdd572e37ddabe81cda513383028c8958d4822a780de188c12cd35d3e595"
+    },
+    {
+      "id": "frozen-over",
+      "source": "character-ability-cards/frosthaven/FF/fh-frozen-over.jpeg",
+      "sha256": "fcec3e7fb59b921dc44da586103478f8f6a8c9ff2c6288c99fecdd6265661379"
+    },
+    {
+      "id": "frozen-spike",
+      "source": "character-ability-cards/frosthaven/FF/fh-frozen-spike.jpeg",
+      "sha256": "649a4305e053b6af06b630a4932dc1bda961441688c24fccd6461fe5ff640945"
+    },
+    {
+      "id": "fury-of-the-mountain",
+      "source": "character-ability-cards/frosthaven/FF/fh-fury-of-the-mountain.jpeg",
+      "sha256": "095bd7313f38afc31dfb2b744cbc338f13915ba5fef19b48e8452471d1c4c24d"
+    },
+    {
+      "id": "gift-of-the-mountain",
+      "source": "character-ability-cards/frosthaven/FF/fh-gift-of-the-mountain.jpeg",
+      "sha256": "5045c17a3bae6115d5a2245edae362014f9d16fab8908e0256b49587e419cc28"
+    },
+    {
+      "id": "glacier-slam",
+      "source": "character-ability-cards/frosthaven/FF/fh-glacier-slam.jpeg",
+      "sha256": "2663cce1cb34a7c643ca2c1f97f6aacee03f9ee86d04cf42788b21d588fa5991"
+    },
+    {
+      "id": "ice-blast",
+      "source": "character-ability-cards/frosthaven/FF/fh-ice-blast.jpeg",
+      "sha256": "22c1b552a2b27e5086be8b98fc34166cd4bc51dbc180f10ba7bd18331bf2a808"
+    },
+    {
+      "id": "ice-uppercut",
+      "source": "character-ability-cards/frosthaven/FF/fh-ice-uppercut.jpeg",
+      "sha256": "305e2516720fc7e8e845b69cc7529ec862733e5aca663906f463d94e0a1e0578"
+    },
+    {
+      "id": "lacerating-eruption",
+      "source": "character-ability-cards/frosthaven/FF/fh-lacerating-eruption.jpeg",
+      "sha256": "ad8066275d40446a5e3406a27b90ac8b90c44ad9f76948ba0b563ebeb92b444d"
+    },
+    {
+      "id": "one-with-the-mountain",
+      "source": "character-ability-cards/frosthaven/FF/fh-one-with-the-mountain.jpeg",
+      "sha256": "d3a948d0fb1a2279f9a76c4870f28f2b001554e4d7a1592137a083e646e038b2"
+    },
+    {
+      "id": "packed-solid",
+      "source": "character-ability-cards/frosthaven/FF/fh-packed-solid.jpeg",
+      "sha256": "34ce0ac800f6df030aa42abc164cd8d10db3e1a523f3d2c269aec4c1648a5276"
+    },
+    {
+      "id": "piercing-pummel",
+      "source": "character-ability-cards/frosthaven/FF/fh-piercing-pummel.jpeg",
+      "sha256": "9d2c05248b3cdf2beb37cae55bfe7443a6ff17d648b14078af2901410df92b56"
+    },
+    {
+      "id": "preserved-fury",
+      "source": "character-ability-cards/frosthaven/FF/fh-preserved-fury.jpeg",
+      "sha256": "155af05c9cfe8f849aa0a5b561f9c56975749ce697e7e6095dc279d6fff07dee"
+    },
+    {
+      "id": "primal-bellow",
+      "source": "character-ability-cards/frosthaven/FF/fh-primal-bellow.jpeg",
+      "sha256": "b1bbdc397158c32ed129a400f78803b22300a86a3a1ace63b3b072681268536f"
+    },
+    {
+      "id": "seeing-stars",
+      "source": "character-ability-cards/frosthaven/FF/fh-seeing-stars.jpeg",
+      "sha256": "a77126d774f05bc1d78dd7b96b999f7a234477ea81303b665c597d2a8e8422f2"
+    },
+    {
+      "id": "shard-launch",
+      "source": "character-ability-cards/frosthaven/FF/fh-shard-launch.jpeg",
+      "sha256": "1e1e14fc8d3eacb01249e7c15483b22982cfa0672907b5cd64dc636c8dee8ab9"
+    },
+    {
+      "id": "shattering-blow",
+      "source": "character-ability-cards/frosthaven/FF/fh-shattering-blow.jpeg",
+      "sha256": "8fa136dc9ef5761227509a7e4288dec9a29ee594a2a68dd002303178de9f7655"
+    },
+    {
+      "id": "the-mountains-fist",
+      "source": "character-ability-cards/frosthaven/FF/fh-the-mountains-fist.jpeg",
+      "sha256": "a58a17eef51b0d5d1fc9f5ccea9f335b04fbb7dcb21dbd4272797085a92957d5"
+    },
+    {
+      "id": "thick-frost",
+      "source": "character-ability-cards/frosthaven/FF/fh-thick-frost.jpeg",
+      "sha256": "6f7fd9509c024153fcdeeed1c81275680ab4d605f7541263ef7a901d72ff57b6"
+    },
+    {
+      "id": "voice-from-below",
+      "source": "character-ability-cards/frosthaven/FF/fh-voice-from-below.jpeg",
+      "sha256": "eb71826d1002b7b20dbfc835dea9fbc63a6487b09adc90d495ade7a5efb45ec8"
+    },
+    {
+      "id": "ff-back",
+      "source": "character-ability-cards/frosthaven/FF/fh-ff-back.jpeg",
+      "sha256": "a9a52aa35cdb0f85095ad33cb19caff127b75d360500a6c60f4f8889f374094d"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/FF.png",
+    "sha256": "48e0a08b77d583ac0e5853f73470a6db56b78b7b05614202ac246d8796bb052c"
+  }
+}

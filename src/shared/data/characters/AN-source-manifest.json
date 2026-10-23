@@ -1,0 +1,176 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/mercenary.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "8f11abb3c43e523dfc2160cbb7e265eca3036ee597d43d5e60bc228913adb08f"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "anguish",
+      "source": "character-ability-cards/mercenary/AN/anguish.jpeg",
+      "sha256": "226d7a09ce9d200b449227076ec5f456e3ef358b10c9c47d59af83be44d9df40"
+    },
+    {
+      "id": "black-claws",
+      "source": "character-ability-cards/mercenary/AN/black-claws.jpeg",
+      "sha256": "f8d3cdea0a37b00f25fe7cfad1af474372ba022fa671b59fef677971e3ada196"
+    },
+    {
+      "id": "bug-bodys-bidding",
+      "source": "character-ability-cards/mercenary/AN/bug-bodys-bidding.jpeg",
+      "sha256": "b0ef50ee91d49c970942d87eb6b93b7d137150dde8657c47c513b6881f5548e7"
+    },
+    {
+      "id": "compulsive-hoarding",
+      "source": "character-ability-cards/mercenary/AN/compulsive-hoarding.jpeg",
+      "sha256": "7e1504f89da041e0249021775794f18a97d03260fa168905eb4a714885e2a239"
+    },
+    {
+      "id": "consume-with-regret",
+      "source": "character-ability-cards/mercenary/AN/consume-with-regret.jpeg",
+      "sha256": "b540be487e03b1faf4ef565c06b3aca8f05673143ef733255c8aa3bea547dd0b"
+    },
+    {
+      "id": "diamartias-dominance",
+      "source": "character-ability-cards/mercenary/AN/diamartias-dominance.jpeg",
+      "sha256": "ceecfef3e4949591db4bc84df9faa08079919e4a2cbe7ae1a6ba4811a9e65bd6"
+    },
+    {
+      "id": "doks-ferocity",
+      "source": "character-ability-cards/mercenary/AN/doks-ferocity.jpeg",
+      "sha256": "b4de066ff93ccb45108e48a4a41ccf1e879eb589ad67011b2b99136ce7ed641e"
+    },
+    {
+      "id": "endless-biting",
+      "source": "character-ability-cards/mercenary/AN/endless-biting.jpeg",
+      "sha256": "ee4ff05c454236024fa4f621d057f856a8c84a92b694679ba902a78090dcd6e6"
+    },
+    {
+      "id": "her-highness",
+      "source": "character-ability-cards/mercenary/AN/her-highness.jpeg",
+      "sha256": "bde8579e388e165127268558eec172c007b7793e6f3716a5eede8d633f3fb3ca"
+    },
+    {
+      "id": "hidden-assault",
+      "source": "character-ability-cards/mercenary/AN/hidden-assault.jpeg",
+      "sha256": "6e134e393a17967e71a6766d4a59373b94e254712c06ade17ed2bfa980369773"
+    },
+    {
+      "id": "howling-apparition",
+      "source": "character-ability-cards/mercenary/AN/howling-apparition.jpeg",
+      "sha256": "d012618571f6fe6138b7d485aaf34846fdbf9a86b70b5370dcbace31f8d574cf"
+    },
+    {
+      "id": "musophobia",
+      "source": "character-ability-cards/mercenary/AN/musophobia.jpeg",
+      "sha256": "82c324b72e328ae2d46d2ef93bf4c0507f32ff59ceb512b0c80c6195558dc8c7"
+    },
+    {
+      "id": "my-loyal-friend",
+      "source": "character-ability-cards/mercenary/AN/my-loyal-friend.jpeg",
+      "sha256": "97a7a8adcbbecf3647f000ecae696ed84f1fe4437dc35adb9fe9ffdfea182330"
+    },
+    {
+      "id": "nibbled-to-death",
+      "source": "character-ability-cards/mercenary/AN/nibbled-to-death.jpeg",
+      "sha256": "04aafeba71097578d94c384f663a06d394f9c8cfea316fb3437fc19e73866331"
+    },
+    {
+      "id": "nocturnal-feeding",
+      "source": "character-ability-cards/mercenary/AN/nocturnal-feeding.jpeg",
+      "sha256": "2f34b67c5baee0fdc2e1b02a8f0e847ad6785a9c8cb91bda026adc0163c4e1c4"
+    },
+    {
+      "id": "pay-the-piper",
+      "source": "character-ability-cards/mercenary/AN/pay-the-piper.jpeg",
+      "sha256": "8199d41ec6f80444ae69fff5a2159043499694280a5891d683ede737c67dedc6"
+    },
+    {
+      "id": "phantasmal-flurry",
+      "source": "character-ability-cards/mercenary/AN/phantasmal-flurry.jpeg",
+      "sha256": "051f2c13da90981d50b41670241505f2495a1fe2deb8ffc65045bb7c5ef5e58a"
+    },
+    {
+      "id": "powders-ingenuity",
+      "source": "character-ability-cards/mercenary/AN/powders-ingenuity.jpeg",
+      "sha256": "de270a1e1c6d5d95e51b3645365d9f11224aeef6c3f5c4e0770dcccdf0f452cb"
+    },
+    {
+      "id": "rat-surprise",
+      "source": "character-ability-cards/mercenary/AN/rat-surprise.jpeg",
+      "sha256": "035f96281e32d64698525a4af5ca32f893b0f92718a861b7f533757a1ba5eb6d"
+    },
+    {
+      "id": "rat-tide",
+      "source": "character-ability-cards/mercenary/AN/rat-tide.jpeg",
+      "sha256": "841d85fc85fb7fa41339ce1401cbcd1ac0b2c6ad24a0be0b4d304b2754872255"
+    },
+    {
+      "id": "revel-in-misery",
+      "source": "character-ability-cards/mercenary/AN/revel-in-misery.jpeg",
+      "sha256": "6833e727395bf70aede92e0c18ef5f3d65a77b3f66a0d13fe2596b7d92a14f38"
+    },
+    {
+      "id": "seeking-strikes",
+      "source": "character-ability-cards/mercenary/AN/seeking-strikes.jpeg",
+      "sha256": "743b2b286639711708e7af30c4ef7b5e07c3c8aad96f24c3b2dea8bcd4b82290"
+    },
+    {
+      "id": "sharp-teeth",
+      "source": "character-ability-cards/mercenary/AN/sharp-teeth.jpeg",
+      "sha256": "3458b4111d35fd7e53e12fa8be58be1d0f1114fe87487337aef7cd16fc03bdf0"
+    },
+    {
+      "id": "sickening-betrayal",
+      "source": "character-ability-cards/mercenary/AN/sickening-betrayal.jpeg",
+      "sha256": "03a71cc567280bb81b256e06c9087389bb279c4b2cd69a2c6f0aaf9d579fa841"
+    },
+    {
+      "id": "surrounding-shadows",
+      "source": "character-ability-cards/mercenary/AN/surrounding-shadows.jpeg",
+      "sha256": "217f126f1ecf1662320488fc4b34692a516fc410d9349eb7eba6c68ac31f1f6c"
+    },
+    {
+      "id": "tibers-tenacity",
+      "source": "character-ability-cards/mercenary/AN/tibers-tenacity.jpeg",
+      "sha256": "02d6c1ef0749aa635ab07129149900b1acefbb83bf8d9f1e4858ddb6b9a6d0cf"
+    },
+    {
+      "id": "touch-of-atrophy",
+      "source": "character-ability-cards/mercenary/AN/touch-of-atrophy.jpeg",
+      "sha256": "fc00747d14f4735cb55a4f721ea8c98773fcb891719a2e40c6c1f4a8b7fda5ae"
+    },
+    {
+      "id": "treacherous-tactics",
+      "source": "character-ability-cards/mercenary/AN/treacherous-tactics.jpeg",
+      "sha256": "22cb5f35d4eea90cb1ba9908abafae89665bf2d5863be922f02442e5e862b6b6"
+    },
+    {
+      "id": "twin-frenzy",
+      "source": "character-ability-cards/mercenary/AN/twin-frenzy.jpeg",
+      "sha256": "ed39e903b9083ade47ffc88a67e7a758aa3ffd84f98436623252f545ce90a176"
+    },
+    {
+      "id": "vermincall",
+      "source": "character-ability-cards/mercenary/AN/vermincall.jpeg",
+      "sha256": "63775eaf02b76bd485c92910ad2f1b2eaa5e42f6364419c56f0e467a537b6eee"
+    },
+    {
+      "id": "an-back",
+      "source": "character-ability-cards/mercenary/AN/an-back.jpeg",
+      "sha256": "7e6c793e31cce653c9759407bbe95c3c3dafa8ee946f083f0d47d985f384db6a"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/merc/AN.png",
+    "sha256": "524324f725227b6c37fcbf511f948235a981f91b1d25f2ac7a6e3c4fcfa34cb8"
+  }
+}

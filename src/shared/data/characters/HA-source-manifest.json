@@ -1,0 +1,166 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/mercenary.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "8f11abb3c43e523dfc2160cbb7e265eca3036ee597d43d5e60bc228913adb08f"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "abundant-nuisance",
+      "source": "character-ability-cards/mercenary/HA/abundant-nuisance.jpeg",
+      "sha256": "52b1e9852808b9c21a4cc5c06ef7ac7762d5bcdcc9da51fed700dfb63fb5e533"
+    },
+    {
+      "id": "beneath-me",
+      "source": "character-ability-cards/mercenary/HA/beneath-me.jpeg",
+      "sha256": "e22f9e78b53b1ec631ea9218edf06d2de2a4c7bc35415b07809c132a411f1c51"
+    },
+    {
+      "id": "bizarre-antics",
+      "source": "character-ability-cards/mercenary/HA/bizarre-antics.jpeg",
+      "sha256": "d2d0ec68c5b6dc751da3796b26d7729366a578bca03781dc243ef552349ea536"
+    },
+    {
+      "id": "cant-be-bothered",
+      "source": "character-ability-cards/mercenary/HA/cant-be-bothered.jpeg",
+      "sha256": "9d5abb78f179200b8b7be8f1ac1a1f94d7c811c1026d5cdb05373f57d20bcba6"
+    },
+    {
+      "id": "closed-for-business",
+      "source": "character-ability-cards/mercenary/HA/closed-for-business.jpeg",
+      "sha256": "b55ffbd97eb9d03e1d1593ce372e79419f3736796179be07d710884b55d19b01"
+    },
+    {
+      "id": "collect-essence",
+      "source": "character-ability-cards/mercenary/HA/collect-essence.jpeg",
+      "sha256": "5f30ff0d2d1511cc568a1c2723632fcf96fda4c28a4fb03e71205780fbc0f5c7"
+    },
+    {
+      "id": "dismissive-comment",
+      "source": "character-ability-cards/mercenary/HA/dismissive-comment.jpeg",
+      "sha256": "fd4655ee4d5a56a7ef5b93353b7e82623ed8207692e26f5c4ec58bdaf610f6a6"
+    },
+    {
+      "id": "dont-be-a-baby",
+      "source": "character-ability-cards/mercenary/HA/dont-be-a-baby.jpeg",
+      "sha256": "cc2775db2f2db4a05cc3de670d0bc8ffdb1342d130691f6e5d9ecb101cdee214"
+    },
+    {
+      "id": "experimental-insights",
+      "source": "character-ability-cards/mercenary/HA/experimental-insights.jpeg",
+      "sha256": "583bf313e83af50a2a9275ba2ae5a95ad3a96f4017b32580a0297dac4d9a0bcf"
+    },
+    {
+      "id": "fading-presence",
+      "source": "character-ability-cards/mercenary/HA/fading-presence.jpeg",
+      "sha256": "aa087b8af4ce6f4a7f6861d2fe987380f015504aed917585c26ab86e5e011737"
+    },
+    {
+      "id": "fired-up",
+      "source": "character-ability-cards/mercenary/HA/fired-up.jpeg",
+      "sha256": "1b9d07ee58e76f332858ba350890ccfa8426af6934ee034269813d189eff12f6"
+    },
+    {
+      "id": "fleeting-interest",
+      "source": "character-ability-cards/mercenary/HA/fleeting-interest.jpeg",
+      "sha256": "1ae6e5096922ac5acdb677be66bf55f56d06640ed5011bc8371f9444cf2d4797"
+    },
+    {
+      "id": "fools-errand",
+      "source": "character-ability-cards/mercenary/HA/fools-errand.jpeg",
+      "sha256": "5b41f10f4f3bd927aa703acb51a692599a455dd27fb9979836f792fb8b546e01"
+    },
+    {
+      "id": "gather-reagents",
+      "source": "character-ability-cards/mercenary/HA/gather-reagents.jpeg",
+      "sha256": "007a091cd3b6e82c0bc9240dc33c5c301d906a8e0015e0d7e7b34ca12b225784"
+    },
+    {
+      "id": "interesting-speciments",
+      "source": "character-ability-cards/mercenary/HA/interesting-speciments.jpeg",
+      "sha256": "47f811039e8cb049d38c7322a65fadf6c144da7e9ec93e9f812ff66824624d4f"
+    },
+    {
+      "id": "kill-that-one-first",
+      "source": "character-ability-cards/mercenary/HA/kill-that-one-first.jpeg",
+      "sha256": "ca77db0a8c7550c840cd963af385fb685cc9342ede71f31cd77077e312b52df5"
+    },
+    {
+      "id": "leave-me-alone",
+      "source": "character-ability-cards/mercenary/HA/leave-me-alone.jpeg",
+      "sha256": "5a2dbdfa86840389c5b89ddad6ac7286e3d17e4b3c823146ff98341f3fdce74b"
+    },
+    {
+      "id": "miniaturize",
+      "source": "character-ability-cards/mercenary/HA/miniaturize.jpeg",
+      "sha256": "8a5828aec0286d3ef2d60f931e66b642b7e288cb2f8cebd4515e3b62097da153"
+    },
+    {
+      "id": "minor-inconvenience",
+      "source": "character-ability-cards/mercenary/HA/minor-inconvenience.jpeg",
+      "sha256": "0f8ef10f71cdd8db8e21ecb6d5367f43f963ddfbba7d109d69f23ace923dff70"
+    },
+    {
+      "id": "not-amused",
+      "source": "character-ability-cards/mercenary/HA/not-amused.jpeg",
+      "sha256": "8ca3a2018a6f3f943ac5a9610c573a1f1f90950e5c69bed7d201cd7c9a8ca0f4"
+    },
+    {
+      "id": "outsource",
+      "source": "character-ability-cards/mercenary/HA/outsource.jpeg",
+      "sha256": "c8c31ee20d22712cc39aa9ed54858bb2b38332a60327911163ff398f7d1d176c"
+    },
+    {
+      "id": "perpetual-annoyance",
+      "source": "character-ability-cards/mercenary/HA/perpetual-annoyance.jpeg",
+      "sha256": "87933327259758096f04a0b0f6f53603049aa1abd09605a87825243ea181daca"
+    },
+    {
+      "id": "somewhere-to-be",
+      "source": "character-ability-cards/mercenary/HA/somewhere-to-be.jpeg",
+      "sha256": "7cbffbc7bbc79801261a7d6018a30ae0dc4dff992995fcce2b017ba1cfbf9c21"
+    },
+    {
+      "id": "tear-a-new-one",
+      "source": "character-ability-cards/mercenary/HA/tear-a-new-one.jpeg",
+      "sha256": "58ea50d1e2f3a9025f3a8749f0805d8ec8de178f464ef79a315d5c603897b080"
+    },
+    {
+      "id": "the-power-of-enhancement",
+      "source": "character-ability-cards/mercenary/HA/the-power-of-enhancement.jpeg",
+      "sha256": "5d977e7a033a5054782933b3ec87470ab8d87c0934bdde455ef98e36ce607375"
+    },
+    {
+      "id": "trial-and-success",
+      "source": "character-ability-cards/mercenary/HA/trial-and-success.jpeg",
+      "sha256": "578eca61da937a7ee2df9864ca004874ec8baf19c50514527de903f322f43dcc"
+    },
+    {
+      "id": "trying-to-remember",
+      "source": "character-ability-cards/mercenary/HA/trying-to-remember.jpeg",
+      "sha256": "d9ef0c25e016c613363fbe520c3f955a201bc3b700c1ad117b016a1ec3215eb9"
+    },
+    {
+      "id": "withering-stare",
+      "source": "character-ability-cards/mercenary/HA/withering-stare.jpeg",
+      "sha256": "70870a0e0e23ee1b305fdec550b69ac6c240b031511054a9b691386ea55455dd"
+    },
+    {
+      "id": "ha-back",
+      "source": "character-ability-cards/mercenary/HA/ha-back.jpeg",
+      "sha256": "944f78cbc14b612148f00e3b90e6c4c6151f2883541de78270b64ae89072a605"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/merc/HA.png",
+    "sha256": "edf0dad9f352faa8c637cf2aa866c43b68deb6e5750b4caf10a1857aa347d79f"
+  }
+}

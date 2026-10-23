@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "air-support",
+      "source": "character-ability-cards/frosthaven/BN/fh-air-support.jpeg",
+      "sha256": "42b76c169af7027779f96fd42cdd11654fb03f8702fbc6fa7271c484db94653e"
+    },
+    {
+      "id": "at-all-costs",
+      "source": "character-ability-cards/frosthaven/BN/fh-at-all-costs.jpeg",
+      "sha256": "75c76c12d569063b0a314a9e41695c2605222644d8742da4dd5c5f4eb5cd3186"
+    },
+    {
+      "id": "barricade",
+      "source": "character-ability-cards/frosthaven/BN/fh-barricade.jpeg",
+      "sha256": "c316b80fdb1a406167d6adb711a6e92b3323ae52712b615cc2ae08ee5d189cdd"
+    },
+    {
+      "id": "boldening-blow",
+      "source": "character-ability-cards/frosthaven/BN/fh-boldening-blow.jpeg",
+      "sha256": "a4f3e9dc3cf1acd67dbfa98702d719f5ade18b85091ff391fd752c7590771c02"
+    },
+    {
+      "id": "bolstering-shout",
+      "source": "character-ability-cards/frosthaven/BN/fh-bolstering-shout.jpeg",
+      "sha256": "cfeefede35a3ef65207997ff877a09f2140f552205ae54a647f0e73370fbaeb3"
+    },
+    {
+      "id": "combined-effort",
+      "source": "character-ability-cards/frosthaven/BN/fh-combined-effort.jpeg",
+      "sha256": "5cda8cd95879337db6bdb07403c95df79d1b74a72ea4a7721fc67a3017b72ac5"
+    },
+    {
+      "id": "deflecting-maneuver",
+      "source": "character-ability-cards/frosthaven/BN/fh-deflecting-maneuver.jpeg",
+      "sha256": "e7231cd3f9a115ba8e35e770431d2eb98520ac26f65b6c9129acd19622ea2c83"
+    },
+    {
+      "id": "driving-inspiration",
+      "source": "character-ability-cards/frosthaven/BN/fh-driving-inspiration.jpeg",
+      "sha256": "c66794733c30db3dcf445b9c63686ea8aff575f616ddfaf0cc11bbbccc8df410"
+    },
+    {
+      "id": "explosive-epicenter",
+      "source": "character-ability-cards/frosthaven/BN/fh-explosive-epicenter.jpeg",
+      "sha256": "2b30aca541e820251f977720c4d566c59e8aac027e09c253c17cfdb8b7a838d0"
+    },
+    {
+      "id": "hail-of-spears",
+      "source": "character-ability-cards/frosthaven/BN/fh-hail-of-spears.jpeg",
+      "sha256": "26c29a8d3011a85443aa3d8776cbcc7222aa784e2c3d1761ed11981089dd1fc0"
+    },
+    {
+      "id": "head-of-the-hammer",
+      "source": "character-ability-cards/frosthaven/BN/fh-head-of-the-hammer.jpeg",
+      "sha256": "999f6d5ae6335b01b42c311da8e9aac66f918dcc701bdc6682efd12995f198ed"
+    },
+    {
+      "id": "hold-the-line",
+      "source": "character-ability-cards/frosthaven/BN/fh-hold-the-line.jpeg",
+      "sha256": "22c40d6e8a921783483220587def275873da47e88ecef136ad7430a7d9a2b9ca"
+    },
+    {
+      "id": "incendiary-throw",
+      "source": "character-ability-cards/frosthaven/BN/fh-incendiary-throw.jpeg",
+      "sha256": "75f6ed1458dc1c2a07b32d4c11021f93989c5fc71a28344567636d3f5fe9bc23"
+    },
+    {
+      "id": "javelin",
+      "source": "character-ability-cards/frosthaven/BN/fh-javelin.jpeg",
+      "sha256": "c97350d4660b13a35c8b865029b08ce9bd38da145cca0d5c0006ddff0006a8aa"
+    },
+    {
+      "id": "lead-from-afar",
+      "source": "character-ability-cards/frosthaven/BN/fh-lead-from-afar.jpeg",
+      "sha256": "ecf6534faff33baddcb48911257db938eadf9078e50ad24cde45e3dbc7c5d498"
+    },
+    {
+      "id": "let-them-come",
+      "source": "character-ability-cards/frosthaven/BN/fh-let-them-come.jpeg",
+      "sha256": "ac2919cfe3894b832d50ba5c78f7a52ee9d0c2b68d0bba7b3fe5a123b64baf64"
+    },
+    {
+      "id": "meat-grinder",
+      "source": "character-ability-cards/frosthaven/BN/fh-meat-grinder.jpeg",
+      "sha256": "e3a0ee0e51005fc36b6a39f3f35930e20dcd2a285cc2fe2a002c319dcb4d2a2f"
+    },
+    {
+      "id": "pincer-movement",
+      "source": "character-ability-cards/frosthaven/BN/fh-pincer-movement.jpeg",
+      "sha256": "aabbe67a8c8a8fba84aa2ba344a9ff8d09a74ec019807f0452abc9af835b81b8"
+    },
+    {
+      "id": "pinning-charge",
+      "source": "character-ability-cards/frosthaven/BN/fh-pinning-charge.jpeg",
+      "sha256": "1ceef4a1a48ba71e97f2e6e0efca8f4a68a3b5bea32806864d185f483b0cfdf8"
+    },
+    {
+      "id": "rallying-cry",
+      "source": "character-ability-cards/frosthaven/BN/fh-rallying-cry.jpeg",
+      "sha256": "43c85bc433b94ea37a8447f0edda7c97692004355ee9e7374b9af4d0f0503eea"
+    },
+    {
+      "id": "regroup",
+      "source": "character-ability-cards/frosthaven/BN/fh-regroup.jpeg",
+      "sha256": "280179ec405e17b0498e4fe5bd620fec5c545067f2686ca9cbc5659a57be8dcf"
+    },
+    {
+      "id": "resolved-courage",
+      "source": "character-ability-cards/frosthaven/BN/fh-resolved-courage.jpeg",
+      "sha256": "3d65df862d07906bf4c2bfc08a3e1c3772ac08ec89a51a22dd8ff4f121fe2350"
+    },
+    {
+      "id": "set-for-the-charge",
+      "source": "character-ability-cards/frosthaven/BN/fh-set-for-the-charge.jpeg",
+      "sha256": "ad650738b19afb4814c54a350d56a6491c71c2cdd1e04e14cb42c3539515fb0a"
+    },
+    {
+      "id": "sweeping-aid",
+      "source": "character-ability-cards/frosthaven/BN/fh-sweeping-aid.jpeg",
+      "sha256": "8a8565b0757841b54cc7e433d2bac6591442ffb71207708bb04ca760b27ad857"
+    },
+    {
+      "id": "take-no-prisoners",
+      "source": "character-ability-cards/frosthaven/BN/fh-take-no-prisoners.jpeg",
+      "sha256": "06a367443f6c01c6d40ff124f041d3ec526757dabc8b846fdc3dbc839920184f"
+    },
+    {
+      "id": "taunting-howl",
+      "source": "character-ability-cards/frosthaven/BN/fh-taunting-howl.jpeg",
+      "sha256": "0fb6cef6a5d896bbeba9416884dbdc7cb950a233a11bb786969352ff0f3be106"
+    },
+    {
+      "id": "tip-of-the-spear",
+      "source": "character-ability-cards/frosthaven/BN/fh-tip-of-the-spear.jpeg",
+      "sha256": "7ca0e79290d3267b49cbbf09229f06d0d40692bc9883b4678992453d2eab3e1b"
+    },
+    {
+      "id": "tri-thrust",
+      "source": "character-ability-cards/frosthaven/BN/fh-tri-thrust.jpeg",
+      "sha256": "3f07e251dbf8f2f429476d553df5d4628fab27a023d6816000604d6c8c53736a"
+    },
+    {
+      "id": "unbreakable-wall",
+      "source": "character-ability-cards/frosthaven/BN/fh-unbreakable-wall.jpeg",
+      "sha256": "5cea3fa76c992e1b0e6ad7c5546ddd91a49abe90702ecaef3bd7dd63371f4eb3"
+    },
+    {
+      "id": "bn-back",
+      "source": "character-ability-cards/frosthaven/BN/fh-bn-back.jpeg",
+      "sha256": "e2d76e0e1618c998640e4dcefe9a8e523548670c813040a89c10cfd5a90e10a7"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/BN.png",
+    "sha256": "779753783051ea435ed1524d70f2c182d0978a6e1a1a1f2c345ca2d3e9160534"
+  }
+}
