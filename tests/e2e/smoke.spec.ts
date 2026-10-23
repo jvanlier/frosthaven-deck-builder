@@ -553,11 +553,7 @@ test("matches the compact image-first mockup on desktop and phone", async ({
   for (const width of [1280, 800, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
-    // The picked candidate edits its note in Your deck, so use an unpicked one.
-    const candidate = page
-      .locator(".level-up-candidate")
-      .filter({ has: page.locator(".card-note-input") })
-      .first();
+    const candidate = page.locator(".level-up-candidate").first();
     const card = candidate.locator(".card-action");
     const image = card.locator("img");
     const cardBox = (await card.boundingBox())!;
@@ -940,7 +936,7 @@ test("resets during an in-flight save without losing unrelated fields or notes",
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
   await page.getByRole("button", { name: "Pick Tornado" }).click();
-  await page.getByLabel("Card note for Tornado").fill("Temporary note");
+  await page.getByLabel("Card note for Tornado").first().fill("Temporary note");
   await expect.poll(() => firstPutStarted).toBe(true);
   await page
     .getByRole("button", { name: "Reset (current edit)", exact: true })
@@ -1009,17 +1005,20 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
     name: "Add White Winds to deck",
   });
   await whiteout.click();
-  await expect(page.getByLabel("Card note for White Winds")).toBeVisible();
+  await expect(
+    page.getByLabel("Card note for White Winds").first(),
+  ).toBeVisible();
   await page
     .getByLabel("Card note for White Winds")
+    .first()
     .fill("Bring it back for control.");
   await page
     .getByRole("button", { name: "Remove White Winds from deck" })
     .click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
-  await expect(page.getByLabel("Card note for White Winds")).toHaveValue(
-    "Bring it back for control.",
-  );
+  await expect(
+    page.getByLabel("Card note for White Winds").first(),
+  ).toHaveValue("Bring it back for control.");
   await expect(
     page.getByRole("button", { name: "Keep White Winds new" }),
   ).toBeVisible();
@@ -1087,7 +1086,10 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await page.getByText("Swap more cards from the pool").click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
-  await page.getByLabel("Card note for White Winds").fill("Temporary note");
+  await page
+    .getByLabel("Card note for White Winds")
+    .first()
+    .fill("Temporary note");
   await page
     .getByRole("button", { name: "Reset (current edit)", exact: true })
     .click();
@@ -1611,7 +1613,8 @@ test("shows card notes, dropped cards and a read-only note history", async ({
   const birds = page.locator(
     '.deck-card-item:has([data-card-id="birds-in-a-tempest"])',
   );
-  await expect(birds.locator(".card-state")).toHaveText("Level 2 pick");
+  // Pick and pool badges are reserved for the editors.
+  await expect(page.locator(".deck-card-list .card-state")).toHaveCount(0);
   await expect(page.getByText("NEW", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(0);
 
@@ -1911,24 +1914,25 @@ test("carries card notes forward and records a new version per level", async ({
     name: "Available cards",
     exact: true,
   });
-  // Every shown card can carry a note, including kept deck cards. The picked
-  // candidate is also in Your deck, where its single note field lives.
+  // Every shown card can carry a note, including kept deck cards.
   const candidates = available.locator(".level-up-candidate");
   await expect(available.getByRole("textbox")).toHaveCount(
-    (await candidates.count()) - 1,
+    await candidates.count(),
   );
-  await expect(
-    available
-      .locator('.level-up-candidate:has([data-card-id="polar-vortex"])')
-      .getByRole("textbox"),
-  ).toHaveCount(0);
   const deck = page.locator(".level-up-deck");
   await expect(deck.getByRole("textbox")).toHaveCount(
     await deck.locator(".level-up-deck-card").count(),
   );
   await expect(available.getByText("Card note", { exact: true })).toHaveCount(
-    (await candidates.count()) - 1,
+    await candidates.count(),
   );
+
+  // A picked card shows the same note in both places, kept in sync.
+  const pickNotes = page.getByLabel("Card note for Polar Vortex");
+  await expect(pickNotes).toHaveCount(2);
+  await pickNotes.first().fill("Synced between both fields");
+  await expect(pickNotes.nth(1)).toHaveValue("Synced between both fields");
+  await pickNotes.nth(1).fill("");
 
   const tornado = candidates.filter({
     has: page.getByRole("button", { name: "Pick Tornado", exact: true }),
@@ -2028,13 +2032,13 @@ test("sorts Your deck and the deck view by descending level with X last", async 
   );
 });
 
-test("styles level-up pick badges as centered pills in view and edit", async ({
+test("styles level-up pick badges as centered pills in the editor", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
     route.fulfill({ json: deckFixtureData }),
   );
-  for (const route of ["2", "2/level-up"]) {
+  for (const route of ["2/level-up"]) {
     await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
     const badge = page
       .locator('.card-tile[data-card-id="birds-in-a-tempest"] .card-state')
@@ -2783,16 +2787,14 @@ test("copies a higher starting level with its pick slots intact", async ({
       .getByRole("navigation", { name: "Starting setup steps" })
       .getByRole("button"),
   ).toHaveCount(3);
-  await expect(
-    page
-      .locator(".starting-pick-summary")
-      .getByText("Birds in a Tempest", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page
-      .locator(".starting-pick-summary")
-      .getByText("Tornado", { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator(".starting-pick-summary")).toHaveCount(0);
+  for (const level of [2, 3]) {
+    await expect(
+      page
+        .getByRole("navigation", { name: "Starting setup steps" })
+        .getByRole("button", { name: `Level ${level} pick, complete` }),
+    ).toBeVisible();
+  }
   await expect(
     page.getByRole("heading", { name: "Complement your picks · Level 3 hand" }),
   ).toBeVisible();
@@ -2866,7 +2868,10 @@ test("preserves a lower starting pick while surfacing a higher-slot conflict", a
   });
 
   await page.goto(`/c/SD/b/${startThreeFixtureData.builds[0].id}/l/3/start`);
-  await page.getByRole("button", { name: "Change level 3 pick" }).click();
+  await page
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 3 pick/ })
+    .click();
   await page
     .getByRole("button", { name: "Pick Birds in a Tempest", exact: true })
     .click();
@@ -3191,7 +3196,10 @@ test("keeps one card note per card in the starting editor, whatever its state", 
   await page.reload();
   await expect(note).toHaveValue("Not enough room in this hand.");
   await expect(unpickedNote).toHaveValue("I prefer the other level-two card.");
-  await page.getByRole("button", { name: "Change level 2 pick" }).click();
+  await page
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 2 pick/ })
+    .click();
   await page.getByRole("button", { name: "Pick Tornado", exact: true }).click();
   await page
     .getByRole("button", { name: "Return to hand", exact: true })
@@ -3333,7 +3341,10 @@ test("edits starting exclusion and initial-pick card notes", async ({
       }),
     );
 
-  await page.getByRole("button", { name: "Change level 2 pick" }).click();
+  await page
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 2 pick/ })
+    .click();
   await expect(
     page.getByLabel("Card note for Birds in a Tempest"),
   ).toBeVisible();
@@ -3362,7 +3373,8 @@ test("edits starting exclusion and initial-pick card notes", async ({
   await expect(includedPick).toHaveValue("Slot two reason");
   await includedPick.fill("Shared pick and inclusion reason");
   await page
-    .getByRole("button", { name: "Change level 2 pick", exact: true })
+    .getByRole("navigation", { name: "Starting setup steps" })
+    .getByRole("button", { name: /^Level 2 pick/ })
     .click();
   await expect(page.getByLabel("Card note for Birds in a Tempest")).toHaveValue(
     "Shared pick and inclusion reason",

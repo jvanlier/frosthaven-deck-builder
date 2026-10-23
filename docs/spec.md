@@ -161,8 +161,6 @@ variants within a level.
   It shows a “n / total level-up cards picked” badge (green when complete, amber
   otherwise), the hand count during hand assembly, and the current next/finish
   action. There is no separate hand status bar or “Build your starting hand” heading.
-  The “Level-up card picks” disclosure has a bordered container and indented
-  contents, so its collapsed scope is clear without repeating the status count.
   Each new pick enters the starting hand. In hand assembly, clicking a selected
   picked card opens its pick slot instead of removing it; only starter cards can
   be freely added or removed here. Revising a pick offers Return to hand once all
@@ -267,7 +265,6 @@ its reported problems instead of appending.
   - The deck's cards as images, sorted by card level, then initiative.
   - A level switcher (previous/next, and a direct choice among existing levels).
   - Badges: **incomplete**, **invalid**.
-  - Cards picked or added at this level are marked *Level N pick* or *Added from pool*. At the start level, each starting pick shows its slot level (e.g. *Level 2 pick*).
   - A **"Show card note"** toggle that shows each card's note for this level (§4.8) below
     the card, with the level it was recorded at. Tapping a card opens card detail (F12).
   - A **"Show dropped cards"** toggle (not at the start level) that also shows the cards

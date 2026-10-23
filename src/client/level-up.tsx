@@ -371,11 +371,6 @@ function LevelUpEditor({
     mutateBuild((current) => removeCardNote(current, card.id, level));
   }
 
-  // Picked and added candidates also appear in Your deck; edit their note there.
-  function renderCandidateNote(card: Card) {
-    return activeAdded.has(card.id) ? null : renderNote(card);
-  }
-
   function renderNote(card: Card) {
     return (
       <CardNoteInput
@@ -497,7 +492,7 @@ function LevelUpEditor({
               pickLevel={level}
               added={activeAdded}
               canMutate={canMutate}
-              renderNote={renderCandidateNote}
+              renderNote={renderNote}
               onPick={choosePick}
               onAdd={toggleExtra}
             />
@@ -569,7 +564,7 @@ function LevelUpEditor({
                 pickLevel={level}
                 added={activeAdded}
                 canMutate={canMutate}
-                renderNote={renderCandidateNote}
+                renderNote={renderNote}
                 onPick={choosePick}
                 onAdd={toggleExtra}
               />

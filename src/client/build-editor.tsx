@@ -690,35 +690,6 @@ export function StartingEditor({
               Hand
             </button>
           </nav>
-          <details className="starting-pick-summary" open={showHand}>
-            <summary>Level-up card picks</summary>
-            <ul>
-              {picks
-                .filter((pick) => pick.cardId)
-                .map((pick) => (
-                  <li key={pick.forLevel}>
-                    <span>
-                      Level {pick.forLevel}:{" "}
-                      <strong>
-                        {character.cards.find((card) => card.id === pick.cardId)
-                          ?.name ?? pick.cardId}
-                      </strong>
-                      {!validPickLevels.has(pick.forLevel)
-                        ? " — choose a replacement"
-                        : ""}
-                    </span>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      disabled={!canMutate}
-                      onClick={() => openStep(pick.forLevel)}
-                    >
-                      Change level {pick.forLevel} pick
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          </details>
           {activePick ? (
             <section
               className="editor-section"

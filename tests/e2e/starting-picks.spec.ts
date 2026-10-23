@@ -184,23 +184,10 @@ test("builds a level-seven hand from highest picks down, including lower-level c
     statusBar.getByText("6 / 6 level-up cards picked", { exact: true }),
   ).toHaveCSS("color", "rgb(74, 222, 128)");
   await expect(statusBar).toContainText("6 / 11 cards");
-  const disclosure = page.locator(".starting-pick-summary");
-  await expect(disclosure.locator("summary")).toHaveText("Level-up card picks");
-  await expect(disclosure).toHaveCSS("border-top-width", "1px");
-  const listBox = (await disclosure.locator("ul").boundingBox())!;
-  const disclosureBox = (await disclosure.boundingBox())!;
-  expect(listBox.x).toBeGreaterThan(disclosureBox.x + 12);
-  await disclosure.locator("summary").click();
-  await expect(
-    disclosure.getByRole("button", {
-      name: "Change level 2 pick",
-      exact: true,
-    }),
-  ).toBeHidden();
+  await expect(page.locator(".starting-pick-summary")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Complement your picks · Level 7 hand" }),
   ).toBeVisible();
-  await disclosure.locator("summary").click();
   await expect(
     statusBar.getByRole("button", { name: "Done", exact: true }),
   ).toBeVisible();

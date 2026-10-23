@@ -1076,34 +1076,8 @@ textarea {
   outline: 2px solid var(--ice);
   outline-offset: 2px;
 }
-.starting-pick-summary,
 .starting-unavailable {
   margin-block: 16px;
-}
-.starting-pick-summary {
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--panel);
-}
-.starting-pick-summary summary {
-  cursor: pointer;
-  font-weight: 600;
-}
-.starting-pick-summary ul {
-  margin: 12px 0 0 8px;
-  padding: 0 0 0 12px;
-  border-left: 2px solid var(--line);
-  list-style: none;
-}
-.starting-pick-summary li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-block: 8px;
-  border-bottom: 1px solid var(--line);
 }
 .starting-candidate-group {
   margin-block: 20px;
