@@ -1,0 +1,226 @@
+{
+  "id": "CR",
+  "name": "Crashing Tide",
+  "handSize": 12,
+  "icon": "CR.png",
+  "cardBack": "CR/fh-cr-back.jpeg",
+  "cards": [
+    {
+      "id": "blood-in-the-water",
+      "name": "Blood in the Water",
+      "level": 2,
+      "initiative": 53,
+      "image": "CR/fh-blood-in-the-water.jpeg"
+    },
+    {
+      "id": "chaotic-refraction",
+      "name": "Chaotic Refraction",
+      "level": 4,
+      "initiative": 26,
+      "image": "CR/fh-chaotic-refraction.jpeg"
+    },
+    {
+      "id": "clean-sweep",
+      "name": "Clean Sweep",
+      "level": 4,
+      "initiative": 65,
+      "image": "CR/fh-clean-sweep.jpeg"
+    },
+    {
+      "id": "cleansing-swell",
+      "name": "Cleansing Swell",
+      "level": 1,
+      "initiative": 45,
+      "image": "CR/fh-cleansing-swell.jpeg"
+    },
+    {
+      "id": "crashing-surge",
+      "name": "Crashing Surge",
+      "level": 1,
+      "initiative": 34,
+      "image": "CR/fh-crashing-surge.jpeg"
+    },
+    {
+      "id": "cresting-force",
+      "name": "Cresting Force",
+      "level": 1,
+      "initiative": 87,
+      "image": "CR/fh-cresting-force.jpeg"
+    },
+    {
+      "id": "crush-armor",
+      "name": "Crush Armor",
+      "level": "X",
+      "initiative": 42,
+      "image": "CR/fh-crush-armor.jpeg"
+    },
+    {
+      "id": "death-on-all-sides",
+      "name": "Death on All Sides",
+      "level": 8,
+      "initiative": 73,
+      "image": "CR/fh-death-on-all-sides.jpeg"
+    },
+    {
+      "id": "down-to-the-depths",
+      "name": "Down To the Depths",
+      "level": 1,
+      "initiative": 74,
+      "image": "CR/fh-down-to-the-depths.jpeg"
+    },
+    {
+      "id": "drown-beneath-the-waves",
+      "name": "Drown Beneath the Waves",
+      "level": 7,
+      "initiative": 9,
+      "image": "CR/fh-drown-beneath-the-waves.jpeg"
+    },
+    {
+      "id": "dug-in",
+      "name": "Dug in",
+      "level": 7,
+      "initiative": 76,
+      "image": "CR/fh-dug-in.jpeg"
+    },
+    {
+      "id": "ebb-and-flow",
+      "name": "Ebb and Flow",
+      "level": 8,
+      "initiative": 24,
+      "image": "CR/fh-ebb-and-flow.jpeg"
+    },
+    {
+      "id": "endless-cycle",
+      "name": "Endless Cycle",
+      "level": 3,
+      "initiative": 8,
+      "image": "CR/fh-endless-cycle.jpeg"
+    },
+    {
+      "id": "high-tide",
+      "name": "High Tide",
+      "level": 9,
+      "initiative": 90,
+      "image": "CR/fh-high-tide.jpeg"
+    },
+    {
+      "id": "low-tide",
+      "name": "Low Tide",
+      "level": 9,
+      "initiative": 10,
+      "image": "CR/fh-low-tide.jpeg"
+    },
+    {
+      "id": "mighty-claws",
+      "name": "Mighty Claws",
+      "level": 1,
+      "initiative": 23,
+      "image": "CR/fh-mighty-claws.jpeg"
+    },
+    {
+      "id": "overwhelming-wave",
+      "name": "Overwhelming Wave",
+      "level": 1,
+      "initiative": 86,
+      "image": "CR/fh-overwhelming-wave.jpeg"
+    },
+    {
+      "id": "pool-of-power",
+      "name": "Pool of Power",
+      "level": 1,
+      "initiative": 41,
+      "image": "CR/fh-pool-of-power.jpeg"
+    },
+    {
+      "id": "powerful-pincer",
+      "name": "Powerful Pincer",
+      "level": 6,
+      "initiative": 70,
+      "image": "CR/fh-powerful-pincer.jpeg"
+    },
+    {
+      "id": "rancid-brine",
+      "name": "Rancid Brine",
+      "level": 1,
+      "initiative": 62,
+      "image": "CR/fh-rancid-brine.jpeg"
+    },
+    {
+      "id": "rising-flood",
+      "name": "Rising Flood",
+      "level": "X",
+      "initiative": 49,
+      "image": "CR/fh-rising-flood.jpeg"
+    },
+    {
+      "id": "sharp-chitin",
+      "name": "Sharp Chitin",
+      "level": 1,
+      "initiative": 25,
+      "image": "CR/fh-sharp-chitin.jpeg"
+    },
+    {
+      "id": "shuck",
+      "name": "Shuck",
+      "level": 3,
+      "initiative": 55,
+      "image": "CR/fh-shuck.jpeg"
+    },
+    {
+      "id": "skitter",
+      "name": "Skitter",
+      "level": 1,
+      "initiative": 51,
+      "image": "CR/fh-skitter.jpeg"
+    },
+    {
+      "id": "smashing-torrent",
+      "name": "Smashing Torrent",
+      "level": 2,
+      "initiative": 79,
+      "image": "CR/fh-smashing-torrent.jpeg"
+    },
+    {
+      "id": "sodden-soil",
+      "name": "Sodden Soil",
+      "level": 5,
+      "initiative": 17,
+      "image": "CR/fh-sodden-soil.jpeg"
+    },
+    {
+      "id": "soft-flesh",
+      "name": "Soft Flesh",
+      "level": 1,
+      "initiative": 75,
+      "image": "CR/fh-soft-flesh.jpeg"
+    },
+    {
+      "id": "submerge",
+      "name": "Submerge",
+      "level": 1,
+      "initiative": 68,
+      "image": "CR/fh-submerge.jpeg"
+    },
+    {
+      "id": "tidal-blast",
+      "name": "Tidal Blast",
+      "level": 5,
+      "initiative": 71,
+      "image": "CR/fh-tidal-blast.jpeg"
+    },
+    {
+      "id": "twilight-grasp",
+      "name": "Twilight Grasp",
+      "level": 6,
+      "initiative": 33,
+      "image": "CR/fh-twilight-grasp.jpeg"
+    },
+    {
+      "id": "undertow",
+      "name": "Undertow",
+      "level": "X",
+      "initiative": 15,
+      "image": "CR/fh-undertow.jpeg"
+    }
+  ]
+}

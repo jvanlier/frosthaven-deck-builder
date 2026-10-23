@@ -1,0 +1,219 @@
+{
+  "id": "AN",
+  "name": "Anaphi",
+  "handSize": 11,
+  "icon": "AN.png",
+  "cardBack": "AN/an-back.jpeg",
+  "cards": [
+    {
+      "id": "anguish",
+      "name": "Anguish",
+      "level": "X",
+      "initiative": 33,
+      "image": "AN/anguish.jpeg"
+    },
+    {
+      "id": "black-claws",
+      "name": "Black Claws",
+      "level": 1,
+      "initiative": 79,
+      "image": "AN/black-claws.jpeg"
+    },
+    {
+      "id": "bug-bodys-bidding",
+      "name": "Bug-bodys Bidding",
+      "level": 1,
+      "initiative": 81,
+      "image": "AN/bug-bodys-bidding.jpeg"
+    },
+    {
+      "id": "compulsive-hoarding",
+      "name": "Compulsive Hoarding",
+      "level": 4,
+      "initiative": 62,
+      "image": "AN/compulsive-hoarding.jpeg"
+    },
+    {
+      "id": "consume-with-regret",
+      "name": "Consume With Regret",
+      "level": "X",
+      "initiative": 75,
+      "image": "AN/consume-with-regret.jpeg"
+    },
+    {
+      "id": "diamartias-dominance",
+      "name": "Diamartia's Dominance",
+      "level": 6,
+      "initiative": 68,
+      "image": "AN/diamartias-dominance.jpeg"
+    },
+    {
+      "id": "doks-ferocity",
+      "name": "Doks Ferocity",
+      "level": 4,
+      "initiative": 35,
+      "image": "AN/doks-ferocity.jpeg"
+    },
+    {
+      "id": "endless-biting",
+      "name": "Endless Biting",
+      "level": 1,
+      "initiative": 72,
+      "image": "AN/endless-biting.jpeg"
+    },
+    {
+      "id": "her-highness",
+      "name": "Her Highness",
+      "level": 9,
+      "initiative": 94,
+      "image": "AN/her-highness.jpeg"
+    },
+    {
+      "id": "hidden-assault",
+      "name": "Hidden Assault",
+      "level": 2,
+      "initiative": 17,
+      "image": "AN/hidden-assault.jpeg"
+    },
+    {
+      "id": "howling-apparition",
+      "name": "Howling Apparition",
+      "level": 1,
+      "initiative": 93,
+      "image": "AN/howling-apparition.jpeg"
+    },
+    {
+      "id": "musophobia",
+      "name": "Musophobia",
+      "level": 3,
+      "initiative": 53,
+      "image": "AN/musophobia.jpeg"
+    },
+    {
+      "id": "my-loyal-friend",
+      "name": "My Loyal Friend",
+      "level": 5,
+      "initiative": 91,
+      "image": "AN/my-loyal-friend.jpeg"
+    },
+    {
+      "id": "nibbled-to-death",
+      "name": "Nibbled To Death",
+      "level": 5,
+      "initiative": 83,
+      "image": "AN/nibbled-to-death.jpeg"
+    },
+    {
+      "id": "nocturnal-feeding",
+      "name": "Nocturnal Feeding",
+      "level": 1,
+      "initiative": 25,
+      "image": "AN/nocturnal-feeding.jpeg"
+    },
+    {
+      "id": "pay-the-piper",
+      "name": "Pay the Piper",
+      "level": 8,
+      "initiative": 49,
+      "image": "AN/pay-the-piper.jpeg"
+    },
+    {
+      "id": "phantasmal-flurry",
+      "name": "Phantasmal Flurry",
+      "level": 1,
+      "initiative": 23,
+      "image": "AN/phantasmal-flurry.jpeg"
+    },
+    {
+      "id": "powders-ingenuity",
+      "name": "Powders Ingenuity",
+      "level": 8,
+      "initiative": 39,
+      "image": "AN/powders-ingenuity.jpeg"
+    },
+    {
+      "id": "rat-surprise",
+      "name": "Rat Surprise",
+      "level": "X",
+      "initiative": 89,
+      "image": "AN/rat-surprise.jpeg"
+    },
+    {
+      "id": "rat-tide",
+      "name": "Rat Tide",
+      "level": 7,
+      "initiative": 85,
+      "image": "AN/rat-tide.jpeg"
+    },
+    {
+      "id": "revel-in-misery",
+      "name": "Revel in Misery",
+      "level": 6,
+      "initiative": 22,
+      "image": "AN/revel-in-misery.jpeg"
+    },
+    {
+      "id": "seeking-strikes",
+      "name": "Seeking Strikes",
+      "level": 3,
+      "initiative": 10,
+      "image": "AN/seeking-strikes.jpeg"
+    },
+    {
+      "id": "sharp-teeth",
+      "name": "Sharp Teeth",
+      "level": 1,
+      "initiative": 31,
+      "image": "AN/sharp-teeth.jpeg"
+    },
+    {
+      "id": "sickening-betrayal",
+      "name": "Sickening Betrayal",
+      "level": 1,
+      "initiative": 15,
+      "image": "AN/sickening-betrayal.jpeg"
+    },
+    {
+      "id": "surrounding-shadows",
+      "name": "Surrounding Shadows",
+      "level": 1,
+      "initiative": 16,
+      "image": "AN/surrounding-shadows.jpeg"
+    },
+    {
+      "id": "tibers-tenacity",
+      "name": "Tibers Tenacity",
+      "level": 2,
+      "initiative": 12,
+      "image": "AN/tibers-tenacity.jpeg"
+    },
+    {
+      "id": "touch-of-atrophy",
+      "name": "Touch of Atrophy",
+      "level": 1,
+      "initiative": 47,
+      "image": "AN/touch-of-atrophy.jpeg"
+    },
+    {
+      "id": "treacherous-tactics",
+      "name": "Treacherous Tactics",
+      "level": 9,
+      "initiative": 59,
+      "image": "AN/treacherous-tactics.jpeg"
+    },
+    {
+      "id": "twin-frenzy",
+      "name": "Twin Frenzy",
+      "level": 7,
+      "initiative": 14,
+      "image": "AN/twin-frenzy.jpeg"
+    },
+    {
+      "id": "vermincall",
+      "name": "Vermincall",
+      "level": 1,
+      "initiative": 7,
+      "image": "AN/vermincall.jpeg"
+    }
+  ]
+}

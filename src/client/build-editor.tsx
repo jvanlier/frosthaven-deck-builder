@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { CardTile, compareCardLevelsDescending } from "./cards";
 import { CandidateGrid } from "./candidate-grid";
 import { RepairIssues } from "./repairs";
-import { deckPath } from "./deck-view";
+import { deckPath, UnavailableDeckView } from "./deck-view";
 import { CardNoteInput } from "./notes";
 import { ImportDataError, parseImportFile, useAppData } from "./app-data";
 import {
@@ -16,7 +16,7 @@ import {
   setCardNote,
   setStartPick,
 } from "../shared/builds.js";
-import { characters } from "../shared/data/characters/index.js";
+import { getCharacter } from "../shared/data/characters/index.js";
 import {
   startingPickOptions,
   replayBuild,
@@ -25,9 +25,17 @@ import {
 import type { Card, Character } from "../shared/character.js";
 import type { AppData, Build } from "../shared/schema/index.js";
 
-const character = characters[0]!;
-
 export function BuildList() {
+  const { characterId } = useParams();
+  const character = getCharacter(characterId ?? "");
+  return character ? (
+    <CharacterBuildList key={character.id} character={character} />
+  ) : (
+    <UnavailableDeckView />
+  );
+}
+
+function CharacterBuildList({ character }: { character: Character }) {
   const { data, canMutate, updateData } = useAppData();
   const navigate = useNavigate();
   const [dialog, setDialog] = useState<"create" | "copy" | "rename" | null>(
@@ -35,7 +43,8 @@ export function BuildList() {
   );
   const [selectedBuild, setSelectedBuild] = useState<Build | null>(null);
   const [buildToDelete, setBuildToDelete] = useState<Build | null>(null);
-  const builds = data?.builds ?? [];
+  const builds =
+    data?.builds.filter((build) => build.characterId === character.id) ?? [];
 
   const openCreate = () => {
     setSelectedBuild(null);
@@ -93,14 +102,14 @@ export function BuildList() {
       builds: deleteBuild(current.builds, buildToDelete.id),
     }));
     setBuildToDelete(null);
-    navigate("/");
+    navigate(`/c/${character.id}`);
   }
 
   return (
     <main className="page-content" aria-labelledby="builds-heading">
       <section className="page-intro build-list-intro">
         <div>
-          <p className="eyebrow">Snowdancer</p>
+          <p className="eyebrow">{character.name}</p>
           <h1 id="builds-heading">Your builds</h1>
           <p>
             Choose a build to plan its deck from the starting level to level 9.
@@ -221,7 +230,7 @@ export function BuildList() {
   );
 }
 
-function DataBackupControls() {
+export function DataBackupControls() {
   const { canMutate, downloadData, replaceData } = useAppData();
   const [candidate, setCandidate] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -398,12 +407,12 @@ function ImportConfirmationDialog({
 export function StartingRoute() {
   const { characterId, buildId, level } = useParams();
   const { data } = useAppData();
-  const build = data?.builds.find((candidate) => candidate.id === buildId);
-  if (
-    characterId !== character.id ||
-    !build ||
-    Number(level) !== build.startLevel
-  ) {
+  const character = getCharacter(characterId ?? "");
+  const build = data?.builds.find(
+    (candidate) =>
+      candidate.id === buildId && candidate.characterId === character?.id,
+  );
+  if (!character || !build || Number(level) !== build.startLevel) {
     return <UnavailableStartingView />;
   }
   return <StartingDeckPlaceholder build={build} />;
@@ -742,6 +751,11 @@ export function StartingEditor({
               ? `Complement your picks · Level ${build.startLevel} hand`
               : "Choose your deck"}
           </h2>
+          {character.id === "GE" ? (
+            <p className="section-description">
+              Choose 7 melee-form and 7 ranged-form cards.
+            </p>
+          ) : null}
           <RepairIssues
             build={build}
             character={character}
@@ -988,14 +1002,19 @@ function StartingDeckPlaceholder({ build }: { build: Build }) {
 }
 
 function UnavailableStartingView() {
+  const { characterId } = useParams();
+  const character = getCharacter(characterId ?? "");
   return (
     <main className="page-content narrow-content">
       <section className="empty-card">
         <p className="eyebrow">Build not found</p>
         <h1>This starting editor is unavailable</h1>
         <p>Choose an existing build or create a new one.</p>
-        <Link className="button-link" to={`/c/${character.id}`}>
-          Back to builds
+        <Link
+          className="button-link"
+          to={character ? `/c/${character.id}` : "/"}
+        >
+          {character ? "Back to builds" : "Choose a character"}
         </Link>
       </section>
     </main>

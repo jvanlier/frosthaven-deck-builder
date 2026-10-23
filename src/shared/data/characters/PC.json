@@ -1,0 +1,212 @@
+{
+  "id": "PC",
+  "name": "Pain Conduit",
+  "handSize": 10,
+  "icon": "PC.png",
+  "cardBack": "PC/fh-pc-back.jpeg",
+  "cards": [
+    {
+      "id": "blood-ritual",
+      "name": "Blood Ritual",
+      "level": 1,
+      "initiative": 56,
+      "image": "PC/fh-blood-ritual.jpeg"
+    },
+    {
+      "id": "burned-at-both-ends",
+      "name": "Burned At Both Ends",
+      "level": 3,
+      "initiative": 30,
+      "image": "PC/fh-burned-at-both-ends.jpeg"
+    },
+    {
+      "id": "chained-by-despair",
+      "name": "Chained By Despair",
+      "level": 5,
+      "initiative": 15,
+      "image": "PC/fh-chained-by-despair.jpeg"
+    },
+    {
+      "id": "chained-by-spite",
+      "name": "Chained By Spite",
+      "level": 5,
+      "initiative": 15,
+      "image": "PC/fh-chained-by-spite.jpeg"
+    },
+    {
+      "id": "cleansing-fire",
+      "name": "Cleansing Fire",
+      "level": 1,
+      "initiative": 64,
+      "image": "PC/fh-cleansing-fire.jpeg"
+    },
+    {
+      "id": "delayed-malady",
+      "name": "Delayed Malady",
+      "level": "X",
+      "initiative": 90,
+      "image": "PC/fh-delayed-malady.jpeg"
+    },
+    {
+      "id": "down-to-the-dirt",
+      "name": "Down To the Dirt",
+      "level": 4,
+      "initiative": 39,
+      "image": "PC/fh-down-to-the-dirt.jpeg"
+    },
+    {
+      "id": "explosive-wounds",
+      "name": "Explosive Wounds",
+      "level": 1,
+      "initiative": 43,
+      "image": "PC/fh-explosive-wounds.jpeg"
+    },
+    {
+      "id": "hopelessness",
+      "name": "Hopelessness",
+      "level": 6,
+      "initiative": 83,
+      "image": "PC/fh-hopelessness.jpeg"
+    },
+    {
+      "id": "infection-purge",
+      "name": "Infection Purge",
+      "level": 2,
+      "initiative": 45,
+      "image": "PC/fh-infection-purge.jpeg"
+    },
+    {
+      "id": "line-of-transference",
+      "name": "Line of Transference",
+      "level": 1,
+      "initiative": 25,
+      "image": "PC/fh-line-of-transference.jpeg"
+    },
+    {
+      "id": "mirrored-misery",
+      "name": "Mirrored Misery",
+      "level": 4,
+      "initiative": 72,
+      "image": "PC/fh-mirrored-misery.jpeg"
+    },
+    {
+      "id": "penance",
+      "name": "Penance",
+      "level": 7,
+      "initiative": 12,
+      "image": "PC/fh-penance.jpeg"
+    },
+    {
+      "id": "phantom-limb",
+      "name": "Phantom Limb",
+      "level": 6,
+      "initiative": 75,
+      "image": "PC/fh-phantom-limb.jpeg"
+    },
+    {
+      "id": "pleasure-in-pain",
+      "name": "Pleasure in Pain",
+      "level": "X",
+      "initiative": 47,
+      "image": "PC/fh-pleasure-in-pain.jpeg"
+    },
+    {
+      "id": "redemption",
+      "name": "Redemption",
+      "level": 9,
+      "initiative": 33,
+      "image": "PC/fh-redemption.jpeg"
+    },
+    {
+      "id": "reject-the-gift",
+      "name": "Reject the Gift",
+      "level": 7,
+      "initiative": 20,
+      "image": "PC/fh-reject-the-gift.jpeg"
+    },
+    {
+      "id": "reprisal",
+      "name": "Reprisal",
+      "level": 3,
+      "initiative": 70,
+      "image": "PC/fh-reprisal.jpeg"
+    },
+    {
+      "id": "reversal-of-fate",
+      "name": "Reversal of Fate",
+      "level": 2,
+      "initiative": 23,
+      "image": "PC/fh-reversal-of-fate.jpeg"
+    },
+    {
+      "id": "scarred-effigy",
+      "name": "Scarred Effigy",
+      "level": 1,
+      "initiative": 19,
+      "image": "PC/fh-scarred-effigy.jpeg"
+    },
+    {
+      "id": "shared-affliction",
+      "name": "Shared Affliction",
+      "level": 1,
+      "initiative": 61,
+      "image": "PC/fh-shared-affliction.jpeg"
+    },
+    {
+      "id": "swift-vengeance",
+      "name": "Swift Vengeance",
+      "level": 1,
+      "initiative": 21,
+      "image": "PC/fh-swift-vengeance.jpeg"
+    },
+    {
+      "id": "the-agony-of-others",
+      "name": "The Agony of Others",
+      "level": 1,
+      "initiative": 78,
+      "image": "PC/fh-the-agony-of-others.jpeg"
+    },
+    {
+      "id": "the-end-of-everything",
+      "name": "The End of Everything",
+      "level": 9,
+      "initiative": 99,
+      "image": "PC/fh-the-end-of-everything.jpeg"
+    },
+    {
+      "id": "transferred-injury",
+      "name": "Transferred Injury",
+      "level": 1,
+      "initiative": 74,
+      "image": "PC/fh-transferred-injury.jpeg"
+    },
+    {
+      "id": "unending-torment",
+      "name": "Unending Torment",
+      "level": 1,
+      "initiative": 29,
+      "image": "PC/fh-unending-torment.jpeg"
+    },
+    {
+      "id": "unstable-effigy",
+      "name": "Unstable Effigy",
+      "level": "X",
+      "initiative": 18,
+      "image": "PC/fh-unstable-effigy.jpeg"
+    },
+    {
+      "id": "wave-of-anguish",
+      "name": "Wave of Anguish",
+      "level": 8,
+      "initiative": 68,
+      "image": "PC/fh-wave-of-anguish.jpeg"
+    },
+    {
+      "id": "wracked-with-pain",
+      "name": "Wracked With Pain",
+      "level": 8,
+      "initiative": 22,
+      "image": "PC/fh-wracked-with-pain.jpeg"
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "id": "SH",
+  "name": "Shattersong",
+  "handSize": 10,
+  "icon": "SH.png",
+  "cardBack": "SH/fh-sh-back.jpeg",
+  "cards": [
+    {
+      "id": "barbaric-yawp",
+      "name": "Barbaric Yawp",
+      "level": 9,
+      "initiative": 66,
+      "image": "SH/fh-barbaric-yawp.jpeg"
+    },
+    {
+      "id": "befuddling-bellow",
+      "name": "Befuddling Bellow",
+      "level": 2,
+      "initiative": 18,
+      "image": "SH/fh-befuddling-bellow.jpeg"
+    },
+    {
+      "id": "calamitous-yawp",
+      "name": "Calamitous Yawp",
+      "level": "X",
+      "initiative": 65,
+      "image": "SH/fh-calamitous-yawp.jpeg"
+    },
+    {
+      "id": "cloaking-refraction",
+      "name": "Cloaking Refraction",
+      "level": 7,
+      "initiative": 11,
+      "image": "SH/fh-cloaking-refraction.jpeg"
+    },
+    {
+      "id": "concentrated-blast",
+      "name": "Concentrated Blast",
+      "level": 4,
+      "initiative": 38,
+      "image": "SH/fh-concentrated-blast.jpeg"
+    },
+    {
+      "id": "devastating-shout",
+      "name": "Devastating Shout",
+      "level": 1,
+      "initiative": 68,
+      "image": "SH/fh-devastating-shout.jpeg"
+    },
+    {
+      "id": "din-of-battle",
+      "name": "Din of Battle",
+      "level": "X",
+      "initiative": 14,
+      "image": "SH/fh-din-of-battle.jpeg"
+    },
+    {
+      "id": "elemental-pulse",
+      "name": "Elemental Pulse",
+      "level": 4,
+      "initiative": 25,
+      "image": "SH/fh-elemental-pulse.jpeg"
+    },
+    {
+      "id": "empowering-note",
+      "name": "Empowering Note",
+      "level": 5,
+      "initiative": 45,
+      "image": "SH/fh-empowering-note.jpeg"
+    },
+    {
+      "id": "empowering-pulse",
+      "name": "Empowering Pulse",
+      "level": 1,
+      "initiative": 22,
+      "image": "SH/fh-empowering-pulse.jpeg"
+    },
+    {
+      "id": "feedback",
+      "name": "Feedback",
+      "level": 8,
+      "initiative": 24,
+      "image": "SH/fh-feedback.jpeg"
+    },
+    {
+      "id": "forceful-vibrations",
+      "name": "Forceful Vibrations",
+      "level": 1,
+      "initiative": 27,
+      "image": "SH/fh-forceful-vibrations.jpeg"
+    },
+    {
+      "id": "foreboding-tremors",
+      "name": "Foreboding Tremors",
+      "level": 1,
+      "initiative": 21,
+      "image": "SH/fh-foreboding-tremors.jpeg"
+    },
+    {
+      "id": "future-sense",
+      "name": "Future Sense",
+      "level": 6,
+      "initiative": 28,
+      "image": "SH/fh-future-sense.jpeg"
+    },
+    {
+      "id": "heartening-harmony",
+      "name": "Heartening Harmony",
+      "level": 1,
+      "initiative": 30,
+      "image": "SH/fh-heartening-harmony.jpeg"
+    },
+    {
+      "id": "illuminative-tone",
+      "name": "Illuminative Tone",
+      "level": "X",
+      "initiative": 72,
+      "image": "SH/fh-illuminative-tone.jpeg"
+    },
+    {
+      "id": "lifting-voice",
+      "name": "Lifting Voice",
+      "level": 1,
+      "initiative": 29,
+      "image": "SH/fh-lifting-voice.jpeg"
+    },
+    {
+      "id": "precious-gems",
+      "name": "Precious Gems",
+      "level": 1,
+      "initiative": 10,
+      "image": "SH/fh-precious-gems.jpeg"
+    },
+    {
+      "id": "resonant-frequency",
+      "name": "Resonant Frequency",
+      "level": 1,
+      "initiative": 88,
+      "image": "SH/fh-resonant-frequency.jpeg"
+    },
+    {
+      "id": "shape-the-path",
+      "name": "Shape the Path",
+      "level": 3,
+      "initiative": 40,
+      "image": "SH/fh-shape-the-path.jpeg"
+    },
+    {
+      "id": "shrieking-chakram",
+      "name": "Shrieking Chakram",
+      "level": 5,
+      "initiative": 8,
+      "image": "SH/fh-shrieking-chakram.jpeg"
+    },
+    {
+      "id": "soft-spots",
+      "name": "Soft Spots",
+      "level": 8,
+      "initiative": 47,
+      "image": "SH/fh-soft-spots.jpeg"
+    },
+    {
+      "id": "sonic-shock",
+      "name": "Sonic Shock",
+      "level": 1,
+      "initiative": 58,
+      "image": "SH/fh-sonic-shock.jpeg"
+    },
+    {
+      "id": "sound-therapy",
+      "name": "Sound Therapy",
+      "level": 7,
+      "initiative": 73,
+      "image": "SH/fh-sound-therapy.jpeg"
+    },
+    {
+      "id": "stealth-vibrations",
+      "name": "Stealth Vibrations",
+      "level": 3,
+      "initiative": 35,
+      "image": "SH/fh-stealth-vibrations.jpeg"
+    },
+    {
+      "id": "transparency",
+      "name": "Transparency",
+      "level": 2,
+      "initiative": 13,
+      "image": "SH/fh-transparency.jpeg"
+    },
+    {
+      "id": "unrelenting-wail",
+      "name": "Unrelenting Wail",
+      "level": 1,
+      "initiative": 26,
+      "image": "SH/fh-unrelenting-wail.jpeg"
+    },
+    {
+      "id": "unsustainable-wave",
+      "name": "Unsustainable Wave",
+      "level": 6,
+      "initiative": 36,
+      "image": "SH/fh-unsustainable-wave.jpeg"
+    },
+    {
+      "id": "violent-vibrations",
+      "name": "Violent Vibrations",
+      "level": 9,
+      "initiative": 5,
+      "image": "SH/fh-violent-vibrations.jpeg"
+    }
+  ]
+}

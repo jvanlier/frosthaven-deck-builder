@@ -1,0 +1,219 @@
+{
+  "id": "HV",
+  "name": "Hive",
+  "handSize": 9,
+  "icon": "HV.png",
+  "cardBack": "HV/fh-hv-back.jpeg",
+  "cards": [
+    {
+      "id": "aimed-assault",
+      "name": "Aimed Assault",
+      "level": 1,
+      "initiative": 88,
+      "image": "HV/fh-aimed-assault.jpeg"
+    },
+    {
+      "id": "burning-slash",
+      "name": "Burning Slash",
+      "level": 8,
+      "initiative": 29,
+      "image": "HV/fh-burning-slash.jpeg"
+    },
+    {
+      "id": "code-geminate",
+      "name": "Code Geminate",
+      "level": 5,
+      "initiative": 28,
+      "image": "HV/fh-code-geminate.jpeg"
+    },
+    {
+      "id": "coiled-limbs",
+      "name": "Coiled Limbs",
+      "level": 1,
+      "initiative": 82,
+      "image": "HV/fh-coiled-limbs.jpeg"
+    },
+    {
+      "id": "disassemble",
+      "name": "Disassemble",
+      "level": 9,
+      "initiative": 20,
+      "image": "HV/fh-disassemble.jpeg"
+    },
+    {
+      "id": "divergent-destruction",
+      "name": "Divergent Destruction",
+      "level": 4,
+      "initiative": 22,
+      "image": "HV/fh-divergent-destruction.jpeg"
+    },
+    {
+      "id": "faceless-entity",
+      "name": "Faceless Entity",
+      "level": 1,
+      "initiative": 12,
+      "image": "HV/fh-faceless-entity.jpeg"
+    },
+    {
+      "id": "force-field",
+      "name": "Force Field",
+      "level": 2,
+      "initiative": 78,
+      "image": "HV/fh-force-field.jpeg"
+    },
+    {
+      "id": "heavy-metal",
+      "name": "Heavy Metal",
+      "level": 9,
+      "initiative": 76,
+      "image": "HV/fh-heavy-metal.jpeg"
+    },
+    {
+      "id": "high-impact-projectiles",
+      "name": "High Impact Projectiles",
+      "level": 1,
+      "initiative": 16,
+      "image": "HV/fh-high-impact-projectiles.jpeg"
+    },
+    {
+      "id": "hijack",
+      "name": "Hijack",
+      "level": 3,
+      "initiative": 40,
+      "image": "HV/fh-hijack.jpeg"
+    },
+    {
+      "id": "hunter-killer",
+      "name": "Hunter-killer",
+      "level": 1,
+      "initiative": 84,
+      "image": "HV/fh-hunter-killer.jpeg"
+    },
+    {
+      "id": "interference",
+      "name": "Interference",
+      "level": 1,
+      "initiative": 21,
+      "image": "HV/fh-interference.jpeg"
+    },
+    {
+      "id": "launch-pod",
+      "name": "Launch Pod",
+      "level": 1,
+      "initiative": 77,
+      "image": "HV/fh-launch-pod.jpeg"
+    },
+    {
+      "id": "long-range-missile",
+      "name": "Long-range Missile",
+      "level": 2,
+      "initiative": 19,
+      "image": "HV/fh-long-range-missile.jpeg"
+    },
+    {
+      "id": "mortar-shells",
+      "name": "Mortar Shells",
+      "level": 7,
+      "initiative": 85,
+      "image": "HV/fh-mortar-shells.jpeg"
+    },
+    {
+      "id": "net-dispersal",
+      "name": "Net Dispersal",
+      "level": 5,
+      "initiative": 94,
+      "image": "HV/fh-net-dispersal.jpeg"
+    },
+    {
+      "id": "plague-protocol",
+      "name": "Plague Protocol",
+      "level": 4,
+      "initiative": 98,
+      "image": "HV/fh-plague-protocol.jpeg"
+    },
+    {
+      "id": "plated-defense",
+      "name": "Plated Defense",
+      "level": 1,
+      "initiative": 80,
+      "image": "HV/fh-plated-defense.jpeg"
+    },
+    {
+      "id": "prepare-for-deployment",
+      "name": "Prepare For Deployment",
+      "level": 1,
+      "initiative": 64,
+      "image": "HV/fh-prepare-for-deployment.jpeg"
+    },
+    {
+      "id": "rapid-fire",
+      "name": "Rapid Fire",
+      "level": 3,
+      "initiative": 92,
+      "image": "HV/fh-rapid-fire.jpeg"
+    },
+    {
+      "id": "reaper-function",
+      "name": "Reaper Function",
+      "level": 1,
+      "initiative": 32,
+      "image": "HV/fh-reaper-function.jpeg"
+    },
+    {
+      "id": "reassemble",
+      "name": "Reassemble",
+      "level": "X",
+      "initiative": 27,
+      "image": "HV/fh-reassemble.jpeg"
+    },
+    {
+      "id": "recall",
+      "name": "Recall",
+      "level": 7,
+      "initiative": 91,
+      "image": "HV/fh-recall.jpeg"
+    },
+    {
+      "id": "reconstructive-aid",
+      "name": "Reconstructive Aid",
+      "level": 1,
+      "initiative": 90,
+      "image": "HV/fh-reconstructive-aid.jpeg"
+    },
+    {
+      "id": "remote-control",
+      "name": "Remote Control",
+      "level": "X",
+      "initiative": 48,
+      "image": "HV/fh-remote-control.jpeg"
+    },
+    {
+      "id": "shocking-pulse",
+      "name": "Shocking Pulse",
+      "level": "X",
+      "initiative": 86,
+      "image": "HV/fh-shocking-pulse.jpeg"
+    },
+    {
+      "id": "spinning-blades",
+      "name": "Spinning Blades",
+      "level": 6,
+      "initiative": 79,
+      "image": "HV/fh-spinning-blades.jpeg"
+    },
+    {
+      "id": "swarming-bulwark",
+      "name": "Swarming Bulwark",
+      "level": 8,
+      "initiative": 96,
+      "image": "HV/fh-swarming-bulwark.jpeg"
+    },
+    {
+      "id": "triage-program",
+      "name": "Triage Program",
+      "level": 6,
+      "initiative": 13,
+      "image": "HV/fh-triage-program.jpeg"
+    }
+  ]
+}

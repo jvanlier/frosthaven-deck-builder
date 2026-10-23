@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "blood-ritual",
+      "source": "character-ability-cards/frosthaven/PC/fh-blood-ritual.jpeg",
+      "sha256": "b6d363080170c40681755db8d32f73096ddc8867c185ce9863dfde4191d92486"
+    },
+    {
+      "id": "burned-at-both-ends",
+      "source": "character-ability-cards/frosthaven/PC/fh-burned-at-both-ends.jpeg",
+      "sha256": "1dfde5e1dc7457ba8ea491629d1031fb4faa95e5df8a605a116701a4896ccaf1"
+    },
+    {
+      "id": "chained-by-despair",
+      "source": "character-ability-cards/frosthaven/PC/fh-chained-by-despair.jpeg",
+      "sha256": "08fc6ae39f42d00983e0a482d58e2f4ba925b1f1765d1e696f3de88e359fff2e"
+    },
+    {
+      "id": "chained-by-spite",
+      "source": "character-ability-cards/frosthaven/PC/fh-chained-by-spite.jpeg",
+      "sha256": "998e9e26300408913021c39fd0782dc87444ea34cdaadcda77fce392f33060d5"
+    },
+    {
+      "id": "cleansing-fire",
+      "source": "character-ability-cards/frosthaven/PC/fh-cleansing-fire.jpeg",
+      "sha256": "912984c72ec9222d90549fdc88f92b5de914bf5827b50c6a324ed979ef60688b"
+    },
+    {
+      "id": "delayed-malady",
+      "source": "character-ability-cards/frosthaven/PC/fh-delayed-malady.jpeg",
+      "sha256": "dc54d0f0c5c33b0bc8dd037bcec2ef3c154296eefd14b57dc40f6012f2ff2901"
+    },
+    {
+      "id": "down-to-the-dirt",
+      "source": "character-ability-cards/frosthaven/PC/fh-down-to-the-dirt.jpeg",
+      "sha256": "d4219ea2db270a8030b325e0b1673d8ffc02dea4ef66e6325ac986321afc8ca0"
+    },
+    {
+      "id": "explosive-wounds",
+      "source": "character-ability-cards/frosthaven/PC/fh-explosive-wounds.jpeg",
+      "sha256": "08aff163718cb2136296b0bfcf4d329f7a26012ca30026128a9ab497b2243aa3"
+    },
+    {
+      "id": "hopelessness",
+      "source": "character-ability-cards/frosthaven/PC/fh-hopelessness.jpeg",
+      "sha256": "d96eef8f3972b39ca90ecb24728c7af080761b72945740463998c13d907eaa1a"
+    },
+    {
+      "id": "infection-purge",
+      "source": "character-ability-cards/frosthaven/PC/fh-infection-purge.jpeg",
+      "sha256": "0bbafa52e8dc3346ce1bc0303ecceaa56a75bdedc96d71c6cd3cf250cb9ce3fd"
+    },
+    {
+      "id": "line-of-transference",
+      "source": "character-ability-cards/frosthaven/PC/fh-line-of-transference.jpeg",
+      "sha256": "c154db13788b9f50c2f4310eeefa2c962702bf959ab50379fb5203a0cff8d1ff"
+    },
+    {
+      "id": "mirrored-misery",
+      "source": "character-ability-cards/frosthaven/PC/fh-mirrored-misery.jpeg",
+      "sha256": "7e1bf5c53bebc750aaf67044773615c33de84efbd33b86a32e210831690e0c95"
+    },
+    {
+      "id": "penance",
+      "source": "character-ability-cards/frosthaven/PC/fh-penance.jpeg",
+      "sha256": "f445b83c8241ecce8e47d1012059e93f093ce440ac2fb7b5be3ef1a2c75f62d8"
+    },
+    {
+      "id": "phantom-limb",
+      "source": "character-ability-cards/frosthaven/PC/fh-phantom-limb.jpeg",
+      "sha256": "fc7d8c5d1381e1e020f187f4bb69c45a3c89b9e64c042a209a9a490f5317b3ba"
+    },
+    {
+      "id": "pleasure-in-pain",
+      "source": "character-ability-cards/frosthaven/PC/fh-pleasure-in-pain.jpeg",
+      "sha256": "cdb8e9f5a01d19e5e17deb68fe66f2d46a5f9497612c5ccd09e84904b6d15b22"
+    },
+    {
+      "id": "redemption",
+      "source": "character-ability-cards/frosthaven/PC/fh-redemption.jpeg",
+      "sha256": "4d39c94ef49c3dddc11f77133cc6a0fae36649edc9edc33ee472d1be98a7288f"
+    },
+    {
+      "id": "reject-the-gift",
+      "source": "character-ability-cards/frosthaven/PC/fh-reject-the-gift.jpeg",
+      "sha256": "56ca362d75b8c10ac8f8f83b36a6d56f46525455617f4e970453852c201e0715"
+    },
+    {
+      "id": "reprisal",
+      "source": "character-ability-cards/frosthaven/PC/fh-reprisal.jpeg",
+      "sha256": "95078af84ed3256b7073578d0e57f413668c1f6402c5bb0d329bcde5568936d9"
+    },
+    {
+      "id": "reversal-of-fate",
+      "source": "character-ability-cards/frosthaven/PC/fh-reversal-of-fate.jpeg",
+      "sha256": "132d5909c9d4fe2643fb8cc8556c766c4e93979f78f7034bceb16c88bbff6a84"
+    },
+    {
+      "id": "scarred-effigy",
+      "source": "character-ability-cards/frosthaven/PC/fh-scarred-effigy.jpeg",
+      "sha256": "dc721f47b56b435d79bba9a20c00a98a3c4c4943038867a5a3f1fad512f6720a"
+    },
+    {
+      "id": "shared-affliction",
+      "source": "character-ability-cards/frosthaven/PC/fh-shared-affliction.jpeg",
+      "sha256": "edf43b6514d8de0fd24e39a2242a28aa9eaae76a3cf3ef3e3b178f6c0dc3fdd3"
+    },
+    {
+      "id": "swift-vengeance",
+      "source": "character-ability-cards/frosthaven/PC/fh-swift-vengeance.jpeg",
+      "sha256": "aee44598218d2359aa882489c897dd4ee6fc8994ec89f8b73a67e8d7e26d3c5a"
+    },
+    {
+      "id": "the-agony-of-others",
+      "source": "character-ability-cards/frosthaven/PC/fh-the-agony-of-others.jpeg",
+      "sha256": "9512265e8d7a190e7b8d215239d58b1feed8fc37fe824e566c6ef54e2e43762e"
+    },
+    {
+      "id": "the-end-of-everything",
+      "source": "character-ability-cards/frosthaven/PC/fh-the-end-of-everything.jpeg",
+      "sha256": "e752e4362c39907626627d97dd96fd923c6c394a025ea12c8322ca7509442643"
+    },
+    {
+      "id": "transferred-injury",
+      "source": "character-ability-cards/frosthaven/PC/fh-transferred-injury.jpeg",
+      "sha256": "8c9d98d851708596a5525081e0aca795640190879686517ae48ca6c9f9ba7342"
+    },
+    {
+      "id": "unending-torment",
+      "source": "character-ability-cards/frosthaven/PC/fh-unending-torment.jpeg",
+      "sha256": "12e7d4f4c5896af26d7a5318d807b8916e03c9d8d8a449f1c801d7971055c274"
+    },
+    {
+      "id": "unstable-effigy",
+      "source": "character-ability-cards/frosthaven/PC/fh-unstable-effigy.jpeg",
+      "sha256": "0117b552d6ead8e7ed31daf1e6236916eb4915b84ee93e333d08fc05f7ab678d"
+    },
+    {
+      "id": "wave-of-anguish",
+      "source": "character-ability-cards/frosthaven/PC/fh-wave-of-anguish.jpeg",
+      "sha256": "c8b9848d3d4e19019dbadbf2b8534a6bfb348e83ec084232d0d1453ddb24f70b"
+    },
+    {
+      "id": "wracked-with-pain",
+      "source": "character-ability-cards/frosthaven/PC/fh-wracked-with-pain.jpeg",
+      "sha256": "9e739ded4f19481c632b81d3722d7c9ff0d596713f7a1bbfd417432fcdacffe1"
+    },
+    {
+      "id": "pc-back",
+      "source": "character-ability-cards/frosthaven/PC/fh-pc-back.jpeg",
+      "sha256": "8cdb69a25814d7de1da6a472a64f6f0a70320e32cd840157e613cccabfafa7cc"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/PC.png",
+    "sha256": "2339091bea7d8400db6003f3763c9d23f313cc459c115ccf347bcfacc07bb097"
+  }
+}

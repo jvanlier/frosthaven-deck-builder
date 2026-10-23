@@ -1,0 +1,205 @@
+{
+  "id": "HA",
+  "name": "Hail",
+  "handSize": 9,
+  "icon": "HA.png",
+  "cardBack": "HA/ha-back.jpeg",
+  "cards": [
+    {
+      "id": "abundant-nuisance",
+      "name": "Abundant Nuisance",
+      "level": "X",
+      "initiative": 90,
+      "image": "HA/abundant-nuisance.jpeg"
+    },
+    {
+      "id": "beneath-me",
+      "name": "Beneath Me",
+      "level": 3,
+      "initiative": 85,
+      "image": "HA/beneath-me.jpeg"
+    },
+    {
+      "id": "bizarre-antics",
+      "name": "Bizarre Antics",
+      "level": 1,
+      "initiative": 13,
+      "image": "HA/bizarre-antics.jpeg"
+    },
+    {
+      "id": "cant-be-bothered",
+      "name": "Cant Be Bothered",
+      "level": 1,
+      "initiative": 75,
+      "image": "HA/cant-be-bothered.jpeg"
+    },
+    {
+      "id": "closed-for-business",
+      "name": "Closed For Business",
+      "level": 8,
+      "initiative": 23,
+      "image": "HA/closed-for-business.jpeg"
+    },
+    {
+      "id": "collect-essence",
+      "name": "Collect Essence",
+      "level": 7,
+      "initiative": 41,
+      "image": "HA/collect-essence.jpeg"
+    },
+    {
+      "id": "dismissive-comment",
+      "name": "Dismissive Comment",
+      "level": 6,
+      "initiative": 20,
+      "image": "HA/dismissive-comment.jpeg"
+    },
+    {
+      "id": "dont-be-a-baby",
+      "name": "Dont Be a Baby",
+      "level": 5,
+      "initiative": 33,
+      "image": "HA/dont-be-a-baby.jpeg"
+    },
+    {
+      "id": "experimental-insights",
+      "name": "Experimental Insights",
+      "level": 2,
+      "initiative": 24,
+      "image": "HA/experimental-insights.jpeg"
+    },
+    {
+      "id": "fading-presence",
+      "name": "Fading Presence",
+      "level": 3,
+      "initiative": 15,
+      "image": "HA/fading-presence.jpeg"
+    },
+    {
+      "id": "fired-up",
+      "name": "Fired Up",
+      "level": 9,
+      "initiative": 70,
+      "image": "HA/fired-up.jpeg"
+    },
+    {
+      "id": "fleeting-interest",
+      "name": "Fleeting Interest",
+      "level": 1,
+      "initiative": 76,
+      "image": "HA/fleeting-interest.jpeg"
+    },
+    {
+      "id": "fools-errand",
+      "name": "Fools Errand",
+      "level": 4,
+      "initiative": 26,
+      "image": "HA/fools-errand.jpeg"
+    },
+    {
+      "id": "gather-reagents",
+      "name": "Gather Reagents",
+      "level": 1,
+      "initiative": 21,
+      "image": "HA/gather-reagents.jpeg"
+    },
+    {
+      "id": "interesting-speciments",
+      "name": "Interesting Speciments",
+      "level": 1,
+      "initiative": 80,
+      "image": "HA/interesting-speciments.jpeg"
+    },
+    {
+      "id": "kill-that-one-first",
+      "name": "Kill That One First",
+      "level": 8,
+      "initiative": 7,
+      "image": "HA/kill-that-one-first.jpeg"
+    },
+    {
+      "id": "leave-me-alone",
+      "name": "Leave Me Alone",
+      "level": "X",
+      "initiative": 70,
+      "image": "HA/leave-me-alone.jpeg"
+    },
+    {
+      "id": "miniaturize",
+      "name": "Miniaturize",
+      "level": 4,
+      "initiative": 86,
+      "image": "HA/miniaturize.jpeg"
+    },
+    {
+      "id": "minor-inconvenience",
+      "name": "Minor Inconvenience",
+      "level": 1,
+      "initiative": 28,
+      "image": "HA/minor-inconvenience.jpeg"
+    },
+    {
+      "id": "not-amused",
+      "name": "Not Amused",
+      "level": 1,
+      "initiative": 47,
+      "image": "HA/not-amused.jpeg"
+    },
+    {
+      "id": "outsource",
+      "name": "Outsource",
+      "level": 2,
+      "initiative": 68,
+      "image": "HA/outsource.jpeg"
+    },
+    {
+      "id": "perpetual-annoyance",
+      "name": "Perpetual Annoyance",
+      "level": 1,
+      "initiative": 30,
+      "image": "HA/perpetual-annoyance.jpeg"
+    },
+    {
+      "id": "somewhere-to-be",
+      "name": "Somewhere To Be",
+      "level": 1,
+      "initiative": 10,
+      "image": "HA/somewhere-to-be.jpeg"
+    },
+    {
+      "id": "tear-a-new-one",
+      "name": "Tear a New One",
+      "level": 7,
+      "initiative": 19,
+      "image": "HA/tear-a-new-one.jpeg"
+    },
+    {
+      "id": "the-power-of-enhancement",
+      "name": "The Power of Enhancement",
+      "level": 9,
+      "initiative": 98,
+      "image": "HA/the-power-of-enhancement.jpeg"
+    },
+    {
+      "id": "trial-and-success",
+      "name": "Trial and Success",
+      "level": "X",
+      "initiative": 95,
+      "image": "HA/trial-and-success.jpeg"
+    },
+    {
+      "id": "trying-to-remember",
+      "name": "Trying To Remember",
+      "level": 5,
+      "initiative": 55,
+      "image": "HA/trying-to-remember.jpeg"
+    },
+    {
+      "id": "withering-stare",
+      "name": "Withering Stare",
+      "level": 6,
+      "initiative": 38,
+      "image": "HA/withering-stare.jpeg"
+    }
+  ]
+}

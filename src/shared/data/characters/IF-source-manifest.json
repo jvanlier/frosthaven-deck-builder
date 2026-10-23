@@ -1,0 +1,176 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "ancient-rites-of-power",
+      "source": "character-ability-cards/frosthaven/IF/fh-ancient-rites-of-power.jpeg",
+      "sha256": "71762117d45092d1d5bd5c69b4e43a781748b29dc6aa3ec858efa21229845c0e"
+    },
+    {
+      "id": "battle-prowess",
+      "source": "character-ability-cards/frosthaven/IF/fh-battle-prowess.jpeg",
+      "sha256": "7cd5bf0f928d7cd0a618d80f38bd9c3652f52bbe6e9f1038dbbf5f830ea57ec5"
+    },
+    {
+      "id": "boon-of-the-tempest",
+      "source": "character-ability-cards/frosthaven/IF/fh-boon-of-the-tempest.jpeg",
+      "sha256": "dad42da7347caad5d2d5f458ec3bf6522cf1a0586141a4b9f1d4228e5ab03265"
+    },
+    {
+      "id": "bounty-of-the-earth",
+      "source": "character-ability-cards/frosthaven/IF/fh-bounty-of-the-earth.jpeg",
+      "sha256": "d4f598665259a6d0c4966f59443bbe122557b4bff7049fb459721673d632fd4d"
+    },
+    {
+      "id": "caress-of-the-night",
+      "source": "character-ability-cards/frosthaven/IF/fh-caress-of-the-night.jpeg",
+      "sha256": "c328da64905a6fe39fac83bd03ebfd232d34e3a06200f56fc905c080c1ab69b4"
+    },
+    {
+      "id": "coalescing-darkness",
+      "source": "character-ability-cards/frosthaven/IF/fh-coalescing-darkness.jpeg",
+      "sha256": "a6fa0384389b56d6f41803ddf2610dfa048fba17273daddb502495dda1ed0260"
+    },
+    {
+      "id": "crystalline-aegis",
+      "source": "character-ability-cards/frosthaven/IF/fh-crystalline-aegis.jpeg",
+      "sha256": "af123c0c0d82f5bc57d108db73e5a8ba3e5002e364fbec0d49ad4203c9e7f355"
+    },
+    {
+      "id": "desperate-throw",
+      "source": "character-ability-cards/frosthaven/IF/fh-desperate-throw.jpeg",
+      "sha256": "9f4323168d67b6a03c05ee15d7a9121a2913dae15bde0163709635490d4e3950"
+    },
+    {
+      "id": "diamondization",
+      "source": "character-ability-cards/frosthaven/IF/fh-diamondization.jpeg",
+      "sha256": "4071768564c21954bc5a1b8b11a5aeb0de12edcf840bf043a8d732d20ad4c1f7"
+    },
+    {
+      "id": "emerald-edge",
+      "source": "character-ability-cards/frosthaven/IF/fh-emerald-edge.jpeg",
+      "sha256": "e4ef26108c023ec34c577252b508fa9f065bd6b9de3b7082bb79c2a99c34723c"
+    },
+    {
+      "id": "formless-bladestorm",
+      "source": "character-ability-cards/frosthaven/IF/fh-formless-bladestorm.jpeg",
+      "sha256": "0535232b4e56bd73a35513c7cd0d1d3faf34eecaa23048c5968382657ad51c30"
+    },
+    {
+      "id": "gale-barrage",
+      "source": "character-ability-cards/frosthaven/IF/fh-gale-barrage.jpeg",
+      "sha256": "f11a62707c98b98ef9bb72a34e60f4c1676c5d9a2902f321bcf678602775e365"
+    },
+    {
+      "id": "gemstone-resonance",
+      "source": "character-ability-cards/frosthaven/IF/fh-gemstone-resonance.jpeg",
+      "sha256": "c63f725e887cfdb0e5e5202a3a002170295a7db37fd8689f5f73833312e76c8a"
+    },
+    {
+      "id": "guide-the-flow",
+      "source": "character-ability-cards/frosthaven/IF/fh-guide-the-flow.jpeg",
+      "sha256": "f96c87d67dcb5fcd5bab5b8638d3164239f5acb424787e0d8a87f3fac34e782f"
+    },
+    {
+      "id": "imbue-with-life",
+      "source": "character-ability-cards/frosthaven/IF/fh-imbue-with-life.jpeg",
+      "sha256": "9cede115f052120e26c6aec28f3e71b389f0c586063283384e6797f8d676a1a6"
+    },
+    {
+      "id": "malachite-shockwave",
+      "source": "character-ability-cards/frosthaven/IF/fh-malachite-shockwave.jpeg",
+      "sha256": "14755368c8e5c74caa99bdc03c8766105b5615356410218b8765c2b191fbb1e5"
+    },
+    {
+      "id": "obsidian-spear",
+      "source": "character-ability-cards/frosthaven/IF/fh-obsidian-spear.jpeg",
+      "sha256": "97114ec3ff2f90ac4aa5d0b2967b98ffd7b965bf7699d868e15e5bf20f1b06dd"
+    },
+    {
+      "id": "onyx-shards",
+      "source": "character-ability-cards/frosthaven/IF/fh-onyx-shards.jpeg",
+      "sha256": "7ba5117d01ca591002c73e82b0c76cb0f3c8265a09ca94be4cd157c1321f60f5"
+    },
+    {
+      "id": "propulsive-tailwind",
+      "source": "character-ability-cards/frosthaven/IF/fh-propulsive-tailwind.jpeg",
+      "sha256": "0d44d7824163b06a43528474b532980495321a82bd3b9de35d5ec61f4879fc8d"
+    },
+    {
+      "id": "reinforced-riposte",
+      "source": "character-ability-cards/frosthaven/IF/fh-reinforced-riposte.jpeg",
+      "sha256": "468d0ae2fddd9fa5f6096faf200721bdb4832882da2a4c89a30dac9c34c23d30"
+    },
+    {
+      "id": "remote-impact",
+      "source": "character-ability-cards/frosthaven/IF/fh-remote-impact.jpeg",
+      "sha256": "99b7ad9a0464a802c0fd84f12b7a3247944fae90b12d358c67e63b7e1aec561a"
+    },
+    {
+      "id": "rising-momentum",
+      "source": "character-ability-cards/frosthaven/IF/fh-rising-momentum.jpeg",
+      "sha256": "d3def68bd513a397fb884e4c34dcdeb15bf4851d56e55cfbf0182040f6ff99e9"
+    },
+    {
+      "id": "sky-splitting-strike",
+      "source": "character-ability-cards/frosthaven/IF/fh-sky-splitting-strike.jpeg",
+      "sha256": "77fe6a645e76bee9a847730d23d128d98d629df0d5f3d8ebe933d13d5b42a3ea"
+    },
+    {
+      "id": "slashing-cyclone",
+      "source": "character-ability-cards/frosthaven/IF/fh-slashing-cyclone.jpeg",
+      "sha256": "c6c897ee4293fe45197cc7f8aa79230e962254ffa9c08eef62ab57b0461149b3"
+    },
+    {
+      "id": "stoic-vigilance",
+      "source": "character-ability-cards/frosthaven/IF/fh-stoic-vigilance.jpeg",
+      "sha256": "5906e1c92b151e0d0b97f854358504060e9f8bac8b6099a0dec0d1c64405e2e7"
+    },
+    {
+      "id": "swift-pivot",
+      "source": "character-ability-cards/frosthaven/IF/fh-swift-pivot.jpeg",
+      "sha256": "2cd0adaffca58fd58600ee1d384ffb317abeff8ab9d496e451111fe60249aabf"
+    },
+    {
+      "id": "torrential-cleave",
+      "source": "character-ability-cards/frosthaven/IF/fh-torrential-cleave.jpeg",
+      "sha256": "3025e890b7b3019e984e9528dfc6bacc28e15ceac4aa30a7c3db7c789371f384"
+    },
+    {
+      "id": "unstoppable-impulse",
+      "source": "character-ability-cards/frosthaven/IF/fh-unstoppable-impulse.jpeg",
+      "sha256": "427e1c1f587996a6e12e9b20c7d1bf2053c0a51563f235fd43a03fc887417c62"
+    },
+    {
+      "id": "untether-the-shackles",
+      "source": "character-ability-cards/frosthaven/IF/fh-untether-the-shackles.jpeg",
+      "sha256": "1b530ff6f5b8974fb2aa5d9c4167aa31309d6bd3bc294a9a58e7ce040fdf3ec5"
+    },
+    {
+      "id": "veil-of-protection",
+      "source": "character-ability-cards/frosthaven/IF/fh-veil-of-protection.jpeg",
+      "sha256": "e1635b2b21d73d123ecec5ff33d9ca3a5c00387080adf217f02c3ca9bc00f58a"
+    },
+    {
+      "id": "if-back",
+      "source": "character-ability-cards/frosthaven/IF/fh-if-back.jpeg",
+      "sha256": "e2bd97ff54cf5b84eb519bb03acdf4df1af81782acf553830fbeacf44e748824"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/IF.png",
+    "sha256": "989b51c59d90f9d25fa81b6efe7981fb14186791f6dbede0462c57834e0869b9"
+  }
+}

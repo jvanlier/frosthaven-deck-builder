@@ -1,0 +1,181 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "angry-spirits",
+      "source": "character-ability-cards/frosthaven/BO/fh-angry-spirits.jpeg",
+      "sha256": "bddfcf13eebfbf6e2faeda54b12035745ef22f5ac2b4bfabb5e3d01061926a06"
+    },
+    {
+      "id": "approach-oblivion",
+      "source": "character-ability-cards/frosthaven/BO/fh-approach-oblivion.jpeg",
+      "sha256": "8422b269001d53f02b6cb3ffe3573b801b2e3ecb00cc8562d961bb8752e5dfd8"
+    },
+    {
+      "id": "behold-the-shrouded-sun",
+      "source": "character-ability-cards/frosthaven/BO/fh-behold-the-shrouded-sun.jpeg",
+      "sha256": "2c7361c1cc48f4d9dd4a9d1dde071fdfd3e754276fd526ee90e3cf985a0b0181"
+    },
+    {
+      "id": "bone-dagger",
+      "source": "character-ability-cards/frosthaven/BO/fh-bone-dagger.jpeg",
+      "sha256": "f0668ae3caaf542692b1386bbbb56d48078942801007410d0f5e128c8879e32b"
+    },
+    {
+      "id": "command-the-wretched",
+      "source": "character-ability-cards/frosthaven/BO/fh-command-the-wretched.jpeg",
+      "sha256": "167cece6fea5b1f9f993fa387c76787bdd21bf5709f8fb8d5da06da91941cba3"
+    },
+    {
+      "id": "critical-failure",
+      "source": "character-ability-cards/frosthaven/BO/fh-critical-failure.jpeg",
+      "sha256": "6aa88fdc2b2b2555ae606408b63f7bbd4732e730755f9c40cdaa9cf649464754"
+    },
+    {
+      "id": "damned-horde",
+      "source": "character-ability-cards/frosthaven/BO/fh-damned-horde.jpeg",
+      "sha256": "0696912015bb5ac199a82573a8138adfd4c98276cc05004aa22d25a63f9c53ee"
+    },
+    {
+      "id": "dark-tidings",
+      "source": "character-ability-cards/frosthaven/BO/fh-dark-tidings.jpeg",
+      "sha256": "9ff6f75ce72886eb778fe23baf82bf01d3514832523ca4b7c22560e63bdf729b"
+    },
+    {
+      "id": "decaying-will",
+      "source": "character-ability-cards/frosthaven/BO/fh-decaying-will.jpeg",
+      "sha256": "f2d553d497bdb063483d0f230ee5725406f92d87c44277ddc987cf68d6aa0455"
+    },
+    {
+      "id": "endless-numbers",
+      "source": "character-ability-cards/frosthaven/BO/fh-endless-numbers.jpeg",
+      "sha256": "bcc6946058c4d6e4bd349ed89b7c80b9d6c6e8d5169cbbaf72f440bba2cb8031"
+    },
+    {
+      "id": "eternal-torment",
+      "source": "character-ability-cards/frosthaven/BO/fh-eternal-torment.jpeg",
+      "sha256": "92084b15dd5d73cbab40a39e1cc3205c49356bdb910ddcb6baaba4269f0a81e4"
+    },
+    {
+      "id": "exploding-corpse",
+      "source": "character-ability-cards/frosthaven/BO/fh-exploding-corpse.jpeg",
+      "sha256": "aa641c47f29926a9d22ea28e13bd147450b8ed8018df67c7427c1197d8a79e1c"
+    },
+    {
+      "id": "fell-remedy",
+      "source": "character-ability-cards/frosthaven/BO/fh-fell-remedy.jpeg",
+      "sha256": "65bd5ad7344045c582cd15518d4c9e2220b81d2e8d216a2305626620ede0f3ec"
+    },
+    {
+      "id": "flesh-shield",
+      "source": "character-ability-cards/frosthaven/BO/fh-flesh-shield.jpeg",
+      "sha256": "bfb46a20527d97d3fc28105dcf3c108850e8ef3686aa33dd3f45278ad798596d"
+    },
+    {
+      "id": "flow-of-the-black-river",
+      "source": "character-ability-cards/frosthaven/BO/fh-flow-of-the-black-river.jpeg",
+      "sha256": "b0044e936e506dc6f04d7a315196bab598e1f6fde5e4956d79296d1525efebbe"
+    },
+    {
+      "id": "grave-digging",
+      "source": "character-ability-cards/frosthaven/BO/fh-grave-digging.jpeg",
+      "sha256": "f775678740c3cdc8e4abd75abf049931cacadf118ff9f2330a2508fa84ff1bc1"
+    },
+    {
+      "id": "life-in-death",
+      "source": "character-ability-cards/frosthaven/BO/fh-life-in-death.jpeg",
+      "sha256": "51d96fe6289dfee10b78b41c8eac720a966ea502017de8aaf9daebf65c4c86e6"
+    },
+    {
+      "id": "malicious-conversion",
+      "source": "character-ability-cards/frosthaven/BO/fh-malicious-conversion.jpeg",
+      "sha256": "5e900a2af782ce29be4d41f37561b49708997b32330c9996b857184bf935df34"
+    },
+    {
+      "id": "putrid-cloud",
+      "source": "character-ability-cards/frosthaven/BO/fh-putrid-cloud.jpeg",
+      "sha256": "1484516223042d9425306734e29d925fd38f7a2f5aa7e197ba523121324cd29a"
+    },
+    {
+      "id": "recycled-limbs",
+      "source": "character-ability-cards/frosthaven/BO/fh-recycled-limbs.jpeg",
+      "sha256": "4e53c2856b448fd1812510a0d25baa46e1a8a7edfd8f661fda622a2fe86a2cd3"
+    },
+    {
+      "id": "returned-servant",
+      "source": "character-ability-cards/frosthaven/BO/fh-returned-servant.jpeg",
+      "sha256": "cc36955354e4190a804013e6457ad82ff2d3d02592752e7e1fbbd2ebe6f752a0"
+    },
+    {
+      "id": "rotting-multitude",
+      "source": "character-ability-cards/frosthaven/BO/fh-rotting-multitude.jpeg",
+      "sha256": "14203385159503c084d26b7ba7c79717b47849ca5b82924a1f73bb970528a0db"
+    },
+    {
+      "id": "solid-bones",
+      "source": "character-ability-cards/frosthaven/BO/fh-solid-bones.jpeg",
+      "sha256": "57869c4cb57439f5ce8feb1f7968ad30a795c86ecac4fc8646e0f2d8a56aa3b7"
+    },
+    {
+      "id": "soul-claim",
+      "source": "character-ability-cards/frosthaven/BO/fh-soul-claim.jpeg",
+      "sha256": "4495c6c3375b08e1329342550ffc97de0209c5984b4bc7bb42622a0d0e551d17"
+    },
+    {
+      "id": "transfer-of-essence",
+      "source": "character-ability-cards/frosthaven/BO/fh-transfer-of-essence.jpeg",
+      "sha256": "7505c31b9ce32850f98b2569dfcb5c3f070fcbdff1a6c45e03d2edde7874bf5c"
+    },
+    {
+      "id": "twisted-decree",
+      "source": "character-ability-cards/frosthaven/BO/fh-twisted-decree.jpeg",
+      "sha256": "3213faf4b66207043e5dd287fe73b7f5e42722103ecb6e4346e354456dbbbbe0"
+    },
+    {
+      "id": "unearthed-horror",
+      "source": "character-ability-cards/frosthaven/BO/fh-unearthed-horror.jpeg",
+      "sha256": "ff988edd4d81dcacefc5ad81b2e3c5dfd3193ac529bafd4d0a5bda5cd7a7776c"
+    },
+    {
+      "id": "unforgivable-methods",
+      "source": "character-ability-cards/frosthaven/BO/fh-unforgivable-methods.jpeg",
+      "sha256": "64770cff41d8170d71a96affb659b93e7d8629ff50f790aaf1b88eff46d5c48b"
+    },
+    {
+      "id": "unholy-prowess",
+      "source": "character-ability-cards/frosthaven/BO/fh-unholy-prowess.jpeg",
+      "sha256": "4f3be066848e274d472bbe079afe8683c67446967b9a72ff0d5124efab59ced2"
+    },
+    {
+      "id": "wailing-from-beyond",
+      "source": "character-ability-cards/frosthaven/BO/fh-wailing-from-beyond.jpeg",
+      "sha256": "655b83d7423a603265b09ae239a8de7a8af26e066116dcae9714117a20f477cf"
+    },
+    {
+      "id": "wrath-of-the-turned-earth",
+      "source": "character-ability-cards/frosthaven/BO/fh-wrath-of-the-turned-earth.jpeg",
+      "sha256": "6e59d48bd91c6a4f01b23302f641486f1ece72a342524c38be86f95f5c9f0cd2"
+    },
+    {
+      "id": "bo-back",
+      "source": "character-ability-cards/frosthaven/BO/fh-bo-back.jpeg",
+      "sha256": "b13d3dd4fcdf7468c0c608e5bcef39ac863afecfb527395e8677280e85592d4e"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/BO.png",
+    "sha256": "5437cb2c081fb92d01fc687de729f906672b2fb3d41178914162d85f6f5b0fa7"
+  }
+}

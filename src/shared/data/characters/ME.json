@@ -1,0 +1,205 @@
+{
+  "id": "ME",
+  "name": "Metal Mosaic",
+  "handSize": 9,
+  "icon": "ME.png",
+  "cardBack": "ME/fh-me-back.jpeg",
+  "cards": [
+    {
+      "id": "ancient-drill",
+      "name": "Ancient Drill",
+      "level": 1,
+      "initiative": 90,
+      "image": "ME/fh-ancient-drill.jpeg"
+    },
+    {
+      "id": "beam-axe",
+      "name": "Beam Axe",
+      "level": 1,
+      "initiative": 29,
+      "image": "ME/fh-beam-axe.jpeg"
+    },
+    {
+      "id": "bronze-plating",
+      "name": "Bronze Plating",
+      "level": 2,
+      "initiative": 18,
+      "image": "ME/fh-bronze-plating.jpeg"
+    },
+    {
+      "id": "cryogenic-hibernation",
+      "name": "Cryogenic Hibernation",
+      "level": 7,
+      "initiative": 19,
+      "image": "ME/fh-cryogenic-hibernation.jpeg"
+    },
+    {
+      "id": "curious-gear",
+      "name": "Curious Gear",
+      "level": "X",
+      "initiative": 12,
+      "image": "ME/fh-curious-gear.jpeg"
+    },
+    {
+      "id": "curious-machinery",
+      "name": "Curious Machinery",
+      "level": 8,
+      "initiative": 11,
+      "image": "ME/fh-curious-machinery.jpeg"
+    },
+    {
+      "id": "electrical-discharge",
+      "name": "Electrical Discharge",
+      "level": 3,
+      "initiative": 26,
+      "image": "ME/fh-electrical-discharge.jpeg"
+    },
+    {
+      "id": "energy-conversion",
+      "name": "Energy Conversion",
+      "level": 4,
+      "initiative": 23,
+      "image": "ME/fh-energy-conversion.jpeg"
+    },
+    {
+      "id": "heat-conduction",
+      "name": "Heat Conduction",
+      "level": 5,
+      "initiative": 11,
+      "image": "ME/fh-heat-conduction.jpeg"
+    },
+    {
+      "id": "heated-drill",
+      "name": "Heated Drill",
+      "level": 7,
+      "initiative": 80,
+      "image": "ME/fh-heated-drill.jpeg"
+    },
+    {
+      "id": "magnetic-field",
+      "name": "Magnetic Field",
+      "level": 4,
+      "initiative": 21,
+      "image": "ME/fh-magnetic-field.jpeg"
+    },
+    {
+      "id": "memory-drive",
+      "name": "Memory Drive",
+      "level": 1,
+      "initiative": 64,
+      "image": "ME/fh-memory-drive.jpeg"
+    },
+    {
+      "id": "piston-barrage",
+      "name": "Piston Barrage",
+      "level": 8,
+      "initiative": 33,
+      "image": "ME/fh-piston-barrage.jpeg"
+    },
+    {
+      "id": "polarity-shift",
+      "name": "Polarity Shift",
+      "level": 9,
+      "initiative": 79,
+      "image": "ME/fh-polarity-shift.jpeg"
+    },
+    {
+      "id": "power-core",
+      "name": "Power Core",
+      "level": 1,
+      "initiative": 83,
+      "image": "ME/fh-power-core.jpeg"
+    },
+    {
+      "id": "pressure-build-up",
+      "name": "Pressure Build-up",
+      "level": 1,
+      "initiative": 20,
+      "image": "ME/fh-pressure-build-up.jpeg"
+    },
+    {
+      "id": "processing",
+      "name": "Processing",
+      "level": "X",
+      "initiative": 95,
+      "image": "ME/fh-processing.jpeg"
+    },
+    {
+      "id": "radiation",
+      "name": "Radiation",
+      "level": 5,
+      "initiative": 37,
+      "image": "ME/fh-radiation.jpeg"
+    },
+    {
+      "id": "recursion",
+      "name": "Recursion",
+      "level": "X",
+      "initiative": 50,
+      "image": "ME/fh-recursion.jpeg"
+    },
+    {
+      "id": "release-valve",
+      "name": "Release Valve",
+      "level": 2,
+      "initiative": 30,
+      "image": "ME/fh-release-valve.jpeg"
+    },
+    {
+      "id": "rocket-boots",
+      "name": "Rocket Boots",
+      "level": 1,
+      "initiative": 22,
+      "image": "ME/fh-rocket-boots.jpeg"
+    },
+    {
+      "id": "scalding-blast",
+      "name": "Scalding Blast",
+      "level": 6,
+      "initiative": 45,
+      "image": "ME/fh-scalding-blast.jpeg"
+    },
+    {
+      "id": "steam-armor",
+      "name": "Steam Armor",
+      "level": 1,
+      "initiative": 17,
+      "image": "ME/fh-steam-armor.jpeg"
+    },
+    {
+      "id": "steam-core",
+      "name": "Steam Core",
+      "level": 6,
+      "initiative": 71,
+      "image": "ME/fh-steam-core.jpeg"
+    },
+    {
+      "id": "steel-piston",
+      "name": "Steel Piston",
+      "level": 1,
+      "initiative": 40,
+      "image": "ME/fh-steel-piston.jpeg"
+    },
+    {
+      "id": "stress-vents",
+      "name": "Stress Vents",
+      "level": 3,
+      "initiative": 15,
+      "image": "ME/fh-stress-vents.jpeg"
+    },
+    {
+      "id": "super-heat-transfer",
+      "name": "Super Heat Transfer",
+      "level": 1,
+      "initiative": 25,
+      "image": "ME/fh-super-heat-transfer.jpeg"
+    },
+    {
+      "id": "unstable-core",
+      "name": "Unstable Core",
+      "level": 9,
+      "initiative": 10,
+      "image": "ME/fh-unstable-core.jpeg"
+    }
+  ]
+}

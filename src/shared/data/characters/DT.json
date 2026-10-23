@@ -1,0 +1,212 @@
+{
+  "id": "DT",
+  "name": "Deepwraith",
+  "handSize": 10,
+  "icon": "DT.png",
+  "cardBack": "DT/fh-dt-back.jpeg",
+  "cards": [
+    {
+      "id": "black-night-of-the-deep",
+      "name": "Black Night of the Deep",
+      "level": 9,
+      "initiative": 26,
+      "image": "DT/fh-black-night-of-the-deep.jpeg"
+    },
+    {
+      "id": "black-scythe",
+      "name": "Black Scythe",
+      "level": 1,
+      "initiative": 45,
+      "image": "DT/fh-black-scythe.jpeg"
+    },
+    {
+      "id": "claw-of-doom",
+      "name": "Claw of Doom",
+      "level": 6,
+      "initiative": 30,
+      "image": "DT/fh-claw-of-doom.jpeg"
+    },
+    {
+      "id": "consume-the-helpless",
+      "name": "Consume the Helpless",
+      "level": 9,
+      "initiative": 12,
+      "image": "DT/fh-consume-the-helpless.jpeg"
+    },
+    {
+      "id": "crippling-terror",
+      "name": "Crippling Terror",
+      "level": 3,
+      "initiative": 15,
+      "image": "DT/fh-crippling-terror.jpeg"
+    },
+    {
+      "id": "crushing-darkness",
+      "name": "Crushing Darkness",
+      "level": 4,
+      "initiative": 40,
+      "image": "DT/fh-crushing-darkness.jpeg"
+    },
+    {
+      "id": "death-spiral",
+      "name": "Death Spiral",
+      "level": 5,
+      "initiative": 48,
+      "image": "DT/fh-death-spiral.jpeg"
+    },
+    {
+      "id": "dire-frenzy",
+      "name": "Dire Frenzy",
+      "level": 7,
+      "initiative": 26,
+      "image": "DT/fh-dire-frenzy.jpeg"
+    },
+    {
+      "id": "extra-decoration",
+      "name": "Extra Decoration",
+      "level": 5,
+      "initiative": 92,
+      "image": "DT/fh-extra-decoration.jpeg"
+    },
+    {
+      "id": "grim-trophies",
+      "name": "Grim Trophies",
+      "level": 4,
+      "initiative": 18,
+      "image": "DT/fh-grim-trophies.jpeg"
+    },
+    {
+      "id": "hasten-the-end",
+      "name": "Hasten the End",
+      "level": 7,
+      "initiative": 65,
+      "image": "DT/fh-hasten-the-end.jpeg"
+    },
+    {
+      "id": "haunting-brutality",
+      "name": "Haunting Brutality",
+      "level": "X",
+      "initiative": 23,
+      "image": "DT/fh-haunting-brutality.jpeg"
+    },
+    {
+      "id": "hollow-aura",
+      "name": "Hollow Aura",
+      "level": 1,
+      "initiative": 88,
+      "image": "DT/fh-hollow-aura.jpeg"
+    },
+    {
+      "id": "ink-cloud",
+      "name": "Ink Cloud",
+      "level": 1,
+      "initiative": 28,
+      "image": "DT/fh-ink-cloud.jpeg"
+    },
+    {
+      "id": "lacerating-stabs",
+      "name": "Lacerating Stabs",
+      "level": 1,
+      "initiative": 14,
+      "image": "DT/fh-lacerating-stabs.jpeg"
+    },
+    {
+      "id": "lie-in-wait",
+      "name": "Lie in Wait",
+      "level": 2,
+      "initiative": 98,
+      "image": "DT/fh-lie-in-wait.jpeg"
+    },
+    {
+      "id": "mantle-of-dread",
+      "name": "Mantle of Dread",
+      "level": 1,
+      "initiative": 96,
+      "image": "DT/fh-mantle-of-dread.jpeg"
+    },
+    {
+      "id": "morbid-camouflage",
+      "name": "Morbid Camouflage",
+      "level": "X",
+      "initiative": 31,
+      "image": "DT/fh-morbid-camouflage.jpeg"
+    },
+    {
+      "id": "pinning-spines",
+      "name": "Pinning Spines",
+      "level": 3,
+      "initiative": 25,
+      "image": "DT/fh-pinning-spines.jpeg"
+    },
+    {
+      "id": "rip-from-the-bone",
+      "name": "Rip From the Bone",
+      "level": 8,
+      "initiative": 11,
+      "image": "DT/fh-rip-from-the-bone.jpeg"
+    },
+    {
+      "id": "skewer-the-flesh",
+      "name": "Skewer the Flesh",
+      "level": 1,
+      "initiative": 86,
+      "image": "DT/fh-skewer-the-flesh.jpeg"
+    },
+    {
+      "id": "skull-collection",
+      "name": "Skull Collection",
+      "level": 1,
+      "initiative": 22,
+      "image": "DT/fh-skull-collection.jpeg"
+    },
+    {
+      "id": "slipping-into-death",
+      "name": "Slipping Into Death",
+      "level": 2,
+      "initiative": 89,
+      "image": "DT/fh-slipping-into-death.jpeg"
+    },
+    {
+      "id": "soul-hunger",
+      "name": "Soul Hunger",
+      "level": "X",
+      "initiative": 91,
+      "image": "DT/fh-soul-hunger.jpeg"
+    },
+    {
+      "id": "staring-into-the-abyss",
+      "name": "Staring Into the Abyss",
+      "level": 1,
+      "initiative": 63,
+      "image": "DT/fh-staring-into-the-abyss.jpeg"
+    },
+    {
+      "id": "succumb-to-fear",
+      "name": "Succumb To Fear",
+      "level": 1,
+      "initiative": 20,
+      "image": "DT/fh-succumb-to-fear.jpeg"
+    },
+    {
+      "id": "the-remorseless-deep",
+      "name": "The Remorseless Deep",
+      "level": 6,
+      "initiative": 22,
+      "image": "DT/fh-the-remorseless-deep.jpeg"
+    },
+    {
+      "id": "tumultuous-panic",
+      "name": "Tumultuous Panic",
+      "level": 1,
+      "initiative": 66,
+      "image": "DT/fh-tumultuous-panic.jpeg"
+    },
+    {
+      "id": "unseen-horror",
+      "name": "Unseen Horror",
+      "level": 8,
+      "initiative": 19,
+      "image": "DT/fh-unseen-horror.jpeg"
+    }
+  ]
+}

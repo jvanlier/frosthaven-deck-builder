@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/mercenary.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "8f11abb3c43e523dfc2160cbb7e265eca3036ee597d43d5e60bc228913adb08f"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "anticipate-intricacies",
+      "source": "character-ability-cards/mercenary/CA/anticipate-intricacies.jpeg",
+      "sha256": "f790ba505933d2335c9c16085e56429c2a3a1f093a22de649f002767cf726b44"
+    },
+    {
+      "id": "approach-of-the-void",
+      "source": "character-ability-cards/mercenary/CA/approach-of-the-void.jpeg",
+      "sha256": "748ed4b303e6e11453e7acb47d43187370f746ae2e079011d29fa08feacc1d97"
+    },
+    {
+      "id": "call-of-the-nether",
+      "source": "character-ability-cards/mercenary/CA/call-of-the-nether.jpeg",
+      "sha256": "05791cd9b09dbdc4a0035350812f4715f12027cd98ffc7006a81a830884c34ea"
+    },
+    {
+      "id": "careful-attunement",
+      "source": "character-ability-cards/mercenary/CA/careful-attunement.jpeg",
+      "sha256": "ecd5c6814c7d4702e43b5ae658fa9a4192b74659fdd9e4cc85e29e33759df27c"
+    },
+    {
+      "id": "cleansing-rite",
+      "source": "character-ability-cards/mercenary/CA/cleansing-rite.jpeg",
+      "sha256": "e81df07abd272156e2f4c29db1dfc9f58613091e3b955b6145054c149f82c7b3"
+    },
+    {
+      "id": "constant-flux",
+      "source": "character-ability-cards/mercenary/CA/constant-flux.jpeg",
+      "sha256": "860e427dfd41c9822f53220923d9ef5a8995bb4daffeb45174b04dbbbdef1fb6"
+    },
+    {
+      "id": "convergence",
+      "source": "character-ability-cards/mercenary/CA/convergence.jpeg",
+      "sha256": "588a35668fe2a18ca696aea3d5708715a2c828e2b8c1f2b51955fcb63b894b45"
+    },
+    {
+      "id": "cursed-ground",
+      "source": "character-ability-cards/mercenary/CA/cursed-ground.jpeg",
+      "sha256": "8f3eaa8a84d87a46efd3c4766682b57d5ba95d9ef59ef825c19a653f5d8b7179"
+    },
+    {
+      "id": "deep-contemplation",
+      "source": "character-ability-cards/mercenary/CA/deep-contemplation.jpeg",
+      "sha256": "4d11815a201cda7731c09a004ae04804c5e7f0f7fe60cb9cb8d83d179956cd6d"
+    },
+    {
+      "id": "dimensional-divide",
+      "source": "character-ability-cards/mercenary/CA/dimensional-divide.jpeg",
+      "sha256": "bb5263109fcba3cce6c4dcbea98948fe586d56d157737d57ebdcc7d21326283d"
+    },
+    {
+      "id": "dimensional-transfer",
+      "source": "character-ability-cards/mercenary/CA/dimensional-transfer.jpeg",
+      "sha256": "6ae313477db75c8b3b2797ce821e9305a18b0696a54c164f1aab7a4cc98b2a7c"
+    },
+    {
+      "id": "duality-shards",
+      "source": "character-ability-cards/mercenary/CA/duality-shards.jpeg",
+      "sha256": "cc35eed7d12592c77dce2e1e67e3a5590ca5592df4b0df2ad1a5aafc698a24c6"
+    },
+    {
+      "id": "enfeebling-hex",
+      "source": "character-ability-cards/mercenary/CA/enfeebling-hex.jpeg",
+      "sha256": "047c1f5ce2484690ef90fcb0f5e9a2e39e4b70668fcd6482034b9fae48155d63"
+    },
+    {
+      "id": "envision-the-course",
+      "source": "character-ability-cards/mercenary/CA/envision-the-course.jpeg",
+      "sha256": "a91e708e93dab3b301532320a5aa80565a57999927dfba42e6c7d8b921a84eb1"
+    },
+    {
+      "id": "ethereal-vortex",
+      "source": "character-ability-cards/mercenary/CA/ethereal-vortex.jpeg",
+      "sha256": "1eb9e20cace330e23bb09abc7ee13ce200ba8d4aa29cc92313bd791273dcb975"
+    },
+    {
+      "id": "hand-of-destiny",
+      "source": "character-ability-cards/mercenary/CA/hand-of-destiny.jpeg",
+      "sha256": "aa1c7351bdda9b6cda431c1e59a57af73ebf0989c0e513b51280245258d9c3aa"
+    },
+    {
+      "id": "inspiration-from-beyond",
+      "source": "character-ability-cards/mercenary/CA/inspiration-from-beyond.jpeg",
+      "sha256": "bbe25f07086acddae0c9402235d0730640327f945634a7e0c6e9a70173d52ddc"
+    },
+    {
+      "id": "otherworldly-journey",
+      "source": "character-ability-cards/mercenary/CA/otherworldly-journey.jpeg",
+      "sha256": "4c7013046df3dde5390b7eabab2b0f5cc103ac1a2ea5b6896d39282f89abf0eb"
+    },
+    {
+      "id": "past-and-future",
+      "source": "character-ability-cards/mercenary/CA/past-and-future.jpeg",
+      "sha256": "111af2d7afaf32984550ad080a4d602ebefbb49337f9b2fe62722aa871650652"
+    },
+    {
+      "id": "peer-into-battle",
+      "source": "character-ability-cards/mercenary/CA/peer-into-battle.jpeg",
+      "sha256": "c4758b752679665b5e42ad0b6fcbb021ab6320e2a0329b8fad866c5ba338bae9"
+    },
+    {
+      "id": "planar-chaos",
+      "source": "character-ability-cards/mercenary/CA/planar-chaos.jpeg",
+      "sha256": "c3055be1fd06e6b74db44bd932d2db51d10ecbd9f5da44a73a6cdbdd0c3e7c6d"
+    },
+    {
+      "id": "protective-aura",
+      "source": "character-ability-cards/mercenary/CA/protective-aura.jpeg",
+      "sha256": "dd11cf8dd4cefd1e30bba760bd351c87f9ce572ba9ff814677d7ac276b3725ae"
+    },
+    {
+      "id": "ray-of-light",
+      "source": "character-ability-cards/mercenary/CA/ray-of-light.jpeg",
+      "sha256": "df61f7ea5091d70fdfcee415bdd1ecc4d8d05a2a214b90086d0cdfe798839a21"
+    },
+    {
+      "id": "recurrence",
+      "source": "character-ability-cards/mercenary/CA/recurrence.jpeg",
+      "sha256": "d960995ef946ac64f37dc01d5fa64efd8e794f71bac42940c41d039d5bbdfd14"
+    },
+    {
+      "id": "seal-their-fate",
+      "source": "character-ability-cards/mercenary/CA/seal-their-fate.jpeg",
+      "sha256": "0c35b3ea59663920135b884f3461ba5c29721b402607b05a77b43ef1afea906b"
+    },
+    {
+      "id": "tear-reality",
+      "source": "character-ability-cards/mercenary/CA/tear-reality.jpeg",
+      "sha256": "f554034e4d1838760d9077ec0bdcf4879aaca0b7d3bc1dbd2c5251f78849b3dd"
+    },
+    {
+      "id": "tether-the-planes",
+      "source": "character-ability-cards/mercenary/CA/tether-the-planes.jpeg",
+      "sha256": "c0955ae559151e469965a42e483c0d077bfb82fc94a9c0d55daa02313950abd5"
+    },
+    {
+      "id": "time-and-again",
+      "source": "character-ability-cards/mercenary/CA/time-and-again.jpeg",
+      "sha256": "4ae9ea4e835a5277067635fcb344009591a8095f2a9522feb715dd6edd7bda9e"
+    },
+    {
+      "id": "void-snare",
+      "source": "character-ability-cards/mercenary/CA/void-snare.jpeg",
+      "sha256": "7322edcb64da57016e732f6ab2fd6fea39d8a4257a1aafaf6ed2749df5ad06ab"
+    },
+    {
+      "id": "ca-back",
+      "source": "character-ability-cards/mercenary/CA/ca-back.jpeg",
+      "sha256": "baaae11b782e09a694ac60ae8a1312ea66b4cfec2b351ee5608410e3d3759e1f"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/merc/CA.png",
+    "sha256": "5e0668bb02d6758a84b240b9d89ba27df29e01973eca671dfd6a2dd593da51a8"
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "accelerated-metabolism",
+      "source": "character-ability-cards/frosthaven/GE/fh-accelerated-metabolism.jpeg",
+      "sha256": "ffaa20931a286754296245881c7e1324a2d38447e648b17fe83ce1605d5aec05"
+    },
+    {
+      "id": "alluring-pheromones",
+      "source": "character-ability-cards/frosthaven/GE/fh-alluring-pheromones.jpeg",
+      "sha256": "4b19d72aaf8b0d99d68cf59ec5355f9d4f079dadbc0c02527e564e5807867f70"
+    },
+    {
+      "id": "changelings-boon",
+      "source": "character-ability-cards/frosthaven/GE/fh-changelings-boon.jpeg",
+      "sha256": "d9199c26ab297056c9759e43c59170caa204b233ccd125fbd970efca468f6cea"
+    },
+    {
+      "id": "chitinous-horde",
+      "source": "character-ability-cards/frosthaven/GE/fh-chitinous-horde.jpeg",
+      "sha256": "4e3248e267ff739333ac07fa31981cdc3d97b882ba53380092be699674694de0"
+    },
+    {
+      "id": "corrosive-acids",
+      "source": "character-ability-cards/frosthaven/GE/fh-corrosive-acids.jpeg",
+      "sha256": "d51dbf50db94bff2a1ec08ac67718d25636ac8e117623e22f902afe7d7594aaf"
+    },
+    {
+      "id": "drag-down",
+      "source": "character-ability-cards/frosthaven/GE/fh-drag-down.jpeg",
+      "sha256": "e851a66118018905abd0895e4f7cd44afe594f9ae475e1172ec4d5feb351a019"
+    },
+    {
+      "id": "dragonfly-surge",
+      "source": "character-ability-cards/frosthaven/GE/fh-dragonfly-surge.jpeg",
+      "sha256": "d255af26c151a57b67c11baa570005c39ea163c4a78fbbf3ddb3010edd15fc9b"
+    },
+    {
+      "id": "draining-pincers",
+      "source": "character-ability-cards/frosthaven/GE/fh-draining-pincers.jpeg",
+      "sha256": "e24c4adad8f1423bbcd2044011a4cf1dbdb06d699be50f9e6054dd9666e48c58"
+    },
+    {
+      "id": "feeding-frenzy",
+      "source": "character-ability-cards/frosthaven/GE/fh-feeding-frenzy.jpeg",
+      "sha256": "23d83ba64aa62328bbd7b65247555acaaa33a24a702f3be03d4dc77e33f75ff3"
+    },
+    {
+      "id": "firefly-swarm",
+      "source": "character-ability-cards/frosthaven/GE/fh-firefly-swarm.jpeg",
+      "sha256": "751525e718d81670c678daed2bd52ae0b70142131a120329f2a13970c2e8c191"
+    },
+    {
+      "id": "flailing-tendrils",
+      "source": "character-ability-cards/frosthaven/GE/fh-flailing-tendrils.jpeg",
+      "sha256": "7e4ad6864eaa03a414bb546499ac0f169e903f281a60622705c59b4084b63d0a"
+    },
+    {
+      "id": "formless-grace",
+      "source": "character-ability-cards/frosthaven/GE/fh-formless-grace.jpeg",
+      "sha256": "27238843efb1036a3736755607c4c37e12686ddf107def14d1c566fd17fafb44"
+    },
+    {
+      "id": "hail-of-thorns",
+      "source": "character-ability-cards/frosthaven/GE/fh-hail-of-thorns.jpeg",
+      "sha256": "f2ca863029c15e13031826a6dda18fab92447138f120c16a9d0e801e92314b0a"
+    },
+    {
+      "id": "harbinger-of-ruin",
+      "source": "character-ability-cards/frosthaven/GE/fh-harbinger-of-ruin.jpeg",
+      "sha256": "b646b775b9917402c4ae2aa0a34ba2748cb4da3748dbf1e6fd6d9b6104225164"
+    },
+    {
+      "id": "harvest-the-essence",
+      "source": "character-ability-cards/frosthaven/GE/fh-harvest-the-essence.jpeg",
+      "sha256": "2ce90608e7dd48cff3428aaa63a31c05b0365bb1ff2259378d2f3b1ea1c594ce"
+    },
+    {
+      "id": "hirudotherapy",
+      "source": "character-ability-cards/frosthaven/GE/fh-hirudotherapy.jpeg",
+      "sha256": "8ddc8219828b721a9903211d4c12805c72a74932d5c5f64c2ac7b16467071460"
+    },
+    {
+      "id": "hornbeetle-carapace",
+      "source": "character-ability-cards/frosthaven/GE/fh-hornbeetle-carapace.jpeg",
+      "sha256": "bb1c9fb9fa37636df71ad2f8bff9442cd707395adb692ede5320927ba66b829d"
+    },
+    {
+      "id": "hornet-stingers",
+      "source": "character-ability-cards/frosthaven/GE/fh-hornet-stingers.jpeg",
+      "sha256": "8c48621747e7b35c083e29659ecc36f3d9c97eaf6ce2ee515037bc3444ca6526"
+    },
+    {
+      "id": "icebound-quills",
+      "source": "character-ability-cards/frosthaven/GE/fh-icebound-quills.jpeg",
+      "sha256": "6ebf22141fc70fb0834d1bf40cf2e0ceaaa0bdd24358b8a359555faabeb10713"
+    },
+    {
+      "id": "into-my-embrace",
+      "source": "character-ability-cards/frosthaven/GE/fh-into-my-embrace.jpeg",
+      "sha256": "82bac6e93ba699a7ef0546373f1febafda4efffc685e8d2e234f79b22ef6a0bf"
+    },
+    {
+      "id": "locust-host",
+      "source": "character-ability-cards/frosthaven/GE/fh-locust-host.jpeg",
+      "sha256": "0559579e3cdff1eb74050cfe9a8a0581f740918bca91d4f4ff2bc7f1fa714518"
+    },
+    {
+      "id": "luminous-descent",
+      "source": "character-ability-cards/frosthaven/GE/fh-luminous-descent.jpeg",
+      "sha256": "b4bf3d5f561ec4af97d780bf7e6692a136e6e2e50fcae8f91a198bc862871a28"
+    },
+    {
+      "id": "mandible-storm",
+      "source": "character-ability-cards/frosthaven/GE/fh-mandible-storm.jpeg",
+      "sha256": "7a859dcfcddf43e6dec35c65c07ee98840a37c4eda7a50eaa3d763c94519e99e"
+    },
+    {
+      "id": "mind-spike",
+      "source": "character-ability-cards/frosthaven/GE/fh-mind-spike.jpeg",
+      "sha256": "5e3f077fb7d3382d038c4f3a9aa006ce505b1aae9515c71c252afab44874871b"
+    },
+    {
+      "id": "oscillating-entity",
+      "source": "character-ability-cards/frosthaven/GE/fh-oscillating-entity.jpeg",
+      "sha256": "dc34941c14caddca0fa1d1a31803c3156226525c06d3dde4d56a8fe170bb6065"
+    },
+    {
+      "id": "reckless-jab",
+      "source": "character-ability-cards/frosthaven/GE/fh-reckless-jab.jpeg",
+      "sha256": "327836224324027a0d3c200c020c7c9cab86b37fda91122e783a7377b125ef1a"
+    },
+    {
+      "id": "reshape-the-guise",
+      "source": "character-ability-cards/frosthaven/GE/fh-reshape-the-guise.jpeg",
+      "sha256": "d4e498c41e3f00d0863f200fa89e283e2f46e66d64bd0cd4fefe9dfaf4d91d45"
+    },
+    {
+      "id": "scarab-flight",
+      "source": "character-ability-cards/frosthaven/GE/fh-scarab-flight.jpeg",
+      "sha256": "84a23f6747543787cbaa7e0041c35148b204f9946bbadd668fc0b26b998cec81"
+    },
+    {
+      "id": "selfless-offering",
+      "source": "character-ability-cards/frosthaven/GE/fh-selfless-offering.jpeg",
+      "sha256": "740dcb0cb58ed2b9b2a4e71b1e5bd66a0bf9811341682dd2cde728b8a21b5e06"
+    },
+    {
+      "id": "smoldering-hatred",
+      "source": "character-ability-cards/frosthaven/GE/fh-smoldering-hatred.jpeg",
+      "sha256": "e5c0c9cd38c5f7d0c9e91b73da52d590ae86d94f060d5d002a06ae3a49752290"
+    },
+    {
+      "id": "thresh-and-flail",
+      "source": "character-ability-cards/frosthaven/GE/fh-thresh-and-flail.jpeg",
+      "sha256": "45ee06729d991211c6911fa712a2b148d5cd7076c16a70c540369b17540c4caa"
+    },
+    {
+      "id": "two-pronged-entrapment",
+      "source": "character-ability-cards/frosthaven/GE/fh-two-pronged-entrapment.jpeg",
+      "sha256": "7a9c41c4d0ddbc646ebd75e843c2ee6f145d87f2391edd04c806beddb9094dd3"
+    },
+    {
+      "id": "venomous-barbs",
+      "source": "character-ability-cards/frosthaven/GE/fh-venomous-barbs.jpeg",
+      "sha256": "d97c73dc0bc562c691edc82ac2bbe736df32c040fc3a76bf9ed16de088e2c82e"
+    },
+    {
+      "id": "voice-of-salvation",
+      "source": "character-ability-cards/frosthaven/GE/fh-voice-of-salvation.jpeg",
+      "sha256": "2f8f2c46ef82e51d3387c7ccf04ea2f4385f99bbe907f5d25051ccf843360d73"
+    },
+    {
+      "id": "ge-back",
+      "source": "character-ability-cards/frosthaven/GE/fh-ge-back.jpeg",
+      "sha256": "0b1df6c2bad063a2b80ebf5c78049150f4cf89ea823eb61c2438da3fe71d1a13"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/GE.png",
+    "sha256": "2cbce2c2dc1b7cb8f505c3d7adacfdb3e2eaef537bbbdbe808823951afc9c0e6"
+  }
+}

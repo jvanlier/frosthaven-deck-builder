@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBuild } from "../builds";
-import { characters } from "../data/characters";
+import { getCharacter } from "../data/characters";
 import {
   addOptions,
   applyDeckEdit,
@@ -14,7 +14,7 @@ import {
 } from "./index";
 import { buildSchema, type Build } from "../schema";
 
-const character = characters[0]!;
+const character = getCharacter("SD")!;
 const timestamp = "2024-01-02T03:04:05.000Z";
 
 function makeBuild(startLevel: number, overrides: Partial<Build> = {}): Build {

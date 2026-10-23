@@ -12,6 +12,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import fixture from "./fixtures/snowdancer-source.json";
+import mercenaryFixture from "./fixtures/mercenary-source.json";
+import { frosthavenCharacters, mercenaryCharacters } from "./characters";
 import {
   createImportPlan,
   importCards,
@@ -108,6 +110,173 @@ describe("Snowdancer source parsing", () => {
   });
 });
 
+describe("other character imports", () => {
+  it("filters a class catalog and preserves Blinkblade's fast/slow initiatives", () => {
+    const character = frosthavenCharacters.find(({ id }) => id === "BB")!;
+    const plan = createImportPlan(
+      [
+        ...fixture.filter((record) => record.image.includes("/SD/")),
+        sourceRecord({
+          name: "blurry jab",
+          image: "character-ability-cards/frosthaven/BB/fh-blurry-jab.jpeg",
+          initiative: "20/50",
+        }),
+        sourceRecord({
+          name: "bb-back",
+          image: "character-ability-cards/frosthaven/BB/fh-bb-back.jpeg",
+          level: "-",
+          initiative: "-",
+        }),
+      ],
+      {
+        character,
+        metadataChecksum: "checksum",
+        sourceRevisions: { metadata: "metadata", images: "images" },
+        requireCompleteCatalog: false,
+      },
+    );
+    expect(plan.character).toMatchObject({
+      id: "BB",
+      name: "Blinkblade",
+      handSize: 10,
+      icon: "BB.png",
+    });
+    expect(plan.character.cards).toEqual([
+      {
+        id: "blurry-jab",
+        name: "Blurry Jab",
+        level: 1,
+        initiative: "20/50",
+        image: "BB/fh-blurry-jab.jpeg",
+      },
+    ]);
+    expect(plan.back.outputPath).toBe("fh-bb-back.jpeg");
+  });
+
+  it("rejects malformed dual initiatives and unsafe paths for other classes", () => {
+    const character = frosthavenCharacters.find(({ id }) => id === "BB")!;
+    const invalidOverrides: Record<string, string>[] = [
+      { initiative: "20/50/80" },
+      { image: "character-ability-cards/frosthaven/BB/../fh-blurry-jab.jpeg" },
+    ];
+    for (const overrides of invalidOverrides) {
+      expect(() =>
+        parseSourceRecords(
+          [
+            sourceRecord({
+              image: "character-ability-cards/frosthaven/BB/fh-blurry-jab.jpeg",
+              ...overrides,
+            }),
+          ],
+          character,
+        ),
+      ).toThrow();
+    }
+  });
+});
+
+describe("Mercenary Pack imports", () => {
+  const hail = mercenaryCharacters.find(({ id }) => id === "HA")!;
+
+  it("uses the mercenary source paths and preserves unprefixed card IDs", () => {
+    const plan = createImportPlan([...fixture, ...mercenaryFixture], {
+      character: hail,
+      requireCompleteCatalog: false,
+      metadataChecksum: "checksum",
+      sourceRevisions: {
+        metadata: "metadata-revision",
+        images: "image-revision",
+      },
+    });
+    expect(plan.character).toEqual({
+      id: "HA",
+      name: "Hail",
+      handSize: 9,
+      icon: "HA.png",
+      cardBack: "HA/ha-back.jpeg",
+      cards: [
+        {
+          id: "gather-reagents",
+          name: "Gather Reagents",
+          level: 1,
+          initiative: 21,
+          image: "HA/gather-reagents.jpeg",
+        },
+        {
+          id: "somewhere-to-be",
+          name: "Somewhere To Be",
+          level: 1,
+          initiative: 10,
+          image: "HA/somewhere-to-be.jpeg",
+        },
+      ],
+    });
+    expect(plan.back.outputPath).toBe("ha-back.jpeg");
+  });
+
+  it("rejects unsafe Mercenary Pack image paths", () => {
+    expect(() =>
+      parseSourceRecords(
+        [
+          {
+            ...mercenaryFixture[1],
+            image:
+              "character-ability-cards/mercenary/HA/../gather-reagents.jpeg",
+          },
+        ],
+        hail,
+      ),
+    ).toThrow(/Unsafe/);
+  });
+
+  it("downloads and installs the mercenary artwork, icon, and source manifest locally", async () => {
+    const root = await mkdtemp(join(tmpdir(), "mercenary-import-"));
+    const requests: string[] = [];
+    const result = await importCards({
+      projectRoot: root,
+      character: hail,
+      requireCompleteCatalog: false,
+      sourceRevisions: {
+        metadata: "metadata-revision",
+        images: "image-revision",
+      },
+      fetchImpl: async (url) => {
+        requests.push(url);
+        return url.endsWith("mercenary.json")
+          ? new Response(JSON.stringify(mercenaryFixture))
+          : new Response("local artwork");
+      },
+    });
+    expect(requests).toContain(
+      "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/metadata-revision/data/character-abilities/mercenary.json",
+    );
+    expect(requests).toContain(
+      "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/image-revision/images/icons/characters/merc/HA.png",
+    );
+    expect(result.manifest.source.metadata.url).toContain("/mercenary.json");
+    for (const path of [
+      "public/cards/HA/gather-reagents.jpeg",
+      "public/cards/HA/ha-back.jpeg",
+      "public/icons/HA.png",
+    ]) {
+      await expect(readFile(join(root, path), "utf8")).resolves.toBe(
+        "local artwork",
+      );
+    }
+    const catalog = JSON.parse(
+      await readFile(join(root, "src/shared/data/characters/HA.json"), "utf8"),
+    );
+    expect(catalog).toEqual(result.character);
+    const manifest = JSON.parse(
+      await readFile(
+        join(root, "src/shared/data/characters/HA-source-manifest.json"),
+        "utf8",
+      ),
+    );
+    expect(manifest).toEqual(result.manifest);
+  });
+});
+
 describe("Snowdancer import plan", () => {
   it("is deterministic and validates the complete catalog against the spec", () => {
     const first = createImportPlan(fixture, {
@@ -135,6 +304,7 @@ describe("Snowdancer import plan", () => {
       name: "Snowdancer",
       handSize: 11,
       icon: "SD.png",
+      cardBack: "SD/fh-sd-back.jpeg",
       cards: [
         {
           id: "natures-breath",
@@ -327,12 +497,17 @@ describe("Snowdancer import transaction", () => {
     ).resolves.toEqual(Buffer.from(image));
     await expect(
       readFile(
-        join(root, "src/shared/data/characters/source-manifest.json"),
+        join(root, "src/shared/data/characters/SD-source-manifest.json"),
         "utf8",
       ),
     ).resolves.toContain('"metadata-revision"');
     await expect(
       readFile(join(root, "src/shared/data/characters/index.ts"), "utf8"),
-    ).resolves.toContain("getCharacter");
+    ).resolves.toBe(
+      await readFile(
+        new URL("../src/shared/data/characters/index.ts", import.meta.url),
+        "utf8",
+      ),
+    );
   });
 });

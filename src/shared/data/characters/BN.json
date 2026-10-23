@@ -1,0 +1,212 @@
+{
+  "id": "BN",
+  "name": "Banner Spear",
+  "handSize": 10,
+  "icon": "BN.png",
+  "cardBack": "BN/fh-bn-back.jpeg",
+  "cards": [
+    {
+      "id": "air-support",
+      "name": "Air Support",
+      "level": 4,
+      "initiative": 20,
+      "image": "BN/fh-air-support.jpeg"
+    },
+    {
+      "id": "at-all-costs",
+      "name": "At All Costs",
+      "level": 1,
+      "initiative": 60,
+      "image": "BN/fh-at-all-costs.jpeg"
+    },
+    {
+      "id": "barricade",
+      "name": "Barricade",
+      "level": 6,
+      "initiative": 16,
+      "image": "BN/fh-barricade.jpeg"
+    },
+    {
+      "id": "boldening-blow",
+      "name": "Boldening Blow",
+      "level": 4,
+      "initiative": 72,
+      "image": "BN/fh-boldening-blow.jpeg"
+    },
+    {
+      "id": "bolstering-shout",
+      "name": "Bolstering Shout",
+      "level": 6,
+      "initiative": 75,
+      "image": "BN/fh-bolstering-shout.jpeg"
+    },
+    {
+      "id": "combined-effort",
+      "name": "Combined Effort",
+      "level": 1,
+      "initiative": 32,
+      "image": "BN/fh-combined-effort.jpeg"
+    },
+    {
+      "id": "deflecting-maneuver",
+      "name": "Deflecting Maneuver",
+      "level": 1,
+      "initiative": 15,
+      "image": "BN/fh-deflecting-maneuver.jpeg"
+    },
+    {
+      "id": "driving-inspiration",
+      "name": "Driving Inspiration",
+      "level": "X",
+      "initiative": 18,
+      "image": "BN/fh-driving-inspiration.jpeg"
+    },
+    {
+      "id": "explosive-epicenter",
+      "name": "Explosive Epicenter",
+      "level": 5,
+      "initiative": 78,
+      "image": "BN/fh-explosive-epicenter.jpeg"
+    },
+    {
+      "id": "hail-of-spears",
+      "name": "Hail of Spears",
+      "level": 9,
+      "initiative": 44,
+      "image": "BN/fh-hail-of-spears.jpeg"
+    },
+    {
+      "id": "head-of-the-hammer",
+      "name": "Head of the Hammer",
+      "level": 3,
+      "initiative": 87,
+      "image": "BN/fh-head-of-the-hammer.jpeg"
+    },
+    {
+      "id": "hold-the-line",
+      "name": "Hold the Line",
+      "level": 5,
+      "initiative": 5,
+      "image": "BN/fh-hold-the-line.jpeg"
+    },
+    {
+      "id": "incendiary-throw",
+      "name": "Incendiary Throw",
+      "level": "X",
+      "initiative": 22,
+      "image": "BN/fh-incendiary-throw.jpeg"
+    },
+    {
+      "id": "javelin",
+      "name": "Javelin",
+      "level": 1,
+      "initiative": 21,
+      "image": "BN/fh-javelin.jpeg"
+    },
+    {
+      "id": "lead-from-afar",
+      "name": "Lead From Afar",
+      "level": 7,
+      "initiative": 80,
+      "image": "BN/fh-lead-from-afar.jpeg"
+    },
+    {
+      "id": "let-them-come",
+      "name": "Let Them Come",
+      "level": 3,
+      "initiative": 24,
+      "image": "BN/fh-let-them-come.jpeg"
+    },
+    {
+      "id": "meat-grinder",
+      "name": "Meat Grinder",
+      "level": 2,
+      "initiative": 62,
+      "image": "BN/fh-meat-grinder.jpeg"
+    },
+    {
+      "id": "pincer-movement",
+      "name": "Pincer Movement",
+      "level": 1,
+      "initiative": 69,
+      "image": "BN/fh-pincer-movement.jpeg"
+    },
+    {
+      "id": "pinning-charge",
+      "name": "Pinning Charge",
+      "level": 2,
+      "initiative": 17,
+      "image": "BN/fh-pinning-charge.jpeg"
+    },
+    {
+      "id": "rallying-cry",
+      "name": "Rallying Cry",
+      "level": 1,
+      "initiative": 71,
+      "image": "BN/fh-rallying-cry.jpeg"
+    },
+    {
+      "id": "regroup",
+      "name": "Regroup",
+      "level": 1,
+      "initiative": 25,
+      "image": "BN/fh-regroup.jpeg"
+    },
+    {
+      "id": "resolved-courage",
+      "name": "Resolved Courage",
+      "level": "X",
+      "initiative": 10,
+      "image": "BN/fh-resolved-courage.jpeg"
+    },
+    {
+      "id": "set-for-the-charge",
+      "name": "Set For the Charge",
+      "level": 1,
+      "initiative": 6,
+      "image": "BN/fh-set-for-the-charge.jpeg"
+    },
+    {
+      "id": "sweeping-aid",
+      "name": "Sweeping Aid",
+      "level": 8,
+      "initiative": 73,
+      "image": "BN/fh-sweeping-aid.jpeg"
+    },
+    {
+      "id": "take-no-prisoners",
+      "name": "Take No Prisoners",
+      "level": 9,
+      "initiative": 85,
+      "image": "BN/fh-take-no-prisoners.jpeg"
+    },
+    {
+      "id": "taunting-howl",
+      "name": "Taunting Howl",
+      "level": 8,
+      "initiative": 11,
+      "image": "BN/fh-taunting-howl.jpeg"
+    },
+    {
+      "id": "tip-of-the-spear",
+      "name": "Tip of the Spear",
+      "level": 1,
+      "initiative": 67,
+      "image": "BN/fh-tip-of-the-spear.jpeg"
+    },
+    {
+      "id": "tri-thrust",
+      "name": "Tri-thrust",
+      "level": 7,
+      "initiative": 27,
+      "image": "BN/fh-tri-thrust.jpeg"
+    },
+    {
+      "id": "unbreakable-wall",
+      "name": "Unbreakable Wall",
+      "level": 1,
+      "initiative": 83,
+      "image": "BN/fh-unbreakable-wall.jpeg"
+    }
+  ]
+}

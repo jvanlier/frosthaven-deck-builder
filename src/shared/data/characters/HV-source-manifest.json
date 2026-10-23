@@ -1,0 +1,176 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "aimed-assault",
+      "source": "character-ability-cards/frosthaven/HV/fh-aimed-assault.jpeg",
+      "sha256": "4267c324ae8e340d15c6cd38f9a8de036fed0203d003e0f3f81451239e5d2b0d"
+    },
+    {
+      "id": "burning-slash",
+      "source": "character-ability-cards/frosthaven/HV/fh-burning-slash.jpeg",
+      "sha256": "92ea38a4a4e9a7b98345c45a4a409ae44baa7f43df4e569af41d4da7d9930c63"
+    },
+    {
+      "id": "code-geminate",
+      "source": "character-ability-cards/frosthaven/HV/fh-code-geminate.jpeg",
+      "sha256": "29b14be8688d116a4c28277b329bb7e5bec4b2d44e7d77452156d62d2f29f378"
+    },
+    {
+      "id": "coiled-limbs",
+      "source": "character-ability-cards/frosthaven/HV/fh-coiled-limbs.jpeg",
+      "sha256": "148587d12123f4fdec2ce4133fed31255cdc222782451805d98755c03d9e5be4"
+    },
+    {
+      "id": "disassemble",
+      "source": "character-ability-cards/frosthaven/HV/fh-disassemble.jpeg",
+      "sha256": "a56a4b3780e4d0b69714dc3b1965c3832517a8c26a3b43daacb74a51c71465cf"
+    },
+    {
+      "id": "divergent-destruction",
+      "source": "character-ability-cards/frosthaven/HV/fh-divergent-destruction.jpeg",
+      "sha256": "53cb336f5d6caa5dc38d0a7436b449cce6666c12440d9a3cb51d1c77b21559de"
+    },
+    {
+      "id": "faceless-entity",
+      "source": "character-ability-cards/frosthaven/HV/fh-faceless-entity.jpeg",
+      "sha256": "ac32011c600d007c6ed39cc6176a11ff9dd9199ec4b527eb83b02e6baa02f93b"
+    },
+    {
+      "id": "force-field",
+      "source": "character-ability-cards/frosthaven/HV/fh-force-field.jpeg",
+      "sha256": "f464310814439db1d81c8be4142ac096cfadb31b91598f1d0459d37cd5ee1095"
+    },
+    {
+      "id": "heavy-metal",
+      "source": "character-ability-cards/frosthaven/HV/fh-heavy-metal.jpeg",
+      "sha256": "3b1792fed0ba59cbb992b03e4eb2d878f464eeead3b9cec485c0c2c89d9cf147"
+    },
+    {
+      "id": "high-impact-projectiles",
+      "source": "character-ability-cards/frosthaven/HV/fh-high-impact-projectiles.jpeg",
+      "sha256": "fbb3290689f744322557ce1a5aa9b29d72cc8afeb9889141792a7319dc97bd1a"
+    },
+    {
+      "id": "hijack",
+      "source": "character-ability-cards/frosthaven/HV/fh-hijack.jpeg",
+      "sha256": "1e1165d668ddc4b3d277a0ab96409f419d4537f6efb573ee1e9db115a988b024"
+    },
+    {
+      "id": "hunter-killer",
+      "source": "character-ability-cards/frosthaven/HV/fh-hunter-killer.jpeg",
+      "sha256": "4174ffe0b616fcde08afe97c1c46bf02f23a18efcd09a4a08b34d4791e0d973b"
+    },
+    {
+      "id": "interference",
+      "source": "character-ability-cards/frosthaven/HV/fh-interference.jpeg",
+      "sha256": "23a0d0d8639cbbabd50da6bd4c45a7dc123e02574c02cf24c41f03d8bfb27992"
+    },
+    {
+      "id": "launch-pod",
+      "source": "character-ability-cards/frosthaven/HV/fh-launch-pod.jpeg",
+      "sha256": "a5f169e869becc906ecfea375cd2798ca41d003a08dbea5f6419bda3b334594c"
+    },
+    {
+      "id": "long-range-missile",
+      "source": "character-ability-cards/frosthaven/HV/fh-long-range-missile.jpeg",
+      "sha256": "5acaf324a9f14e0a3a007a0448de6b8b067af9dae5845282d8879a3c096259f1"
+    },
+    {
+      "id": "mortar-shells",
+      "source": "character-ability-cards/frosthaven/HV/fh-mortar-shells.jpeg",
+      "sha256": "f5a65396c568fc3eb26b98a2bf3d99d0c166dbe89834c77d7dc4bae6d4fb4cc6"
+    },
+    {
+      "id": "net-dispersal",
+      "source": "character-ability-cards/frosthaven/HV/fh-net-dispersal.jpeg",
+      "sha256": "d46e470ccd6a2b87acbe805eec6e504b5917084c3cc71c8ca43b7e0d7e68fe29"
+    },
+    {
+      "id": "plague-protocol",
+      "source": "character-ability-cards/frosthaven/HV/fh-plague-protocol.jpeg",
+      "sha256": "90a19fc4cdbbb6355a8bdd43cde4c6e2480fe1460fcc507308e46e7ac79f63f8"
+    },
+    {
+      "id": "plated-defense",
+      "source": "character-ability-cards/frosthaven/HV/fh-plated-defense.jpeg",
+      "sha256": "6f72d830e261ca0be8eb9a098315876564545a60adc0efc64be6dddeff9f9772"
+    },
+    {
+      "id": "prepare-for-deployment",
+      "source": "character-ability-cards/frosthaven/HV/fh-prepare-for-deployment.jpeg",
+      "sha256": "2ea279e97ab225f621d28ec99605a5023051b0928d22498662886049df79edc0"
+    },
+    {
+      "id": "rapid-fire",
+      "source": "character-ability-cards/frosthaven/HV/fh-rapid-fire.jpeg",
+      "sha256": "9cb0f869f62868533b09469d2682646e615d1bd297147aa66075c28403cd7eb4"
+    },
+    {
+      "id": "reaper-function",
+      "source": "character-ability-cards/frosthaven/HV/fh-reaper-function.jpeg",
+      "sha256": "15caebf94cc5328051d52b12d277bebc83648992a36be11bc917039325befb88"
+    },
+    {
+      "id": "reassemble",
+      "source": "character-ability-cards/frosthaven/HV/fh-reassemble.jpeg",
+      "sha256": "b7c7030c576737b0d3d9ec0b47ce7631265b4cd800bf298bcd958581fe2c3424"
+    },
+    {
+      "id": "recall",
+      "source": "character-ability-cards/frosthaven/HV/fh-recall.jpeg",
+      "sha256": "4be7f4f19d54c278cb1e69d62009daaa57aee1c189627ab2f5cd06bd6dc2a97c"
+    },
+    {
+      "id": "reconstructive-aid",
+      "source": "character-ability-cards/frosthaven/HV/fh-reconstructive-aid.jpeg",
+      "sha256": "d28350eee032fc74046c182fc6ea01d75d0707bb7cd68e8e1bde929e81b6a61c"
+    },
+    {
+      "id": "remote-control",
+      "source": "character-ability-cards/frosthaven/HV/fh-remote-control.jpeg",
+      "sha256": "a4a5961807ea8f1e6987c275505cf71f5869871637be4c5683355fae37cb00f9"
+    },
+    {
+      "id": "shocking-pulse",
+      "source": "character-ability-cards/frosthaven/HV/fh-shocking-pulse.jpeg",
+      "sha256": "805bb59eec5a15053bbb6e5111ad83b85d8c924e7953cc7a7165a81c3b3ceb5d"
+    },
+    {
+      "id": "spinning-blades",
+      "source": "character-ability-cards/frosthaven/HV/fh-spinning-blades.jpeg",
+      "sha256": "2073089a5b77223ec24eac272d153b0e10d09da87dbab0dbcab342727258afaf"
+    },
+    {
+      "id": "swarming-bulwark",
+      "source": "character-ability-cards/frosthaven/HV/fh-swarming-bulwark.jpeg",
+      "sha256": "fb7b6c348c1471c0b5be8b2ef587cf11a8aa798145c12f3c9a13b03ec3dbc234"
+    },
+    {
+      "id": "triage-program",
+      "source": "character-ability-cards/frosthaven/HV/fh-triage-program.jpeg",
+      "sha256": "2d55cc1fa1c9e9baa7d516f57e5310bc92020f8b424155aa71a60e3fae680950"
+    },
+    {
+      "id": "hv-back",
+      "source": "character-ability-cards/frosthaven/HV/fh-hv-back.jpeg",
+      "sha256": "a2c9fd89cce9db90402ffc4b4bc33434fc1c77c7d57597309133686d6d2a822e"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/HV.png",
+    "sha256": "122b3d14b300b4b8cf72984f37394563efcbc936631c332af4610b1222ebbad8"
+  }
+}

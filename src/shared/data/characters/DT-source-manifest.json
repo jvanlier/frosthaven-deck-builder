@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "black-night-of-the-deep",
+      "source": "character-ability-cards/frosthaven/DT/fh-black-night-of-the-deep.jpeg",
+      "sha256": "3ba4598f40a3920888cba257b43d43c028c917234ddadddb91e123128b597e1b"
+    },
+    {
+      "id": "black-scythe",
+      "source": "character-ability-cards/frosthaven/DT/fh-black-scythe.jpeg",
+      "sha256": "b0b4663834519fb6af3832932f2ce785d472172218d54f79c5cf869bbff979af"
+    },
+    {
+      "id": "claw-of-doom",
+      "source": "character-ability-cards/frosthaven/DT/fh-claw-of-doom.jpeg",
+      "sha256": "62a9241e17155c527b84b160fc61e30fcc1069c767abf8cb3e31dbd7c3a3cb91"
+    },
+    {
+      "id": "consume-the-helpless",
+      "source": "character-ability-cards/frosthaven/DT/fh-consume-the-helpless.jpeg",
+      "sha256": "ac70a5a0a77c45a3e0f1c989f039d4c82fd45b78adbea8606046fdf8c52cdbab"
+    },
+    {
+      "id": "crippling-terror",
+      "source": "character-ability-cards/frosthaven/DT/fh-crippling-terror.jpeg",
+      "sha256": "4803c9d6ad32bfdc02ad71a3a6797e8d629e7c7b828000729c8f2c00db5a1c8f"
+    },
+    {
+      "id": "crushing-darkness",
+      "source": "character-ability-cards/frosthaven/DT/fh-crushing-darkness.jpeg",
+      "sha256": "c76a82946a9b82c67dc93e5f053bd6da76c751c7dc97826a7bbb76eb021d4d9e"
+    },
+    {
+      "id": "death-spiral",
+      "source": "character-ability-cards/frosthaven/DT/fh-death-spiral.jpeg",
+      "sha256": "4de0b2b46c50f61f2edc6ddaa1244b66cc0c933267ce0fcd4fd49b3ce66541d8"
+    },
+    {
+      "id": "dire-frenzy",
+      "source": "character-ability-cards/frosthaven/DT/fh-dire-frenzy.jpeg",
+      "sha256": "ed98a1bb70195161592177e09715a275b47b2c570b6f5fa608a8a3ad451c522c"
+    },
+    {
+      "id": "extra-decoration",
+      "source": "character-ability-cards/frosthaven/DT/fh-extra-decoration.jpeg",
+      "sha256": "fadf6d266e4a9ec4101c8abc8478fbaec92e6bbd3a62c81ceaf7a02a1e60bc1a"
+    },
+    {
+      "id": "grim-trophies",
+      "source": "character-ability-cards/frosthaven/DT/fh-grim-trophies.jpeg",
+      "sha256": "50a5c122e8c95689678ca6ddf8cae96c9db524e8d529bc856618df66c768af39"
+    },
+    {
+      "id": "hasten-the-end",
+      "source": "character-ability-cards/frosthaven/DT/fh-hasten-the-end.jpeg",
+      "sha256": "a1375d03cfe4bc4c01532cb663207a7f60d556cbfd6ab6402f43a87a38038483"
+    },
+    {
+      "id": "haunting-brutality",
+      "source": "character-ability-cards/frosthaven/DT/fh-haunting-brutality.jpeg",
+      "sha256": "cf02e6f514652d261934e18e7ebf0aa3299d9b6e01c744706652005a0e7804f0"
+    },
+    {
+      "id": "hollow-aura",
+      "source": "character-ability-cards/frosthaven/DT/fh-hollow-aura.jpeg",
+      "sha256": "fb2a04cb8c5059afa965462c313de23ce61262a07b4a205a9c88d4a80cc23e1e"
+    },
+    {
+      "id": "ink-cloud",
+      "source": "character-ability-cards/frosthaven/DT/fh-ink-cloud.jpeg",
+      "sha256": "577aa4b1215231e8a282ba5a11d1e592675fccea48b0ee0e529f5f3c77fdb852"
+    },
+    {
+      "id": "lacerating-stabs",
+      "source": "character-ability-cards/frosthaven/DT/fh-lacerating-stabs.jpeg",
+      "sha256": "a6bf8d0e798e3f5752a52f66736ed6ca8c33c8a32bbe51bb65604130d34dcb83"
+    },
+    {
+      "id": "lie-in-wait",
+      "source": "character-ability-cards/frosthaven/DT/fh-lie-in-wait.jpeg",
+      "sha256": "f7d0697b8420ed7de54098fa74e1a03ff8fc35f0a4b2d178d3c87c4ef8ae78db"
+    },
+    {
+      "id": "mantle-of-dread",
+      "source": "character-ability-cards/frosthaven/DT/fh-mantle-of-dread.jpeg",
+      "sha256": "30b15175d7a0e905fc0f2cf8925f47992ac5b9db9c641fd3f71de4baf2d0a0a3"
+    },
+    {
+      "id": "morbid-camouflage",
+      "source": "character-ability-cards/frosthaven/DT/fh-morbid-camouflage.jpeg",
+      "sha256": "4024bdb4c405c5f619b8ad2b0c4193141ac30aa1016783b9d7965a9ffb9ecffa"
+    },
+    {
+      "id": "pinning-spines",
+      "source": "character-ability-cards/frosthaven/DT/fh-pinning-spines.jpeg",
+      "sha256": "dea02428c02f0c590340caea27d2694784ad76fc88384534157961386f722db7"
+    },
+    {
+      "id": "rip-from-the-bone",
+      "source": "character-ability-cards/frosthaven/DT/fh-rip-from-the-bone.jpeg",
+      "sha256": "fd1def722d2653e723fbf8aacf1514ca3a56a9a9a0d845783579e14886602860"
+    },
+    {
+      "id": "skewer-the-flesh",
+      "source": "character-ability-cards/frosthaven/DT/fh-skewer-the-flesh.jpeg",
+      "sha256": "fdebe074ea44df94e23d1bd9eaad97ede5c5fabefcf9cae5e6653a24d7479c8f"
+    },
+    {
+      "id": "skull-collection",
+      "source": "character-ability-cards/frosthaven/DT/fh-skull-collection.jpeg",
+      "sha256": "82cbf81b7a7f9f247cfcbd9de31165f9af1bae1164413f9c0c6eb905fc27c77c"
+    },
+    {
+      "id": "slipping-into-death",
+      "source": "character-ability-cards/frosthaven/DT/fh-slipping-into-death.jpeg",
+      "sha256": "875cd9abb7065be076cdbd43330a01c30f0f7c6d64c6eb96051d456e85f75e3c"
+    },
+    {
+      "id": "soul-hunger",
+      "source": "character-ability-cards/frosthaven/DT/fh-soul-hunger.jpeg",
+      "sha256": "7d5acbda0257eec099de6ed81a1b141d1bdcc39d05ab92f097dc5b16a28d7439"
+    },
+    {
+      "id": "staring-into-the-abyss",
+      "source": "character-ability-cards/frosthaven/DT/fh-staring-into-the-abyss.jpeg",
+      "sha256": "a833c3062873246ca4e8e27b0ba6be2c54172d050089c9118fd400650e084621"
+    },
+    {
+      "id": "succumb-to-fear",
+      "source": "character-ability-cards/frosthaven/DT/fh-succumb-to-fear.jpeg",
+      "sha256": "bdd8089da7eefd862bae2ba2fec82807f7c05d57ba08f1006e77b27ae95d5432"
+    },
+    {
+      "id": "the-remorseless-deep",
+      "source": "character-ability-cards/frosthaven/DT/fh-the-remorseless-deep.jpeg",
+      "sha256": "57c5814cc97ce0956307d87eb14c82182003e139dcbf12a582f6995a0c9ccbe1"
+    },
+    {
+      "id": "tumultuous-panic",
+      "source": "character-ability-cards/frosthaven/DT/fh-tumultuous-panic.jpeg",
+      "sha256": "ae0be99351b4cea92878b5711cb4f27f110e309a42242210bdde94ea87d084d0"
+    },
+    {
+      "id": "unseen-horror",
+      "source": "character-ability-cards/frosthaven/DT/fh-unseen-horror.jpeg",
+      "sha256": "891fa70d654a1d5a93589f79c76327c31d50aaca1d83364a8b8e99b7ba303fe2"
+    },
+    {
+      "id": "dt-back",
+      "source": "character-ability-cards/frosthaven/DT/fh-dt-back.jpeg",
+      "sha256": "7d5e5a44813e3db66e3ae3628c298d9f3d2e1b38e5bd7c4aafed25705f627037"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/DT.png",
+    "sha256": "d856ddb73cfc06830565392cb84959e9078ccaa7c8e2d4ebeb1161a910b1d86b"
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "accurate-strikes",
+      "source": "character-ability-cards/frosthaven/DF/fh-accurate-strikes.jpeg",
+      "sha256": "6ef9b59a1273f02b889a8029315ec4d3c5427b759b82e380b0cf9b9f7b94491a"
+    },
+    {
+      "id": "against-all-odds",
+      "source": "character-ability-cards/frosthaven/DF/fh-against-all-odds.jpeg",
+      "sha256": "7d2398d2550449da95dfaf03eda4e01f42d59a82e33cd1234d6adba75532c2ef"
+    },
+    {
+      "id": "bloodletting",
+      "source": "character-ability-cards/frosthaven/DF/fh-bloodletting.jpeg",
+      "sha256": "f57465496b8622eafda8ea7fcf858350661d3a95aeb5764ff1e4e86e84e88848"
+    },
+    {
+      "id": "break-through",
+      "source": "character-ability-cards/frosthaven/DF/fh-break-through.jpeg",
+      "sha256": "5e471227381652906973df14d1d89887fadc21a6e0bac834bc7f05828b5fefe5"
+    },
+    {
+      "id": "chunk-of-flesh",
+      "source": "character-ability-cards/frosthaven/DF/fh-chunk-of-flesh.jpeg",
+      "sha256": "b27fe91482587d1a97af3556e50e88ff2c7a4a91187d62e2b0e196990cae48ee"
+    },
+    {
+      "id": "consume-stamina",
+      "source": "character-ability-cards/frosthaven/DF/fh-consume-stamina.jpeg",
+      "sha256": "25565e3bdcadff9369cb52e251a31345edf43c02cc9caac8d6db3f10a6c812a9"
+    },
+    {
+      "id": "continuous-health",
+      "source": "character-ability-cards/frosthaven/DF/fh-continuous-health.jpeg",
+      "sha256": "5b60455337d372342ba8d615d37bc60d4a5ac4cb78c80c7a207470e7060796e2"
+    },
+    {
+      "id": "crushing-weight",
+      "source": "character-ability-cards/frosthaven/DF/fh-crushing-weight.jpeg",
+      "sha256": "f57eeeec2034ad48b9badbee00b99afedf284c6f78127a30ae34e34ea39caa4b"
+    },
+    {
+      "id": "deadly-shot",
+      "source": "character-ability-cards/frosthaven/DF/fh-deadly-shot.jpeg",
+      "sha256": "502e180df2a5e37d036ef33a088564b8154755dee793eac8dcc069588dc38be1"
+    },
+    {
+      "id": "destructive-fury",
+      "source": "character-ability-cards/frosthaven/DF/fh-destructive-fury.jpeg",
+      "sha256": "6e87d3e51d8542ddd0c58bbcc370fd39e9dafb4116f361ceb45ef313e9679b96"
+    },
+    {
+      "id": "draining-arrows",
+      "source": "character-ability-cards/frosthaven/DF/fh-draining-arrows.jpeg",
+      "sha256": "766262d223981068b9a5d6ad4354da66c4b64a2940868d40c692e863d572a71e"
+    },
+    {
+      "id": "dual-bow",
+      "source": "character-ability-cards/frosthaven/DF/fh-dual-bow.jpeg",
+      "sha256": "5e48d57e239cf952b450be6e1b70af36097f67700e15c0a3882c26ea8a544ae4"
+    },
+    {
+      "id": "ever-forward",
+      "source": "character-ability-cards/frosthaven/DF/fh-ever-forward.jpeg",
+      "sha256": "c7f881c12771f2e0ac474a41f4ccebd1b8e9f4e27468c3e1dfde0910a9400231"
+    },
+    {
+      "id": "everlasting",
+      "source": "character-ability-cards/frosthaven/DF/fh-everlasting.jpeg",
+      "sha256": "c2b507b4319e60d6e956e6e828af00a28dff36aed0499efa362d118c83fa8042"
+    },
+    {
+      "id": "fierce-barrage",
+      "source": "character-ability-cards/frosthaven/DF/fh-fierce-barrage.jpeg",
+      "sha256": "9997a47cc6e9f664a8692dcac96d229a7c24260b80d1328d3225397ba6c62407"
+    },
+    {
+      "id": "fortitude",
+      "source": "character-ability-cards/frosthaven/DF/fh-fortitude.jpeg",
+      "sha256": "02dd81d86a8cd51fb8fc1a34b8aec56cfacd121deadfdb202ba4f3a85c6e4870"
+    },
+    {
+      "id": "gift-of-the-prey",
+      "source": "character-ability-cards/frosthaven/DF/fh-gift-of-the-prey.jpeg",
+      "sha256": "4b55cfa8eccaf1f956b89fb578d581b12ebbdb1ccb2605738c64590b22f8a15d"
+    },
+    {
+      "id": "inevitable-conclusion",
+      "source": "character-ability-cards/frosthaven/DF/fh-inevitable-conclusion.jpeg",
+      "sha256": "41215a6a6c5e82b24b996ce89518fb496b319192532d030c5af10dd1a8c7e963"
+    },
+    {
+      "id": "like-the-wind",
+      "source": "character-ability-cards/frosthaven/DF/fh-like-the-wind.jpeg",
+      "sha256": "21f409526cb05315176867213026b4e966afc5dac1f62ab24435f12175c79075"
+    },
+    {
+      "id": "no-remorse",
+      "source": "character-ability-cards/frosthaven/DF/fh-no-remorse.jpeg",
+      "sha256": "b5cb96ce98fc48c0eeb86f611496ded3384c64626e0ed2f2ebc643c8e8c11e6f"
+    },
+    {
+      "id": "precision-aim",
+      "source": "character-ability-cards/frosthaven/DF/fh-precision-aim.jpeg",
+      "sha256": "689a5ff56c8388536841389733ba88e8536de030ca213a93577b034049d66ef9"
+    },
+    {
+      "id": "prudent-preparation",
+      "source": "character-ability-cards/frosthaven/DF/fh-prudent-preparation.jpeg",
+      "sha256": "6fcf91e5b0e129c3a4d5c6ffc6a1afcc4fc256bc9f36f17045cc4326658d5d80"
+    },
+    {
+      "id": "relentless",
+      "source": "character-ability-cards/frosthaven/DF/fh-relentless.jpeg",
+      "sha256": "86281955c075d891a3f60f0ec9150c1c3f8b292bd9f66fb6ebeadea9c802d488"
+    },
+    {
+      "id": "shockwave",
+      "source": "character-ability-cards/frosthaven/DF/fh-shockwave.jpeg",
+      "sha256": "6efd45322adba2cf41d62cc254b42da21a00a402bda61f871a61374157142a8a"
+    },
+    {
+      "id": "survivalist",
+      "source": "character-ability-cards/frosthaven/DF/fh-survivalist.jpeg",
+      "sha256": "9f0a198a842ac805f84d1960c63a97c0daf682f5b4766793acba149d0fda885b"
+    },
+    {
+      "id": "sustained-momentum",
+      "source": "character-ability-cards/frosthaven/DF/fh-sustained-momentum.jpeg",
+      "sha256": "ad0d35f694c9c628c4fafc815efbcb051b03b656ac41f2a59b266d63f875b58e"
+    },
+    {
+      "id": "unbreakable",
+      "source": "character-ability-cards/frosthaven/DF/fh-unbreakable.jpeg",
+      "sha256": "58e5dedf4dffc3e153912b65e8a79a5a3b8593aca6cd2d5dd7ce8efcd2da7cac"
+    },
+    {
+      "id": "unending-fight",
+      "source": "character-ability-cards/frosthaven/DF/fh-unending-fight.jpeg",
+      "sha256": "234c8389f37ee230f758d6e7a7ec539e840ee4865db7152c7179579f7acc3be6"
+    },
+    {
+      "id": "use-every-part",
+      "source": "character-ability-cards/frosthaven/DF/fh-use-every-part.jpeg",
+      "sha256": "5ec629052e8d73dce00dbbe258c999c758f2aca7c9f64d62b7f748dab8e1a9b5"
+    },
+    {
+      "id": "vile-assault",
+      "source": "character-ability-cards/frosthaven/DF/fh-vile-assault.jpeg",
+      "sha256": "c5c5afb49ef35e2e07fb89d54ac658a435ae23266f94d8f1d6a501f94fcfbc1d"
+    },
+    {
+      "id": "violent-inheritance",
+      "source": "character-ability-cards/frosthaven/DF/fh-violent-inheritance.jpeg",
+      "sha256": "81823b76e4d477e7f86030f2cec42d4aaaeb82a2fbdb6628fd94dff99d3409b1"
+    },
+    {
+      "id": "df-back",
+      "source": "character-ability-cards/frosthaven/DF/fh-df-back.jpeg",
+      "sha256": "6821cab9ea33675f9d8737ed5557d477440348f2099175e445d5ea1f7ead0179"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/DF.png",
+    "sha256": "addc3409db07badce38c43c16c3bcf065776386c05b5fd98b21683c35dc58325"
+  }
+}

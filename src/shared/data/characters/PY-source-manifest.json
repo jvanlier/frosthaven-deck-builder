@@ -1,0 +1,171 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "calamity",
+      "source": "character-ability-cards/frosthaven/PY/fh-calamity.jpeg",
+      "sha256": "081f37d47171b4882240ca3de6a80aa2564f0df72701cfe99d72ae246ac64413"
+    },
+    {
+      "id": "cinder-lance",
+      "source": "character-ability-cards/frosthaven/PY/fh-cinder-lance.jpeg",
+      "sha256": "1a8357572ddbdfed3a9db0aa7b6ee1119d468b074f7ea078c530d73ae7c0104c"
+    },
+    {
+      "id": "cloud-of-ash",
+      "source": "character-ability-cards/frosthaven/PY/fh-cloud-of-ash.jpeg",
+      "sha256": "ef938785a408229ced349e0d83568bfbb8adc9dcd557ac5fbecb1e8728985943"
+    },
+    {
+      "id": "cooling",
+      "source": "character-ability-cards/frosthaven/PY/fh-cooling.jpeg",
+      "sha256": "54a2342633b7c0c8eca38e3e6d6926ab0c9eea73f58921259251e9efe1c4ad6d"
+    },
+    {
+      "id": "deep-fury",
+      "source": "character-ability-cards/frosthaven/PY/fh-deep-fury.jpeg",
+      "sha256": "396cb226c23610e7f81f7793dd9840345bc01d4a8a72f7ec3ec6b0ff8bcbda3c"
+    },
+    {
+      "id": "erupting-rage",
+      "source": "character-ability-cards/frosthaven/PY/fh-erupting-rage.jpeg",
+      "sha256": "0fe1ade57e80ecdec8d520228386ffea276c930ee037c054aedc512cfeca9c1a"
+    },
+    {
+      "id": "eruption",
+      "source": "character-ability-cards/frosthaven/PY/fh-eruption.jpeg",
+      "sha256": "3cf67c2f6060c74fdd454a6ad02b4aba29f616d571d4dee3ba2b064f848cba91"
+    },
+    {
+      "id": "feed-the-beast",
+      "source": "character-ability-cards/frosthaven/PY/fh-feed-the-beast.jpeg",
+      "sha256": "c0ec871580a9d8932c0f28af097bdc01d539c537beac07d519f6252fb3535c9b"
+    },
+    {
+      "id": "flowing-fire",
+      "source": "character-ability-cards/frosthaven/PY/fh-flowing-fire.jpeg",
+      "sha256": "7bfdfc536d90bef6495b1353ea34bc451d652228ce94e2f5b45b9263d989757b"
+    },
+    {
+      "id": "force-of-the-earth",
+      "source": "character-ability-cards/frosthaven/PY/fh-force-of-the-earth.jpeg",
+      "sha256": "a5db3aa82fbc15c36924aba38acc2703e28014beb565249ab295b4604579b672"
+    },
+    {
+      "id": "hand-of-flame",
+      "source": "character-ability-cards/frosthaven/PY/fh-hand-of-flame.jpeg",
+      "sha256": "2f83b16c602f02aeaf2e805f46adeebad12616d0af705b5c28c528f09b2fc5a0"
+    },
+    {
+      "id": "hardened-spike",
+      "source": "character-ability-cards/frosthaven/PY/fh-hardened-spike.jpeg",
+      "sha256": "188aa5ae29dc3aec63b49433f3c8d896889271608a05c814f66366c501309f58"
+    },
+    {
+      "id": "heat-wave",
+      "source": "character-ability-cards/frosthaven/PY/fh-heat-wave.jpeg",
+      "sha256": "014543fdcc9ec6813278261d391e00ac39d02685918b8b4d4024a8e53e780279"
+    },
+    {
+      "id": "igneous-path",
+      "source": "character-ability-cards/frosthaven/PY/fh-igneous-path.jpeg",
+      "sha256": "4a2d58a352e58755f8b2ffe8a54d14285a9541fce080dc5e0e6ddcbe9037588a"
+    },
+    {
+      "id": "lava-bomb",
+      "source": "character-ability-cards/frosthaven/PY/fh-lava-bomb.jpeg",
+      "sha256": "bfcac61d16172d86c544031daaa79a907f3e646ed10a7d1b220efdfde60f656b"
+    },
+    {
+      "id": "liquid-stone",
+      "source": "character-ability-cards/frosthaven/PY/fh-liquid-stone.jpeg",
+      "sha256": "6e0d15597567da6bc2070e5792e5f8e03cf65f05f68071d3c288541a2892afd3"
+    },
+    {
+      "id": "living-magma",
+      "source": "character-ability-cards/frosthaven/PY/fh-living-magma.jpeg",
+      "sha256": "d6b5cb5c21713f650516389d282117035f50c100a7113201c48018a3972b85f2"
+    },
+    {
+      "id": "magma-orbs",
+      "source": "character-ability-cards/frosthaven/PY/fh-magma-orbs.jpeg",
+      "sha256": "b373a5b32a94eb20fb1471d219af858c602dbe5184699c044121690fb30f4606"
+    },
+    {
+      "id": "melted-armor",
+      "source": "character-ability-cards/frosthaven/PY/fh-melted-armor.jpeg",
+      "sha256": "b245e7f7ce3efd34991105f06236a05144bc1a17ced9a4378ce246efe7ee1c58"
+    },
+    {
+      "id": "metamorphic-rock",
+      "source": "character-ability-cards/frosthaven/PY/fh-metamorphic-rock.jpeg",
+      "sha256": "c5dda49da10103ec0bcb2e8e6fe995a395e218a1fc46eea976557814b46380e9"
+    },
+    {
+      "id": "obsidian-shield",
+      "source": "character-ability-cards/frosthaven/PY/fh-obsidian-shield.jpeg",
+      "sha256": "2e664e64d0ae84d20aff1cb855cafd79db474a07f651cc37759db0084677530a"
+    },
+    {
+      "id": "quenched-rage",
+      "source": "character-ability-cards/frosthaven/PY/fh-quenched-rage.jpeg",
+      "sha256": "b8ee2161843e448ff42dc348b816cd9fce592b07fde5ec3b61c08ae0ad31a54f"
+    },
+    {
+      "id": "rain-of-fire",
+      "source": "character-ability-cards/frosthaven/PY/fh-rain-of-fire.jpeg",
+      "sha256": "37598ef686a296928cc0a077d35de3783c0e406d3dbf32ff9ee6227305db1d01"
+    },
+    {
+      "id": "return-to-the-source",
+      "source": "character-ability-cards/frosthaven/PY/fh-return-to-the-source.jpeg",
+      "sha256": "9995f236eec430e0df07896f80c7fe9238d8809117e3905ceced1b1c9e38d8a3"
+    },
+    {
+      "id": "searing-smoke",
+      "source": "character-ability-cards/frosthaven/PY/fh-searing-smoke.jpeg",
+      "sha256": "7eeaaffe0778cd412a4cc06a5676aa3eae127a2444cb88eda238dd45a2d7b39b"
+    },
+    {
+      "id": "stone-armor",
+      "source": "character-ability-cards/frosthaven/PY/fh-stone-armor.jpeg",
+      "sha256": "4b1a312ada20506ae5348c481f245fa77631a47685372ea1ea1b030498dc8a66"
+    },
+    {
+      "id": "swelter",
+      "source": "character-ability-cards/frosthaven/PY/fh-swelter.jpeg",
+      "sha256": "7a14078d1dc45272de2adbc8fa2385ce2fdedfd1509aabb3f4c2b0e2d841abf8"
+    },
+    {
+      "id": "under-pressure",
+      "source": "character-ability-cards/frosthaven/PY/fh-under-pressure.jpeg",
+      "sha256": "198f6bb0a1fd1eb3c201bf8c544a3739a21d40db38c52e47aea37b1d6f325cd6"
+    },
+    {
+      "id": "wildfire",
+      "source": "character-ability-cards/frosthaven/PY/fh-wildfire.jpeg",
+      "sha256": "0feca48d46e4ea0b36d1941570ac70654e090775aeaefc0de2ebaed2876dc941"
+    },
+    {
+      "id": "py-back",
+      "source": "character-ability-cards/frosthaven/PY/fh-py-back.jpeg",
+      "sha256": "a1e6531f70642ec39e454c984264d9ebc33ad9dff444799c55e60ababb28e4d4"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/PY.png",
+    "sha256": "0eb6c16a76de965854c3882409ef02a993305b05638843dd89fa80929118949e"
+  }
+}

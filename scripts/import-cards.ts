@@ -10,12 +10,20 @@ import {
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Card, CardLevel, Character } from "../src/shared/character";
+import {
+  characterDefinitions,
+  frosthavenCharacters,
+  mercenaryCharacters,
+  snowdancer,
+  geminateMeleeCards,
+  type CharacterDefinition,
+} from "./characters";
 
 const RAW_REPOSITORY_URL =
   "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser";
-const SOURCE_METADATA_PATH = "data/character-abilities/frosthaven.json";
+const SOURCE_METADATA_DIRECTORY = "data/character-abilities";
 const SOURCE_IMAGE_PATH = "images/";
-export const SOURCE_METADATA_URL = `${RAW_REPOSITORY_URL}/main/${SOURCE_METADATA_PATH}`;
+export const SOURCE_METADATA_URL = `${RAW_REPOSITORY_URL}/main/${SOURCE_METADATA_DIRECTORY}/frosthaven.json`;
 export const SOURCE_IMAGE_BASE_URL = `${RAW_REPOSITORY_URL}/images/${SOURCE_IMAGE_PATH}`;
 export const SOURCE_REPOSITORY =
   "https://github.com/cmlenius/gloomhaven-card-browser";
@@ -26,14 +34,7 @@ export const SOURCE_REVISION_URLS = {
     "https://api.github.com/repos/cmlenius/gloomhaven-card-browser/commits/images",
 } as const;
 
-const SOURCE_IMAGE_PREFIX = "character-ability-cards/frosthaven/SD/";
-const SOURCE_IMAGE_PATTERN =
-  /^character-ability-cards\/frosthaven\/SD\/fh-[a-z0-9]+(?:-[a-z0-9]+)*\.jpeg$/;
-const BACK_SOURCE_IMAGE = `${SOURCE_IMAGE_PREFIX}fh-sd-back.jpeg`;
-const GENERATED_CARD_DIRECTORY = "public/cards/SD";
 const GENERATED_DATA_DIRECTORY = "src/shared/data/characters";
-const GENERATED_ICON_PATH = "public/icons/SD.png";
-const DEFAULT_ICON_SOURCE = "docs/mockup/snowdancer-icon.png";
 
 export interface SourceCardRecord {
   name: string;
@@ -63,6 +64,7 @@ export interface ParsedSourceRecords {
 }
 
 export interface ImportPlan {
+  source: CharacterDefinition["source"];
   character: Character;
   cards: ParsedCard[];
   back: ParsedCardBack;
@@ -119,6 +121,7 @@ const defaultFileSystem: ImportFileSystem = {
 };
 
 export interface ImportCardsOptions {
+  character?: CharacterDefinition;
   projectRoot?: string;
   iconSource?: string;
   fetchImpl?: FetchImplementation;
@@ -199,29 +202,39 @@ const EXPECTED_CARDS: readonly ExpectedCard[] = [
 
 export function parseSourceRecords(
   records: readonly unknown[],
+  character: CharacterDefinition = snowdancer,
 ): ParsedSourceRecords {
-  const snowdancerRecords = records.filter(isSnowdancerRecord);
+  const prefix = `character-ability-cards/${character.source.directory}/${character.id}/`;
+  const backImage = `${prefix}${character.source.filePrefix}${character.id.toLowerCase()}-back.jpeg`;
+  const imagePattern = new RegExp(
+    `^${prefix}${character.source.filePrefix}[a-z0-9]+(?:-[a-z0-9]+)*\\.jpeg$`,
+  );
+  const characterRecords = records.filter((value) =>
+    isCharacterRecord(value, character.id),
+  );
   const cards: ParsedCard[] = [];
   let back: ParsedCardBack | undefined;
 
-  for (const [index, value] of snowdancerRecords.entries()) {
+  for (const [index, value] of characterRecords.entries()) {
     const record = parseSourceRecord(value, index);
-    if (!SOURCE_IMAGE_PATTERN.test(record.image)) {
-      throw new Error(`Unsafe Snowdancer image path: ${record.image}`);
+    if (!imagePattern.test(record.image)) {
+      throw new Error(`Unsafe ${character.name} image path: ${record.image}`);
     }
 
-    if (record.image === BACK_SOURCE_IMAGE) {
+    if (record.image === backImage) {
       if (back) {
-        throw new Error("Duplicate Snowdancer card back");
+        throw new Error(`Duplicate ${character.name} card back`);
       }
       if (record.level !== "-" || record.initiative !== "-") {
-        throw new Error("Snowdancer card back has playable card metadata");
+        throw new Error(
+          `${character.name} card back has playable card metadata`,
+        );
       }
-      back = { image: record.image, outputPath: "fh-sd-back.jpeg" };
+      back = { image: record.image, outputPath: basename(record.image) };
       continue;
     }
 
-    const parsed = parsePlayableCard(record);
+    const parsed = parsePlayableCard(record, character);
     cards.push(parsed);
   }
 
@@ -244,26 +257,30 @@ export function createImportPlan(
     metadataChecksum: string;
     sourceRevisions: SourceRevisions;
     requireCompleteCatalog?: boolean;
+    character?: CharacterDefinition;
   },
 ): ImportPlan {
-  const parsed = parseSourceRecords(records);
+  const character = options.character ?? snowdancer;
+  const parsed = parseSourceRecords(records, character);
   if (!parsed.back) {
-    throw new Error("Snowdancer source is missing the card back");
+    throw new Error(`${character.name} source is missing the card back`);
   }
   const cards = parsed.cards.map(
     ({ sourceImage: _sourceImage, ...card }) => card,
   );
 
   if (options.requireCompleteCatalog !== false) {
-    validateCatalog(cards);
+    validateCatalog(cards, character);
   }
 
   return {
+    source: character.source,
     character: {
-      id: "SD",
-      name: "Snowdancer",
-      handSize: 11,
-      icon: "SD.png",
+      id: character.id,
+      name: character.name,
+      handSize: character.handSize,
+      icon: `${character.id}.png`,
+      cardBack: `${character.id}/${parsed.back.outputPath}`,
       cards,
     },
     cards: parsed.cards,
@@ -273,12 +290,32 @@ export function createImportPlan(
   };
 }
 
-export function validateCatalog(cards: readonly Card[]): void {
-  if (cards.length !== EXPECTED_CARDS.length) {
+export function validateCatalog(
+  cards: readonly Card[],
+  character: CharacterDefinition = snowdancer,
+): void {
+  const levelXCount = character.id === "GE" ? 4 : 3;
+  const expectedCount = character.levelOneCards + levelXCount + 16;
+  if (cards.length !== expectedCount) {
     throw new Error(
-      `Snowdancer catalog must contain 30 playable cards, received ${cards.length}`,
+      `${character.name} catalog must contain ${expectedCount} playable cards, received ${cards.length}`,
     );
   }
+  const counts = new Map<CardLevel, number>();
+  for (const card of cards)
+    counts.set(card.level, (counts.get(card.level) ?? 0) + 1);
+  if (
+    counts.get(1) !== character.levelOneCards ||
+    counts.get("X") !== levelXCount ||
+    Array.from({ length: 8 }, (_, index) => index + 2).some(
+      (level) => counts.get(level as CardLevel) !== 2,
+    )
+  ) {
+    throw new Error(
+      `${character.name} catalog has incorrect card counts by level`,
+    );
+  }
+  if (character.id !== "SD") return;
 
   const expectedById = new Map(EXPECTED_CARDS.map((card) => [card.id, card]));
   const actualIds = new Set<string>();
@@ -306,28 +343,12 @@ export function validateCatalog(cards: readonly Card[]): void {
   if (actualIds.size !== expectedById.size) {
     throw new Error("Snowdancer catalog is missing a card from the spec");
   }
-
-  const levelCounts = new Map<CardLevel, number>();
-  for (const card of cards) {
-    levelCounts.set(card.level, (levelCounts.get(card.level) ?? 0) + 1);
-  }
-  if (levelCounts.get(1) !== 11 || levelCounts.get("X") !== 3) {
-    throw new Error(
-      "Snowdancer catalog must contain 11 level-1 and 3 level-X cards",
-    );
-  }
-  for (let level = 2; level <= 9; level += 1) {
-    if (levelCounts.get(level as CardLevel) !== 2) {
-      throw new Error(
-        `Snowdancer catalog must contain two level-${level} cards`,
-      );
-    }
-  }
 }
 
 export async function importCards(
   options: ImportCardsOptions = {},
 ): Promise<ImportCardsResult> {
+  const character = options.character ?? snowdancer;
   const projectRoot = resolve(options.projectRoot ?? process.cwd());
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   const fileSystem = { ...defaultFileSystem, ...options.fileSystem };
@@ -335,7 +356,7 @@ export async function importCards(
     options.sourceRevisions ?? (await fetchSourceRevisions(fetchImpl));
   const metadataResponse = await fetchRequired(
     fetchImpl,
-    sourceMetadataUrl(sourceRevisions.metadata),
+    sourceMetadataUrl(sourceRevisions.metadata, character.source.directory),
     "source metadata download",
   );
   const metadataBytes = new Uint8Array(await metadataResponse.arrayBuffer());
@@ -354,6 +375,7 @@ export async function importCards(
     metadataChecksum: sha256(metadataBytes),
     sourceRevisions,
     requireCompleteCatalog: options.requireCompleteCatalog,
+    character,
   });
   const assetBytes = new Map<string, Uint8Array>();
   for (const card of plan.cards) {
@@ -367,8 +389,9 @@ export async function importCards(
       ),
     );
   }
+  const backId = `${plan.character.id.toLowerCase()}-back`;
   assetBytes.set(
-    "sd-back",
+    backId,
     await downloadAsset(
       fetchImpl,
       plan.back.image,
@@ -377,11 +400,23 @@ export async function importCards(
     ),
   );
 
-  const iconSource = options.iconSource ?? DEFAULT_ICON_SOURCE;
-  const iconPath = isAbsolute(iconSource)
-    ? iconSource
-    : resolve(projectRoot, iconSource);
-  const iconBytes = new Uint8Array(await fileSystem.readFile(iconPath));
+  const iconSource =
+    options.iconSource ??
+    `icons/characters/${character.source.iconDirectory}/${character.id}.png`;
+  const iconBytes = options.iconSource
+    ? new Uint8Array(
+        await fileSystem.readFile(
+          isAbsolute(iconSource)
+            ? iconSource
+            : resolve(projectRoot, iconSource),
+        ),
+      )
+    : await downloadAsset(
+        fetchImpl,
+        iconSource,
+        "class icon",
+        sourceRevisions.images,
+      );
   const manifest = createManifest(plan, assetBytes, iconSource, iconBytes);
   await commitOutputs(
     projectRoot,
@@ -413,19 +448,22 @@ export async function fetchSourceRevisions(
   return { metadata, images };
 }
 
-function isSnowdancerRecord(value: unknown): value is Record<string, unknown> {
+function isCharacterRecord(
+  value: unknown,
+  characterId: string,
+): value is Record<string, unknown> {
   return (
     typeof value === "object" &&
     value !== null &&
     "image" in value &&
     typeof value.image === "string" &&
-    value.image.includes("/SD/")
+    value.image.includes(`/${characterId}/`)
   );
 }
 
 function parseSourceRecord(value: unknown, index: number): SourceCardRecord {
   if (typeof value !== "object" || value === null) {
-    throw new Error(`Invalid Snowdancer source record at index ${index}`);
+    throw new Error(`Invalid character source record at index ${index}`);
   }
   const record = value as Record<string, unknown>;
   if (
@@ -435,7 +473,7 @@ function parseSourceRecord(value: unknown, index: number): SourceCardRecord {
     typeof record.level !== "string" ||
     typeof record.initiative !== "string"
   ) {
-    throw new Error(`Invalid Snowdancer source record at index ${index}`);
+    throw new Error(`Invalid character source record at index ${index}`);
   }
   return {
     name: record.name as string,
@@ -446,21 +484,35 @@ function parseSourceRecord(value: unknown, index: number): SourceCardRecord {
   };
 }
 
-function parsePlayableCard(record: SourceCardRecord): ParsedCard {
+function parsePlayableCard(
+  record: SourceCardRecord,
+  character: CharacterDefinition,
+): ParsedCard {
+  const characterId = character.id;
   const fileName = basename(record.image);
-  const id = fileName.slice(3, -".jpeg".length);
+  const id = fileName.slice(
+    character.source.filePrefix.length,
+    -".jpeg".length,
+  );
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
-    throw new Error(`Unsafe Snowdancer card slug: ${id}`);
+    throw new Error(`Unsafe character card slug: ${id}`);
   }
   const level = parseCardLevel(record.level);
-  const initiative = parseInitiative(record.initiative);
+  const initiative = parseInitiative(record.initiative, characterId === "BB");
   return {
     id,
     name: toDisplayName(record.name),
     level,
     initiative,
-    image: `SD/${fileName}`,
+    image: `${characterId}/${fileName}`,
     sourceImage: record.image,
+    ...(characterId === "GE"
+      ? {
+          form: geminateMeleeCards.has(id)
+            ? ("melee" as const)
+            : ("ranged" as const),
+        }
+      : {}),
   };
 }
 
@@ -471,12 +523,17 @@ function parseCardLevel(level: string): CardLevel {
   if (/^[1-9]$/.test(level)) {
     return Number(level) as CardLevel;
   }
-  throw new Error(`Unsupported Snowdancer card level: ${level}`);
+  throw new Error(`Unsupported character card level: ${level}`);
 }
 
-function parseInitiative(initiative: string): number {
+function parseInitiative(
+  initiative: string,
+  dual: boolean,
+): Card["initiative"] {
+  if (dual && /^\d{2}\/\d{2}$/.test(initiative))
+    return initiative as `${number}/${number}`;
   if (!/^\d{1,2}$/.test(initiative)) {
-    throw new Error(`Unsupported Snowdancer initiative: ${initiative}`);
+    throw new Error(`Unsupported character initiative: ${initiative}`);
   }
   return Number(initiative);
 }
@@ -484,7 +541,7 @@ function parseInitiative(initiative: string): number {
 function toDisplayName(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) {
-    throw new Error("Snowdancer card display name cannot be empty");
+    throw new Error("Character card display name cannot be empty");
   }
   const lowerCaseWords = new Set(["a", "an", "and", "in", "of", "on", "the"]);
   return trimmed
@@ -502,7 +559,7 @@ function assertUnique(values: readonly string[], label: string): void {
   const seen = new Set<string>();
   for (const value of values) {
     if (seen.has(value)) {
-      throw new Error(`Duplicate Snowdancer ${label}: ${value}`);
+      throw new Error(`Duplicate character ${label}: ${value}`);
     }
     seen.add(value);
   }
@@ -543,8 +600,8 @@ async function readRevision(response: Response): Promise<string> {
   return body.sha;
 }
 
-function sourceMetadataUrl(revision: string): string {
-  return `${RAW_REPOSITORY_URL}/${revision}/${SOURCE_METADATA_PATH}`;
+function sourceMetadataUrl(revision: string, directory: string): string {
+  return `${RAW_REPOSITORY_URL}/${revision}/${SOURCE_METADATA_DIRECTORY}/${directory}.json`;
 }
 
 function sourceImageBaseUrl(revision: string): string {
@@ -577,7 +634,10 @@ function createManifest(
     source: {
       repository: SOURCE_REPOSITORY,
       metadata: {
-        url: sourceMetadataUrl(plan.sourceRevisions.metadata),
+        url: sourceMetadataUrl(
+          plan.sourceRevisions.metadata,
+          plan.source.directory,
+        ),
         revision: plan.sourceRevisions.metadata,
         sha256: plan.metadataChecksum,
       },
@@ -593,9 +653,13 @@ function createManifest(
         sha256: sha256(assetBytes.get(card.id) as Uint8Array),
       })),
       {
-        id: "sd-back",
+        id: `${plan.character.id.toLowerCase()}-back`,
         source: plan.back.image,
-        sha256: sha256(assetBytes.get("sd-back") as Uint8Array),
+        sha256: sha256(
+          assetBytes.get(
+            `${plan.character.id.toLowerCase()}-back`,
+          ) as Uint8Array,
+        ),
       },
     ],
     icon: { source: iconSource, sha256: sha256(iconBytes) },
@@ -619,11 +683,11 @@ async function commitOutputs(
 ): Promise<void> {
   const generatedFiles = [
     {
-      relativePath: `${GENERATED_DATA_DIRECTORY}/SD.json`,
+      relativePath: `${GENERATED_DATA_DIRECTORY}/${plan.character.id}.json`,
       contents: `${JSON.stringify(plan.character, null, 2)}\n`,
     },
     {
-      relativePath: `${GENERATED_DATA_DIRECTORY}/source-manifest.json`,
+      relativePath: `${GENERATED_DATA_DIRECTORY}/${plan.character.id}-source-manifest.json`,
       contents: `${JSON.stringify(manifest, null, 2)}\n`,
     },
     {
@@ -631,14 +695,19 @@ async function commitOutputs(
       contents: createCatalogIndex(),
     },
     ...plan.cards.map((card) => ({
-      relativePath: `${GENERATED_CARD_DIRECTORY}/fh-${card.id}.jpeg`,
+      relativePath: `public/cards/${card.image}`,
       contents: assetBytes.get(card.id) as Uint8Array,
     })),
     {
-      relativePath: `${GENERATED_CARD_DIRECTORY}/${plan.back.outputPath}`,
-      contents: assetBytes.get("sd-back") as Uint8Array,
+      relativePath: `public/cards/${plan.character.id}/${plan.back.outputPath}`,
+      contents: assetBytes.get(
+        `${plan.character.id.toLowerCase()}-back`,
+      ) as Uint8Array,
     },
-    { relativePath: GENERATED_ICON_PATH, contents: iconBytes },
+    {
+      relativePath: `public/icons/${plan.character.icon}`,
+      contents: iconBytes,
+    },
   ];
 
   const stagingDirectory = await fileSystem.mkdtemp(
@@ -721,7 +790,7 @@ function formatError(error: unknown): string {
 }
 
 function createCatalogIndex(): string {
-  return `import snowdancerData from "./SD.json" with { type: "json" };\nimport type { Character } from "../../character.js";\n\nconst snowdancer = snowdancerData as unknown as Character;\nexport const characters: Character[] = [snowdancer];\n\nexport function getCharacter(id: string): Character | undefined {\n  return characters.find((character) => character.id === id);\n}\n`;
+  return `${characterDefinitions.map(({ id }) => `import ${id} from "./${id}.json" with { type: "json" };`).join("\n")}\nimport type { Character } from "../../character.js";\n\nexport const characterGroups = [\n  {\n    name: "Frosthaven",\n    characters: [\n${frosthavenCharacters.map(({ id }) => `      ${id},`).join("\n")}\n    ] as Character[],\n  },\n  {\n    name: "Mercenary Pack",\n    characters: [${mercenaryCharacters.map(({ id }) => id).join(", ")}] as Character[],\n  },\n];\n\nexport const characters = characterGroups.flatMap((group) => group.characters);\n\nexport function getCharacter(id: string): Character | undefined {\n  return characters.find((character) => character.id === id);\n}\n`;
 }
 
 function isMissingFileError(error: unknown): boolean {
@@ -734,10 +803,15 @@ function isMissingFileError(error: unknown): boolean {
 }
 
 async function main(): Promise<void> {
-  const result = await importCards();
-  console.log(
-    `Imported ${result.character.cards.length} Snowdancer cards and the local card back.`,
+  const sourceRevisions = await fetchSourceRevisions((input, init) =>
+    fetch(input, init),
   );
+  for (const character of characterDefinitions) {
+    const result = await importCards({ character, sourceRevisions });
+    console.log(
+      `Imported ${result.character.cards.length} ${character.name} cards, card back, and class icon.`,
+    );
+  }
 }
 
 if (

@@ -1,0 +1,281 @@
+{
+  "id": "GE",
+  "name": "Geminate",
+  "handSize": 14,
+  "icon": "GE.png",
+  "cardBack": "GE/fh-ge-back.jpeg",
+  "cards": [
+    {
+      "id": "accelerated-metabolism",
+      "name": "Accelerated Metabolism",
+      "level": 8,
+      "initiative": 85,
+      "image": "GE/fh-accelerated-metabolism.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "alluring-pheromones",
+      "name": "Alluring Pheromones",
+      "level": 7,
+      "initiative": 49,
+      "image": "GE/fh-alluring-pheromones.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "changelings-boon",
+      "name": "Changeling's Boon",
+      "level": 1,
+      "initiative": 40,
+      "image": "GE/fh-changelings-boon.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "chitinous-horde",
+      "name": "Chitinous Horde",
+      "level": 5,
+      "initiative": 15,
+      "image": "GE/fh-chitinous-horde.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "corrosive-acids",
+      "name": "Corrosive Acids",
+      "level": 6,
+      "initiative": 28,
+      "image": "GE/fh-corrosive-acids.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "drag-down",
+      "name": "Drag Down",
+      "level": 1,
+      "initiative": 34,
+      "image": "GE/fh-drag-down.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "dragonfly-surge",
+      "name": "Dragonfly Surge",
+      "level": 3,
+      "initiative": 50,
+      "image": "GE/fh-dragonfly-surge.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "draining-pincers",
+      "name": "Draining Pincers",
+      "level": 1,
+      "initiative": 72,
+      "image": "GE/fh-draining-pincers.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "feeding-frenzy",
+      "name": "Feeding Frenzy",
+      "level": "X",
+      "initiative": 62,
+      "image": "GE/fh-feeding-frenzy.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "firefly-swarm",
+      "name": "Firefly Swarm",
+      "level": 1,
+      "initiative": 76,
+      "image": "GE/fh-firefly-swarm.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "flailing-tendrils",
+      "name": "Flailing Tendrils",
+      "level": 1,
+      "initiative": 12,
+      "image": "GE/fh-flailing-tendrils.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "formless-grace",
+      "name": "Formless Grace",
+      "level": 5,
+      "initiative": 75,
+      "image": "GE/fh-formless-grace.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "hail-of-thorns",
+      "name": "Hail of Thorns",
+      "level": 1,
+      "initiative": 88,
+      "image": "GE/fh-hail-of-thorns.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "harbinger-of-ruin",
+      "name": "Harbinger of Ruin",
+      "level": 9,
+      "initiative": 11,
+      "image": "GE/fh-harbinger-of-ruin.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "harvest-the-essence",
+      "name": "Harvest the Essence",
+      "level": 1,
+      "initiative": 60,
+      "image": "GE/fh-harvest-the-essence.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "hirudotherapy",
+      "name": "Hirudotherapy",
+      "level": 6,
+      "initiative": 92,
+      "image": "GE/fh-hirudotherapy.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "hornbeetle-carapace",
+      "name": "Hornbeetle Carapace",
+      "level": 1,
+      "initiative": 20,
+      "image": "GE/fh-hornbeetle-carapace.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "hornet-stingers",
+      "name": "Hornet Stingers",
+      "level": 1,
+      "initiative": 23,
+      "image": "GE/fh-hornet-stingers.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "icebound-quills",
+      "name": "Icebound Quills",
+      "level": 1,
+      "initiative": 14,
+      "image": "GE/fh-icebound-quills.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "into-my-embrace",
+      "name": "Into My Embrace",
+      "level": 1,
+      "initiative": 36,
+      "image": "GE/fh-into-my-embrace.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "locust-host",
+      "name": "Locust Host",
+      "level": 2,
+      "initiative": 23,
+      "image": "GE/fh-locust-host.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "luminous-descent",
+      "name": "Luminous Descent",
+      "level": 4,
+      "initiative": 67,
+      "image": "GE/fh-luminous-descent.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "mandible-storm",
+      "name": "Mandible Storm",
+      "level": 3,
+      "initiative": 30,
+      "image": "GE/fh-mandible-storm.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "mind-spike",
+      "name": "Mind Spike",
+      "level": 1,
+      "initiative": 18,
+      "image": "GE/fh-mind-spike.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "oscillating-entity",
+      "name": "Oscillating Entity",
+      "level": 8,
+      "initiative": 55,
+      "image": "GE/fh-oscillating-entity.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "reckless-jab",
+      "name": "Reckless Jab",
+      "level": "X",
+      "initiative": 38,
+      "image": "GE/fh-reckless-jab.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "reshape-the-guise",
+      "name": "Reshape the Guise",
+      "level": "X",
+      "initiative": 38,
+      "image": "GE/fh-reshape-the-guise.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "scarab-flight",
+      "name": "Scarab Flight",
+      "level": 1,
+      "initiative": 30,
+      "image": "GE/fh-scarab-flight.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "selfless-offering",
+      "name": "Selfless Offering",
+      "level": 1,
+      "initiative": 27,
+      "image": "GE/fh-selfless-offering.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "smoldering-hatred",
+      "name": "Smoldering Hatred",
+      "level": "X",
+      "initiative": 32,
+      "image": "GE/fh-smoldering-hatred.jpeg",
+      "form": "ranged"
+    },
+    {
+      "id": "thresh-and-flail",
+      "name": "Thresh and Flail",
+      "level": 4,
+      "initiative": 43,
+      "image": "GE/fh-thresh-and-flail.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "two-pronged-entrapment",
+      "name": "Two-pronged Entrapment",
+      "level": 7,
+      "initiative": 21,
+      "image": "GE/fh-two-pronged-entrapment.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "venomous-barbs",
+      "name": "Venomous Barbs",
+      "level": 2,
+      "initiative": 17,
+      "image": "GE/fh-venomous-barbs.jpeg",
+      "form": "melee"
+    },
+    {
+      "id": "voice-of-salvation",
+      "name": "Voice of Salvation",
+      "level": 9,
+      "initiative": 39,
+      "image": "GE/fh-voice-of-salvation.jpeg",
+      "form": "ranged"
+    }
+  ]
+}

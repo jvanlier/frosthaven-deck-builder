@@ -1,0 +1,212 @@
+{
+  "id": "SA",
+  "name": "Satha",
+  "handSize": 10,
+  "icon": "SA.png",
+  "cardBack": "SA/sa-back.jpeg",
+  "cards": [
+    {
+      "id": "a-little-help-here",
+      "name": "A Little Help Here",
+      "level": 3,
+      "initiative": 15,
+      "image": "SA/a-little-help-here.jpeg"
+    },
+    {
+      "id": "armory",
+      "name": "Armory",
+      "level": 5,
+      "initiative": 14,
+      "image": "SA/armory.jpeg"
+    },
+    {
+      "id": "blade-of-the-north",
+      "name": "Blade of the North",
+      "level": 1,
+      "initiative": 76,
+      "image": "SA/blade-of-the-north.jpeg"
+    },
+    {
+      "id": "bonded-through-battle",
+      "name": "Bonded Through Battle",
+      "level": 8,
+      "initiative": 72,
+      "image": "SA/bonded-through-battle.jpeg"
+    },
+    {
+      "id": "bring-them-down",
+      "name": "Bring Them Down",
+      "level": 1,
+      "initiative": 16,
+      "image": "SA/bring-them-down.jpeg"
+    },
+    {
+      "id": "combined-might",
+      "name": "Combined Might",
+      "level": 1,
+      "initiative": 22,
+      "image": "SA/combined-might.jpeg"
+    },
+    {
+      "id": "crashing-steel",
+      "name": "Crashing Steel",
+      "level": 6,
+      "initiative": 29,
+      "image": "SA/crashing-steel.jpeg"
+    },
+    {
+      "id": "dazing-sweep",
+      "name": "Dazing Sweep",
+      "level": 1,
+      "initiative": 86,
+      "image": "SA/dazing-sweep.jpeg"
+    },
+    {
+      "id": "defiance",
+      "name": "Defiance",
+      "level": 6,
+      "initiative": 47,
+      "image": "SA/defiance.jpeg"
+    },
+    {
+      "id": "emboldening-call",
+      "name": "Emboldening Call",
+      "level": "X",
+      "initiative": 31,
+      "image": "SA/emboldening-call.jpeg"
+    },
+    {
+      "id": "fight-as-one",
+      "name": "Fight As One",
+      "level": 9,
+      "initiative": 37,
+      "image": "SA/fight-as-one.jpeg"
+    },
+    {
+      "id": "for-frosthaven",
+      "name": "For Frosthaven",
+      "level": 7,
+      "initiative": 79,
+      "image": "SA/for-frosthaven.jpeg"
+    },
+    {
+      "id": "get-behind-me",
+      "name": "Get Behind Me",
+      "level": 1,
+      "initiative": 11,
+      "image": "SA/get-behind-me.jpeg"
+    },
+    {
+      "id": "implacable-advance",
+      "name": "Implacable Advance",
+      "level": 1,
+      "initiative": 82,
+      "image": "SA/implacable-advance.jpeg"
+    },
+    {
+      "id": "lead-from-the-front",
+      "name": "Lead From the Front",
+      "level": 8,
+      "initiative": 10,
+      "image": "SA/lead-from-the-front.jpeg"
+    },
+    {
+      "id": "lead-the-charge",
+      "name": "Lead the Charge",
+      "level": 1,
+      "initiative": 39,
+      "image": "SA/lead-the-charge.jpeg"
+    },
+    {
+      "id": "northern-valor",
+      "name": "Northern Valor",
+      "level": 4,
+      "initiative": 84,
+      "image": "SA/northern-valor.jpeg"
+    },
+    {
+      "id": "outmaneuver",
+      "name": "Outmaneuver",
+      "level": 2,
+      "initiative": 41,
+      "image": "SA/outmaneuver.jpeg"
+    },
+    {
+      "id": "raze",
+      "name": "Raze",
+      "level": 3,
+      "initiative": 6,
+      "image": "SA/raze.jpeg"
+    },
+    {
+      "id": "send-them-reeling",
+      "name": "Send Them Reeling",
+      "level": 7,
+      "initiative": 20,
+      "image": "SA/send-them-reeling.jpeg"
+    },
+    {
+      "id": "shared-glory",
+      "name": "Shared Glory",
+      "level": 1,
+      "initiative": 8,
+      "image": "SA/shared-glory.jpeg"
+    },
+    {
+      "id": "spur-their-spirits",
+      "name": "Spur Their Spirits",
+      "level": 1,
+      "initiative": 18,
+      "image": "SA/spur-their-spirits.jpeg"
+    },
+    {
+      "id": "stand-against-many",
+      "name": "Stand Against Many",
+      "level": 9,
+      "initiative": 13,
+      "image": "SA/stand-against-many.jpeg"
+    },
+    {
+      "id": "stand-firm",
+      "name": "Stand Firm",
+      "level": 2,
+      "initiative": 12,
+      "image": "SA/stand-firm.jpeg"
+    },
+    {
+      "id": "strike-now",
+      "name": "Strike Now",
+      "level": 4,
+      "initiative": 52,
+      "image": "SA/strike-now.jpeg"
+    },
+    {
+      "id": "take-command",
+      "name": "Take Command",
+      "level": "X",
+      "initiative": 55,
+      "image": "SA/take-command.jpeg"
+    },
+    {
+      "id": "unleash-the-archers",
+      "name": "Unleash the Archers",
+      "level": 5,
+      "initiative": 64,
+      "image": "SA/unleash-the-archers.jpeg"
+    },
+    {
+      "id": "victory-rush",
+      "name": "Victory Rush",
+      "level": 1,
+      "initiative": 63,
+      "image": "SA/victory-rush.jpeg"
+    },
+    {
+      "id": "wolf-pack-tactics",
+      "name": "Wolf Pack Tactics",
+      "level": "X",
+      "initiative": 26,
+      "image": "SA/wolf-pack-tactics.jpeg"
+    }
+  ]
+}

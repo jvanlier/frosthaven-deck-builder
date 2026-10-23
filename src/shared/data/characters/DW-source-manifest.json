@@ -1,0 +1,176 @@
+{
+  "generatedBy": "scripts/import-cards.ts",
+  "source": {
+    "repository": "https://github.com/cmlenius/gloomhaven-card-browser",
+    "metadata": {
+      "url": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/dafbc908836aa0e4150e17cada7c879b199015c9/data/character-abilities/frosthaven.json",
+      "revision": "dafbc908836aa0e4150e17cada7c879b199015c9",
+      "sha256": "6d2380262ace64429ebbaa3e636f115fe62600a8d5159b13e9fe6a8c6cf9f305"
+    },
+    "images": {
+      "baseUrl": "https://raw.githubusercontent.com/cmlenius/gloomhaven-card-browser/a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1/images/",
+      "revision": "a54ecb9cdf3ea3a85468f3245fa00bb7b29e65d1"
+    }
+  },
+  "assets": [
+    {
+      "id": "anger-of-the-dead",
+      "source": "character-ability-cards/frosthaven/DW/fh-anger-of-the-dead.jpeg",
+      "sha256": "501be8e76d492386599c74d45e50739f26e50037161a7de767776c2e9886c394"
+    },
+    {
+      "id": "black-barrage",
+      "source": "character-ability-cards/frosthaven/DW/fh-black-barrage.jpeg",
+      "sha256": "ac2db3c02e4a7a7befa11f1b0198c1717335a62247adb631f08a4b8e88c349fb"
+    },
+    {
+      "id": "black-lance",
+      "source": "character-ability-cards/frosthaven/DW/fh-black-lance.jpeg",
+      "sha256": "37dc501988c38523b5d6c2bd6f1ae0c57a245ec3c2abad3f680ec7ba07d8054d"
+    },
+    {
+      "id": "call-of-doom",
+      "source": "character-ability-cards/frosthaven/DW/fh-call-of-doom.jpeg",
+      "sha256": "f26420d11b4cd467045ebce5aafcba219a1cf5b60b9f226d84c827f1e6ce1838"
+    },
+    {
+      "id": "call-to-the-abyss",
+      "source": "character-ability-cards/frosthaven/DW/fh-call-to-the-abyss.jpeg",
+      "sha256": "4005ae2d6c81bf483f43c76ad3b29355a6a798b27a07b677a4c492229f555e12"
+    },
+    {
+      "id": "dark-fog",
+      "source": "character-ability-cards/frosthaven/DW/fh-dark-fog.jpeg",
+      "sha256": "ac8588072b150d1f495c589413a3e15c24fedf5326cd8baed5610ccd0d3b4779"
+    },
+    {
+      "id": "dead-bolt",
+      "source": "character-ability-cards/frosthaven/DW/fh-dead-bolt.jpeg",
+      "sha256": "3fd52e3bd70ffa5a2dd24eefd5f6a4dcf5194575d446b28420d3066b0248f8ca"
+    },
+    {
+      "id": "deepening-despair",
+      "source": "character-ability-cards/frosthaven/DW/fh-deepening-despair.jpeg",
+      "sha256": "8aaa54fcc67fa7949b18a1ec4aae9eea0e28ddb31ae1823a516dc465d5561caf"
+    },
+    {
+      "id": "dominate",
+      "source": "character-ability-cards/frosthaven/DW/fh-dominate.jpeg",
+      "sha256": "5ba50a2fb13426353369788fa707d5de73e361041e52505a40dd6530a5c449aa"
+    },
+    {
+      "id": "eclipse",
+      "source": "character-ability-cards/frosthaven/DW/fh-eclipse.jpeg",
+      "sha256": "68e1ab43c46c44d666c76a8932ff9e290d0dd7a8d894f29f35d2fdfa0f145383"
+    },
+    {
+      "id": "fleeting-dusk",
+      "source": "character-ability-cards/frosthaven/DW/fh-fleeting-dusk.jpeg",
+      "sha256": "f92ff7b8526951ac244cfbe1db82d842da18399cf1d8e1eabee4b0d99d58241c"
+    },
+    {
+      "id": "fluid-night",
+      "source": "character-ability-cards/frosthaven/DW/fh-fluid-night.jpeg",
+      "sha256": "7c6dd02fedcfbfb5045265d90b5f1d9f93d28b2698cd77cd69065fdc844c85e9"
+    },
+    {
+      "id": "forceful-spirits",
+      "source": "character-ability-cards/frosthaven/DW/fh-forceful-spirits.jpeg",
+      "sha256": "8728e189fc6ff32fb7d01cb22ae99b39e1ab05975579f6e92bdc273fcd207cd5"
+    },
+    {
+      "id": "frozen-in-fear",
+      "source": "character-ability-cards/frosthaven/DW/fh-frozen-in-fear.jpeg",
+      "sha256": "3d2ceb905419947998fb654a40d8b7a55f75647e42102d69dd91f4e74b3e401b"
+    },
+    {
+      "id": "hungry-grasps",
+      "source": "character-ability-cards/frosthaven/DW/fh-hungry-grasps.jpeg",
+      "sha256": "3b23a42c3459fa3ff112e852b908a2c4becf02ae18022771f345c39485982355"
+    },
+    {
+      "id": "lashing-tendrils",
+      "source": "character-ability-cards/frosthaven/DW/fh-lashing-tendrils.jpeg",
+      "sha256": "9ace2ff77b2be411be2f197ea206b0109210e5851da4446ef393afd3d88c2d54"
+    },
+    {
+      "id": "lingering-rot",
+      "source": "character-ability-cards/frosthaven/DW/fh-lingering-rot.jpeg",
+      "sha256": "353fe5aac6983c55e6a3fffa8ca6e754a3e8ce7e18e8df505084186b7f670920"
+    },
+    {
+      "id": "medium",
+      "source": "character-ability-cards/frosthaven/DW/fh-medium.jpeg",
+      "sha256": "237aeb1906dff4520efc2f2c45f20cf570fb7c126314231c2cfaea754bc0143c"
+    },
+    {
+      "id": "proliferation-of-the-abyss",
+      "source": "character-ability-cards/frosthaven/DW/fh-proliferation-of-the-abyss.jpeg",
+      "sha256": "028fc8d63029a3a8bc7b642565301c46fd6b660a1209e31244c91bba2b3208f6"
+    },
+    {
+      "id": "pulled-across",
+      "source": "character-ability-cards/frosthaven/DW/fh-pulled-across.jpeg",
+      "sha256": "55c4181ab75b60f61d09dce39361fbb21171cf72c7c622256fab41b85bc88055"
+    },
+    {
+      "id": "rest-in-the-shade",
+      "source": "character-ability-cards/frosthaven/DW/fh-rest-in-the-shade.jpeg",
+      "sha256": "76f56629e81a09718b250993d3483c42184f9c5352b701e2918db4c1c26ec109"
+    },
+    {
+      "id": "restless-spirits",
+      "source": "character-ability-cards/frosthaven/DW/fh-restless-spirits.jpeg",
+      "sha256": "e055616ba694a0a374f789787fca40bb407c6748431002c836f24f412f5c11f8"
+    },
+    {
+      "id": "ritual-sacrifice",
+      "source": "character-ability-cards/frosthaven/DW/fh-ritual-sacrifice.jpeg",
+      "sha256": "40bb0cacd98a1b83a146110aeba1e88068be34fb2e4d915efae14270c9359432"
+    },
+    {
+      "id": "shadow-step",
+      "source": "character-ability-cards/frosthaven/DW/fh-shadow-step.jpeg",
+      "sha256": "f056724baee6ac0e8214a5a92f37157578bb6bfe2fd051facb00696c1ee957a5"
+    },
+    {
+      "id": "strength-of-the-abyss",
+      "source": "character-ability-cards/frosthaven/DW/fh-strength-of-the-abyss.jpeg",
+      "sha256": "af2052bcda2ceed6414ca10bb12bc7cb4bb0af5f27942d91e7dcf73b0a7e2040"
+    },
+    {
+      "id": "sunless-apparition",
+      "source": "character-ability-cards/frosthaven/DW/fh-sunless-apparition.jpeg",
+      "sha256": "b9cc3d1cc82a4ece89e2bab72dab2c5de568666f266f249dd9625805e4cf2472"
+    },
+    {
+      "id": "the-night-takes-shape",
+      "source": "character-ability-cards/frosthaven/DW/fh-the-night-takes-shape.jpeg",
+      "sha256": "b32cca3367e0b94d3b390795706632e6253765e7147ba2caf962de4a810b2ea2"
+    },
+    {
+      "id": "vengeful-storm",
+      "source": "character-ability-cards/frosthaven/DW/fh-vengeful-storm.jpeg",
+      "sha256": "084b090359967406dbfb08e4153fba7e42177ecc638c25b4b2f7977dcb23e9bf"
+    },
+    {
+      "id": "wave-of-anguish",
+      "source": "character-ability-cards/frosthaven/DW/fh-wave-of-anguish.jpeg",
+      "sha256": "b37b31f5e818b75794e82683e28104f86c982e82cdbcec456a1e372554c26270"
+    },
+    {
+      "id": "when-your-time-comes",
+      "source": "character-ability-cards/frosthaven/DW/fh-when-your-time-comes.jpeg",
+      "sha256": "7b1748af751951ccc48859bcfb471b17f2a5ab5f80d2fa82c240c940c6927958"
+    },
+    {
+      "id": "dw-back",
+      "source": "character-ability-cards/frosthaven/DW/fh-dw-back.jpeg",
+      "sha256": "c43bda1ec9cdd012ad519d719669af7913da1ce43fb61a58807f81013c0ef6d1"
+    }
+  ],
+  "icon": {
+    "source": "icons/characters/fh/DW.png",
+    "sha256": "6cc7c61023fe7c21ae324d9368262f689c30899da0646d5217a7abacea4cb64b"
+  }
+}

@@ -642,6 +642,11 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
+  if (page.viewportSize()!.width < 1240) {
+    await expect(
+      page.getByRole("heading", { name: "Your deck", exact: true }),
+    ).toBeFocused();
+  }
   await expect(page.getByText("12 / 11 cards", { exact: true })).toBeVisible();
   const excluded = page.locator(
     '.level-up-candidate:has([data-card-id="tornado"])',
@@ -1299,16 +1304,16 @@ test("loads local class icons in the picker and build header", async ({
     await loading;
     await route.fulfill({ json: fixtureData });
   });
-  await page.goto("/c/SD");
-  const pickerIcon = page.locator(".class-icon");
+  await page.goto("/");
+  await expect(page.getByText("Loading your deck workspace…")).toBeVisible();
+  releaseData();
+  const pickerIcon = page.locator('.character-choice[href="/c/SD"] img');
   await expect(pickerIcon).toHaveAttribute("src", "/icons/SD.png");
   await expect
     .poll(() =>
       pickerIcon.evaluate((image) => (image as HTMLImageElement).naturalWidth),
     )
     .toBeGreaterThan(0);
-  releaseData();
-  await expect(page.locator(".brand img")).toBeVisible();
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1`);
   const headerIcon = page.locator(".brand img");
   await expect(headerIcon).toHaveAttribute("src", "/icons/SD.png");
@@ -2169,7 +2174,7 @@ test("switches between stored levels using the header navigation", async ({
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
 });
 
-test("resumes the last valid deck position and safely falls back for invalid storage", async ({
+test("offers the last valid deck on the picker and safely ignores invalid storage", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
@@ -2204,6 +2209,16 @@ test("resumes the last valid deck position and safely falls back for invalid sto
   );
 
   await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Choose your character" }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await page
+    .getByRole("link", {
+      name: "Resume Snowdancer · Freeze control · Level 2",
+      exact: true,
+    })
+    .click();
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/2`);
   await expect(
     page.getByRole("heading", { name: "Deck: Freeze control" }),
@@ -2215,8 +2230,9 @@ test("resumes the last valid deck position and safely falls back for invalid sto
   );
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Your builds" }),
+    page.getByRole("heading", { name: "Choose your character" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Resume/ })).toHaveCount(0);
   await expect(page).toHaveURL(/\/$/);
 
   await page.evaluate(
@@ -2229,7 +2245,7 @@ test("resumes the last valid deck position and safely falls back for invalid sto
   );
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Your builds" }),
+    page.getByRole("heading", { name: "Choose your character" }),
   ).toBeVisible();
 
   await page.evaluate(
@@ -2246,7 +2262,7 @@ test("resumes the last valid deck position and safely falls back for invalid sto
   );
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Your builds" }),
+    page.getByRole("heading", { name: "Choose your character" }),
   ).toBeVisible();
 });
 
@@ -2415,7 +2431,7 @@ test("offers retry after an initial load failure", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("button", { name: "Retry" }).click();
   await expect(
-    page.getByRole("heading", { name: "Your builds" }),
+    page.getByRole("heading", { name: "Choose your character" }),
   ).toBeVisible();
 });
 
@@ -2456,7 +2472,7 @@ test("creates a starting build, caps the hand, and restores it after reload", as
     });
   });
 
-  await page.goto("/");
+  await page.goto("/c/SD");
   await page.getByRole("button", { name: "Create build" }).click();
   const dialog = page.getByRole("dialog", { name: "Create build" });
   await dialog.getByRole("button", { name: "Create build" }).click();
@@ -2717,7 +2733,7 @@ test("renames, copies, and confirms build deletion", async ({ page }) => {
     });
   });
 
-  await page.goto("/");
+  await page.goto("/c/SD");
   const original = page.locator("li").filter({ hasText: "Freeze control" });
   await original.getByRole("button", { name: "Rename" }).click();
   const renameDialog = page.getByRole("dialog", { name: "Rename build" });
@@ -2787,7 +2803,7 @@ test("copies a higher starting level with its pick slots intact", async ({
     });
   });
 
-  await page.goto("/");
+  await page.goto("/c/SD");
   await page.locator("li").getByRole("button", { name: "Copy" }).click();
   const copyDialog = page.getByRole("dialog", { name: "Copy build" });
   await copyDialog.getByLabel("Build name").fill("Higher copy");
@@ -2838,7 +2854,7 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
     await route.fulfill({ status: 503, body: "unavailable" });
   });
 
-  await page.goto("/");
+  await page.goto("/c/SD");
   await page.getByRole("button", { name: "Create build" }).click();
   const createDialog = page.getByRole("dialog", { name: "Create build" });
   await createDialog.getByLabel("Build name").fill("Pending build");
@@ -2939,7 +2955,7 @@ test("offers sequential legal picks for a higher starting level", async ({
       body: JSON.stringify({ revision: 1 }),
     });
   });
-  await page.goto("/");
+  await page.goto("/c/SD");
   await page.getByRole("button", { name: "Create build" }).click();
   const dialog = page.getByRole("dialog", { name: "Create build" });
   await dialog.getByLabel("Build name").fill("Prosperity three");

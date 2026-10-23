@@ -160,7 +160,9 @@ function compareLevels(left: CardLevel, right: CardLevel): number {
 }
 
 function compareCards(left: Card, right: Card): number {
-  const initiativeDifference = left.initiative - right.initiative;
+  const initiativeDifference =
+    parseInt(String(left.initiative), 10) -
+    parseInt(String(right.initiative), 10);
   if (initiativeDifference !== 0) {
     return initiativeDifference;
   }

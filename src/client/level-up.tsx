@@ -6,7 +6,7 @@ import { CardNoteInput } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
-import { characters } from "../shared/data/characters/index.js";
+import { getCharacter } from "../shared/data/characters/index.js";
 import {
   appendLevelUp,
   removeCardNote,
@@ -27,8 +27,6 @@ import {
   type LevelUp,
 } from "../shared/schema/index.js";
 import type { Card, Character } from "../shared/character.js";
-
-const character = characters[0]!;
 
 export function levelUpPath(
   characterId: string,
@@ -69,7 +67,11 @@ export function LevelUpRoute() {
   const { characterId, buildId, level } = useParams();
   const location = useLocation();
   const { data, canMutate, updateData, flush } = useAppData();
-  const build = data?.builds.find((candidate) => candidate.id === buildId);
+  const character = getCharacter(characterId ?? "");
+  const build = data?.builds.find(
+    (candidate) =>
+      candidate.id === buildId && candidate.characterId === character?.id,
+  );
   const targetLevel = level === undefined ? Number.NaN : Number(level);
   const existingLevelUp = build?.levelUps.find(
     (candidate) => candidate.level === targetLevel,
@@ -78,7 +80,7 @@ export function LevelUpRoute() {
     ? build.startLevel + build.levelUps.length + 1
     : Number.NaN;
   const shouldAppend =
-    characterId === character.id &&
+    character !== undefined &&
     build !== undefined &&
     existingLevelUp === undefined &&
     targetLevel === expectedNextLevel &&
@@ -100,7 +102,7 @@ export function LevelUpRoute() {
     void flush().catch(() => undefined);
   }, [build, flush, shouldAppend, targetLevel, updateData]);
 
-  if (characterId !== character.id || !build) {
+  if (!character || !build) {
     return <UnavailableLevelUpView />;
   }
   if (existingLevelUp) {
@@ -606,6 +608,8 @@ function deckPath(characterId: string, buildId: string, level: number): string {
 }
 
 export function UnavailableLevelUpView() {
+  const { characterId } = useParams();
+  const character = getCharacter(characterId ?? "");
   return (
     <main className="page-content narrow-content">
       <section className="empty-card">
@@ -615,8 +619,11 @@ export function UnavailableLevelUpView() {
           The requested level is not ready to edit. Your saved data is
           unchanged.
         </p>
-        <Link className="button-link" to={`/c/${character.id}`}>
-          Back to builds
+        <Link
+          className="button-link"
+          to={character ? `/c/${character.id}` : "/"}
+        >
+          {character ? "Back to builds" : "Choose a character"}
         </Link>
       </section>
     </main>

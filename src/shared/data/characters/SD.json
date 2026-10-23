@@ -3,6 +3,7 @@
   "name": "Snowdancer",
   "handSize": 11,
   "icon": "SD.png",
+  "cardBack": "SD/fh-sd-back.jpeg",
   "cards": [
     {
       "id": "birds-in-a-tempest",
