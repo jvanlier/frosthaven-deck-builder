@@ -494,6 +494,7 @@ function LevelUpEditor({
               cards={availableCards}
               selection="pick"
               selectedPick={selectedPick}
+              pickLevel={level}
               added={activeAdded}
               canMutate={canMutate}
               renderNote={renderCandidateNote}
@@ -534,7 +535,7 @@ function LevelUpEditor({
                         isDropped
                           ? "Dropped"
                           : card.id === selectedPick
-                            ? "Level-up pick"
+                            ? `Level ${level} pick`
                             : isNew
                               ? "Added from pool"
                               : "In deck"
@@ -565,6 +566,7 @@ function LevelUpEditor({
                 cards={swapCandidates}
                 selection="add"
                 selectedPick={selectedPick}
+                pickLevel={level}
                 added={activeAdded}
                 canMutate={canMutate}
                 renderNote={renderCandidateNote}

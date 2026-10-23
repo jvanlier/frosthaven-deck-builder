@@ -1611,7 +1611,7 @@ test("shows card notes, dropped cards and a read-only note history", async ({
   const birds = page.locator(
     '.deck-card-item:has([data-card-id="birds-in-a-tempest"])',
   );
-  await expect(birds.locator(".card-state")).toHaveText("Level-up pick");
+  await expect(birds.locator(".card-state")).toHaveText("Level 2 pick");
   await expect(page.getByText("NEW", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(0);
 
@@ -2039,7 +2039,7 @@ test("styles level-up pick badges as centered pills in view and edit", async ({
     const badge = page
       .locator('.card-tile[data-card-id="birds-in-a-tempest"] .card-state')
       .first();
-    await expect(badge).toHaveText("Level-up pick");
+    await expect(badge).toHaveText("Level 2 pick");
     await expect(badge).toHaveCSS("top", "-11px");
     await expect(badge).toHaveCSS("border-radius", "99px");
     await expect(badge).toHaveCSS("font-size", "12px");

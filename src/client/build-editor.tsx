@@ -755,6 +755,7 @@ export function StartingEditor({
                     )}
                     selection="pick"
                     selectedPick={activePick.cardId}
+                    pickLevel={activePick.forLevel}
                     canMutate={canMutate}
                     renderNote={renderNote}
                     onPick={(card) => choosePick(activePick.forLevel, card.id)}
@@ -855,7 +856,7 @@ export function StartingEditor({
                     }
                     stateLabel={
                       selected && pickedSlot
-                        ? "Level-up pick"
+                        ? `Level ${pickedSlot.forLevel} pick`
                         : selected
                           ? "In starting deck"
                           : !inPool

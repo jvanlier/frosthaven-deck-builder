@@ -755,7 +755,7 @@ textarea {
 .card-action:disabled {
   opacity: 0.4;
 }
-.card-tile[data-state="Level-up pick"] .card-action:disabled,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-action:disabled,
 .card-tile[data-state="Added from pool"] .card-action:disabled {
   opacity: 1;
   cursor: default;
@@ -795,7 +795,7 @@ textarea {
   overflow: hidden;
   clip-path: inset(50%);
 }
-.card-tile[data-state^="Level-up pick"] img,
+.card-tile[data-state^="Level "][data-state$=" pick"] img,
 .card-tile[data-state="Added from pool"] img,
 .card-tile[data-state="In starting deck"] img {
   outline: 3px solid var(--ice);
@@ -804,7 +804,7 @@ textarea {
     0 0 0 7px #38bdf833,
     0 0 40px #38bdf855;
 }
-.card-tile[data-state^="Level-up pick"] .card-state,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
 .card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
@@ -815,7 +815,7 @@ textarea {
   max-width: none;
   width: max-content;
 }
-.card-tile[data-state^="Level-up pick"] .card-state,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
 .card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
@@ -826,13 +826,13 @@ textarea {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-.card-tile[data-state^="Level-up pick"] .card-state,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
 .card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state {
   color: #03111f;
   background: var(--ice);
 }
-.card-tile[data-state^="Level-up pick"] .card-state::before,
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state::before,
 .card-tile[data-state="Added from pool"] .card-state::before,
 .card-tile[data-state="In starting deck"] .card-state::before {
   content: "✓ ";

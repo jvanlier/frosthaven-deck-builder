@@ -6,6 +6,7 @@ export function CandidateGrid({
   cards,
   selection,
   selectedPick,
+  pickLevel,
   added,
   canMutate,
   renderNote,
@@ -15,6 +16,8 @@ export function CandidateGrid({
   cards: Card[];
   selection: "pick" | "add";
   selectedPick: string | null;
+  /** The level the selected pick is for, shown on its badge. */
+  pickLevel: number;
   added?: Set<string>;
   canMutate: boolean;
   renderNote: (card: Card) => ReactNode;
@@ -49,7 +52,7 @@ export function CandidateGrid({
               }
               stateLabel={
                 isPicked
-                  ? "Level-up pick"
+                  ? `Level ${pickLevel} pick`
                   : isAdded
                     ? "Added from pool"
                     : isExcluded

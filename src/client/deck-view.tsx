@@ -60,12 +60,13 @@ export function DeckView({
   const navigate = useNavigate();
   const cardById = new Map(character.cards.map((card) => [card.id, card]));
   const isStartLevel = state.level === build.startLevel;
-  const pickedIds = new Set(
+  // Starting picks keep their slot level; a level-up pick belongs to its level.
+  const pickLevels = new Map(
     isStartLevel
-      ? state.applied.startingPicks.map((pick) => pick.cardId)
+      ? state.applied.startingPicks.map((pick) => [pick.cardId, pick.forLevel])
       : state.applied.pick === null
         ? []
-        : [state.applied.pick],
+        : [[state.applied.pick, state.level]],
   );
   const droppedCards = state.applied.dropped.flatMap((cardId) => {
     const card = cardById.get(cardId);
@@ -76,8 +77,8 @@ export function DeckView({
     ...(showDropped && !isStartLevel ? droppedCards : []),
   ].sort(compareCardLevelsDescending);
   const stateLabel = (card: Card): string | undefined =>
-    pickedIds.has(card.id)
-      ? "Level-up pick"
+    pickLevels.has(card.id)
+      ? `Level ${pickLevels.get(card.id)} pick`
       : state.applied.dropped.includes(card.id)
         ? "Dropped"
         : state.applied.added.includes(card.id)

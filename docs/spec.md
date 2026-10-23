@@ -209,13 +209,13 @@ necessarily on screen at once.
 1. **Pick a new pool card (R2).** Candidates:
    - **Newly unlocked**: the level L+1 cards, shown first and prominently.
    - **Earlier, not yet picked**: unpicked cards of level 2..L, in a secondary section.
-   - The picked card stays in place, marked *Level-up pick*. Tapping it again un-picks it, and
+   - The picked card stays in place, marked *Level N pick* (N = the level it is picked for). Tapping it again un-picks it, and
      tapping another candidate changes the pick.
-2. **Added to deck.** The pick always enters the deck, marked **Level-up pick**. The deck is now
+2. **Added to deck.** The pick always enters the deck, marked **Level L+1 pick**. The deck is now
    `handSize + 1`, and the status bar shows **"Remove 1 card — 12 / 11"**.
 3. **Drop one card.** Tap a deck card to drop it, and tap it again to keep it. Dropped
    cards stay in place, marked *Dropped*.
-   - Cards that are *Level-up pick* or *Added from pool* in this flow can't be dropped. Undo them
+   - Cards marked as this level's pick or *Added from pool* in this flow can't be dropped. Undo them
      where they were chosen instead.
    - So a pick always enters the deck at its own level. It can be dropped at a later
      level.
@@ -267,7 +267,7 @@ its reported problems instead of appending.
   - The deck's cards as images, sorted by card level, then initiative.
   - A level switcher (previous/next, and a direct choice among existing levels).
   - Badges: **incomplete**, **invalid**.
-  - Cards picked or added at this level are marked *Level-up pick* or *Added from pool*.
+  - Cards picked or added at this level are marked *Level N pick* or *Added from pool*. At the start level, each starting pick shows its slot level (e.g. *Level 2 pick*).
   - A **"Show card note"** toggle that shows each card's note for this level (§4.8) below
     the card, with the level it was recorded at. Tapping a card opens card detail (F12).
   - A **"Show dropped cards"** toggle (not at the start level) that also shows the cards
@@ -517,7 +517,7 @@ rule in §2.2 and every issue above. It exposes at least `pool`, `deck`, `pickOp
    - Then choose 11 of 16 pool cards.
 3. Level-up 3 → 4: the status bar stays visible and the level 4 cards are shown first.
    Pick Biting Frost → "Remove 1 card — 12 / 11" → drop one → done. That takes ≤ 4
-   taps without typing. Biting Frost is marked *Level-up pick* in the deck and can't be
+   taps without typing. Biting Frost is marked *Level 4 pick* in the deck and can't be
    dropped.
 4. Extra swaps: pick and drop, then bring back an earlier dropped pool card from "Swap
    more" and drop another.
