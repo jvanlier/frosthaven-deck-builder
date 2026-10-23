@@ -717,6 +717,14 @@ textarea {
   gap: 14px;
   align-items: start;
 }
+/* Card notes belong to the card above them: keep each note close to its card
+   and separate rows clearly, so a note never reads as the next row's card's. */
+:is(.card-grid, .deck-card-list, .level-up-card-grid):has(
+  .card-note,
+  .card-note-input
+) {
+  row-gap: 32px;
+}
 .deck-card-item,
 .level-up-group,
 .level-up-candidate,
@@ -879,10 +887,36 @@ textarea {
   color: #03111f;
   background: var(--ice2);
 }
+.card-note,
+.card-note-input {
+  position: relative;
+  margin-top: 10px;
+}
+/* A notch on top points at the note's card. */
+.card-note::before,
+.card-note-input::before,
+.card-note::after,
+.card-note-input::after {
+  position: absolute;
+  left: 50%;
+  border: 8px solid transparent;
+  border-top: 0;
+  content: "";
+  transform: translateX(-50%);
+}
+.card-note::before,
+.card-note-input::before {
+  bottom: 100%;
+  border-bottom-color: #38bdf866;
+}
+.card-note::after,
+.card-note-input::after {
+  bottom: calc(100% - 1px);
+  border-bottom-color: #162238;
+}
 .card-note {
   display: grid;
   gap: 4px;
-  margin-top: 8px;
   padding: 8px;
   border: 1px solid #38bdf866;
   border-radius: 10px;
@@ -903,7 +937,6 @@ textarea {
 .card-note-input {
   display: grid;
   gap: 4px;
-  margin-top: 8px;
   padding: 8px;
   border: 1px solid #38bdf866;
   border-radius: 10px;
@@ -1464,6 +1497,12 @@ textarea {
   .level-up-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+  :is(.card-grid, .deck-card-list, .level-up-card-grid):has(
+    .card-note,
+    .card-note-input
+  ) {
+    row-gap: 24px;
   }
   .deck-card-item .card-grid {
     grid-template-columns: minmax(0, 1fr);
