@@ -5,6 +5,7 @@ Status: v5 · single-ticket autonomous delivery agreed · Owner: jvanlier
 Implementation sequence and GitHub issues: [`implementation-plan.md`](implementation-plan.md).
 Resolved agent-facing contracts and edge cases: [`agent-contracts.md`](agent-contracts.md).
 Mandatory test-first, review and authorized merge policy: [`../AGENTS.md`](../AGENTS.md).
+Planned, not yet implemented: public multi-user hosting, see [`public-hosting.md`](public-hosting.md).
 
 ## 1. Purpose
 
