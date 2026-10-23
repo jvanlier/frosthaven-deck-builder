@@ -682,12 +682,12 @@ export function StartingEditor({
             <button
               type="button"
               className="secondary-button"
-              aria-label="Starting hand"
+              aria-label={`Starting hand${startState.issues.length === 0 ? ", complete" : ""}`}
               aria-current={showHand ? "step" : undefined}
               disabled={!!firstUnfinished}
               onClick={() => openStep(null)}
             >
-              Hand
+              Hand{startState.issues.length === 0 ? " ✓" : ""}
             </button>
           </nav>
           {activePick ? (
@@ -699,7 +699,6 @@ export function StartingEditor({
               <h2 id="starting-picks-heading" ref={stepHeading} tabIndex={-1}>
                 Level {activePick.forLevel} pick
               </h2>
-              <p>Choose one card of level {activePick.forLevel} or lower.</p>
               {activePick.cardId &&
               !validPickLevels.has(activePick.forLevel) ? (
                 <p className="issue-message" role="alert">
@@ -743,12 +742,6 @@ export function StartingEditor({
               ? `Complement your picks · Level ${build.startLevel} hand`
               : "Choose your deck"}
           </h2>
-          {picks.length ? (
-            <p>
-              Your picked cards stay in the hand. Click one to change its pick.
-              Add or remove complementary level 1 and X cards here.
-            </p>
-          ) : null}
           <RepairIssues
             build={build}
             character={character}

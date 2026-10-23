@@ -1142,7 +1142,8 @@ textarea {
   gap: 10px;
   min-height: 56px;
   padding: 10px 12px;
-  margin-bottom: 24px;
+  /* Matches the gap above the bar (--status-bar-gap). */
+  margin-bottom: var(--status-bar-gap);
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #0b1220f2;
@@ -1154,24 +1155,23 @@ textarea {
 .starting-setup-status .level-up-counter {
   white-space: normal;
 }
-.starting-setup-status .level-up-actions button {
-  min-height: 44px;
-  max-width: 130px;
-  padding: 8px;
-  font-size: 13px;
-}
 .starting-editor h2[tabindex] {
   width: fit-content;
 }
+/* Pick steps and the hand share one layout, so switching steps doesn't jump. */
 .starting-editor [data-pick-level] {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.starting-editor :is([data-pick-level], .starting-hand) > h2 {
+  margin-top: 5px;
 }
 .starting-stepper {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-block: 16px;
+  margin-block: 0 16px;
 }
 .starting-stepper button {
   min-width: 44px;
