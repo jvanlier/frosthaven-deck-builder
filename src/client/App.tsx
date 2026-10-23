@@ -84,7 +84,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomeRoute />} />
         <Route path="/about" element={<AboutView />} />
-        {import.meta.env.DEV ? (
+        {/* Test previews: dev server and the CI e2e build only. */}
+        {import.meta.env.DEV || import.meta.env.MODE === "e2e" ? (
           <>
             <Route path="/__test/cards" element={<CardPreview />} />
             <Route
