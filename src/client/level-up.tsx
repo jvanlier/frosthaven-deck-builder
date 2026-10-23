@@ -2,16 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardTile, compareCardLevelsDescending } from "./cards";
 import { CandidateGrid } from "./candidate-grid";
-import { MotivationInput, type EditableMotivationKind } from "./notes";
+import { CardNoteInput } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
 import { startEditorPath } from "./build-editor";
 import { characters } from "../shared/data/characters/index.js";
 import {
   appendLevelUp,
-  motivationKey,
+  removeCardNote,
+  setCardNote,
   setLevelUp,
-  upsertMotivation,
 } from "../shared/builds.js";
 import {
   addOptions,
@@ -23,8 +23,8 @@ import {
 import {
   buildSchema,
   type Build,
+  type CardNote,
   type LevelUp,
-  type Motivation,
 } from "../shared/schema/index.js";
 import type { Card, Character } from "../shared/character.js";
 
@@ -149,11 +149,11 @@ function LevelUpEditor({
   );
   const baseline = useRef({
     levelUp: cloneLevelUp(levelUp),
-    motivations: build.motivations
-      .filter((motivation) => motivation.level === level)
-      .map(cloneMotivation),
+    cardNotes: build.cardNotes
+      .filter((note) => note.level === level)
+      .map(cloneCardNote),
   });
-  const changedMotivations = useRef(new Set<string>());
+  const changedNotes = useRef(new Set<string>());
   const [swapOpen, setSwapOpen] = useState(false);
   const deckHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -355,36 +355,37 @@ function LevelUpEditor({
     changeDeck(card, activeDropped.has(card.id) ? "add" : "remove");
   }
 
-  function updateMotivation(
-    card: Card,
-    kind: EditableMotivationKind,
-    text: string,
-  ): void {
+  function updateNote(card: Card, text: string): void {
     if (!canMutate) {
       return;
     }
-    changedMotivations.current.add(motivationKey(level, card.id, kind));
-    mutateBuild((current) =>
-      upsertMotivation(current, {
-        level,
-        cardId: card.id,
-        kind,
-        text,
-      }),
-    );
+    changedNotes.current.add(card.id);
+    mutateBuild((current) => setCardNote(current, card.id, level, text));
   }
 
-  function motivationText(
-    cardId: string,
-    kind: EditableMotivationKind,
-  ): string {
+  function revertNote(card: Card): void {
+    if (!canMutate) {
+      return;
+    }
+    changedNotes.current.add(card.id);
+    mutateBuild((current) => removeCardNote(current, card.id, level));
+  }
+
+  // Picked and added candidates also appear in Your deck; edit their note there.
+  function renderCandidateNote(card: Card) {
+    return activeAdded.has(card.id) ? null : renderNote(card);
+  }
+
+  function renderNote(card: Card) {
     return (
-      build.motivations.find(
-        (motivation) =>
-          motivation.level === level &&
-          motivation.cardId === cardId &&
-          motivation.kind === kind,
-      )?.text ?? ""
+      <CardNoteInput
+        build={build}
+        card={card}
+        level={level}
+        disabled={!canMutate}
+        onChange={(text) => updateNote(card, text)}
+        onRevert={() => revertNote(card)}
+      />
     );
   }
 
@@ -393,38 +394,23 @@ function LevelUpEditor({
       return;
     }
     const entry = baseline.current;
+    const changed = changedNotes.current;
     mutateBuild((current) => {
       const resetLevel = setLevelUp(current, level, entry.levelUp);
-      if (changedMotivations.current.size === 0) {
+      if (changed.size === 0) {
         return resetLevel;
       }
-      const baselineByKey = new Map(
-        entry.motivations.map((motivation) => [
-          motivationKey(motivation.level, motivation.cardId, motivation.kind),
-          motivation,
-        ]),
-      );
-      const motivations = [
-        ...resetLevel.motivations.filter(
-          (motivation) =>
-            !changedMotivations.current.has(
-              motivationKey(
-                motivation.level,
-                motivation.cardId,
-                motivation.kind,
-              ),
-            ),
+      const cardNotes = [
+        ...resetLevel.cardNotes.filter(
+          (note) => note.level !== level || !changed.has(note.cardId),
         ),
-        ...[...changedMotivations.current]
-          .map((key) => baselineByKey.get(key))
-          .filter(
-            (motivation): motivation is Motivation => motivation !== undefined,
-          )
-          .map(cloneMotivation),
+        ...entry.cardNotes
+          .filter((note) => changed.has(note.cardId))
+          .map(cloneCardNote),
       ];
       return buildSchema.parse({
         ...resetLevel,
-        motivations,
+        cardNotes,
         updatedAt: new Date().toISOString(),
       });
     });
@@ -506,15 +492,13 @@ function LevelUpEditor({
             </div>
             <CandidateGrid
               cards={availableCards}
-              level={level}
               selection="pick"
               selectedPick={selectedPick}
               added={activeAdded}
               canMutate={canMutate}
-              motivationText={motivationText}
+              renderNote={renderCandidateNote}
               onPick={choosePick}
               onAdd={toggleExtra}
-              onMotivation={updateMotivation}
             />
           </section>
         </div>
@@ -549,24 +533,16 @@ function LevelUpEditor({
                       stateLabel={
                         isDropped
                           ? "Dropped"
-                          : isNew
-                            ? "NEW — undo in its section"
-                            : "In deck"
+                          : card.id === selectedPick
+                            ? "Level-up pick"
+                            : isNew
+                              ? "Added from pool"
+                              : "In deck"
                       }
                       disabled={!canMutate || isNew}
                       onAction={() => toggleDrop(card)}
                     />
-                    {isDropped ? (
-                      <MotivationInput
-                        card={card}
-                        kind="drop"
-                        value={motivationText(card.id, "drop")}
-                        disabled={!canMutate}
-                        onChange={(text) =>
-                          updateMotivation(card, "drop", text)
-                        }
-                      />
-                    ) : null}
+                    {renderNote(card)}
                   </div>
                 );
               })}
@@ -587,15 +563,13 @@ function LevelUpEditor({
               </p>
               <CandidateGrid
                 cards={swapCandidates}
-                level={level}
                 selection="add"
                 selectedPick={selectedPick}
                 added={activeAdded}
                 canMutate={canMutate}
-                motivationText={motivationText}
+                renderNote={renderCandidateNote}
                 onPick={choosePick}
                 onAdd={toggleExtra}
-                onMotivation={updateMotivation}
               />
             </details>
           </section>
@@ -624,8 +598,8 @@ function cloneLevelUp(levelUp: LevelUp): LevelUp {
   };
 }
 
-function cloneMotivation(motivation: Motivation): Motivation {
-  return { ...motivation };
+function cloneCardNote(note: CardNote): CardNote {
+  return { ...note };
 }
 
 function deckPath(characterId: string, buildId: string, level: number): string {

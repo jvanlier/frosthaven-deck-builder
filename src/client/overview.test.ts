@@ -107,32 +107,34 @@ describe("overview matrix projection", () => {
     ).toBeUndefined();
   });
 
-  it("exposes every currently applicable motivation on its card cell", () => {
+  it("marks the cells where a non-empty card note was recorded", () => {
     const model = buildOverviewModel(
       makeBuild({
-        startLevel: 2,
-        startPicks: [{ forLevel: 2, cardId: "birds-in-a-tempest" }],
-        startDeck: startingCards,
-        motivations: [
+        levelUps: [
           {
             level: 2,
-            cardId: "birds-in-a-tempest",
-            kind: "add",
-            text: "A strong pick",
-            updatedAt: timestamp,
+            pick: "birds-in-a-tempest",
+            added: ["birds-in-a-tempest"],
+            dropped: ["whiteout"],
           },
+        ],
+        cardNotes: [
           {
-            level: 2,
-            cardId: "birds-in-a-tempest",
-            kind: "exclude",
-            text: "Still not in the hand",
-            updatedAt: timestamp,
-          },
-          {
-            level: 2,
             cardId: "tornado",
-            kind: "exclude",
+            level: 1,
             text: "Too unreliable",
+            updatedAt: timestamp,
+          },
+          {
+            cardId: "tornado",
+            level: 2,
+            text: "",
+            updatedAt: timestamp,
+          },
+          {
+            cardId: "whiteout",
+            level: 2,
+            text: "Swapped for Birds",
             updatedAt: timestamp,
           },
         ],
@@ -140,24 +142,12 @@ describe("overview matrix projection", () => {
       character,
     );
 
-    const start = model.levels[0]!;
-    const picked = start.cells.find(
-      (cell) => cell.card.id === "birds-in-a-tempest",
-    );
-    expect(picked?.marker).toBe("picked");
-    expect(picked?.markerForLevel).toBe(2);
-    expect(picked?.motivations).toEqual([
-      expect.objectContaining({ kind: "add", text: "A strong pick" }),
-      expect.objectContaining({
-        kind: "exclude",
-        text: "Still not in the hand",
-      }),
-    ]);
-    expect(
-      start.cells.find((cell) => cell.card.id === "tornado")?.motivations,
-    ).toEqual([
-      expect.objectContaining({ kind: "exclude", text: "Too unreliable" }),
-    ]);
+    const cell = (level: number, cardId: string) =>
+      model.levels[level - 1]?.cells.find((item) => item.card.id === cardId);
+    expect(cell(1, "tornado")?.note?.text).toBe("Too unreliable");
+    expect(cell(2, "tornado")?.note).toBeUndefined();
+    expect(cell(1, "whiteout")?.note).toBeUndefined();
+    expect(cell(2, "whiteout")?.note?.text).toBe("Swapped for Birds");
   });
 
   it("keeps a starting pick's slot and applied counts distinct from the start level", () => {
@@ -199,44 +189,5 @@ describe("overview matrix projection", () => {
       addedCount: 1,
       droppedCount: 1,
     });
-  });
-
-  it("hides stale motivation indicators while keeping their stored notes intact", () => {
-    const build = makeBuild({
-      levelUps: [
-        {
-          level: 2,
-          pick: "birds-in-a-tempest",
-          added: ["birds-in-a-tempest"],
-          dropped: ["whiteout"],
-        },
-      ],
-      motivations: [
-        {
-          level: 2,
-          cardId: "whiteout",
-          kind: "drop",
-          text: "Only while this is dropped",
-          updatedAt: timestamp,
-        },
-      ],
-    });
-    const stale = buildSchema.parse({
-      ...build,
-      startDeck: startingCards.filter((cardId) => cardId !== "whiteout"),
-    });
-
-    expect(
-      buildOverviewModel(build, character).levels[1]?.cells.find(
-        (cell) => cell.card.id === "whiteout",
-      )?.motivations,
-    ).toEqual([
-      expect.objectContaining({ text: "Only while this is dropped" }),
-    ]);
-    expect(
-      buildOverviewModel(stale, character).levels[1]?.cells.find(
-        (cell) => cell.card.id === "whiteout",
-      )?.motivations,
-    ).toEqual([]);
   });
 });

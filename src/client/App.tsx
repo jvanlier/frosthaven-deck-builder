@@ -18,7 +18,6 @@ import {
   readLastPosition,
 } from "./deck-view";
 import { LevelUpRoute, levelUpDestination } from "./level-up";
-import { MotivationsRoute } from "./motivations";
 import { OverviewRoute } from "./overview-view";
 import { characters } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
@@ -100,7 +99,7 @@ export default function App() {
           element={<StartingEditorRoute />}
         />
         <Route
-          path="/c/:characterId/b/:buildId/l/:level/card/:cardId"
+          path="/c/:characterId/b/:buildId/card/:cardId"
           element={<CardDetailRoute />}
         />
         <Route
@@ -114,10 +113,6 @@ export default function App() {
         <Route
           path="/c/:characterId/b/:buildId/overview"
           element={<OverviewRoute />}
-        />
-        <Route
-          path="/c/:characterId/b/:buildId/motivations"
-          element={<MotivationsRoute />}
         />
         <Route path="*" element={<UnavailableView />} />
       </Routes>
@@ -465,11 +460,6 @@ function BottomTabs() {
         label="Overview"
         icon="▦"
       />
-      <WorkspaceTab
-        to={workspace.build ? motivationsPath(workspace) : null}
-        label="Notes"
-        icon="✎"
-      />
     </nav>
   );
 }
@@ -541,12 +531,6 @@ function workspaceDeckPath(workspace: Workspace, level: number): string {
   return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
     workspace.buildId!,
   )}/l/${level}`;
-}
-
-function motivationsPath(workspace: Workspace): string {
-  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
-    workspace.buildId!,
-  )}/motivations`;
 }
 
 function overviewPath(workspace: Workspace): string {

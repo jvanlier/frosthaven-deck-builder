@@ -1,6 +1,6 @@
 import type { Card, CardLevel, Character } from "../shared/character.js";
 import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
-import type { Build, Motivation } from "../shared/schema/index.js";
+import type { Build, CardNote } from "../shared/schema/index.js";
 
 export type OverviewMembership = "deck" | "pool" | "not-in-pool";
 export type OverviewMarker = "picked" | "added" | "dropped";
@@ -10,7 +10,8 @@ export interface OverviewCell {
   membership: OverviewMembership;
   marker?: OverviewMarker;
   markerForLevel?: number;
-  motivations: Motivation[];
+  /** The non-empty note recorded for this card at exactly this level. */
+  note?: CardNote;
 }
 
 export interface OverviewLevelSummary {
@@ -84,8 +85,9 @@ function makeCell(
         : "not-in-pool",
     marker,
     markerForLevel,
-    motivations: state.activeMotivations.filter(
-      (motivation) => motivation.cardId === card.id,
+    note: build.cardNotes.find(
+      (note) =>
+        note.cardId === card.id && note.level === state.level && note.text,
     ),
   };
 }

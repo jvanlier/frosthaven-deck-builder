@@ -3,7 +3,11 @@ import * as nodeFs from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { getCharacter } from "../shared/data/characters/index.js";
-import { appDataSchema, type AppData } from "../shared/schema/index.js";
+import {
+  appDataSchema,
+  SCHEMA_VERSION,
+  type AppData,
+} from "../shared/schema/index.js";
 
 export interface DataStoreFileSystem {
   mkdir(
@@ -58,7 +62,7 @@ export class RevisionConflictError extends Error {
 }
 
 const EMPTY_DATA: AppData = {
-  schemaVersion: 1,
+  schemaVersion: SCHEMA_VERSION,
   revision: 0,
   builds: [],
 };

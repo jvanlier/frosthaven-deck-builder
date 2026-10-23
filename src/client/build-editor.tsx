@@ -4,7 +4,7 @@ import { CardTile, compareCardLevelsDescending } from "./cards";
 import { CandidateGrid } from "./candidate-grid";
 import { RepairIssues } from "./repairs";
 import { deckPath } from "./deck-view";
-import { MotivationInput } from "./notes";
+import { CardNoteInput } from "./notes";
 import { ImportDataError, parseImportFile, useAppData } from "./app-data";
 import {
   copyBuild,
@@ -12,8 +12,9 @@ import {
   deleteBuild,
   renameBuild,
   setStartDeck,
+  removeCardNote,
+  setCardNote,
   setStartPick,
-  upsertMotivation,
 } from "../shared/builds.js";
 import { characters } from "../shared/data/characters/index.js";
 import {
@@ -313,8 +314,8 @@ function DataBackupControls() {
         </div>
       </div>
       <p>
-        Export includes every build, motivation and guidance note. Import first
-        validates a backup, then replaces all saved data after confirmation.
+        Export includes every build and card note. Import first validates a
+        backup, then replaces all saved data after confirmation.
       </p>
       {error ? (
         <p className="form-error" role="alert">
@@ -354,14 +355,9 @@ function ImportConfirmationDialog({
     }
   }, [candidate]);
 
-  const motivationCount =
+  const cardNoteCount =
     candidate?.builds.reduce(
-      (total, build) => total + build.motivations.length,
-      0,
-    ) ?? 0;
-  const guidanceCount =
-    candidate?.builds.reduce(
-      (total, build) => total + Object.keys(build.guidance).length,
+      (total, build) => total + build.cardNotes.length,
       0,
     ) ?? 0;
 
@@ -380,8 +376,7 @@ function ImportConfirmationDialog({
         <p>This will replace all data currently saved on the server.</p>
         <ul>
           <li>{candidate?.builds.length ?? 0} builds</li>
-          <li>{motivationCount} motivations</li>
-          <li>{guidanceCount} guidance notes</li>
+          <li>{cardNoteCount} card notes</li>
         </ul>
         <p>
           The backup&apos;s revision is ignored. The current server revision is
@@ -519,33 +514,24 @@ export function StartingEditor({
     updateBuild(setStartDeck(build, nextDeck));
   };
 
-  const updateMotivation = (
-    card: Card,
-    kind: "exclude" | "add",
-    text: string,
-    forLevel?: number,
-  ) => {
-    if (!canMutate) {
-      return;
-    }
-    updateBuild(
-      upsertMotivation(build, {
-        kind,
-        cardId: card.id,
-        text,
-        forLevel,
-        level: forLevel ?? build.startLevel,
-      }),
-    );
-  };
-
-  const motivationText = (cardId: string, kind: "exclude" | "add") =>
-    build.motivations.find(
-      (motivation) =>
-        motivation.level === build.startLevel &&
-        motivation.cardId === cardId &&
-        motivation.kind === kind,
-    )?.text ?? "";
+  const renderNote = (card: Card) => (
+    <CardNoteInput
+      build={build}
+      card={card}
+      level={build.startLevel}
+      disabled={!canMutate}
+      onChange={(text) => {
+        if (canMutate) {
+          updateBuild(setCardNote(build, card.id, build.startLevel, text));
+        }
+      }}
+      onRevert={() => {
+        if (canMutate) {
+          updateBuild(removeCardNote(build, card.id, build.startLevel));
+        }
+      }}
+    />
+  );
 
   const pickCards = (forLevel: number): Card[] => {
     const selected = build.startPicks.find(
@@ -767,15 +753,11 @@ export function StartingEditor({
                     cards={pickCards(activePick.forLevel).filter(
                       (card) => effectiveCardLevel(card) === level,
                     )}
-                    level={activePick.forLevel}
                     selection="pick"
                     selectedPick={activePick.cardId}
                     canMutate={canMutate}
-                    motivationText={motivationText}
+                    renderNote={renderNote}
                     onPick={(card) => choosePick(activePick.forLevel, card.id)}
-                    onMotivation={(card, kind, text) =>
-                      updateMotivation(card, kind, text, activePick.forLevel)
-                    }
                   />
                 </section>
               ))}
@@ -873,7 +855,7 @@ export function StartingEditor({
                     }
                     stateLabel={
                       selected && pickedSlot
-                        ? "Picked · Change"
+                        ? "Level-up pick"
                         : selected
                           ? "In starting deck"
                           : !inPool
@@ -885,26 +867,7 @@ export function StartingEditor({
                     disabled={!canMutate || !inPool || (!selected && handFull)}
                     onAction={() => toggleDeckCard(card)}
                   />
-                  {selected ? (
-                    <MotivationInput
-                      card={card}
-                      kind="add"
-                      label={`Why include ${card.name}?`}
-                      value={motivationText(card.id, "add")}
-                      disabled={!canMutate}
-                      onChange={(text) => updateMotivation(card, "add", text)}
-                    />
-                  ) : excluded ? (
-                    <MotivationInput
-                      card={card}
-                      kind="exclude"
-                      value={motivationText(card.id, "exclude")}
-                      disabled={!canMutate}
-                      onChange={(text) =>
-                        updateMotivation(card, "exclude", text)
-                      }
-                    />
-                  ) : null}
+                  {renderNote(card)}
                 </div>
               );
             })}

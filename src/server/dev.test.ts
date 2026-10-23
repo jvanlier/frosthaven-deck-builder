@@ -53,7 +53,7 @@ it.each([false, true])(
       }
       expect(ready).toBe(true);
       const initial = await (await fetch(url)).json();
-      expect(initial).toEqual({ schemaVersion: 1, revision: 0, builds: [] });
+      expect(initial).toEqual({ schemaVersion: 2, revision: 0, builds: [] });
       const data = {
         ...initial,
         builds: [

@@ -3,7 +3,6 @@ import { createBuild } from "../builds";
 import { characters } from "../data/characters";
 import {
   addOptions,
-  applicableMotivationContexts,
   applyDeckEdit,
   canAppendLevel,
   deck,
@@ -205,30 +204,6 @@ describe("Snowdancer rules engine", () => {
     );
   });
 
-  it("keeps a pick motivation active even when its required add is missing", () => {
-    const build = makeBuild(1, {
-      startDeck: startingCards,
-      levelUps: [
-        { level: 2, pick: "birds-in-a-tempest", added: [], dropped: [] },
-      ],
-      motivations: [
-        {
-          level: 2,
-          cardId: "birds-in-a-tempest",
-          kind: "add",
-          text: "Keep this pick available",
-          updatedAt: timestamp,
-        },
-      ],
-    });
-
-    expect(replayBuild(build, character).levels[1]?.activeMotivations).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ cardId: "birds-in-a-tempest" }),
-      ]),
-    );
-  });
-
   it("marks partial hands incomplete and overfull hands invalid", () => {
     const incomplete = makeBuild(1, { startDeck: startingCards.slice(0, 9) });
     const overfull = makeBuild(1, {
@@ -251,119 +226,6 @@ describe("Snowdancer rules engine", () => {
         }),
       ]),
     );
-  });
-
-  it("keeps active motivations for valid picks and exclusions outside the pool", () => {
-    const build = makeBuild(2, {
-      startPicks: [{ forLevel: 2, cardId: "birds-in-a-tempest" }],
-      startDeck: startingCards,
-      motivations: [
-        {
-          level: 2,
-          cardId: "birds-in-a-tempest",
-          kind: "add",
-          text: "A great top action",
-          updatedAt: timestamp,
-        },
-        {
-          level: 2,
-          cardId: "tornado",
-          kind: "exclude",
-          text: "Too unreliable",
-          updatedAt: timestamp,
-        },
-        {
-          level: 1,
-          cardId: "tornado",
-          kind: "exclude",
-          text: "Wrong level note",
-          updatedAt: timestamp,
-        },
-      ],
-    });
-    const level = replayBuild(build, character).levels[0]!;
-
-    expect(
-      level.activeMotivations.map((motivation) => motivation.cardId),
-    ).toEqual(expect.arrayContaining(["birds-in-a-tempest", "tornado"]));
-    expect(level.activeMotivations).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ text: "Wrong level note" }),
-      ]),
-    );
-    expect(
-      applicableMotivationContexts(build, character, 2, "birds-in-a-tempest"),
-    ).toEqual(
-      expect.arrayContaining([
-        { kind: "add", level: 2, forLevel: 2 },
-        { kind: "exclude", level: 2 },
-      ]),
-    );
-  });
-
-  it("keeps starting-hand inclusion reasons active only while the card is included", () => {
-    const build = makeBuild(1, {
-      startDeck: ["cold-therapy", "missing-card", "birds-in-a-tempest"],
-      motivations: [
-        "cold-therapy",
-        "whiteout",
-        "missing-card",
-        "birds-in-a-tempest",
-      ].map((cardId) => ({
-        level: 1,
-        cardId,
-        kind: "add" as const,
-        text: `Include ${cardId}`,
-        updatedAt: timestamp,
-      })),
-    });
-    expect(
-      applicableMotivationContexts(build, character, 1, "cold-therapy"),
-    ).toEqual([{ kind: "add", level: 1 }]);
-    expect(
-      replayBuild(build, character).levels[0]!.activeMotivations.map(
-        (note) => note.cardId,
-      ),
-    ).toEqual(["cold-therapy"]);
-    const removed = { ...build, startDeck: [] };
-    expect(
-      replayBuild(removed, character).levels[0]!.activeMotivations,
-    ).toEqual([]);
-    expect(removed.motivations).toEqual(build.motivations);
-    expect(
-      replayBuild({ ...removed, startDeck: ["cold-therapy"] }, character)
-        .levels[0]!.activeMotivations,
-    ).toEqual([build.motivations[0]]);
-  });
-
-  it("shares one starting add motivation between a prosperity pick and its inclusion in the hand", () => {
-    const build = makeBuild(3, {
-      startPicks: [
-        { forLevel: 2, cardId: "birds-in-a-tempest" },
-        { forLevel: 3, cardId: "tornado" },
-      ],
-      startDeck: ["birds-in-a-tempest", "cold-therapy"],
-      motivations: ["birds-in-a-tempest", "cold-therapy"].map((cardId) => ({
-        level: 3,
-        cardId,
-        kind: "add" as const,
-        text: `Include ${cardId}`,
-        updatedAt: timestamp,
-      })),
-    });
-    expect(
-      applicableMotivationContexts(build, character, 3, "birds-in-a-tempest"),
-    ).toEqual([{ kind: "add", level: 3, forLevel: 2 }]);
-    expect(
-      applicableMotivationContexts(build, character, 3, "cold-therapy"),
-    ).toEqual([{ kind: "add", level: 3 }]);
-    expect(replayBuild(build, character).levels[0]!.activeMotivations).toEqual(
-      build.motivations,
-    );
-    expect(
-      replayBuild({ ...build, startDeck: [] }, character).levels[0]!
-        .activeMotivations,
-    ).toEqual([build.motivations[0]]);
   });
 
   it("normalizes deck edits to added and dropped cards", () => {
@@ -447,49 +309,6 @@ describe("Snowdancer rules engine", () => {
       expect.arrayContaining([
         expect.objectContaining({ level: 3, code: "PICK_ALREADY_IN_POOL" }),
         expect.objectContaining({ level: 3, code: "DROP_NOT_IN_PREV_DECK" }),
-      ]),
-    );
-  });
-
-  it("hides a stale drop motivation and restores it when the same choice returns", () => {
-    const build = makeBuild(1, {
-      startDeck: startingCards,
-      levelUps: [
-        {
-          level: 2,
-          pick: "birds-in-a-tempest",
-          added: ["birds-in-a-tempest"],
-          dropped: ["whiteout"],
-        },
-      ],
-      motivations: [
-        {
-          level: 2,
-          cardId: "whiteout",
-          kind: "drop",
-          text: "Keep this note hidden while stale",
-          updatedAt: timestamp,
-        },
-      ],
-    });
-    const stale = buildSchema.parse({
-      ...build,
-      startDeck: startingCards.filter((cardId) => cardId !== "whiteout"),
-    });
-    expect(
-      replayBuild(stale, character).levels[1]?.activeMotivations,
-    ).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ cardId: "whiteout", kind: "drop" }),
-      ]),
-    );
-    expect(replayBuild(build, character).levels[1]?.activeMotivations).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          cardId: "whiteout",
-          kind: "drop",
-          text: "Keep this note hidden while stale",
-        }),
       ]),
     );
   });

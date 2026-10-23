@@ -26,7 +26,7 @@ const temporaryDirectories: string[] = [];
 
 function dataWithName(name: string): AppData {
   return appDataSchema.parse({
-    schemaVersion: 1,
+    schemaVersion: 2,
     revision: 99,
     builds: [
       {
@@ -37,8 +37,7 @@ function dataWithName(name: string): AppData {
         startPicks: [],
         startDeck: [],
         levelUps: [],
-        motivations: [],
-        guidance: {},
+        cardNotes: [],
         createdAt: timestamp,
         updatedAt: timestamp,
       },
@@ -81,7 +80,7 @@ describe("revision-safe data API", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(await response.json()).toEqual({
-      schemaVersion: 1,
+      schemaVersion: 2,
       revision: 0,
       builds: [],
     });
@@ -190,6 +189,57 @@ describe("revision-safe data API", () => {
     expect(revisions.sort((a, b) => a - b)).toEqual(
       Array.from({ length: 20 }, (_, index) => index + 5),
     );
+  });
+
+  it("upgrades a stored version 1 document to card notes on read", async () => {
+    const dataDir = await newDataDir();
+    const { cardNotes: _cardNotes, ...build } = dataWithName("Old").builds[0]!;
+    await writeFile(
+      join(dataDir, "appdata.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        revision: 7,
+        builds: [
+          {
+            ...build,
+            motivations: [
+              {
+                level: 1,
+                cardId: "snowball",
+                kind: "add",
+                text: "Ice engine",
+                updatedAt: timestamp,
+              },
+            ],
+            guidance: {
+              snowball: { text: "Discarded", updatedAt: timestamp },
+            },
+          },
+        ],
+      }),
+      "utf8",
+    );
+    const app = createApp({ dataDir });
+
+    const response = await app.request("/api/data");
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      schemaVersion: 2,
+      revision: 7,
+      builds: [
+        {
+          cardNotes: [
+            {
+              cardId: "snowball",
+              level: 1,
+              text: "Ice engine",
+              updatedAt: timestamp,
+            },
+          ],
+        },
+      ],
+    });
   });
 
   it("does not turn corrupt storage into an empty document", async () => {

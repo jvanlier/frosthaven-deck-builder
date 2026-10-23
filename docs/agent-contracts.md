@@ -10,8 +10,8 @@ single-ticket execution, TDD, review and authorized merge policy.
 |--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | #4     | Node 22 pin, canonical npm/prek commands, CI, health app factory in `src/server/app.ts`, listening entry in `src/server/index.ts`, and `CardLevel`/`Card`/`Character` contracts in `src/shared/character.ts` matching spec §3.1. |
 | #5     | Validated static catalog in `src/shared/data/characters/index.ts`, exporting `characters` and `getCharacter(id)`; imported `SD.json`, local assets and attribution. Reuse #4's character types.                                  |
-| #6     | `src/shared/schema/index.ts`: `appDataSchema`, `putDataRequestSchema` and inferred document types; `src/shared/builds.ts`: pure build/note mutations, HTTP-compatible UUID generation and a shared motivation-key helper.        |
-| #7     | `src/shared/rules/index.ts`: deterministic replay, options, validation, explicit deck-edit normalization, applicable motivations and append eligibility.                                                                         |
+| #6     | `src/shared/schema/index.ts`: `appDataSchema`, `putDataRequestSchema` and inferred document types; `src/shared/builds.ts`: pure build/card-note mutations and HTTP-compatible UUID generation.                                 |
+| #7     | `src/shared/rules/index.ts`: deterministic replay, options, validation, explicit deck-edit normalization and append eligibility.                                                                                                  |
 | #8     | Serialized disk store and HTTP API extending #4's app factory, consuming #5's catalog and #6's schemas.                                                                                                                          |
 | #9     | App-data provider/hook, save state machine, routes and reusable accessible card/dialog primitives. All later UI issues consume these instead of duplicating state/sync.                                                          |
 | #10–18 | Feature implementation and verification within their assigned issue boundaries, extending established modules rather than replacing them.                                                                                        |
@@ -40,7 +40,7 @@ Do not make a physical phone or human visual approval an acceptance prerequisite
 In addition to the spec APIs, #7 exports `replayBuild(build, character)`. Its result
 contains ordered `levels`; each state exposes `level`, derived `pool`/`deck`, current
 `issues`, and applied starting picks/pick/adds/drops separately from stored operations.
-This is the common projection for deck, overview, motivation applicability and repairs.
+This is the common projection for deck, overview and repairs.
 `validateBuild` returns the flattened issues; options and append guards use the same
 replay. Read/replay never modifies the stored build.
 
@@ -55,10 +55,9 @@ reported independently. UI fixes use codes/identity, never parse display strings
 Pool/deck arrays are unique and deterministic. Deck sorting uses effective level,
 printed 1 before X, initiative, then stable name/ID tie-breakers; overview row groups
 use printed level. Missing/invalid choices are not mistaken for applied changes.
-Initial-pick motivations apply only to valid applied picks, even outside the hand.
-
-Use a shared tuple-based motivation key (e.g. `JSON.stringify([level, cardId, kind])`)
-rather than independently concatenating unvalidated IDs with separators.
+Card notes do not depend on replay: a card's note at level L is its version recorded at
+the highest level ≤ L (`effectiveCardNote`). Use the tuple key `cardNoteKey(cardId,
+level)` rather than concatenating unvalidated IDs with separators.
 
 ### App-data provider
 
@@ -119,14 +118,14 @@ requirement to a ticket that can actually satisfy it with merged prerequisites.
 - The Level up tab resumes the highest unfinished later level. If the starting level is
   unfinished, open its starting editor; if earlier history is broken, show its problems
   and route to repair. Otherwise append only from the highest valid history below 9.
-- Reset captures entry choices and level-local motivations when the editor opens. For a
+- Reset captures entry choices and the card notes recorded at this level when the editor opens. For a
   newly appended level, that baseline is the newly saved null-pick/empty-diff state.
   Reset does not delete the level. On reload/reopen, the persisted current state becomes
   the new baseline; there is no persisted undo history.
-- Reset restores only fields and motivation keys the session changed. Preserve guidance,
-  names, other levels/builds and unrelated notes. The restoration is another autosaved
+- Reset restores only fields and card notes the session changed. Preserve names, other
+  levels/builds and unrelated notes. The restoration is another autosaved
   mutation and remains correct with an in-flight older request.
-- Pick/unpick and pool-add toggles retain entered notes as hidden entries. A pick is
+- Pick/unpick and pool-add toggles never change card notes. A pick is
   excluded from the extra-swap candidates to avoid representing it twice. New deck cards
   are undone only in their originating candidate group.
 - Opening an invalid level or editing another choice must not normalize away invalid

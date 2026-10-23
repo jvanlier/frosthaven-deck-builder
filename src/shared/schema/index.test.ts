@@ -23,18 +23,14 @@ function validBuild(overrides: Record<string, unknown> = {}) {
         dropped: ["cold-therapy"],
       },
     ],
-    motivations: [
+    cardNotes: [
       {
-        level: 3,
         cardId: "unknown-card",
-        kind: "add",
+        level: 3,
         text: "Keep the option available.",
         updatedAt: timestamp,
       },
     ],
-    guidance: {
-      "cold-therapy": { text: "Use this early.", updatedAt: timestamp },
-    },
     createdAt: timestamp,
     updatedAt: timestamp,
     ...overrides,
@@ -43,7 +39,7 @@ function validBuild(overrides: Record<string, unknown> = {}) {
 
 function validData(overrides: Record<string, unknown> = {}): AppData {
   return appDataSchema.parse({
-    schemaVersion: 1,
+    schemaVersion: 2,
     revision: 0,
     builds: [validBuild()],
     ...overrides,
@@ -63,7 +59,7 @@ describe("shared document schemas", () => {
   it("accepts a null/incomplete start pick and an overfull starting deck", () => {
     expect(() =>
       appDataSchema.parse({
-        schemaVersion: 1,
+        schemaVersion: 2,
         revision: 0,
         builds: [
           validBuild({
@@ -103,20 +99,25 @@ describe("shared document schemas", () => {
 
   it("trims names but preserves nonempty note whitespace and line breaks", () => {
     const data = appDataSchema.parse({
-      schemaVersion: 1,
+      schemaVersion: 2,
       revision: 0,
       builds: [
         validBuild({
           name: "  Preserve the name  ",
-          guidance: {
-            card: { text: "  first line\nsecond line  ", updatedAt: timestamp },
-          },
+          cardNotes: [
+            {
+              cardId: "card",
+              level: 3,
+              text: "  first line\nsecond line  ",
+              updatedAt: timestamp,
+            },
+          ],
         }),
       ],
     });
 
     expect(data.builds[0]?.name).toBe("Preserve the name");
-    expect(data.builds[0]?.guidance.card?.text).toBe(
+    expect(data.builds[0]?.cardNotes[0]?.text).toBe(
       "  first line\nsecond line  ",
     );
   });
@@ -154,11 +155,11 @@ describe("shared document schemas", () => {
     ).not.toThrow();
   });
 
-  it("rejects duplicate build/card/motivation keys and overlapping deck edits", () => {
+  it("rejects duplicate build/card-note keys and overlapping deck edits", () => {
     const duplicateBuild = validBuild();
     expect(() =>
       appDataSchema.parse({
-        schemaVersion: 1,
+        schemaVersion: 2,
         revision: 0,
         builds: [validBuild(), duplicateBuild],
       }),
@@ -192,9 +193,9 @@ describe("shared document schemas", () => {
         ...validData(),
         builds: [
           validBuild({
-            motivations: [
-              validBuild().motivations[0],
-              validBuild().motivations[0],
+            cardNotes: [
+              validBuild().cardNotes[0],
+              { ...validBuild().cardNotes[0], text: "Other text" },
             ],
           }),
         ],
@@ -223,24 +224,97 @@ describe("shared document schemas", () => {
         ...validData(),
         builds: [
           validBuild({
-            guidance: {
-              card: { text: "x".repeat(20_001), updatedAt: timestamp },
-            },
+            cardNotes: [
+              {
+                cardId: "card",
+                level: 3,
+                text: "x".repeat(20_001),
+                updatedAt: timestamp,
+              },
+            ],
           }),
         ],
       }),
     ).toThrow();
 
-    const hugeGuidance = Object.fromEntries(
-      Array.from({ length: 60 }, (_, index) => [
-        `card-${index}`,
-        { text: "x".repeat(20_000), updatedAt: timestamp },
-      ]),
-    );
+    const hugeNotes = Array.from({ length: 60 }, (_, index) => ({
+      cardId: `card-${index}`,
+      level: 3,
+      text: "x".repeat(20_000),
+      updatedAt: timestamp,
+    }));
     expect(() =>
       appDataSchema.parse({
         ...validData(),
-        builds: [validBuild({ guidance: hugeGuidance })],
+        builds: [validBuild({ cardNotes: hugeNotes })],
+      }),
+    ).toThrow();
+  });
+
+  it("upgrades version 1 motivations to card notes and drops guidance", () => {
+    const { cardNotes: _cardNotes, ...v1Build } = validBuild();
+    const data = appDataSchema.parse({
+      schemaVersion: 1,
+      revision: 3,
+      builds: [
+        {
+          ...v1Build,
+          motivations: [
+            {
+              level: 3,
+              cardId: "cold-therapy",
+              kind: "add",
+              text: "Older reason",
+              updatedAt: "2024-01-01T00:00:00.000Z",
+            },
+            {
+              level: 3,
+              cardId: "cold-therapy",
+              kind: "exclude",
+              text: "Newer reason",
+              updatedAt: "2024-01-03T00:00:00.000Z",
+            },
+            {
+              level: 4,
+              cardId: "cold-therapy",
+              kind: "drop",
+              text: "Dropped",
+              updatedAt: timestamp,
+            },
+          ],
+          guidance: {
+            "cold-therapy": { text: "Use this early.", updatedAt: timestamp },
+          },
+        },
+      ],
+    });
+
+    expect(data.schemaVersion).toBe(2);
+    expect(data.revision).toBe(3);
+    expect(data.builds[0]?.cardNotes).toEqual([
+      {
+        cardId: "cold-therapy",
+        level: 3,
+        text: "Newer reason",
+        updatedAt: "2024-01-03T00:00:00.000Z",
+      },
+      {
+        cardId: "cold-therapy",
+        level: 4,
+        text: "Dropped",
+        updatedAt: timestamp,
+      },
+    ]);
+    expect(data.builds[0]).not.toHaveProperty("guidance");
+  });
+
+  it("rejects malformed version 1 motivations instead of guessing", () => {
+    const { cardNotes: _cardNotes, ...v1Build } = validBuild();
+    expect(() =>
+      appDataSchema.parse({
+        schemaVersion: 1,
+        revision: 0,
+        builds: [{ ...v1Build, motivations: [{ level: "3" }], guidance: {} }],
       }),
     ).toThrow();
   });

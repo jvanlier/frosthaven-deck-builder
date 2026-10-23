@@ -24,7 +24,7 @@ const buildA = createBuild(
 );
 const buildB = { ...buildA, name: "Cold control" };
 const emptyData: AppData = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   revision: 0,
   builds: [],
 };
@@ -332,12 +332,14 @@ describe("app data save controller", () => {
         ...buildA,
         id: `123e4567-e89b-42d3-a456-42661417${index.toString(16).padStart(4, "0")}`,
         name: `Build ${"n".repeat(40)} ${index}`,
-        guidance: {
-          blizzard: {
+        cardNotes: [
+          {
+            cardId: "blizzard",
+            level: 1,
             text: longText,
             updatedAt: "2024-01-02T03:04:05.000Z",
           },
-        },
+        ],
       })),
     });
     const click = vi.fn();

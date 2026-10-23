@@ -5,7 +5,6 @@ import {
   deleteBuild,
   deleteHighestLevel,
   generateUuid,
-  motivationKey,
   appendLevelUp,
   removeBuildOperation,
   renameBuild,
@@ -13,8 +12,10 @@ import {
   setLevelUp,
   setStartDeck,
   setStartPick,
-  upsertMotivation,
-  upsertNote,
+  cardNoteHistory,
+  effectiveCardNote,
+  removeCardNote,
+  setCardNote,
 } from "./builds";
 import { buildSchema } from "./schema";
 import type { Build } from "./schema";
@@ -51,8 +52,7 @@ describe("build mutations", () => {
       ],
       startDeck: [],
       levelUps: [],
-      motivations: [],
-      guidance: {},
+      cardNotes: [],
       createdAt: firstTime,
       updatedAt: firstTime,
     });
@@ -237,7 +237,7 @@ describe("build mutations", () => {
     expect(restorePickedCard(restored, 2, "birds-in-a-tempest")).toBe(restored);
   });
 
-  it("deletes only the highest level and its motivations while retaining guidance", () => {
+  it("deletes only the highest level and the notes recorded at it", () => {
     const build = buildSchema.parse({
       ...createBuild(
         { characterId: "SD", name: "Original", startLevel: 1 },
@@ -247,41 +247,34 @@ describe("build mutations", () => {
         { level: 2, pick: null, added: [], dropped: [] },
         { level: 3, pick: null, added: [], dropped: [] },
       ],
-      motivations: [
+      cardNotes: [
         {
+          cardId: "tornado",
           level: 2,
-          cardId: "blizzard",
-          kind: "add",
           text: "Keep level 2 note",
           updatedAt: firstTime,
         },
         {
-          level: 3,
           cardId: "tornado",
-          kind: "drop",
+          level: 3,
           text: "Delete this note",
           updatedAt: firstTime,
         },
       ],
-      guidance: {
-        tornado: { text: "Keep guidance", updatedAt: firstTime },
-      },
     });
 
     const deleted = deleteHighestLevel(build, { now: () => secondTime });
     expect(deleted.levelUps).toEqual([
       { level: 2, pick: null, added: [], dropped: [] },
     ]);
-    expect(deleted.motivations).toEqual([
+    expect(deleted.cardNotes).toEqual([
       {
+        cardId: "tornado",
         level: 2,
-        cardId: "blizzard",
-        kind: "add",
         text: "Keep level 2 note",
         updatedAt: firstTime,
       },
     ]);
-    expect(deleted.guidance).toEqual(build.guidance);
     expect(deleted.updatedAt).toBe(secondTime);
   });
 
@@ -312,18 +305,14 @@ describe("build mutations", () => {
       ),
       startPicks: [{ forLevel: 2, cardId: "picked-card" }],
       startDeck: ["picked-card"],
-      motivations: [
+      cardNotes: [
         {
-          level: 2,
           cardId: "picked-card",
-          kind: "add",
-          text: "A reason",
+          level: 2,
+          text: "Use it",
           updatedAt: firstTime,
         },
       ],
-      guidance: {
-        "picked-card": { text: "Use it", updatedAt: firstTime },
-      },
     };
 
     const copy = copyBuild(build, "Copied", {
@@ -339,13 +328,12 @@ describe("build mutations", () => {
       characterId: "SD",
       startLevel: 2,
     });
-    expect(copy.motivations[0]?.updatedAt).toBe(firstTime);
-    expect(copy.guidance["picked-card"]?.updatedAt).toBe(firstTime);
+    expect(copy.cardNotes[0]?.updatedAt).toBe(firstTime);
 
     copy.startPicks[0]!.cardId = "changed";
-    copy.guidance["picked-card"]!.text = "changed";
+    copy.cardNotes[0]!.text = "changed";
     expect(build.startPicks[0]?.cardId).toBe("picked-card");
-    expect(build.guidance["picked-card"]?.text).toBe("Use it");
+    expect(build.cardNotes[0]?.text).toBe("Use it");
   });
 
   it("deletes only the requested build and treats a missing build as a no-op", () => {
@@ -365,137 +353,89 @@ describe("build mutations", () => {
     );
   });
 
-  it("uses tuple motivation keys and preserves hidden unrelated motivations", () => {
-    expect(motivationKey(2, "a|b", "add")).toBe(
-      JSON.stringify([2, "a|b", "add"]),
-    );
-
-    const build = createBuild(
-      { characterId: "SD", name: "Original", startLevel: 3 },
+  it("resolves a card's note from the highest recorded level up to the requested level", () => {
+    let build = createBuild(
+      { characterId: "SD", name: "Original", startLevel: 1 },
       options,
     );
-    const withHiddenNote = upsertMotivation(
-      build,
-      { kind: "add", cardId: "later-card", level: 4, text: "Later reason" },
-      { now: () => firstTime },
+    build = setCardNote(build, "card", 1, "Level 1 note", options);
+    build = setCardNote(build, "card", 4, "Level 4 note", options);
+    build = setCardNote(build, "other", 2, "Other card", options);
+
+    expect(effectiveCardNote(build, "card", 1)?.text).toBe("Level 1 note");
+    expect(effectiveCardNote(build, "card", 3)?.text).toBe("Level 1 note");
+    expect(effectiveCardNote(build, "card", 9)?.text).toBe("Level 4 note");
+    expect(effectiveCardNote(build, "other", 1)).toBeUndefined();
+    expect(cardNoteHistory(build, "card").map((note) => note.level)).toEqual([
+      1, 4,
+    ]);
+  });
+
+  it("records a level's version, preserving whitespace, and keeps older versions", () => {
+    const build = setCardNote(
+      createBuild(
+        { characterId: "SD", name: "Original", startLevel: 1 },
+        options,
+      ),
+      "card",
+      1,
+      "Old",
+      options,
     );
-    const withInitialPickNote = upsertMotivation(
-      withHiddenNote,
-      {
-        kind: "add",
-        cardId: "start-card",
-        forLevel: 2,
-        level: 2,
-        text: "Starting reason",
-      },
+    const updated = setCardNote(
+      build,
+      "card",
+      3,
+      "  keep whitespace\nexactly  ",
       { now: () => secondTime },
     );
 
-    expect(withInitialPickNote.motivations).toEqual([
+    expect(updated.cardNotes).toEqual([
+      { cardId: "card", level: 1, text: "Old", updatedAt: firstTime },
       {
-        level: 4,
-        cardId: "later-card",
-        kind: "add",
-        text: "Later reason",
-        updatedAt: firstTime,
-      },
-      {
+        cardId: "card",
         level: 3,
-        cardId: "start-card",
-        kind: "add",
-        text: "Starting reason",
+        text: "  keep whitespace\nexactly  ",
         updatedAt: secondTime,
       },
     ]);
-
-    const changed = upsertMotivation(
-      withInitialPickNote,
-      {
-        kind: "add",
-        cardId: "later-card",
-        level: 4,
-        text: "  keep whitespace\nexactly  ",
-      },
-      { now: () => secondTime },
-    );
-    expect(changed.motivations[0]?.text).toBe("  keep whitespace\nexactly  ");
-    expect(changed.motivations[1]?.text).toBe("Starting reason");
+    expect(updated.updatedAt).toBe(secondTime);
+    expect(
+      setCardNote(updated, "card", 3, "  keep whitespace\nexactly  "),
+    ).toBe(updated);
   });
 
-  it("preserves prototype-named guidance IDs and serializes them safely", () => {
-    const build = createBuild(
+  it("stores an empty note only when it clears an inherited one", () => {
+    const empty = createBuild(
       { characterId: "SD", name: "Original", startLevel: 1 },
       options,
     );
-    const updated = upsertNote(build, "__proto__", "preserve this note", {
-      now: () => firstTime,
-    });
+    expect(setCardNote(empty, "card", 2, "")).toBe(empty);
 
-    expect(Object.hasOwn(updated.guidance, "__proto__")).toBe(true);
-    expect(updated.guidance["__proto__"]?.text).toBe("preserve this note");
-    expect(JSON.parse(JSON.stringify(updated)).guidance["__proto__"]).toEqual({
-      text: "preserve this note",
-      updatedAt: firstTime,
-    });
+    const withNote = setCardNote(empty, "card", 1, "Inherited", options);
+    const cleared = setCardNote(withNote, "card", 2, "", options);
+    expect(effectiveCardNote(cleared, "card", 2)?.text).toBe("");
+    expect(cleared.cardNotes).toHaveLength(2);
+
+    // Typing the inherited text back removes the level's redundant version.
+    const restored = setCardNote(cleared, "card", 2, "Inherited", options);
+    expect(restored.cardNotes).toEqual(withNote.cardNotes);
+
+    // Clearing a note with nothing to inherit removes it.
+    expect(setCardNote(withNote, "card", 1, "", options).cardNotes).toEqual([]);
   });
 
-  it("removes empty guidance/motivation notes without touching unrelated notes", () => {
-    const build = createBuild(
+  it("reverts a level's version so the older note applies again", () => {
+    let build = createBuild(
       { characterId: "SD", name: "Original", startLevel: 1 },
       options,
     );
-    const importedEmptyNotes = buildSchema.parse({
-      ...build,
-      guidance: {
-        "empty-guidance": { text: "", updatedAt: firstTime },
-      },
-      motivations: [
-        {
-          level: 1,
-          cardId: "empty-motivation",
-          kind: "exclude",
-          text: "",
-          updatedAt: firstTime,
-        },
-      ],
-    });
-    const clearedImportedGuidance = upsertNote(
-      importedEmptyNotes,
-      "empty-guidance",
-      "",
-      { now: () => secondTime },
-    );
-    const clearedImportedMotivation = upsertMotivation(
-      clearedImportedGuidance,
-      { kind: "exclude", cardId: "empty-motivation", text: "" },
-      { now: () => secondTime },
-    );
-    const withGuidance = upsertNote(
-      clearedImportedMotivation,
-      "card-a",
-      "guidance",
-      { now: () => firstTime },
-    );
-    const withBoth = upsertMotivation(
-      withGuidance,
-      { kind: "exclude", cardId: "card-b", text: "exclude reason" },
-      { now: () => firstTime },
-    );
+    build = setCardNote(build, "card", 1, "Old", options);
+    build = setCardNote(build, "card", 3, "New", options);
 
-    const clearedGuidance = upsertNote(withBoth, "card-a", "", {
-      now: () => secondTime,
-    });
-    const clearedMotivation = upsertMotivation(
-      clearedGuidance,
-      { kind: "exclude", cardId: "card-b", text: "" },
-      { now: () => secondTime },
-    );
-
-    expect(clearedImportedGuidance.guidance).toEqual({});
-    expect(clearedImportedMotivation.motivations).toEqual([]);
-    expect(clearedGuidance.guidance).toEqual({});
-    expect(clearedGuidance.motivations).toHaveLength(1);
-    expect(clearedMotivation.motivations).toEqual([]);
+    const reverted = removeCardNote(build, "card", 3, options);
+    expect(effectiveCardNote(reverted, "card", 3)?.text).toBe("Old");
+    expect(removeCardNote(reverted, "card", 3, options)).toBe(reverted);
   });
 
   it("generates standards-compliant UUID v4 values without Math.random", () => {
