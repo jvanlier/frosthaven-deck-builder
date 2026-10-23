@@ -219,13 +219,12 @@ necessarily on screen at once.
      level.
 4. **Done.**
 
-**Swap more cards (secondary path).** A collapsible "Swap more cards from the pool"
-section lists every pool card that isn't in deck L. It behaves like the pick sections:
+**Swap more cards (secondary path).** An "Other pool cards" section, always shown below
+the deck, lists every pool card that isn't in deck L. It behaves like the pick sections:
 - Tapping a card adds it to the deck and marks it *Added from pool*, both in place and
   in the deck. Tapping it
   again removes it.
 - Then drop a card from the deck, repeated as needed.
-- The section stays open until the user closes it.
 - Dropped cards stay in the pool and can return at any later level.
 
 **Card notes** (§4.8) are shown **directly below every card** in the flow, headed "Card
@@ -269,6 +268,8 @@ its reported problems instead of appending.
     the card, with the level it was recorded at. Tapping a card opens card detail (F12).
   - A **"Show dropped cards"** toggle (not at the start level) that also shows the cards
     dropped at this level, marked *Dropped*.
+  - Cards picked or added at this level are marked *Level N pick* or *Added from pool*.
+    At the start level, each starting pick shows its slot level (e.g. *Level 2 pick*).
   - Entry points: level up, edit this level, overview.
 - **F11 Build overview.** A matrix:
   - Rows = all cards, grouped by card level. Columns = the build's levels.

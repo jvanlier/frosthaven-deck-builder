@@ -707,64 +707,22 @@ export function StartingEditor({
                   other choices are preserved.
                 </p>
               ) : null}
-              {Array.from(
-                new Set(
-                  pickCards(activePick.forLevel).map((card) =>
-                    effectiveCardLevel(card),
-                  ),
-                ),
-              ).map((level) => (
-                <section
-                  className="starting-candidate-group"
-                  key={level}
-                  aria-label={`Level ${level} cards`}
-                >
-                  <h3>Level {level} cards</h3>
-                  <CandidateGrid
-                    cards={pickCards(activePick.forLevel).filter(
-                      (card) => effectiveCardLevel(card) === level,
-                    )}
-                    selection="pick"
-                    selectedPick={activePick.cardId}
-                    pickLevel={activePick.forLevel}
-                    canMutate={canMutate}
-                    renderNote={renderNote}
-                    onPick={(card) => choosePick(activePick.forLevel, card.id)}
-                  />
-                </section>
-              ))}
+              {pickCards(activePick.forLevel).length > 0 ? (
+                <CandidateGrid
+                  cards={pickCards(activePick.forLevel)}
+                  selection="pick"
+                  selectedPick={activePick.cardId}
+                  pickLevel={activePick.forLevel}
+                  canMutate={canMutate}
+                  renderNote={renderNote}
+                  onPick={(card) => choosePick(activePick.forLevel, card.id)}
+                />
+              ) : null}
               {pickCards(activePick.forLevel).length === 0 ? (
                 <p className="issue-message">
                   No legal cards are available for this pick.
                 </p>
               ) : null}
-              <details className="starting-unavailable">
-                <summary>Show unavailable cards</summary>
-                <ul>
-                  {character.cards
-                    .filter(
-                      (card) =>
-                        effectiveCardLevel(card) > 1 &&
-                        effectiveCardLevel(card) <= build.startLevel &&
-                        !pickCards(activePick.forLevel).some(
-                          (option) => option.id === card.id,
-                        ),
-                    )
-                    .sort(compareCardLevelsDescending)
-                    .map((card) => (
-                      <li key={card.id}>
-                        {card.name} · Level {card.level} —{" "}
-                        {picks.some(
-                          (pick) =>
-                            pick.forLevel > activePick.forLevel &&
-                            pick.cardId === card.id,
-                        )
-                          ? "Already picked"
-                          : "No remaining pick can select this card"}
-                      </li>
-                    ))}
-                </ul>
-              </details>
             </section>
           ) : null}
         </>
@@ -806,11 +764,11 @@ export function StartingEditor({
               const selected = selectedDeck.has(card.id);
               const pickedSlot = picks.find((pick) => pick.cardId === card.id);
               const inPool = startPoolIds.has(card.id);
-              const excluded = !selected && (handFull || !inPool);
+              const notInDeck = !selected && (handFull || !inPool);
               return (
                 <div
                   className="starting-deck-card"
-                  data-excluded={excluded}
+                  data-not-in-deck={notInDeck}
                   role="listitem"
                   key={card.id}
                 >
@@ -832,8 +790,8 @@ export function StartingEditor({
                           ? "In starting deck"
                           : !inPool
                             ? "Not in pool"
-                            : excluded
-                              ? "Excluded"
+                            : notInDeck
+                              ? "Not in deck"
                               : undefined
                     }
                     disabled={!canMutate || !inPool || (!selected && handFull)}

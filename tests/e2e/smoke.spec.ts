@@ -646,7 +646,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   const excluded = page.locator(
     '.level-up-candidate:has([data-card-id="tornado"])',
   );
-  await expect(excluded.getByRole("status")).toHaveText("Excluded");
+  await expect(excluded.getByRole("status")).toHaveText("Not in pool");
   await expect(
     excluded.getByRole("button", { name: "Pick Tornado", exact: true }),
   ).toBeEnabled();
@@ -960,9 +960,7 @@ test("resets during an in-flight save without losing unrelated fields or notes",
     });
 });
 
-test("keeps extra swaps open, notes stable and new cards undroppable", async ({
-  page,
-}) => {
+test("keeps swap notes stable and new cards removable", async ({ page }) => {
   let persisted = structuredClone(revisedLevelFixtureData);
   await page.route("**/api/data", async (route) => {
     if (route.request().method() === "GET") {
@@ -999,8 +997,6 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
     "Gathering Force",
     "Nature's Breath",
   ]);
-  const swapSection = page.getByText("Swap more cards from the pool");
-  await swapSection.click();
   const whiteout = page.getByRole("button", {
     name: "Add White Winds to deck",
   });
@@ -1013,18 +1009,33 @@ test("keeps extra swaps open, notes stable and new cards undroppable", async ({
     .first()
     .fill("Bring it back for control.");
   await page
+    .getByRole("region", { name: "Other pool cards" })
     .getByRole("button", { name: "Remove White Winds from deck" })
     .click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
   await expect(
     page.getByLabel("Card note for White Winds").first(),
   ).toHaveValue("Bring it back for control.");
-  await expect(
-    page.getByRole("button", { name: "Keep White Winds new" }),
-  ).toBeVisible();
+  // The added card is removable from both the pool and "Your deck".
+  const removeWhiteWinds = page.getByRole("button", {
+    name: "Remove White Winds from deck",
+  });
+  await expect(removeWhiteWinds).toHaveCount(2);
+  await page
+    .getByRole("region", { name: "Your deck" })
+    .getByRole("button", { name: "Remove White Winds from deck" })
+    .click();
+  await expect(removeWhiteWinds).toHaveCount(0);
+  await page.getByRole("button", { name: "Add White Winds to deck" }).click();
+  await expect(removeWhiteWinds).toHaveCount(2);
   await expect(
     page.getByRole("button", { name: "Drop Birds in a Tempest" }),
   ).toHaveCount(0);
+  await expect(
+    page
+      .locator(".level-up-deck")
+      .getByRole("button", { name: "Unpick Birds in a Tempest" }),
+  ).toBeEnabled();
   await page.getByRole("button", { name: "Drop Snowball" }).click();
   await expect(page.getByRole("button", { name: "Done" })).toBeEnabled();
   await page.getByRole("button", { name: "Done" }).click();
@@ -1084,7 +1095,6 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
-  await page.getByText("Swap more cards from the pool").click();
   await page.getByRole("button", { name: "Add White Winds to deck" }).click();
   await page
     .getByLabel("Card note for White Winds")
@@ -1613,8 +1623,7 @@ test("shows card notes, dropped cards and a read-only note history", async ({
   const birds = page.locator(
     '.deck-card-item:has([data-card-id="birds-in-a-tempest"])',
   );
-  // Pick and pool badges are reserved for the editors.
-  await expect(page.locator(".deck-card-list .card-state")).toHaveCount(0);
+  await expect(birds.locator(".card-state")).toHaveText("Level 2 pick");
   await expect(page.getByText("NEW", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveCount(0);
 
@@ -1939,7 +1948,7 @@ test("carries card notes forward and records a new version per level", async ({
   });
   await expect(tornado.locator(".card-tile")).toHaveAttribute(
     "data-state",
-    "Excluded",
+    "Not in pool",
   );
   const tornadoNote = tornado.getByLabel("Card note for Tornado");
   await expect(tornadoNote).toHaveValue("Already explained at level 2");
@@ -2032,13 +2041,13 @@ test("sorts Your deck and the deck view by descending level with X last", async 
   );
 });
 
-test("styles level-up pick badges as centered pills in the editor", async ({
+test("styles level-up pick badges as centered pills in view and edit", async ({
   page,
 }) => {
   await page.route("**/api/data", (route) =>
     route.fulfill({ json: deckFixtureData }),
   );
-  for (const route of ["2/level-up"]) {
+  for (const route of ["2", "2/level-up"]) {
     await page.goto(`/c/SD/b/${fixtureBuildId}/l/${route}`);
     const badge = page
       .locator('.card-tile[data-card-id="birds-in-a-tempest"] .card-state')
@@ -3157,13 +3166,12 @@ test("keeps one card note per card in the starting editor, whatever its state", 
     .locator(".starting-deck-card")
     .filter({ has: page.locator('.card-tile[data-card-id="cold-therapy"]') })
     .locator(".card-note-input");
-  // Included and excluded cards share one note style.
-  expect(await notePanel.evaluate((el) => getComputedStyle(el).color)).toBe(
-    await inclusionPanel.evaluate((el) => getComputedStyle(el).color),
-  );
+  // A not-in-deck card's note takes the Not in deck pill's colour scheme.
+  await expect(notePanel).toHaveCSS("color", "rgb(226, 232, 240)");
+  await expect(inclusionPanel).toHaveCSS("color", "rgb(125, 211, 252)");
   expect(
     await notePanel.evaluate((el) => getComputedStyle(el).backgroundColor),
-  ).toBe(
+  ).not.toBe(
     await inclusionPanel.evaluate((el) => getComputedStyle(el).backgroundColor),
   );
   await expect(notePanel.getByText("Card note", { exact: true })).toBeVisible();
@@ -3257,7 +3265,12 @@ for (const startLevel of [1, 3]) {
     const note = page.getByLabel("Card note for Cold Therapy");
     await expect(note).toBeVisible();
     await expect(
-      page.locator(".starting-deck-card > .card-note-input").first(),
+      page
+        .locator(".starting-deck-card")
+        .filter({
+          has: page.locator('.card-tile[data-card-id="cold-therapy"]'),
+        })
+        .locator(".card-note-input"),
     ).toHaveCSS("background-color", "rgb(22, 34, 56)");
     const cardBox = (await page
       .locator('.starting-deck-card [data-card-id="cold-therapy"].card-action')

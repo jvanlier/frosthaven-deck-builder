@@ -706,6 +706,13 @@ textarea {
   padding-top: 0;
   border-top: 0;
 }
+.deck-card-item .card-grid {
+  padding-top: 0;
+}
+/* The status bar already sits apart from the toggles. */
+.deck-intro + .deck-issues {
+  margin-top: 0;
+}
 .deck-cards > .section-heading {
   margin: 0;
 }
@@ -716,6 +723,8 @@ textarea {
   grid-template-columns: repeat(auto-fill, var(--card-width));
   gap: 14px;
   align-items: start;
+  /* Room for the state pills that overhang the first row of cards. */
+  padding-top: 12px;
 }
 /* Card notes belong to the card above them: keep each note close to its card
    and separate rows clearly, so a note never reads as the next row's card's. */
@@ -786,8 +795,7 @@ textarea {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-.card-tile[data-state="In deck"] .card-state,
-.card-tile[data-state="Not in deck"] .card-state {
+.card-tile[data-state="In deck"] .card-state {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -795,9 +803,9 @@ textarea {
   overflow: hidden;
   clip-path: inset(50%);
 }
-.card-tile[data-state^="Level "][data-state$=" pick"] img,
-.card-tile[data-state="Added from pool"] img,
-.card-tile[data-state="In starting deck"] img {
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-action img,
+.card-tile[data-state="Added from pool"] .card-action img,
+.card-tile[data-state="In starting deck"] .card-action img {
   outline: 3px solid var(--ice);
   outline-offset: 2px;
   box-shadow:
@@ -808,7 +816,8 @@ textarea {
 .card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.card-tile[data-state="Excluded"] .card-state {
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
   top: -11px;
   left: 50%;
   transform: translateX(-50%);
@@ -819,7 +828,8 @@ textarea {
 .card-tile[data-state="Added from pool"] .card-state,
 .card-tile[data-state="In starting deck"] .card-state,
 .card-tile[data-state="Dropped"] .card-state,
-.card-tile[data-state="Excluded"] .card-state {
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
   padding: 3px 10px;
   border-radius: 99px;
   font-size: 12px;
@@ -837,20 +847,22 @@ textarea {
 .card-tile[data-state="In starting deck"] .card-state::before {
   content: "✓ ";
 }
-.card-tile[data-state="Dropped"] img {
+.card-tile[data-state="Dropped"] .card-action img {
   filter: grayscale(1) brightness(0.45);
 }
-.starting-deck-card[data-excluded="true"] .card-action img {
+.starting-deck-card[data-not-in-deck="true"] .card-action img {
   filter: grayscale(1);
 }
-.card-tile[data-state="Excluded"] img {
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-action
+  img {
   filter: grayscale(1);
   opacity: 0.4;
 }
-.starting-deck-card[data-excluded="true"] .card-action:disabled {
+.starting-deck-card[data-not-in-deck="true"] .card-action:disabled {
   opacity: 1;
 }
-.starting-deck-card[data-excluded="true"] .card-action:disabled img {
+.starting-deck-card[data-not-in-deck="true"] .card-action:disabled img {
   opacity: 0.4;
 }
 .card-tile[data-state="Dropped"] .card-state {
@@ -859,6 +871,44 @@ textarea {
 }
 .card-tile[data-state="Dropped"] .card-state::before {
   content: "✕ ";
+}
+/* Not-in-deck, not-in-pool and dropped cards get a frame in their pill colour. It sits on the
+   card button, not the image, so it lifts on hover but the image's grayscale
+   and opacity don't dim it. */
+/* Neutral greys: a card outside the deck or pool is a choice, not an error.
+   Not in deck is available and lighter; not in pool is unavailable and
+   darker. */
+.card-tile[data-state="Not in deck"] {
+  --frame: #475569;
+  --frame-glow: #64748b;
+  --state-fg: #e2e8f0;
+  --state-bg: #334155;
+}
+.card-tile[data-state="Not in pool"] {
+  --frame: #1e293b;
+  --frame-glow: #1e293b;
+  --state-fg: #94a3b8;
+  --state-bg: #1e293b;
+}
+.card-tile[data-state="Dropped"] {
+  --frame: #b73939;
+  --frame-glow: #b73939;
+  --state-fg: white;
+  --state-bg: #b73939;
+}
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-action::after,
+.card-tile[data-state="Dropped"] .card-action::after {
+  position: absolute;
+  z-index: 0;
+  inset: -5px;
+  border: 3px solid var(--frame);
+  border-radius: 17px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--frame-glow) 20%, transparent),
+    0 0 40px color-mix(in srgb, var(--frame-glow) 33%, transparent);
+  content: "";
+  pointer-events: none;
 }
 .enlarge-button {
   padding: 2px 0;
@@ -887,10 +937,64 @@ textarea {
   color: #03111f;
   background: var(--ice2);
 }
+/* Tinted cards zoom in their pill's colours. */
+.card-tile > .enlarge-button:is(:hover, :focus-visible) {
+  color: var(--state-fg, #03111f);
+  border-color: var(--state-fg, #ffffff33);
+  background: var(--state-bg, var(--ice2));
+}
+/* A disabled not-in-pool card stays legible; only its image is dimmed. */
+.card-tile[data-state="Not in pool"] .card-action:disabled {
+  opacity: 1;
+}
 .card-note,
 .card-note-input {
+  --note-accent: var(--ice);
+  --note-border: #38bdf866;
+  --note-bg: #162238;
   position: relative;
   margin-top: 10px;
+}
+/* A note takes the colour scheme of its card's Not in deck, Not in pool or
+   Dropped state. */
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Not in deck"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #e2e8f0;
+  --note-border: #475569;
+  --note-bg: #1a2230;
+  --line: #3b4659;
+  --muted: #a3aebf;
+}
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Not in pool"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #94a3b8;
+  --note-border: #1e293b;
+  --note-bg: #121926;
+  --line: #273244;
+  --muted: #7d8899;
+}
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Dropped"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #f87171;
+  --note-border: #b7393999;
+  --note-bg: #26171b;
+  --line: #4f2a2e;
+  --muted: #c49a9a;
 }
 /* A notch on top points at the note's card. */
 .card-note::before,
@@ -907,21 +1011,21 @@ textarea {
 .card-note::before,
 .card-note-input::before {
   bottom: 100%;
-  border-bottom-color: #38bdf866;
+  border-bottom-color: var(--note-border);
 }
 .card-note::after,
 .card-note-input::after {
   bottom: calc(100% - 1px);
-  border-bottom-color: #162238;
+  border-bottom-color: var(--note-bg);
 }
 .card-note {
   display: grid;
   gap: 4px;
   padding: 8px;
-  border: 1px solid #38bdf866;
+  border: 1px solid var(--note-border);
   border-radius: 10px;
   color: var(--text);
-  background: #162238;
+  background: var(--note-bg);
   font-size: 13px;
 }
 .card-note p {
@@ -938,10 +1042,10 @@ textarea {
   display: grid;
   gap: 4px;
   padding: 8px;
-  border: 1px solid #38bdf866;
+  border: 1px solid var(--note-border);
   border-radius: 10px;
-  color: var(--ice);
-  background: #162238;
+  color: var(--note-accent);
+  background: var(--note-bg);
   font-size: 11px;
   font-weight: 700;
 }
@@ -965,8 +1069,8 @@ textarea {
   letter-spacing: 0.04em;
 }
 .card-note-level[data-current="true"] {
-  border-color: var(--ice);
-  color: var(--ice);
+  border-color: var(--note-accent);
+  color: var(--note-accent);
 }
 .card-note-revert {
   display: grid;
@@ -982,8 +1086,12 @@ textarea {
 }
 .card-note-revert:hover:not(:disabled),
 .card-note-revert:focus-visible {
-  color: var(--ice);
-  border-color: var(--ice);
+  color: var(--note-accent);
+  border-color: var(--note-accent);
+}
+/* Keep the focus ring, but in the note's own colour scheme. */
+.card-note-input :focus-visible {
+  outline-color: var(--note-accent);
 }
 .card-note-input textarea {
   width: 100%;
@@ -1076,15 +1184,6 @@ textarea {
   outline: 2px solid var(--ice);
   outline-offset: 2px;
 }
-.starting-unavailable {
-  margin-block: 16px;
-}
-.starting-candidate-group {
-  margin-block: 20px;
-}
-.starting-candidate-group h3 {
-  margin-bottom: 10px;
-}
 .starting-hand-status {
   margin-top: 0;
   flex-wrap: wrap;
@@ -1163,24 +1262,10 @@ textarea {
 .starting-deck-card {
   position: relative;
 }
-.card-tile[data-state="Excluded"] .card-state {
-  color: var(--warn);
-  border-color: #fbbf2488;
-  background: rgb(42 27 12 / 75%);
-}
-.swap-group details {
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--panel);
-}
-.swap-group summary {
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 13px;
-}
-.swap-group .level-up-card-grid {
-  margin-top: 16px;
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
+  color: var(--state-fg);
+  background: var(--state-bg);
 }
 .card-detail-layout {
   display: grid;
@@ -1310,9 +1395,19 @@ textarea {
   color: var(--text);
   font-weight: 400;
 }
-.overview-card-name span,
+.overview-card-name a,
 .overview-card-name small {
   display: inline;
+}
+.overview-card-name a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+.overview-card-name a:hover {
+  color: var(--ice);
+  text-decoration-color: currentColor;
 }
 .overview-card-name small {
   margin-left: 6px;
@@ -1406,10 +1501,24 @@ textarea {
 .overview-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
-  margin: 12px 0;
+  gap: 10px 20px;
+  margin: 16px 0;
+  padding: 0;
   color: var(--muted);
   font-size: 12px;
+  list-style: none;
+}
+.overview-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* The matrix shows "not in pool" without a box; give its sample the same size. */
+.overview-legend .overview-not-in-pool {
+  border: 1.5px dashed var(--line);
+}
+.overview-legend-note {
+  cursor: default;
 }
 
 @media (max-width: 650px) {

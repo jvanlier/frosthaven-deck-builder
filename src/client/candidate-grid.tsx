@@ -32,11 +32,12 @@ export function CandidateGrid({
       {cards.map((card) => {
         const isPicked = selectedPick === card.id;
         const isAdded = added?.has(card.id) && !isPicked;
-        const isExcluded =
+        const isUnpicked =
           selection === "pick" &&
           selectedPick !== null &&
           !isPicked &&
           !isAdded;
+        const isNotInDeck = selection === "add" && !isAdded;
         return (
           <div className="level-up-candidate" role="listitem" key={card.id}>
             <CardTile
@@ -55,9 +56,11 @@ export function CandidateGrid({
                   ? `Level ${pickLevel} pick`
                   : isAdded
                     ? "Added from pool"
-                    : isExcluded
-                      ? "Excluded"
-                      : undefined
+                    : isUnpicked
+                      ? "Not in pool"
+                      : isNotInDeck
+                        ? "Not in deck"
+                        : undefined
               }
               disabled={!canMutate}
               onAction={() =>

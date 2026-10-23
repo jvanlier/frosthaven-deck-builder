@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router-dom";
 import { useAppData } from "./app-data";
-import { deckPath } from "./deck-view";
+import { cardDetailPath, deckPath } from "./deck-view";
 import {
   buildOverviewModel,
   type OverviewCell,
@@ -85,6 +85,9 @@ export function OverviewView({
                 key={group.level}
                 group={group}
                 levels={model.levels}
+                detailPath={(cardId) =>
+                  cardDetailPath(character.id, build.id, cardId)
+                }
               />
             ))}
             <OverviewSummaryRow levels={model.levels} character={character} />
@@ -98,9 +101,11 @@ export function OverviewView({
 function OverviewGroupRows({
   group,
   levels,
+  detailPath,
 }: {
   group: OverviewGroup;
   levels: OverviewLevel[];
+  detailPath: (cardId: string) => string;
 }) {
   return (
     <>
@@ -112,7 +117,9 @@ function OverviewGroupRows({
       {group.cards.map((card) => (
         <tr key={card.id}>
           <th scope="row" className="overview-card-name">
-            <span>{card.name}</span>
+            <Link to={detailPath(card.id)} state={{ from: "overview" }}>
+              {card.name}
+            </Link>
             <small>Initiative {card.initiative}</small>
           </th>
           {levels.map((level) => {
@@ -289,29 +296,41 @@ function OverviewSummaryRow({
   );
 }
 
+const legendItems: {
+  membership: OverviewCell["membership"];
+  marker?: OverviewCell["marker"];
+  note?: boolean;
+  label: string;
+}[] = [
+  { membership: "deck", label: "In deck" },
+  { membership: "pool", label: "In pool, not in deck" },
+  { membership: "not-in-pool", label: "Not in pool" },
+  { membership: "deck", marker: "picked", label: "Picked" },
+  { membership: "deck", marker: "added", label: "Added from pool" },
+  { membership: "pool", marker: "dropped", label: "Dropped" },
+  { membership: "pool", note: true, label: "Has a card note" },
+];
+
 function OverviewLegend() {
   return (
-    <div className="overview-legend" aria-label="Overview legend">
-      <span>
-        <span className="overview-cell overview-deck" aria-hidden="true">
-          ●
-        </span>{" "}
-        In deck
-      </span>
-      <span>
-        <span className="overview-cell overview-pool" aria-hidden="true">
-          ○
-        </span>{" "}
-        In pool, not deck
-      </span>
-      <span>
-        <span className="overview-cell overview-not-in-pool" aria-hidden="true">
-          ·
-        </span>{" "}
-        Not in pool
-      </span>
-      <span>★ picked · + added · − dropped · ✎ card note</span>
-    </div>
+    <ul className="overview-legend" aria-label="Overview legend">
+      {legendItems.map((item) => (
+        <li key={item.label}>
+          <span
+            className={`overview-cell overview-${item.membership}`}
+            aria-hidden="true"
+          >
+            {markerSymbol(item.marker, item.membership)}
+            {item.note ? (
+              <span className="overview-note-button overview-legend-note">
+                ✎
+              </span>
+            ) : null}
+          </span>
+          {item.label}
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardTile, compareCardLevelsDescending } from "./cards";
 import { CandidateGrid } from "./candidate-grid";
@@ -154,7 +154,6 @@ function LevelUpEditor({
       .map(cloneCardNote),
   });
   const changedNotes = useRef(new Set<string>());
-  const [swapOpen, setSwapOpen] = useState(false);
   const deckHeadingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -515,6 +514,7 @@ function LevelUpEditor({
               {visibleDeck.map((card) => {
                 const isNew = newCards.has(card.id);
                 const isDropped = droppedCards.has(card.id);
+                const isPick = card.id === selectedPick;
                 return (
                   <div className="level-up-deck-card" key={card.id}>
                     <CardTile
@@ -522,21 +522,29 @@ function LevelUpEditor({
                       actionLabel={
                         isDropped
                           ? `Keep ${card.name}`
-                          : isNew
-                            ? `Keep ${card.name} new`
-                            : `Drop ${card.name}`
+                          : isPick
+                            ? `Unpick ${card.name}`
+                            : isNew
+                              ? `Remove ${card.name} from deck`
+                              : `Drop ${card.name}`
                       }
                       stateLabel={
                         isDropped
                           ? "Dropped"
-                          : card.id === selectedPick
+                          : isPick
                             ? `Level ${level} pick`
                             : isNew
                               ? "Added from pool"
                               : "In deck"
                       }
-                      disabled={!canMutate || isNew}
-                      onAction={() => toggleDrop(card)}
+                      disabled={!canMutate}
+                      onAction={() =>
+                        isPick
+                          ? choosePick(card)
+                          : isNew
+                            ? toggleExtra(card)
+                            : toggleDrop(card)
+                      }
                     />
                     {renderNote(card)}
                   </div>
@@ -549,26 +557,20 @@ function LevelUpEditor({
             className="editor-section level-up-group swap-group"
             aria-labelledby="swap-heading"
           >
-            <details
-              open={swapOpen}
-              onToggle={(event) => setSwapOpen(event.currentTarget.open)}
-            >
-              <summary id="swap-heading">Swap more cards from the pool</summary>
-              <p className="section-description">
-                Add another pool card, then remove a card from your deck.
-              </p>
-              <CandidateGrid
-                cards={swapCandidates}
-                selection="add"
-                selectedPick={selectedPick}
-                pickLevel={level}
-                added={activeAdded}
-                canMutate={canMutate}
-                renderNote={renderNote}
-                onPick={choosePick}
-                onAdd={toggleExtra}
-              />
-            </details>
+            <div className="section-heading">
+              <h2 id="swap-heading">Other pool cards</h2>
+            </div>
+            <CandidateGrid
+              cards={swapCandidates}
+              selection="add"
+              selectedPick={selectedPick}
+              pickLevel={level}
+              added={activeAdded}
+              canMutate={canMutate}
+              renderNote={renderNote}
+              onPick={choosePick}
+              onAdd={toggleExtra}
+            />
           </section>
         </div>
       </div>

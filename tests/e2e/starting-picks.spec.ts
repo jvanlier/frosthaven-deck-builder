@@ -72,7 +72,7 @@ test("builds a level-seven hand from highest picks down, including lower-level c
     .locator(".level-up-candidate")
     .filter({ has: page.locator('.card-tile[data-card-id="storm-wall"]') });
   await expect(picked.getByLabel("Card note for Storm Wall")).toBeVisible();
-  // The card's note follows it from picked to excluded.
+  // The card's note follows it from picked to not in deck.
   const rejected = page.getByLabel("Card note for Freezing Storm");
   await expect(rejected).toHaveValue("Keep this reason if I change my mind.");
   await rejected.fill("Storm Wall defines this build.");

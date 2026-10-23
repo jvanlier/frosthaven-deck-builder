@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CardGrid, CardImage, compareCardLevelsDescending } from "./cards";
 import { useAppData } from "./app-data";
 import { formatNoteTimestamp } from "./notes";
@@ -68,9 +68,22 @@ export function DeckView({
     ...state.deck,
     ...(showDropped && !isStartLevel ? droppedCards : []),
   ].sort(compareCardLevelsDescending);
-  // Pick and pool badges belong to the editors; the view only marks drops.
+  // Starting picks keep their slot level; a level-up pick belongs to its level.
+  const pickLevels = new Map(
+    isStartLevel
+      ? state.applied.startingPicks.map((pick) => [pick.cardId, pick.forLevel])
+      : state.applied.pick === null
+        ? []
+        : [[state.applied.pick, state.level]],
+  );
   const stateLabel = (card: Card): string | undefined =>
-    state.applied.dropped.includes(card.id) ? "Dropped" : undefined;
+    pickLevels.has(card.id)
+      ? `Level ${pickLevels.get(card.id)} pick`
+      : state.applied.dropped.includes(card.id)
+        ? "Dropped"
+        : state.applied.added.includes(card.id)
+          ? "Added from pool"
+          : undefined;
 
   useEffect(() => {
     rememberLastPosition({
@@ -244,6 +257,8 @@ function CardDetailView({
   card: Card;
 }) {
   const history = cardNoteHistory(build, card.id);
+  const fromOverview =
+    (useLocation().state as { from?: string } | null)?.from === "overview";
   const position = readLastPosition();
   const backLevel =
     position?.buildId === build.id && position.characterId === character.id
@@ -256,12 +271,21 @@ function CardDetailView({
       aria-labelledby="card-detail-heading"
     >
       <div className="editor-toolbar">
-        <Link
-          className="button-link secondary-button"
-          to={deckPath(character.id, build.id, backLevel)}
-        >
-          Back to level {backLevel} deck
-        </Link>
+        {fromOverview ? (
+          <Link
+            className="button-link secondary-button"
+            to={`/c/${encodeURIComponent(character.id)}/b/${encodeURIComponent(build.id)}/overview`}
+          >
+            Back to overview
+          </Link>
+        ) : (
+          <Link
+            className="button-link secondary-button"
+            to={deckPath(character.id, build.id, backLevel)}
+          >
+            Back to level {backLevel} deck
+          </Link>
+        )}
       </div>
       <section className="page-intro">
         <p className="eyebrow">{build.name}</p>
