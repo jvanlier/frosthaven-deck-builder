@@ -167,5 +167,30 @@ sessions so each PR has a focused diff.
   `CI=1 npm run test:e2e -- --workers=4 --reporter=dot` — all 315 tests passed
   across desktop Chromium, phone Chromium, and phone WebKit.
 
-Importer, stylesheet, and browser test organization remain planned. No
-dependencies were added or upgraded.
+## Session 3b result: card importer
+
+Completed on branch `refactor-card-importer`, based on `refactor-app-adapters`.
+
+- Reduced `scripts/import-cards.ts` from 824 to 167 lines, retaining the CLI,
+  orchestration, options, dependency injection, and all 20 public exports.
+- Separated source parsing/catalog validation, pinned downloads and checksums,
+  output generation, transactional installation, and shared types into
+  `scripts/card-import/`.
+- Compared all 23 original function bodies outside installation: unchanged.
+  The output file definitions, constants, and installation/rollback statements
+  are unchanged; installation delegates output generation to its own module.
+- Added a late-install failure regression that verifies previous catalog,
+  index, and artwork bytes are restored, new outputs are removed, and staging
+  is cleaned up. Existing incomplete-rollback recovery coverage still passes.
+
+### Checks
+
+- Typecheck, lint, formatting, `prek run --all-files`, production build, and
+  `git diff --check` — passed.
+- `npm test -- --run` — all 137 tests passed across 14 files, including 19
+  importer checks for parsing, pinned downloads, installation, and recovery.
+- Production client asset hashes match session 3a; application runtime files
+  are unchanged in this session.
+
+Stylesheet and browser test organization remain planned. No dependencies were
+added or upgraded.
