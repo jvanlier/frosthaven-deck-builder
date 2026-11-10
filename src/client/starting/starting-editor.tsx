@@ -7,12 +7,8 @@ import { CardNoteInput } from "../notes";
 import { useAppData } from "../app-data";
 import { updateBuildData } from "../build-data";
 import { deckPath, startEditorPath } from "../navigation/paths";
-import {
-  setStartDeck,
-  removeCardNote,
-  setCardNote,
-  setStartPick,
-} from "../../shared/builds.js";
+import { removeCardNote, setCardNote } from "../../shared/builds.js";
+import { chooseStartingPick, toggleStartingDeckCard } from "./operations";
 import {
   startingPickOptions,
   replayBuild,
@@ -85,23 +81,7 @@ export function StartingEditor({
     if (!canMutate) {
       return;
     }
-    const current = build.startPicks.find((pick) => pick.forLevel === forLevel);
-    const next = setStartPick(
-      build,
-      forLevel,
-      current?.cardId === cardId ? null : cardId,
-    );
-    // Replacing/unpicking a pool card also removes it from the hand, unless
-    // another slot still owns it. Leave unrelated invalid entries and notes alone.
-    const nextDeck = build.startDeck.filter(
-      (id) =>
-        id !== current?.cardId ||
-        next.startPicks.some((pick) => pick.cardId === id),
-    );
-    if (current?.cardId !== cardId && !nextDeck.includes(cardId)) {
-      nextDeck.push(cardId);
-    }
-    updateBuild(setStartDeck(next, nextDeck));
+    updateBuild(chooseStartingPick(build, forLevel, cardId));
   };
 
   const toggleDeckCard = (card: Card) => {
@@ -117,10 +97,7 @@ export function StartingEditor({
     if (!isSelected && handFull) {
       return;
     }
-    const nextDeck = isSelected
-      ? build.startDeck.filter((cardId) => cardId !== card.id)
-      : [...build.startDeck, card.id];
-    updateBuild(setStartDeck(build, nextDeck));
+    updateBuild(toggleStartingDeckCard(build, card.id, isSelected));
   };
 
   const renderNote = (card: Card) => (

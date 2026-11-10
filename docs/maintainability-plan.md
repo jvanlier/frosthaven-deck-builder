@@ -43,10 +43,7 @@ rules, stylesheet organization, or browser test organization.
    together until a further split has a clear benefit.
 3. Consolidate duplicate operation identity types. Keep UI and replay sorting
    policies explicit because their ordering differs.
-4. Reduce `App.tsx` to application composition by extracting layout, workspace
-   resolution, save feedback, health handling, informational pages, and test
-   previews. Share route lookup while retaining each route's validation.
-5. Use existing regression coverage for invalid downstream operations, reset
+4. Use existing regression coverage for invalid downstream operations, reset
    during saves, note inheritance, route handling, focus, and mobile scrolling.
    Add focused tests only where an extracted behavior lacks useful coverage.
 
@@ -66,6 +63,14 @@ rules, stylesheet organization, or browser test organization.
    game-invalid builds.
 6. Run the relevant regression suites and canonical checks. Prioritize the
    client and importer over splitting the already encapsulated storage module.
+
+## Follow-up: application composition
+
+Reduce `App.tsx` to application composition by extracting layout, workspace
+resolution, save feedback, health handling, informational pages, and test
+previews. Share route lookup while retaining each route's validation. This was
+originally listed under session 2; defer it to keep that session focused on the
+editor operations and rules engine.
 
 ## Session 1 result
 
@@ -96,4 +101,44 @@ Completed on branch `refactor-client-boundaries`.
 - `npm run build` — passed.
 - `git diff --check` — passed.
 
-Sessions 2 and 3 remain planned. No dependencies were added or upgraded.
+## Session 2 result
+
+Completed on branch `refactor-editor-rules`, based directly on
+`refactor-client-boundaries` at `159b108`.
+
+- Extracted starting-pick selection and hand adjustment into
+  `src/client/starting/operations.ts`.
+- Extracted level-up pick replacement, hand reconciliation, baseline capture,
+  and current-edit reset into `src/client/level-up/operations.ts`. Kept mutation
+  guards, save callbacks, scrolling, focus, and step navigation in React.
+- Separated rules types, replay, candidate options, deck reconciliation, and
+  ordering into internal modules behind the existing explicit public API.
+  Kept replay's validation and transition logic together.
+- Reused build operation identity types for rule diagnostics, retaining the
+  existing public type names. Documented the distinct UI and replay ordering.
+- Added six focused regression tests covering conflicting starting picks,
+  unresolved stored operations, pick insertion order, and reset preservation of
+  concurrent build changes and note history.
+- Compared all 21 moved rules functions with their original implementations:
+  unchanged. All 23 public exports and both editors' main markup are preserved.
+  Checked 31 client/shared runtime modules, including re-exports: no cycles.
+
+### Checks
+
+- `npm run typecheck` — passed.
+- `npm run lint` — passed.
+- `npm run format:check` — passed.
+- `prek run --all-files` — passed.
+- `npm test -- --run` — 136 tests passed across 14 files.
+- `npm run build` — passed.
+- `npm run build -- --mode e2e` followed by
+  `CI=1 npm run test:e2e -- --workers=4 --reporter=dot` — all 315 tests passed
+  across desktop Chromium, phone Chromium, and phone WebKit.
+- `git diff --check` — passed.
+
+An initial browser run against the normal production build passed 303 tests;
+12 checks of preview routes failed because those routes require the e2e build
+mode. Rebuilding with CI's e2e mode resolved all 12 failures.
+
+Session 3 and application composition remain planned. No dependencies were
+added or upgraded.
