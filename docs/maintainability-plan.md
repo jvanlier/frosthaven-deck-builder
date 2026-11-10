@@ -64,13 +64,13 @@ rules, stylesheet organization, or browser test organization.
 6. Run the relevant regression suites and canonical checks. Prioritize the
    client and importer over splitting the already encapsulated storage module.
 
-## Follow-up: application composition
+## Application composition (completed with session 3a)
 
 Reduce `App.tsx` to application composition by extracting layout, workspace
 resolution, save feedback, health handling, informational pages, and test
 previews. Share route lookup while retaining each route's validation. This was
-originally listed under session 2; defer it to keep that session focused on the
-editor operations and rules engine.
+originally listed under session 2; completed with the save adapters in session
+3a to keep the editor operations and rules engine changes focused.
 
 ## Session 1 result
 
@@ -140,5 +140,32 @@ An initial browser run against the normal production build passed 303 tests;
 12 checks of preview routes failed because those routes require the e2e build
 mode. Rebuilding with CI's e2e mode resolved all 12 failures.
 
-Session 3 and application composition remain planned. No dependencies were
-added or upgraded.
+## Session 3a result: save adapters and application composition
+
+Completed on branch `refactor-app-adapters`, based on `refactor-editor-rules`.
+The remaining session 3 work is split into separate importer and stylesheet/test
+sessions so each PR has a focused diff.
+
+- Kept the save controller's complete synchronization state and transitions in
+  `app-data/controller.ts`. Extracted HTTP transport, backup parsing/downloads,
+  and the React provider into dedicated modules behind the existing exports.
+- Shared supported-character validation across backup import, API requests,
+  and storage without removing any boundary checks or changing schema acceptance.
+- Reduced `App.tsx` from 614 to 130 lines by extracting header/navigation,
+  workspace resolution, save feedback, health handling, information pages, and
+  test previews. Kept route validation and preview build-mode guards unchanged.
+- Compared 29 original function bodies, including the entire save controller
+  and all application components: unchanged. Checked 43 runtime modules,
+  including re-exports: no import cycles.
+
+### Checks
+
+- Typecheck, lint, formatting, `prek run --all-files`, production build, and
+  `git diff --check` — passed.
+- `npm test -- --run` — all 136 tests passed across 14 files.
+- `npm run build -- --mode e2e` then
+  `CI=1 npm run test:e2e -- --workers=4 --reporter=dot` — all 315 tests passed
+  across desktop Chromium, phone Chromium, and phone WebKit.
+
+Importer, stylesheet, and browser test organization remain planned. No
+dependencies were added or upgraded.
