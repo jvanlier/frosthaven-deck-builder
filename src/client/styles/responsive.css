@@ -1,0 +1,99 @@
+@media (max-width: 650px) {
+  .starting-hand-status .issue-list {
+    min-height: 48px;
+  }
+  .header-utilities {
+    gap: 8px;
+  }
+  .health {
+    max-width: 64px;
+    font-size: 10px;
+  }
+  .build-list-intro,
+  .build-list-item,
+  .editor-toolbar,
+  .repair-list li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .build-list-intro > button,
+  .repair-button {
+    align-self: start;
+  }
+  .build-actions {
+    width: 100%;
+  }
+  .build-actions button {
+    flex: 1;
+  }
+  .save-feedback.error,
+  .save-feedback.conflict {
+    align-items: start;
+    flex-direction: column;
+  }
+  .card-detail-layout {
+    grid-template-columns: 1fr;
+  }
+  .card-detail-image {
+    max-width: 300px;
+    margin: auto;
+  }
+  .overview-matrix {
+    min-width: 608px;
+  }
+  .overview-scroll {
+    scroll-padding-left: 128px;
+  }
+  .overview-matrix thead th:first-child,
+  .overview-matrix .overview-card-name {
+    width: 128px;
+    min-width: 128px;
+    white-space: normal;
+  }
+}
+@media (max-width: 520px) {
+  .card-grid,
+  .deck-card-list,
+  .level-up-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  :is(.card-grid, .deck-card-list, .level-up-card-grid):has(
+    .card-note,
+    .card-note-input
+  ) {
+    row-gap: 24px;
+  }
+  .deck-card-item .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .level-up-status {
+    gap: 6px;
+    padding: 8px;
+  }
+  .level-up-instruction {
+    padding: 6px;
+    font-size: 12px;
+  }
+  .level-up-counter {
+    font-size: 12px;
+  }
+  .level-up-actions {
+    gap: 4px;
+  }
+  .level-up-actions button,
+  .starting-hand-status > button {
+    padding: 6px;
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

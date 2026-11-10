@@ -192,5 +192,34 @@ Completed on branch `refactor-card-importer`, based on `refactor-app-adapters`.
 - Production client asset hashes match session 3a; application runtime files
   are unchanged in this session.
 
-Stylesheet and browser test organization remain planned. No dependencies were
-added or upgraded.
+## Session 3c result: styles and browser tests
+
+Completed on branch `refactor-styles-browser-tests`, based on
+`refactor-card-importer`.
+
+- Replaced the 1,658-line stylesheet with an ordered import entry point and 12
+  modules for base styles, pages, navigation, build dialogs, editor status,
+  decks, cards, notes, editors, card details, overview, and responsive rules.
+- Compared parsed stylesheet rules and declarations, including media queries
+  and source order: unchanged. Production CSS and JavaScript asset hashes match
+  session 3b exactly.
+- Reorganized the 3,740-line browser smoke suite into 13 suites by behavior,
+  sharing its 15 fixture definitions in `tests/e2e/fixtures.ts`.
+- Shared 12 ordinary successful-save API setups through
+  `tests/e2e/workspace-api.ts`. Kept in-flight timing, constant-revision stubs,
+  failure responses, import revision assertions, and two-device conflicts
+  explicit in their tests.
+- Compared all 67 original test/parameterization blocks: preserved, with
+  unchanged actions and assertions. Fixture definitions are unchanged.
+
+### Checks
+
+- Typecheck, lint, formatting, `prek run --all-files`, production build, and
+  `git diff --check` — passed.
+- `npm test -- --run` — all 137 tests passed across 14 files.
+- `npm run build -- --mode e2e` then
+  `CI=1 npm run test:e2e -- --workers=4 --reporter=dot` — all 315 tests passed
+  across desktop Chromium, phone Chromium, and phone WebKit.
+
+All planned sessions and the application composition follow-up are complete.
+No dependencies were added or upgraded.

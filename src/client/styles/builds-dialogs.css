@@ -1,0 +1,129 @@
+.empty-card,
+.content-card,
+.feedback-card {
+  max-width: 760px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.empty-card h2,
+.content-card h2 {
+  margin-top: 0;
+}
+.content-card p,
+.empty-card p,
+.feedback-card p {
+  color: var(--muted);
+}
+.build-list-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 960px;
+}
+.backup-panel {
+  display: grid;
+  gap: 16px;
+  max-width: 960px;
+  margin-bottom: 24px;
+}
+.backup-panel p:last-child {
+  margin-bottom: 0;
+}
+.backup-actions,
+.build-actions,
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+.build-list {
+  display: grid;
+  gap: 12px;
+  max-width: 960px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.build-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.build-list-item > a {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  color: var(--text);
+  text-decoration: none;
+}
+.build-list span {
+  color: var(--muted);
+}
+.build-list .build-attention {
+  color: var(--warn);
+  font-size: 13px;
+  font-weight: 600;
+}
+.build-actions button {
+  font-size: 13px;
+}
+.form-dialog,
+.card-dialog {
+  max-height: 94vh;
+  width: min(92vw, 480px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  color: var(--text);
+  background: var(--bg2);
+  box-shadow: 0 20px 60px #0008;
+}
+dialog::backdrop {
+  background: #000b;
+  backdrop-filter: blur(4px);
+}
+.form-dialog form,
+.form-dialog .dialog-form {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+.form-dialog h2 {
+  margin: 0;
+}
+.form-dialog .dialog-form > p,
+.form-dialog .dialog-form > ul {
+  margin: 0;
+  color: var(--muted);
+}
+.form-dialog label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+}
+input,
+select,
+textarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+  color: var(--text);
+  background: var(--bg);
+}
+.form-dialog input,
+.form-dialog select {
+  width: 100%;
+}
+.form-error {
+  margin: 0;
+  color: var(--bad);
+}

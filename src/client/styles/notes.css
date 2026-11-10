@@ -1,0 +1,176 @@
+.card-note,
+.card-note-input {
+  --note-accent: var(--ice);
+  --note-border: #38bdf866;
+  --note-bg: #162238;
+  position: relative;
+  margin-top: 10px;
+}
+/* A note takes the colour scheme of its card's Not in deck, Not in pool or
+   Dropped state. */
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Not in deck"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #e2e8f0;
+  --note-border: #475569;
+  --note-bg: #1a2230;
+  --line: #3b4659;
+  --muted: #a3aebf;
+}
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Not in pool"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #94a3b8;
+  --note-border: #1e293b;
+  --note-bg: #121926;
+  --line: #273244;
+  --muted: #7d8899;
+}
+:is(
+    .level-up-candidate,
+    .level-up-deck-card,
+    .starting-deck-card,
+    .deck-card-item
+  ):has(.card-tile[data-state="Dropped"])
+  > :is(.card-note, .card-note-input) {
+  --note-accent: #f87171;
+  --note-border: #b7393999;
+  --note-bg: #26171b;
+  --line: #4f2a2e;
+  --muted: #c49a9a;
+}
+/* A notch on top points at the note's card. */
+.card-note::before,
+.card-note-input::before,
+.card-note::after,
+.card-note-input::after {
+  position: absolute;
+  left: 50%;
+  border: 8px solid transparent;
+  border-top: 0;
+  content: "";
+  transform: translateX(-50%);
+}
+.card-note::before,
+.card-note-input::before {
+  bottom: 100%;
+  border-bottom-color: var(--note-border);
+}
+.card-note::after,
+.card-note-input::after {
+  bottom: calc(100% - 1px);
+  border-bottom-color: var(--note-bg);
+}
+.card-note {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--note-border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--note-bg);
+  font-size: 13px;
+}
+.card-note p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.card-note em {
+  color: var(--muted);
+}
+.plain-text {
+  white-space: pre-wrap;
+}
+.card-note-input {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--note-border);
+  border-radius: 10px;
+  color: var(--note-accent);
+  background: var(--note-bg);
+  font-size: 11px;
+  font-weight: 700;
+}
+.card-note-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+.card-note-header label {
+  margin-right: auto;
+}
+.card-note-level {
+  justify-self: start;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.card-note-level[data-current="true"] {
+  border-color: var(--note-accent);
+  color: var(--note-accent);
+}
+.card-note-revert {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: none;
+  font-size: 13px;
+}
+.card-note-revert:hover:not(:disabled),
+.card-note-revert:focus-visible {
+  color: var(--note-accent);
+  border-color: var(--note-accent);
+}
+/* Keep the focus ring, but in the note's own colour scheme. */
+.card-note-input :focus-visible {
+  outline-color: var(--note-accent);
+}
+.card-note-input textarea {
+  width: 100%;
+  min-height: 60px;
+  height: 60px;
+  resize: vertical;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.card-note-history {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.card-note-history li {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.card-note-history li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.card-note-history p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

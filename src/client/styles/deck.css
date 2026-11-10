@@ -1,0 +1,75 @@
+.deck-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.deck-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 14px;
+}
+.deck-intro > .button-link {
+  margin-left: auto;
+}
+.deck-intro > .button-link,
+.deck-toolbar button {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.deck-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.deck-toggle input {
+  appearance: none;
+  position: relative;
+  width: 38px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: var(--line);
+  cursor: pointer;
+}
+.deck-toggle input::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 3px;
+  left: 3px;
+  border-radius: 50%;
+  background: white;
+  transition: 0.2s;
+}
+.deck-toggle input:checked {
+  background: var(--ice2);
+}
+.deck-toggle input:checked::after {
+  left: 19px;
+}
+.deck-cards {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.deck-card-item .card-grid {
+  padding-top: 0;
+}
+/* The status bar already sits apart from the toggles. */
+.deck-intro + .deck-issues {
+  margin-top: 0;
+}
+.deck-cards > .section-heading {
+  margin: 0;
+}
