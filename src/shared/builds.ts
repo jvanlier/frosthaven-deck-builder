@@ -23,8 +23,6 @@ export interface CreateBuildInput {
 export interface BuildMutationOptions {
   now?: () => string;
   id?: () => string;
-  uuid?: () => string;
-  generateId?: () => string;
 }
 
 export type BuildOperationKind =
@@ -450,10 +448,5 @@ function getNow(options: Pick<BuildMutationOptions, "now">): string {
 }
 
 function getId(options: BuildMutationOptions): string {
-  return (
-    options.id?.() ??
-    options.uuid?.() ??
-    options.generateId?.() ??
-    generateUuid()
-  );
+  return options.id?.() ?? generateUuid();
 }

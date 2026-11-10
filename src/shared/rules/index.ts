@@ -798,13 +798,9 @@ export function applyDeckEdit(
   return result;
 }
 
-export const normalizeDeckEdit = applyDeckEdit;
-
 export function canAppendLevel(build: Build, character: Character): boolean {
   if (maxLevel(build) >= 9) {
     return false;
   }
   return replayBuild(build, character).issues.length === 0;
 }
-
-export const isAppendAllowed = canAppendLevel;

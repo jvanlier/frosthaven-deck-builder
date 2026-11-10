@@ -1,32 +1,7 @@
 import { useId } from "react";
 import type { Card } from "../shared/character.js";
 import { effectiveCardNote } from "../shared/builds.js";
-import {
-  MAX_NOTE_LENGTH,
-  type AppData,
-  type Build,
-} from "../shared/schema/index.js";
-
-export function updateBuildData(
-  data: AppData,
-  buildId: string,
-  updater: (build: Build) => Build,
-): AppData {
-  const build = data.builds.find((candidate) => candidate.id === buildId);
-  if (!build) {
-    return data;
-  }
-  const updated = updater(build);
-  if (updated === build) {
-    return data;
-  }
-  return {
-    ...data,
-    builds: data.builds.map((candidate) =>
-      candidate.id === updated.id ? updated : candidate,
-    ),
-  };
-}
+import { MAX_NOTE_LENGTH, type Build } from "../shared/schema/index.js";
 
 /**
  * Edits a card's note at one level. The field is pre-filled with the note the

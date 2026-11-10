@@ -12,7 +12,8 @@ import {
   type RuleLevelState,
 } from "../shared/rules/index.js";
 import { useAppData } from "./app-data";
-import { startEditorPath } from "./build-editor";
+import { levelUpPath, startEditorPath } from "./navigation/paths";
+import { updateBuildData } from "./build-data";
 
 export function RepairIssues({
   build,
@@ -40,12 +41,7 @@ export function RepairIssues({
     if (!canMutate) {
       return;
     }
-    updateData((current) => ({
-      ...current,
-      builds: current.builds.map((candidate) =>
-        candidate.id === build.id ? mutator(candidate) : candidate,
-      ),
-    }));
+    updateData((current) => updateBuildData(current, build.id, mutator));
   }
 
   function openEditor(issue: RuleIssue): void {
@@ -62,9 +58,7 @@ export function RepairIssues({
       : issue.code === "MISSING_PICK"
         ? "?focus=pick"
         : "?focus=deck";
-    navigate(
-      `/c/${encodeURIComponent(character.id)}/b/${encodeURIComponent(build.id)}/l/${state.level}/level-up${focus}`,
-    );
+    navigate(`${levelUpPath(character.id, build.id, state.level)}${focus}`);
   }
 
   function removeOperation(issue: RuleIssue): void {

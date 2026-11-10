@@ -10,10 +10,13 @@ import {
 } from "react-router-dom";
 import { preventUnloadIfPending, useAppData } from "./app-data";
 import { CardGrid } from "./cards";
-import { BuildList, StartingEditor } from "./build-editor";
+import { BuildList } from "./builds/build-list";
+import { StartingEditor } from "./starting/starting-editor";
+import { deckPath, overviewPath } from "./navigation/paths";
 import { CardDetailRoute, DeckRoute } from "./deck-view";
 import { CharacterSelect } from "./character-select";
-import { LevelUpRoute, levelUpDestination } from "./level-up";
+import { LevelUpRoute } from "./level-up";
+import { levelUpDestination } from "./navigation/build-destination";
 import { OverviewRoute } from "./overview-view";
 import { getCharacter } from "../shared/data/characters/index.js";
 import type { Character } from "../shared/character.js";
@@ -413,7 +416,11 @@ function BottomTabs() {
         icon="⬆︎"
       />
       <WorkspaceTab
-        to={workspace.build ? overviewPath(workspace) : null}
+        to={
+          workspace.build
+            ? overviewPath(workspace.characterId!, workspace.buildId!)
+            : null
+        }
         label="Overview"
         icon="▦"
       />
@@ -489,15 +496,7 @@ function useWorkspace(): Workspace {
 }
 
 function workspaceDeckPath(workspace: Workspace, level: number): string {
-  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
-    workspace.buildId!,
-  )}/l/${level}`;
-}
-
-function overviewPath(workspace: Workspace): string {
-  return `/c/${encodeURIComponent(workspace.characterId!)}/b/${encodeURIComponent(
-    workspace.buildId!,
-  )}/overview`;
+  return deckPath(workspace.characterId!, workspace.buildId!, level);
 }
 
 function SaveFeedback() {

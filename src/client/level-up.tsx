@@ -5,7 +5,8 @@ import { CandidateGrid } from "./candidate-grid";
 import { CardNoteInput } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
-import { startEditorPath } from "./build-editor";
+import { deckPath } from "./navigation/paths";
+import { updateBuildData } from "./build-data";
 import { getCharacter } from "../shared/data/characters/index.js";
 import {
   appendLevelUp,
@@ -27,41 +28,6 @@ import {
   type LevelUp,
 } from "../shared/schema/index.js";
 import type { Card, Character } from "../shared/character.js";
-
-export function levelUpPath(
-  characterId: string,
-  buildId: string,
-  level: number,
-): string {
-  return `/c/${encodeURIComponent(characterId)}/b/${encodeURIComponent(buildId)}/l/${level}/level-up`;
-}
-
-export function levelUpDestination(
-  build: Build,
-  character: Character,
-): string | null {
-  const replay = replayBuild(build, character);
-  const starting = replay.levels[0];
-  if (starting?.issues.length) {
-    return startEditorPath(build);
-  }
-
-  const unfinished = replay.levels
-    .slice(1)
-    .find((state) => state.issues.length);
-  if (unfinished) {
-    return levelUpPath(character.id, build.id, unfinished.level);
-  }
-
-  if (canAppendLevel(build, character)) {
-    return levelUpPath(
-      character.id,
-      build.id,
-      build.startLevel + build.levelUps.length + 1,
-    );
-  }
-  return null;
-}
 
 export function LevelUpRoute() {
   const { characterId, buildId, level } = useParams();
@@ -93,12 +59,7 @@ export function LevelUpRoute() {
       return;
     }
     appendRequested.current = targetLevel;
-    updateData((current) => ({
-      ...current,
-      builds: current.builds.map((candidate) =>
-        candidate.id === build.id ? appendLevelUp(candidate) : candidate,
-      ),
-    }));
+    updateData((current) => updateBuildData(current, build.id, appendLevelUp));
     void flush().catch(() => undefined);
   }, [build, flush, shouldAppend, targetLevel, updateData]);
 
@@ -206,24 +167,7 @@ function LevelUpEditor({
   ]).sort(compareCardLevelsDescending);
 
   function mutateBuild(mutator: (current: Build) => Build): void {
-    updateData((current) => {
-      const existing = current.builds.find(
-        (candidate) => candidate.id === build.id,
-      );
-      if (!existing) {
-        return current;
-      }
-      const changed = mutator(existing);
-      if (changed === existing) {
-        return current;
-      }
-      return {
-        ...current,
-        builds: current.builds.map((candidate) =>
-          candidate.id === build.id ? changed : candidate,
-        ),
-      };
-    });
+    updateData((current) => updateBuildData(current, build.id, mutator));
   }
 
   function scrollToDeckOnSmallScreen(): void {
@@ -601,10 +545,6 @@ function cloneLevelUp(levelUp: LevelUp): LevelUp {
 
 function cloneCardNote(note: CardNote): CardNote {
   return { ...note };
-}
-
-function deckPath(characterId: string, buildId: string, level: number): string {
-  return `/c/${encodeURIComponent(characterId)}/b/${encodeURIComponent(buildId)}/l/${level}`;
 }
 
 export function UnavailableLevelUpView() {
