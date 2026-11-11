@@ -6,7 +6,7 @@ planning change.
 - Product specification: [`spec.md`](spec.md).
 - Visual reference: [`mockup/README.md`](mockup/README.md), not production code.
 - Tracking issue: [#3](https://github.com/jvanlier/frosthaven-deck-builder/issues/3).
-- Execution/merge policy: [`../AGENTS.md`](../AGENTS.md).
+- Delivery policy: [agent contracts §5](agent-contracts.md#5-automated-verification-and-delivery-endpoint).
 - Shared ownership and resolved edge cases: [`agent-contracts.md`](agent-contracts.md).
 
 **One assigned ticket per agent.** The maintainer manages dispatch and the loop. Agents
@@ -91,7 +91,7 @@ Issue A establishes a runnable minimal app, health integration test and browser 
 test, not placeholder assertions or `passWithNoTests`.
 
 - GitHub Actions on every pull request and push to `main`.
-- Node 22, committed npm lockfile and `npm ci`.
+- Node 22, committed npm lockfile and `just install`.
 - Pinned action SHAs, read-only permissions, caching, timeouts and cancellation of
   superseded runs.
 - prek checks, formatting/linting, typechecking, Vitest, Playwright smoke coverage and

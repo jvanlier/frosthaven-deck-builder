@@ -1,20 +1,20 @@
 # Agent contracts and unattended-delivery clarifications
 
 These decisions supplement `spec.md` and the issue scopes. They resolve implementation
-ambiguities; they do not add new product scope. See [`../AGENTS.md`](../AGENTS.md) for the
-single-ticket execution, TDD, review and authorized merge policy.
+ambiguities; they do not add new product scope. See [development](development.md) for
+setup, verification, and test-first delivery instructions.
 
 ## 1. Ownership and shared boundaries
 
-| Owner  | Boundary established by that issue                                                                                                                                                                                               |
-|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| #4     | Node 22 pin, canonical npm/prek commands, CI, health app factory in `src/server/app.ts`, listening entry in `src/server/index.ts`, and `CardLevel`/`Card`/`Character` contracts in `src/shared/character.ts` matching spec §3.1. |
-| #5     | Validated static catalog in `src/shared/data/characters/index.ts`, exporting `characters` and `getCharacter(id)`; imported `SD.json`, local assets and attribution. Reuse #4's character types.                                  |
-| #6     | `src/shared/schema/index.ts`: `appDataSchema`, `putDataRequestSchema` and inferred document types; `src/shared/builds.ts`: pure build/card-note mutations and HTTP-compatible UUID generation.                                 |
-| #7     | `src/shared/rules/index.ts`: deterministic replay, options, validation, explicit deck-edit normalization and append eligibility.                                                                                                  |
-| #8     | Serialized disk store and HTTP API extending #4's app factory, consuming #5's catalog and #6's schemas.                                                                                                                          |
-| #9     | App-data provider/hook, save state machine, routes and reusable accessible card/dialog primitives. All later UI issues consume these instead of duplicating state/sync.                                                          |
-| #10–18 | Feature implementation and verification within their assigned issue boundaries, extending established modules rather than replacing them.                                                                                        |
+| Owner  | Boundary established by that issue                                                                                                                                                                                           |
+|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| #4     | Node 22 pin, canonical just commands, CI, health app factory in `src/server/app.ts`, listening entry in `src/server/index.ts`, and `CardLevel`/`Card`/`Character` contracts in `src/shared/character.ts` matching spec §3.1. |
+| #5     | Validated static catalog in `src/shared/data/characters/index.ts`, exporting `characters` and `getCharacter(id)`; imported `SD.json`, local assets and attribution. Reuse #4's character types.                              |
+| #6     | `src/shared/schema/index.ts`: `appDataSchema`, `putDataRequestSchema` and inferred document types; `src/shared/builds.ts`: pure build/card-note mutations and HTTP-compatible UUID generation.                               |
+| #7     | `src/shared/rules/index.ts`: deterministic replay, options, validation, explicit deck-edit normalization and append eligibility.                                                                                             |
+| #8     | Serialized disk store and HTTP API extending #4's app factory, consuming #5's catalog and #6's schemas.                                                                                                                      |
+| #9     | App-data provider/hook, save state machine, routes and reusable accessible card/dialog primitives. All later UI issues consume these instead of duplicating state/sync.                                                      |
+| #10–18 | Feature implementation and verification within their assigned issue boundaries, extending established modules rather than replacing them.                                                                                    |
 
 An owning issue establishes these exports before it closes. Consumers may add compatible
 helpers/refinements needed for their own ticket, but must not invent parallel schemas,
@@ -24,8 +24,10 @@ never leave current main broken or implement an unrelated future ticket.
 
 ### Canonical commands and build
 
-#4 establishes `npm run dev`, `typecheck`, `lint`, `format:check`, `test`, `test:e2e`
-and `build`, plus `prek run --all-files`. Use `npm test -- --run` for non-watch Vitest.
+Use `just install` for dependencies, `just serve` for development, `just check` for
+type/lint/format checks, `just test` for non-watch Vitest, `just test-e2e` for browser
+tests, `just build` for production output, and `just check-hooks` for all-file hooks.
+See the [command reference](commands.md) for browser and hook installation.
 Commit a Node 22 version pin and lockfile; select compatible stable package versions
 without seeking human approval. Production output is `dist/client` and the executable
 `dist/server/index.js`; its shared imports/data must work outside the source tree.

@@ -7,7 +7,8 @@ saved. The real app is built per [`docs/spec.md`](../spec.md) and should not imp
 ## Run
 
 ```sh
-cd docs/mockup && python3 -m http.server 8765
+# from the repository root
+just serve-mockup
 # open http://localhost:8765/
 ```
 

@@ -4,7 +4,8 @@ Status: v5 · single-ticket autonomous delivery agreed · Owner: jvanlier
 
 Implementation sequence and GitHub issues: [`implementation-plan.md`](implementation-plan.md).
 Resolved agent-facing contracts and edge cases: [`agent-contracts.md`](agent-contracts.md).
-Mandatory test-first, review and authorized merge policy: [`../AGENTS.md`](../AGENTS.md).
+Test-first delivery: [development](development.md#verify-a-change).
+Review and delivery policy: [agent contracts §5](agent-contracts.md#5-automated-verification-and-delivery-endpoint).
 
 ## 1. Purpose
 
