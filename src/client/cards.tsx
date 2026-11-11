@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { Card } from "../shared/character.js";
 import { getCharacter } from "../shared/data/characters/index.js";
 
+// UI lists put higher levels first and X last, retaining input order for ties.
 export function compareCardLevelsDescending(left: Card, right: Card): number {
   return (
     (right.level === "X" ? 0 : right.level) -

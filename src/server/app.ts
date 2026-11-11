@@ -4,11 +4,10 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import type { Context } from "hono";
 import { extname, join, resolve } from "node:path";
-import { getCharacter } from "../shared/data/characters/index.js";
+import { hasSupportedCharacters } from "../shared/supported-characters.js";
 import {
   MAX_DOCUMENT_BYTES,
   putDataRequestSchema,
-  type AppData,
 } from "../shared/schema/index.js";
 import {
   createDataStore,
@@ -160,12 +159,6 @@ async function readJsonBody(request: Request): Promise<unknown> {
   } catch {
     throw new Error("Invalid JSON");
   }
-}
-
-function hasSupportedCharacters(data: AppData): boolean {
-  return data.builds.every(
-    (build) => getCharacter(build.characterId) !== undefined,
-  );
 }
 
 function isApiPath(path: string): boolean {

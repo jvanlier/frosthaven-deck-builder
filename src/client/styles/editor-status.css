@@ -1,0 +1,115 @@
+.editor-toolbar,
+.section-heading,
+.pick-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.section-heading h2,
+.pick-heading h3 {
+  margin: 0;
+}
+.editor-section {
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid #2f4466;
+}
+.editor-count {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.pick-list {
+  display: grid;
+  gap: 24px;
+}
+.pick-section {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.pick-section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.pick-section.active {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.selected-pick {
+  margin: 0;
+  color: var(--muted);
+}
+.issue-list {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0;
+  padding: 0;
+  color: var(--warn);
+  list-style: none;
+}
+.issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) {
+  color: var(--bad);
+}
+.deck-issues {
+  margin-block: 14px;
+}
+.deck-view > .deck-issues,
+.starting-hand-status {
+  position: sticky;
+  z-index: 3;
+  top: calc(var(--header-height) + var(--status-bar-gap));
+}
+.deck-issues .issue-list {
+  width: 100%;
+  margin: 0;
+}
+.repair-list li > span,
+.starting-hand-status li,
+.level-up-instruction,
+.level-up-counter {
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fbbf2422;
+  font-size: 14px;
+  font-weight: 700;
+}
+.repair-list .issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) > span,
+.starting-hand-status .issue-invalid:not([data-issue-code="DECK_TOO_LARGE"]) {
+  background: #f8717122;
+}
+.repair-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+.repair-list li {
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.repair-button {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+}
+@media (min-width: 521px) {
+  .deck-view,
+  .starting-editor,
+  .starting-hand,
+  .level-up-editor {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--card-width));
+    column-gap: 14px;
+  }
+  .deck-view > *,
+  .starting-editor > *,
+  .starting-hand > *,
+  .level-up-editor > * {
+    grid-column: 1 / -1;
+  }
+}

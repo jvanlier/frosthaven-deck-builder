@@ -405,6 +405,66 @@ describe("Snowdancer import transaction", () => {
     expect(result.manifest.source.images.baseUrl).toContain("/image-revision/");
   });
 
+  it("restores previous files and removes new outputs after a late install failure", async () => {
+    const root = await mkdtemp(join(tmpdir(), "frosthaven-import-"));
+    const previousFiles = new Map([
+      ["src/shared/data/characters/SD.json", "previous catalog"],
+      ["src/shared/data/characters/index.ts", "previous index"],
+      ["public/cards/SD/fh-natures-breath.jpeg", "previous artwork"],
+    ]);
+    await mkdir(join(root, "src/shared/data/characters"), { recursive: true });
+    await mkdir(join(root, "public/cards/SD"), { recursive: true });
+    for (const [path, contents] of previousFiles) {
+      await writeFile(join(root, path), contents);
+    }
+
+    await expect(
+      importCards({
+        projectRoot: root,
+        iconSource: fixtureIcon,
+        requireCompleteCatalog: false,
+        sourceRevisions: {
+          metadata: "metadata-revision",
+          images: "image-revision",
+        },
+        fetchImpl: async (url) =>
+          new Response(
+            url.endsWith("frosthaven.json")
+              ? JSON.stringify(fixture)
+              : "new artwork",
+          ),
+        fileSystem: {
+          rename: async (from, to) => {
+            if (
+              String(from).includes(".import-cards-") &&
+              String(to) === join(root, "public/icons/SD.png")
+            ) {
+              throw new Error("injected icon install failure");
+            }
+            return realRename(from, to);
+          },
+        },
+      }),
+    ).rejects.toThrow("injected icon install failure");
+
+    for (const [path, contents] of previousFiles) {
+      await expect(readFile(join(root, path), "utf8")).resolves.toBe(contents);
+    }
+    for (const path of [
+      "src/shared/data/characters/SD-source-manifest.json",
+      "public/cards/SD/fh-sd-back.jpeg",
+      "public/cards/SD/fh-the-endless-white.jpeg",
+      "public/icons/SD.png",
+    ]) {
+      await expect(readFile(join(root, path))).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+    }
+    expect(
+      (await readdir(root)).some((name) => name.startsWith(".import-cards-")),
+    ).toBe(false);
+  });
+
   it("preserves the staging backups when rollback itself fails", async () => {
     const root = await mkdtemp(join(tmpdir(), "frosthaven-import-"));
     const existingCatalog = join(root, "src/shared/data/characters/SD.json");

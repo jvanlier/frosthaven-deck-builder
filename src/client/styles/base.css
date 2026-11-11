@@ -1,0 +1,133 @@
+:root {
+  --bg: #0b1220;
+  --bg2: #111a2e;
+  --panel: #162238cc;
+  --line: #25344f;
+  --ice: #7dd3fc;
+  --ice2: #38bdf8;
+  --text: #e6eefb;
+  --muted: #8aa0c0;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --card-width: 220px;
+  --status-bar-gap: 12px;
+  color: var(--text);
+  background: var(--bg);
+  font-family: Inter, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #1e3a5f55, transparent),
+    radial-gradient(800px 500px at -10% 20%, #0ea5e922, transparent), var(--bg);
+}
+button,
+a,
+input,
+select,
+textarea {
+  font: inherit;
+}
+a {
+  color: var(--ice);
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+:focus-visible {
+  outline: 3px solid var(--warn);
+  outline-offset: 3px;
+}
+button,
+.button-link {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--text);
+  background: var(--bg2);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+}
+button:hover,
+.button-link:hover {
+  border-color: var(--ice);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+button:not([class]),
+.level-up-actions button:last-child,
+.build-list-intro > button {
+  border-color: transparent;
+  color: #03111f;
+  background: linear-gradient(180deg, var(--ice2), #0284c7);
+  box-shadow: 0 8px 24px #38bdf844;
+}
+.secondary-button,
+.build-actions button {
+  color: var(--text);
+  background: var(--bg2);
+  box-shadow: none;
+}
+.danger-button {
+  color: var(--bad);
+  border-color: #f8717166;
+  background: #f8717111;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h1 {
+  margin-bottom: 12px;
+  font-size: 26px;
+  line-height: 1.2;
+}
+h2 {
+  margin: 26px 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+h3 {
+  font-size: 16px;
+}
+p {
+  line-height: 1.5;
+}
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

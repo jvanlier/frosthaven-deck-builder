@@ -1,0 +1,218 @@
+.app-header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  border-bottom: 1px solid var(--line);
+  background: #0b1220cc;
+  backdrop-filter: blur(14px);
+}
+.header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 10px;
+  padding: 12px 16px 10px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(81%) sepia(20%) saturate(1260%)
+    hue-rotate(170deg) drop-shadow(0 0 6px #38bdf888);
+}
+.brand span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.15;
+}
+.brand strong {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.brand small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.header-utilities {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+.header-utilities a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.health {
+  margin: 0;
+  color: var(--ok);
+  font-size: 11px;
+}
+.header-utilities .health-healthy {
+  font-size: 0;
+}
+.header-utilities .health-healthy::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+.health-loading {
+  color: var(--muted);
+}
+.health-unavailable {
+  color: var(--bad);
+}
+.header-level {
+  order: 3;
+  width: 100%;
+  min-width: 0;
+}
+.level-switcher {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.level-switcher a,
+.level-switcher > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--text);
+  background: var(--bg2);
+  font-weight: 600;
+  text-decoration: none;
+}
+.level-switcher a[aria-current="page"] {
+  color: #03111f;
+  background: linear-gradient(180deg, var(--ice2), #0284c7);
+  border-color: transparent;
+  box-shadow: 0 6px 20px #38bdf855;
+}
+.level-switcher a[data-needs-attention] {
+  position: relative;
+  color: var(--warn);
+  background: #fbbf2422;
+  border-color: #fbbf2488;
+}
+.level-switcher a[data-needs-attention]::after {
+  content: "!";
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 10px;
+  line-height: 1;
+}
+.level-switcher a[data-needs-attention][aria-current="page"] {
+  color: #03111f;
+  background: var(--warn);
+  border-color: var(--warn);
+  box-shadow: 0 6px 20px #fbbf2455;
+}
+.level-switcher .future-level {
+  border-style: dashed;
+  color: var(--muted);
+  background: transparent;
+}
+.level-switcher .unavailable-level {
+  opacity: 0.35;
+}
+.bottom-tabs {
+  position: fixed;
+  z-index: 6;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: #0b1220ee;
+  backdrop-filter: blur(14px);
+}
+.bottom-tabs a,
+.tab-disabled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 16px;
+  color: var(--muted);
+  font-size: 11px;
+  text-decoration: none;
+}
+.bottom-tabs a span,
+.tab-disabled span {
+  font-size: 20px;
+}
+.bottom-tabs a.active,
+.bottom-tabs a:hover {
+  color: var(--ice);
+}
+.tab-disabled {
+  opacity: 0.5;
+}
+.save-feedback {
+  position: sticky;
+  z-index: 4;
+  top: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 16px;
+  color: #03111f;
+  background: var(--ice);
+  text-align: center;
+}
+.save-feedback.saving {
+  position: fixed;
+  top: auto;
+  right: 16px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  min-height: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  background: var(--bg2);
+  font-size: 12px;
+  pointer-events: none;
+}
+.save-feedback p {
+  margin: 0;
+}
+.save-feedback.error,
+.save-feedback.conflict {
+  justify-content: space-between;
+  color: #fff8f5;
+  background: #7a302c;
+}
+.save-feedback.conflict,
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.save-feedback.error button,
+.save-feedback.conflict button {
+  color: #3d1716;
+  background: #ffe2da;
+  border-color: #ffd2c8;
+}

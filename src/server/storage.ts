@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import * as nodeFs from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { getCharacter } from "../shared/data/characters/index.js";
+import { hasSupportedCharacters } from "../shared/supported-characters.js";
 import {
   appDataSchema,
   SCHEMA_VERSION,
@@ -363,12 +363,6 @@ class FileDataStore implements DataStore {
 
 function cloneEmptyData(): AppData {
   return { ...EMPTY_DATA, builds: [] };
-}
-
-function hasSupportedCharacters(data: AppData): boolean {
-  return data.builds.every(
-    (build) => getCharacter(build.characterId) !== undefined,
-  );
 }
 
 function backupTimestamp(date: Date): string {

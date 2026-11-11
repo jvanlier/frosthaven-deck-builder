@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppData } from "./app-data";
-import { DataBackupControls } from "./build-editor";
-import { deckPath, readLastPosition } from "./deck-view";
+import { DataBackupControls } from "./backup/data-backup-controls";
+import { deckPath } from "./navigation/paths";
+import { readLastPosition } from "./navigation/last-position";
 import {
   characterGroups,
   getCharacter,

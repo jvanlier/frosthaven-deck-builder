@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router-dom";
 import { useAppData } from "./app-data";
-import { cardDetailPath, deckPath } from "./deck-view";
+import { cardDetailPath, deckPath } from "./navigation/paths";
 import {
   buildOverviewModel,
   type OverviewCell,

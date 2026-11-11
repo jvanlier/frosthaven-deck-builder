@@ -4,8 +4,19 @@ import { CardGrid, CardImage, compareCardLevelsDescending } from "./cards";
 import { useAppData } from "./app-data";
 import { formatNoteTimestamp } from "./notes";
 import { RepairIssues } from "./repairs";
-import { startEditorPath } from "./build-editor";
-import { levelUpPath } from "./level-up";
+import {
+  cardDetailPath,
+  deckPath,
+  levelUpPath,
+  overviewPath,
+  startEditorPath,
+} from "./navigation/paths";
+import {
+  readLastPosition,
+  rememberLastPosition,
+} from "./navigation/last-position";
+import { UnavailableDeckView } from "./unavailable-deck-view";
+import { updateBuildData } from "./build-data";
 import { getCharacter } from "../shared/data/characters/index.js";
 import {
   cardNoteHistory,
@@ -15,15 +26,6 @@ import {
 import { replayBuild, type RuleLevelState } from "../shared/rules/index.js";
 import type { Card, Character } from "../shared/character.js";
 import type { Build } from "../shared/schema/index.js";
-
-export const LAST_POSITION_STORAGE_KEY =
-  "frosthaven-deck-builder:last-position";
-
-interface LastPosition {
-  characterId: string;
-  buildId: string;
-  level: number;
-}
 
 export function DeckRoute() {
   const { characterId, buildId, level } = useParams();
@@ -108,12 +110,9 @@ export function DeckView({
     if (!canDeleteLevel) {
       return;
     }
-    updateData((current) => ({
-      ...current,
-      builds: current.builds.map((candidate) =>
-        candidate.id === build.id ? deleteHighestLevel(candidate) : candidate,
-      ),
-    }));
+    updateData((current) =>
+      updateBuildData(current, build.id, deleteHighestLevel),
+    );
     setDeleteDialogOpen(false);
     navigate(deckPath(character.id, build.id, survivingLevel));
   }
@@ -281,7 +280,7 @@ function CardDetailView({
         {fromOverview ? (
           <Link
             className="button-link secondary-button"
-            to={`/c/${encodeURIComponent(character.id)}/b/${encodeURIComponent(build.id)}/overview`}
+            to={overviewPath(character.id, build.id)}
           >
             Back to overview
           </Link>
@@ -406,87 +405,6 @@ function DeleteLevelDialog({
         </div>
       </form>
     </dialog>
-  );
-}
-
-export function UnavailableDeckView() {
-  const { characterId } = useParams();
-  const character = getCharacter(characterId ?? "");
-  return (
-    <main className="page-content narrow-content">
-      <section className="empty-card">
-        <p className="eyebrow">Deck view</p>
-        <h1>This deck view is unavailable</h1>
-        <p>
-          That character, build or level does not exist. Your saved data is
-          unchanged.
-        </p>
-        <Link
-          className="button-link"
-          to={character ? `/c/${character.id}` : "/"}
-        >
-          {character ? "Back to builds" : "Choose a character"}
-        </Link>
-      </section>
-    </main>
-  );
-}
-
-export function deckPath(
-  characterId: string,
-  buildId: string,
-  level: number,
-): string {
-  return `/c/${encodeURIComponent(characterId)}/b/${encodeURIComponent(buildId)}/l/${level}`;
-}
-
-export function cardDetailPath(
-  characterId: string,
-  buildId: string,
-  cardId: string,
-): string {
-  return `/c/${encodeURIComponent(characterId)}/b/${encodeURIComponent(buildId)}/card/${encodeURIComponent(cardId)}`;
-}
-
-export function rememberLastPosition(position: LastPosition): void {
-  try {
-    window.localStorage.setItem(
-      LAST_POSITION_STORAGE_KEY,
-      JSON.stringify(position),
-    );
-  } catch {
-    // Position resume is a convenience; blocked storage must not block deck use.
-  }
-}
-
-export function readLastPosition(): LastPosition | null {
-  try {
-    const raw = window.localStorage.getItem(LAST_POSITION_STORAGE_KEY);
-    if (raw === null) {
-      return null;
-    }
-    const parsed: unknown = JSON.parse(raw);
-    if (!isLastPosition(parsed)) {
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function isLastPosition(value: unknown): value is LastPosition {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate.characterId === "string" &&
-    typeof candidate.buildId === "string" &&
-    typeof candidate.level === "number" &&
-    Number.isInteger(candidate.level) &&
-    candidate.level >= 1 &&
-    candidate.level <= 9
   );
 }
 

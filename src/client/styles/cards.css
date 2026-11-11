@@ -1,0 +1,231 @@
+.card-grid,
+.deck-card-list,
+.level-up-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--card-width));
+  gap: 14px;
+  align-items: start;
+  /* Room for the state pills that overhang the first row of cards. */
+  padding-top: 12px;
+}
+/* Card notes belong to the card above them: keep each note close to its card
+   and separate rows clearly, so a note never reads as the next row's card's. */
+:is(.card-grid, .deck-card-list, .level-up-card-grid):has(
+  .card-note,
+  .card-note-input
+) {
+  row-gap: 32px;
+}
+.deck-card-item,
+.level-up-group,
+.level-up-candidate,
+.level-up-deck-card {
+  min-width: 0;
+}
+.card-tile {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  color: var(--text);
+}
+.card-action {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--text);
+  background: none;
+  text-align: left;
+  transition: transform 0.15s;
+}
+.card-action:hover {
+  transform: translateY(-3px);
+}
+.card-action:disabled {
+  opacity: 0.4;
+}
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-action:disabled,
+.card-tile[data-state="Added from pool"] .card-action:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.card-action:disabled:hover {
+  transform: none;
+}
+.card-action img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border: 1px solid #ffffff14;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px #0008;
+}
+.card-state {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 56px);
+  padding: 3px 7px;
+  border-radius: 6px;
+  color: var(--ice);
+  background: #03111fdd;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.card-tile[data-state="In deck"] .card-state {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-action img,
+.card-tile[data-state="Added from pool"] .card-action img,
+.card-tile[data-state="In starting deck"] .card-action img {
+  outline: 3px solid var(--ice);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 7px #38bdf833,
+    0 0 40px #38bdf855;
+}
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
+.card-tile[data-state="Added from pool"] .card-state,
+.card-tile[data-state="In starting deck"] .card-state,
+.card-tile[data-state="Dropped"] .card-state,
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: none;
+  width: max-content;
+}
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
+.card-tile[data-state="Added from pool"] .card-state,
+.card-tile[data-state="In starting deck"] .card-state,
+.card-tile[data-state="Dropped"] .card-state,
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-state {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state,
+.card-tile[data-state="Added from pool"] .card-state,
+.card-tile[data-state="In starting deck"] .card-state {
+  color: #03111f;
+  background: var(--ice);
+}
+.card-tile[data-state^="Level "][data-state$=" pick"] .card-state::before,
+.card-tile[data-state="Added from pool"] .card-state::before,
+.card-tile[data-state="In starting deck"] .card-state::before {
+  content: "✓ ";
+}
+.card-tile[data-state="Dropped"] .card-action img {
+  filter: grayscale(1) brightness(0.45);
+}
+.starting-deck-card[data-not-in-deck="true"] .card-action img {
+  filter: grayscale(1);
+}
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-action
+  img {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+.starting-deck-card[data-not-in-deck="true"] .card-action:disabled {
+  opacity: 1;
+}
+.starting-deck-card[data-not-in-deck="true"] .card-action:disabled img {
+  opacity: 0.4;
+}
+.card-tile[data-state="Dropped"] .card-state {
+  color: white;
+  background: #b73939;
+}
+.card-tile[data-state="Dropped"] .card-state::before {
+  content: "✕ ";
+}
+/* Not-in-deck, not-in-pool and dropped cards get a frame in their pill colour. It sits on the
+   card button, not the image, so it lifts on hover but the image's grayscale
+   and opacity don't dim it. */
+/* Neutral greys: a card outside the deck or pool is a choice, not an error.
+   Not in deck is available and lighter; not in pool is unavailable and
+   darker. */
+.card-tile[data-state="Not in deck"] {
+  --frame: #475569;
+  --frame-glow: #64748b;
+  --state-fg: #e2e8f0;
+  --state-bg: #334155;
+}
+.card-tile[data-state="Not in pool"] {
+  --frame: #1e293b;
+  --frame-glow: #1e293b;
+  --state-fg: #94a3b8;
+  --state-bg: #1e293b;
+}
+.card-tile[data-state="Dropped"] {
+  --frame: #b73939;
+  --frame-glow: #b73939;
+  --state-fg: white;
+  --state-bg: #b73939;
+}
+.card-tile:is([data-state="Not in deck"], [data-state="Not in pool"])
+  .card-action::after,
+.card-tile[data-state="Dropped"] .card-action::after {
+  position: absolute;
+  z-index: 0;
+  inset: -5px;
+  border: 3px solid var(--frame);
+  border-radius: 17px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--frame-glow) 20%, transparent),
+    0 0 40px color-mix(in srgb, var(--frame-glow) 33%, transparent);
+  content: "";
+  pointer-events: none;
+}
+.enlarge-button {
+  padding: 2px 0;
+  border: 0;
+  color: var(--muted);
+  background: none;
+  font-size: 11px;
+}
+.card-tile > .enlarge-button {
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #ffffff33;
+  border-radius: 10px;
+  color: white;
+  background: #03111fcc;
+}
+.enlarge-button:hover,
+.enlarge-button:focus-visible {
+  color: #03111f;
+  background: var(--ice2);
+}
+/* Tinted cards zoom in their pill's colours. */
+.card-tile > .enlarge-button:is(:hover, :focus-visible) {
+  color: var(--state-fg, #03111f);
+  border-color: var(--state-fg, #ffffff33);
+  background: var(--state-bg, var(--ice2));
+}
+/* A disabled not-in-pool card stays legible; only its image is dimmed. */
+.card-tile[data-state="Not in pool"] .card-action:disabled {
+  opacity: 1;
+}

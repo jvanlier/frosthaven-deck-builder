@@ -1,0 +1,188 @@
+.overview-scroll {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline-offset: 4px;
+  scroll-padding-left: 208px;
+}
+.overview-matrix {
+  width: 100%;
+  min-width: 672px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+.overview-matrix th,
+.overview-matrix td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  white-space: nowrap;
+}
+.overview-matrix thead th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  color: var(--muted);
+  background: var(--bg2);
+  font-weight: 600;
+}
+.overview-matrix thead th:first-child,
+.overview-matrix .overview-card-name {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  width: 208px;
+  min-width: 208px;
+  text-align: left;
+  background: var(--bg2);
+}
+.overview-matrix thead th:first-child {
+  z-index: 4;
+}
+.overview-matrix thead a {
+  color: var(--ice);
+  text-decoration: none;
+  font-weight: 700;
+}
+.overview-column-status {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.overview-invalid {
+  color: var(--bad);
+}
+.overview-incomplete {
+  color: var(--warn);
+}
+.overview-card-name {
+  color: var(--text);
+  font-weight: 400;
+}
+.overview-card-name a,
+.overview-card-name small {
+  display: inline;
+}
+.overview-card-name a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+.overview-card-name a:hover {
+  color: var(--ice);
+  text-decoration-color: currentColor;
+}
+.overview-card-name small {
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.overview-group-row th {
+  color: var(--muted);
+  background: #0f1a2e;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.overview-cell {
+  position: relative;
+  display: inline-grid;
+  min-width: 30px;
+  min-height: 24px;
+  place-items: center;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.overview-deck {
+  color: #03111f;
+  background: var(--ice2);
+}
+.overview-pool {
+  border: 1.5px solid var(--ice2);
+  color: var(--ice);
+}
+.overview-not-in-pool {
+  color: #667c9c;
+}
+.overview-note-button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #03111f;
+  background: var(--warn);
+  font-size: 10px;
+  cursor: pointer;
+}
+.overview-note-button::after {
+  /* Enlarge the touch target without growing the visible dot. */
+  position: absolute;
+  inset: -8px;
+  content: "";
+}
+.overview-note-tooltip {
+  position: fixed;
+  z-index: 20;
+  max-height: 40vh;
+  overflow: auto;
+  padding: 8px 10px;
+  border: 1px solid #38bdf866;
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--bg2);
+  box-shadow: 0 10px 30px #000a;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.4;
+  text-transform: none;
+}
+.overview-summary-row th,
+.overview-summary-row td {
+  color: var(--muted);
+  font-size: 12px;
+}
+.overview-summary-row td {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.overview-summary-row th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg2);
+  text-align: left;
+}
+.overview-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin: 16px 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 12px;
+  list-style: none;
+}
+.overview-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* The matrix shows "not in pool" without a box; give its sample the same size. */
+.overview-legend .overview-not-in-pool {
+  border: 1.5px dashed var(--line);
+}
+.overview-legend-note {
+  cursor: default;
+}

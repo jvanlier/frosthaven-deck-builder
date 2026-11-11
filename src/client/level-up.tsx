@@ -5,7 +5,14 @@ import { CandidateGrid } from "./candidate-grid";
 import { CardNoteInput } from "./notes";
 import { useAppData } from "./app-data";
 import { RepairIssues } from "./repairs";
-import { startEditorPath } from "./build-editor";
+import { deckPath } from "./navigation/paths";
+import { updateBuildData } from "./build-data";
+import {
+  captureLevelUpEdit,
+  changeLevelUpDeck,
+  chooseLevelUpPick,
+  resetLevelUpEdit,
+} from "./level-up/operations";
 import { getCharacter } from "../shared/data/characters/index.js";
 import {
   appendLevelUp,
@@ -15,53 +22,12 @@ import {
 } from "../shared/builds.js";
 import {
   addOptions,
-  applyDeckEdit,
   canAppendLevel,
   pickOptions,
   replayBuild,
 } from "../shared/rules/index.js";
-import {
-  buildSchema,
-  type Build,
-  type CardNote,
-  type LevelUp,
-} from "../shared/schema/index.js";
+import type { Build, LevelUp } from "../shared/schema/index.js";
 import type { Card, Character } from "../shared/character.js";
-
-export function levelUpPath(
-  characterId: string,
-  buildId: string,
-  level: number,
-): string {
-  return `/c/${encodeURIComponent(characterId)}/b/${encodeURIComponent(buildId)}/l/${level}/level-up`;
-}
-
-export function levelUpDestination(
-  build: Build,
-  character: Character,
-): string | null {
-  const replay = replayBuild(build, character);
-  const starting = replay.levels[0];
-  if (starting?.issues.length) {
-    return startEditorPath(build);
-  }
-
-  const unfinished = replay.levels
-    .slice(1)
-    .find((state) => state.issues.length);
-  if (unfinished) {
-    return levelUpPath(character.id, build.id, unfinished.level);
-  }
-
-  if (canAppendLevel(build, character)) {
-    return levelUpPath(
-      character.id,
-      build.id,
-      build.startLevel + build.levelUps.length + 1,
-    );
-  }
-  return null;
-}
 
 export function LevelUpRoute() {
   const { characterId, buildId, level } = useParams();
@@ -93,12 +59,7 @@ export function LevelUpRoute() {
       return;
     }
     appendRequested.current = targetLevel;
-    updateData((current) => ({
-      ...current,
-      builds: current.builds.map((candidate) =>
-        candidate.id === build.id ? appendLevelUp(candidate) : candidate,
-      ),
-    }));
+    updateData((current) => updateBuildData(current, build.id, appendLevelUp));
     void flush().catch(() => undefined);
   }, [build, flush, shouldAppend, targetLevel, updateData]);
 
@@ -149,12 +110,7 @@ function LevelUpEditor({
   const previousState = replay.levels.find(
     (candidate) => candidate.level === level - 1,
   );
-  const baseline = useRef({
-    levelUp: cloneLevelUp(levelUp),
-    cardNotes: build.cardNotes
-      .filter((note) => note.level === level)
-      .map(cloneCardNote),
-  });
+  const baseline = useRef(captureLevelUpEdit(build, levelUp));
   const changedNotes = useRef(new Set<string>());
   const deckHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -206,24 +162,7 @@ function LevelUpEditor({
   ]).sort(compareCardLevelsDescending);
 
   function mutateBuild(mutator: (current: Build) => Build): void {
-    updateData((current) => {
-      const existing = current.builds.find(
-        (candidate) => candidate.id === build.id,
-      );
-      if (!existing) {
-        return current;
-      }
-      const changed = mutator(existing);
-      if (changed === existing) {
-        return current;
-      }
-      return {
-        ...current,
-        builds: current.builds.map((candidate) =>
-          candidate.id === build.id ? changed : candidate,
-        ),
-      };
-    });
+    updateData((current) => updateBuildData(current, build.id, mutator));
   }
 
   function scrollToDeckOnSmallScreen(): void {
@@ -293,55 +232,19 @@ function LevelUpEditor({
     if (!canMutate) {
       return;
     }
-    const added = [...levelUp.added];
-    const oldIndex = selectedPick === null ? -1 : added.indexOf(selectedPick);
-    const withoutPicks = added.filter(
-      (cardId) => cardId !== selectedPick && cardId !== card.id,
-    );
-    if (selectedPick === card.id) {
-      changeLevelUp({
-        pick: null,
-        added: withoutPicks,
-        dropped: [...levelUp.dropped],
-      });
-      return;
+    changeLevelUp(chooseLevelUpPick(levelUp, card.id));
+    if (selectedPick !== card.id) {
+      scrollToDeckOnSmallScreen();
     }
-    if (oldIndex === -1) {
-      withoutPicks.push(card.id);
-    } else {
-      withoutPicks.splice(Math.min(oldIndex, withoutPicks.length), 0, card.id);
-    }
-    changeLevelUp({
-      pick: card.id,
-      added: withoutPicks,
-      dropped: [...levelUp.dropped],
-    });
-    scrollToDeckOnSmallScreen();
   }
 
   function changeDeck(card: Card, action: "add" | "remove"): void {
     if (!canMutate) {
       return;
     }
-    const desired = new Set(editorState.deck.map((candidate) => candidate.id));
-    if (action === "add") {
-      desired.add(card.id);
-    } else {
-      desired.delete(card.id);
-    }
-    const edit = applyDeckEdit(previousDeckIds, [...desired], {
-      existing: {
-        added: levelUp.added,
-        dropped: levelUp.dropped,
-      },
-      validAdded: editorState.applied.added,
-      validDropped: editorState.applied.dropped,
-    });
-    changeLevelUp({
-      pick: levelUp.pick,
-      added: edit.added,
-      dropped: edit.dropped,
-    });
+    changeLevelUp(
+      changeLevelUpDeck(levelUp, previousDeckIds, editorState, card.id, action),
+    );
   }
 
   function toggleExtra(card: Card): void {
@@ -391,25 +294,7 @@ function LevelUpEditor({
     }
     const entry = baseline.current;
     const changed = changedNotes.current;
-    mutateBuild((current) => {
-      const resetLevel = setLevelUp(current, level, entry.levelUp);
-      if (changed.size === 0) {
-        return resetLevel;
-      }
-      const cardNotes = [
-        ...resetLevel.cardNotes.filter(
-          (note) => note.level !== level || !changed.has(note.cardId),
-        ),
-        ...entry.cardNotes
-          .filter((note) => changed.has(note.cardId))
-          .map(cloneCardNote),
-      ];
-      return buildSchema.parse({
-        ...resetLevel,
-        cardNotes,
-        updatedAt: new Date().toISOString(),
-      });
-    });
+    mutateBuild((current) => resetLevelUpEdit(current, entry, changed));
   }
 
   const handSize = character.handSize;
@@ -589,22 +474,6 @@ function uniqueCards(cards: Card[]): Card[] {
     seen.add(card.id);
     return true;
   });
-}
-
-function cloneLevelUp(levelUp: LevelUp): LevelUp {
-  return {
-    ...levelUp,
-    added: [...levelUp.added],
-    dropped: [...levelUp.dropped],
-  };
-}
-
-function cloneCardNote(note: CardNote): CardNote {
-  return { ...note };
-}
-
-function deckPath(characterId: string, buildId: string, level: number): string {
-  return `/c/${encodeURIComponent(characterId)}/b/${encodeURIComponent(buildId)}/l/${level}`;
 }
 
 export function UnavailableLevelUpView() {
