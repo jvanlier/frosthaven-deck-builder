@@ -2,6 +2,24 @@ import type { Character } from "../../shared/character.js";
 import type { Build } from "../../shared/schema/index.js";
 import { canAppendLevel, replayBuild } from "../../shared/rules/index.js";
 import { deckPath, levelUpPath, startEditorPath } from "./paths";
+import { readLastPosition } from "./last-position";
+
+export function activeBuildLevel(
+  build: Build,
+  levels: ReturnType<typeof replayBuild>["levels"],
+): number {
+  const position = readLastPosition(build.id);
+  if (
+    position?.characterId === build.characterId &&
+    levels.some(({ level }) => level === position.level)
+  ) {
+    return position.level;
+  }
+  return (
+    levels.find((state) => state.issues.length > 0)?.level ??
+    levels.at(-1)!.level
+  );
+}
 
 export function buildEntryPath(
   build: Build,
@@ -11,11 +29,7 @@ export function buildEntryPath(
   if (build.levelUps.length === 0 && firstIssue) {
     return startEditorPath(build);
   }
-  return deckPath(
-    build.characterId,
-    build.id,
-    firstIssue?.level ?? levels.at(-1)!.level,
-  );
+  return deckPath(build.characterId, build.id, activeBuildLevel(build, levels));
 }
 
 export function levelUpDestination(

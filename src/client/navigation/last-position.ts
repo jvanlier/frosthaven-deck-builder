@@ -7,10 +7,18 @@ interface LastPosition {
   level: number;
 }
 
+function buildPositionKey(buildId: string): string {
+  return `${LAST_POSITION_STORAGE_KEY}:${buildId}`;
+}
+
 export function rememberLastPosition(position: LastPosition): void {
   try {
     window.localStorage.setItem(
       LAST_POSITION_STORAGE_KEY,
+      JSON.stringify(position),
+    );
+    window.localStorage.setItem(
+      buildPositionKey(position.buildId),
       JSON.stringify(position),
     );
   } catch {
@@ -18,14 +26,17 @@ export function rememberLastPosition(position: LastPosition): void {
   }
 }
 
-export function readLastPosition(): LastPosition | null {
+export function readLastPosition(buildId?: string): LastPosition | null {
   try {
-    const raw = window.localStorage.getItem(LAST_POSITION_STORAGE_KEY);
+    const raw = buildId
+      ? (window.localStorage.getItem(buildPositionKey(buildId)) ??
+        window.localStorage.getItem(LAST_POSITION_STORAGE_KEY))
+      : window.localStorage.getItem(LAST_POSITION_STORAGE_KEY);
     if (raw === null) {
       return null;
     }
     const parsed: unknown = JSON.parse(raw);
-    if (!isLastPosition(parsed)) {
+    if (!isLastPosition(parsed) || (buildId && parsed.buildId !== buildId)) {
       return null;
     }
     return parsed;

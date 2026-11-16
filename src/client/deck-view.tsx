@@ -11,10 +11,7 @@ import {
   overviewPath,
   startEditorPath,
 } from "./navigation/paths";
-import {
-  readLastPosition,
-  rememberLastPosition,
-} from "./navigation/last-position";
+import { readLastPosition } from "./navigation/last-position";
 import { UnavailableDeckView } from "./unavailable-deck-view";
 import { updateBuildData } from "./build-data";
 import { getCharacter } from "../shared/data/characters/index.js";
@@ -89,14 +86,6 @@ export function DeckView({
         : state.applied.added.includes(card.id)
           ? "Added from pool"
           : undefined;
-
-  useEffect(() => {
-    rememberLastPosition({
-      characterId: character.id,
-      buildId: build.id,
-      level: state.level,
-    });
-  }, [build.id, character.id, state.level]);
 
   const openCardDetail = (card: Card) => {
     navigate(cardDetailPath(character.id, build.id, card.id));

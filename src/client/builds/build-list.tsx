@@ -5,7 +5,10 @@ import { updateBuildData } from "../build-data";
 import { DataBackupControls } from "../backup/data-backup-controls";
 import { UnavailableDeckView } from "../unavailable-deck-view";
 import { startEditorPath } from "../navigation/paths";
-import { buildEntryPath } from "../navigation/build-destination";
+import {
+  activeBuildLevel,
+  buildEntryPath,
+} from "../navigation/build-destination";
 import { ConfirmDialog, NameDialog } from "./build-dialogs";
 import {
   copyBuild,
@@ -129,7 +132,8 @@ function CharacterBuildList({ character }: { character: Character }) {
                   <Link to={buildEntryPath(build, levels)}>
                     <strong>{build.name}</strong>
                     <span>
-                      Level: start {build.startLevel} · latest{" "}
+                      Level: start {build.startLevel} · active:{" "}
+                      {activeBuildLevel(build, levels)} · latest:{" "}
                       {levels.at(-1)!.level}
                     </span>
                   </Link>
