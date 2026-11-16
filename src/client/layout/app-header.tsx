@@ -54,36 +54,45 @@ export function AppHeader({ health }: { health: HealthState }) {
     <header className="app-header" ref={headerRef}>
       <div className="header-inner">
         <h1 className="visually-hidden">Frosthaven Deck Builder</h1>
-        <Link
-          className="brand"
-          to={
-            workspace.build
-              ? overviewPath(workspace.characterId!, workspace.buildId!)
-              : character
-                ? `/c/${character.id}`
-                : "/"
-          }
-          aria-label={
-            workspace.build
-              ? "Overview"
-              : character
-                ? "Frosthaven Deck Builder builds"
-                : "Frosthaven Deck Builder home"
-          }
-          title={workspace.build ? "Build overview" : undefined}
-        >
-          {character ? <img src={`/icons/${character.icon}`} alt="" /> : null}
-          <span>
-            <strong>
-              {workspace.build?.name ?? character?.name ?? "Frosthaven"}
-            </strong>
-            <small>
-              {workspace.build
-                ? `${character!.name} · started at level ${workspace.build.startLevel}`
-                : "Deck Builder"}
-            </small>
-          </span>
-        </Link>
+        <div className="brand">
+          {character ? (
+            <Link
+              to={`/c/${character.id}`}
+              aria-label="Frosthaven Deck Builder builds"
+              title="Your builds"
+            >
+              <img src={`/icons/${character.icon}`} alt="" />
+            </Link>
+          ) : null}
+          <Link
+            to={
+              workspace.build
+                ? overviewPath(workspace.characterId!, workspace.buildId!)
+                : character
+                  ? `/c/${character.id}`
+                  : "/"
+            }
+            aria-label={
+              workspace.build
+                ? "Overview"
+                : character
+                  ? "Frosthaven Deck Builder builds"
+                  : "Frosthaven Deck Builder home"
+            }
+            title={workspace.build ? "Build overview" : undefined}
+          >
+            <span>
+              <strong>
+                {workspace.build?.name ?? character?.name ?? "Frosthaven"}
+              </strong>
+              <small>
+                {workspace.build
+                  ? `${character!.name} · started at level ${workspace.build.startLevel}`
+                  : "Deck Builder"}
+              </small>
+            </span>
+          </Link>
+        </div>
         <div className="header-level">
           {workspace.build ? (
             <nav className="level-switcher" aria-label="Level navigation">
