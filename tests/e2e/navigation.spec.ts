@@ -189,6 +189,11 @@ test("offers the last valid deck on the picker and safely ignores invalid storag
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
   await page.getByRole("link", { name: "Overview", exact: true }).click();
   await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/overview`);
+  await page.locator(".brand img").click();
+  await expect(page).toHaveURL("/c/SD");
+  await expect(
+    page.getByRole("heading", { name: "Your builds" }),
+  ).toBeVisible();
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
   await expect(page).toHaveURL(/\/l\/2$/);

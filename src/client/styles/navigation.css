@@ -19,11 +19,14 @@
   gap: 10px;
   min-width: 0;
   flex: 1;
+}
+.brand a {
+  min-width: 0;
   color: var(--text);
   text-decoration: none;
 }
-.brand:hover strong,
-.brand:focus-visible strong {
+.brand a:hover strong,
+.brand a:focus-visible strong {
   color: var(--ice);
   text-decoration: underline;
 }
