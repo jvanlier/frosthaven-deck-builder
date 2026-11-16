@@ -13,10 +13,21 @@ import { HealthIndicator, useHealth } from "./layout/health";
 import { SaveFeedback } from "./layout/save-feedback";
 import { CardPreview, SaveFeedbackPreview } from "./test-previews";
 import { getCharacter } from "../shared/data/characters/index.js";
+import { useWorkspace } from "./layout/workspace";
+import { rememberLastPosition } from "./navigation/last-position";
 
 export default function App() {
   const appData = useAppData();
   const health = useHealth();
+  const { characterId, build, level, levels } = useWorkspace();
+  const buildId = build?.id;
+  const hasLevel = level !== null && levels.includes(level);
+
+  useEffect(() => {
+    if (characterId && buildId && level !== null && hasLevel) {
+      rememberLastPosition({ characterId, buildId, level });
+    }
+  }, [characterId, buildId, level, hasLevel]);
 
   useEffect(() => {
     const warnBeforeUnload = (event: BeforeUnloadEvent) =>

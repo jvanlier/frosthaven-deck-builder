@@ -51,7 +51,7 @@ for (const { name, startLevel, latestLevel } of [
     await page.goto("/c/SD");
     await page
       .getByRole("link", {
-        name: `${name} Level: start ${startLevel} · latest ${latestLevel}`,
+        name: `${name} Level: start ${startLevel} · active: ${startLevel} · latest: ${latestLevel}`,
         exact: true,
       })
       .click();
@@ -85,7 +85,7 @@ for (const firstInvalidLevel of [null, 2, 3]) {
     if (firstInvalidLevel === null) {
       await expect(
         page.getByRole("link", {
-          name: "Freeze control Level: start 1 · latest 3",
+          name: "Freeze control Level: start 1 · active: 3 · latest: 3",
           exact: true,
         }),
       ).toBeVisible();
@@ -95,7 +95,7 @@ for (const firstInvalidLevel of [null, 2, 3]) {
     }
     await page
       .getByRole("link", {
-        name: "Freeze control Level: start 1 · latest 3",
+        name: `Freeze control Level: start 1 · active: ${firstInvalidLevel ?? 3} · latest: 3`,
         exact: true,
       })
       .click();
@@ -131,13 +131,82 @@ for (const valid of [true, false]) {
     await page.goto("/c/SD");
     await page
       .getByRole("link", {
-        name: "Freeze control Level: start 1 · latest 1",
+        name: "Freeze control Level: start 1 · active: 1 · latest: 1",
         exact: true,
       })
       .click();
     await expect(page).toHaveURL(
       `/c/SD/b/${fixtureBuildId}/l/1${valid ? "" : "/start"}`,
     );
+  });
+}
+
+test("remembers the active level independently for each build across reloads", async ({
+  page,
+}) => {
+  const data = structuredClone(overviewFixtureData);
+  data.builds.push({
+    ...structuredClone(data.builds[0]!),
+    id: "223e4567-e89b-42d3-a456-426614174000",
+    name: "Second build",
+  });
+  await page.route("**/api/data", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(data),
+    }),
+  );
+
+  await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
+  await page.getByRole("link", { name: "Level 1", exact: true }).click();
+  await page.goto("/c/SD/b/223e4567-e89b-42d3-a456-426614174000/l/2");
+  await expect(
+    page.getByRole("heading", { name: "Deck: Second build" }),
+  ).toBeVisible();
+  await page.goto("/c/SD");
+  await page.reload();
+
+  const firstBuild = page.getByRole("link", {
+    name: "Freeze control Level: start 1 · active: 1 · latest: 3",
+    exact: true,
+  });
+  await expect(firstBuild).toBeVisible();
+  await expect(
+    page.getByRole("link", {
+      name: "Second build Level: start 1 · active: 2 · latest: 3",
+      exact: true,
+    }),
+  ).toHaveAttribute("href", "/c/SD/b/223e4567-e89b-42d3-a456-426614174000/l/2");
+  await firstBuild.click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/1`);
+});
+
+for (const stored of [
+  "not-json",
+  JSON.stringify({ characterId: "SD", buildId: fixtureBuildId, level: 9 }),
+]) {
+  test(`ignores an unavailable active level: ${stored}`, async ({ page }) => {
+    await page.route("**/api/data", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(overviewFixtureData),
+      }),
+    );
+    await page.goto("/c/SD");
+    await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+      key: `${lastPositionStorageKey}:${fixtureBuildId}`,
+      value: stored,
+    });
+    await page.reload();
+    await page
+      .getByRole("link", {
+        name: "Freeze control Level: start 1 · active: 3 · latest: 3",
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/l/3`);
   });
 }
 
