@@ -9,7 +9,6 @@ import { LevelUpRoute } from "./level-up";
 import { OverviewRoute } from "./overview-view";
 import { AboutView, UnavailableView } from "./information-views";
 import { AppHeader, AppHeading } from "./layout/app-header";
-import { BottomTabs } from "./layout/bottom-tabs";
 import { HealthIndicator, useHealth } from "./layout/health";
 import { SaveFeedback } from "./layout/save-feedback";
 import { CardPreview, SaveFeedbackPreview } from "./test-previews";
@@ -99,7 +98,6 @@ export default function App() {
         />
         <Route path="*" element={<UnavailableView />} />
       </Routes>
-      <BottomTabs />
     </div>
   );
 }

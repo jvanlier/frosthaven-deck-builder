@@ -234,13 +234,6 @@ test("edits card notes only in editors and shows them read-only elsewhere", asyn
   );
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
-  const primaryNavigation = page.getByRole("navigation", {
-    name: "Primary navigation",
-  });
-  await expect(primaryNavigation.getByRole("link")).toHaveCount(3);
-  await expect(
-    primaryNavigation.getByRole("link", { name: "Notes" }),
-  ).toHaveCount(0);
   await page.getByRole("link", { name: "Edit this level" }).click();
   const birdsNote = page
     .locator(".level-up-deck")
@@ -358,7 +351,7 @@ test("pauses note editors after save failures and conflicts", async ({
       response === 409 ? "Changed on another device" : "Error saving",
     );
     await expect(birdsNote).toBeDisabled();
-    await page.getByRole("link", { name: "Deck", exact: true }).click();
+    await page.getByRole("link", { name: "Level 2", exact: true }).click();
     await page.getByRole("link", { name: "Level 1", exact: true }).click();
     await page.getByRole("link", { name: "Edit starting deck" }).click();
     await expect(page.getByLabel("Card note for Cold Therapy")).toBeDisabled();

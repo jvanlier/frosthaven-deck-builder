@@ -74,14 +74,8 @@ test("renders a derived deck view and links to the overview", async ({
   await expect(
     page.getByRole("link", { name: "Edit starting deck" }),
   ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
-  const primaryNavigation = page.getByRole("navigation", {
-    name: "Primary navigation",
-  });
   await expect(
-    primaryNavigation.getByRole("link", { name: "Level up" }),
-  ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await expect(
-    primaryNavigation.getByRole("link", { name: "Overview" }),
+    page.getByRole("link", { name: "Overview", exact: true }),
   ).toHaveAttribute("href", `/c/SD/b/${fixtureBuildId}/overview`);
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/overview`);

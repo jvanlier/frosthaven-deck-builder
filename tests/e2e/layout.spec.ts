@@ -198,7 +198,14 @@ test("matches the compact image-first mockup on desktop and phone", async ({
       .locator(".card-note-input")
       .boundingBox())!;
     expect(noteBox.y).toBeGreaterThanOrEqual(cardBox.y + cardBox.height);
-    await expect(page.locator(".bottom-tabs").getByRole("link")).toHaveCount(3);
+    await expect(page.locator(".bottom-tabs")).toHaveCount(0);
+    await page.getByRole("link", { name: "Overview", exact: true }).click();
+    await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/overview`);
+    await expect(
+      page.getByRole("heading", { name: "Build overview" }),
+    ).toBeVisible();
+    await page.getByRole("link", { name: "Level 2", exact: true }).click();
+    await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
     expect(
       await page
         .locator(".app-header")

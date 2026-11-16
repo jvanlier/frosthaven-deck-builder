@@ -27,7 +27,7 @@ test("runs a level-up pick, drop and done through the stored editor", async ({
   );
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Plan level 2" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2/level-up`);
   await expect(
     page.getByRole("heading", { name: "Earlier, not yet picked" }),
@@ -102,7 +102,7 @@ test("scrolls and moves focus to the deck after a mobile pick", async ({
   );
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Plan level 2" }).click();
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   const deckHeading = page.getByRole("heading", { name: "Your deck" });
   await expect(deckHeading).toBeFocused();
@@ -131,14 +131,7 @@ test("scrolls and moves focus to the deck after a mobile pick", async ({
   await expect
     .poll(async () => {
       const headingBox = await deckHeading.boundingBox();
-      const bottomTabs = await page
-        .getByRole("navigation", { name: "Primary navigation" })
-        .boundingBox();
-      return (
-        (headingBox?.y ?? 568) +
-        (headingBox?.height ?? 0) -
-        (bottomTabs?.y ?? 0)
-      );
+      return (headingBox?.y ?? 568) + (headingBox?.height ?? 0) - 568;
     })
     .toBeLessThanOrEqual(0);
 });
@@ -157,7 +150,7 @@ test("keeps enlarged cards view-only and restores focus before picking", async (
   );
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Plan level 2" }).click();
   const enlargeButton = page.getByRole("button", {
     name: "Enlarge Birds in a Tempest",
   });
@@ -180,13 +173,8 @@ test("keeps enlarged cards view-only and restores focus before picking", async (
         ),
       ).map((element) => element.getBoundingClientRect().bottom),
     );
-    const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
     const safeTop = stickyBottom + 16;
-    const safeBottom =
-      Math.min(
-        window.innerHeight,
-        bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
-      ) - 16;
+    const safeBottom = window.innerHeight - 16;
     const buttonCenter =
       button.getBoundingClientRect().top +
       button.getBoundingClientRect().height / 2;
@@ -423,7 +411,7 @@ test("appends unfinished levels, resumes them after reload and resets only this 
   );
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Plan level 2" }).click();
   await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(1);
   await page.getByRole("button", { name: "Done" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/2`);
@@ -549,16 +537,17 @@ test("scopes editor reset and appending to the current level", async ({
   );
 
   await page.goto(`/c/SD/b/${levelUpBuildId}/l/1`);
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Plan level 2" }).click();
   await page.getByRole("button", { name: "Pick Birds in a Tempest" }).click();
   await page.getByRole("button", { name: "Drop Blizzard" }).click();
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Plan level 3" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
   await expect.poll(async () => persisted.builds[0]?.levelUps.length).toBe(2);
 
   await page.getByRole("link", { name: "Level 2", exact: true }).click();
   await page.getByRole("link", { name: "Edit this level" }).click();
-  await page.getByRole("link", { name: "Level up" }).click();
+  await page.getByRole("link", { name: "Level 3", exact: true }).click();
+  await page.getByRole("link", { name: "Edit this level" }).click();
   await expect(page).toHaveURL(`/c/SD/b/${levelUpBuildId}/l/3/level-up`);
   await page.getByRole("button", { name: "Pick Cold Snap" }).click();
   await page

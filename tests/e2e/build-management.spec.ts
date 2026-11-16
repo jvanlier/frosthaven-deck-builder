@@ -48,9 +48,8 @@ test("renames, copies, and confirms build deletion", async ({ page }) => {
       ["Cold control", []],
       ["Independent copy", ["blizzard"]],
     ]);
-  await page
-    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
-    .click();
+  await page.getByRole("link", { name: "Characters", exact: true }).click();
+  await page.getByRole("link", { name: /^Snowdancer/ }).click();
   await expect(
     page.getByText("Independent copy", { exact: true }),
   ).toBeVisible();
@@ -147,9 +146,8 @@ test("pauses open build dialogs after a save failure", async ({ page }) => {
   const createDialog = page.getByRole("dialog", { name: "Create build" });
   await createDialog.getByLabel("Build name").fill("Pending build");
   await createDialog.getByRole("button", { name: "Create build" }).click();
-  await page
-    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
-    .click();
+  await page.getByRole("link", { name: "Characters", exact: true }).click();
+  await page.getByRole("link", { name: /^Snowdancer/ }).click();
   await page.getByRole("button", { name: "Create build" }).click();
   await expect.poll(() => Boolean(releaseSave)).toBe(true);
   releaseSave();
