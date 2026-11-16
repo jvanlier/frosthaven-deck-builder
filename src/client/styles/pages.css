@@ -1,7 +1,7 @@
 .app-frame {
   --header-height: 112px;
   min-height: 100vh;
-  padding-bottom: 84px;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .app-frame:not(:has(.level-switcher)) {
   --header-height: 62px;

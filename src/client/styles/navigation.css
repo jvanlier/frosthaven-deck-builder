@@ -22,6 +22,11 @@
   color: var(--text);
   text-decoration: none;
 }
+.brand:hover strong,
+.brand:focus-visible strong {
+  color: var(--ice);
+  text-decoration: underline;
+}
 .brand img {
   width: 36px;
   height: 36px;
@@ -134,39 +139,6 @@
 .level-switcher .unavailable-level {
   opacity: 0.35;
 }
-.bottom-tabs {
-  position: fixed;
-  z-index: 6;
-  inset: auto 0 0;
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0 max(14px, env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
-  background: #0b1220ee;
-  backdrop-filter: blur(14px);
-}
-.bottom-tabs a,
-.tab-disabled {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 16px;
-  color: var(--muted);
-  font-size: 11px;
-  text-decoration: none;
-}
-.bottom-tabs a span,
-.tab-disabled span {
-  font-size: 20px;
-}
-.bottom-tabs a.active,
-.bottom-tabs a:hover {
-  color: var(--ice);
-}
-.tab-disabled {
-  opacity: 0.5;
-}
 .save-feedback {
   position: sticky;
   z-index: 4;
@@ -185,7 +157,7 @@
   position: fixed;
   top: auto;
   right: 16px;
-  bottom: calc(84px + env(safe-area-inset-bottom));
+  bottom: calc(16px + env(safe-area-inset-bottom));
   min-height: 0;
   padding: 6px 10px;
   border: 1px solid var(--line);

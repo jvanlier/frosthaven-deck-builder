@@ -37,7 +37,7 @@ test("keeps saving feedback subtle without shifting content while scrolling", as
   const feedbackBox = (await feedback.boundingBox())!;
   expect(feedbackBox.width).toBeLessThan(160);
   expect(feedbackBox.y + feedbackBox.height).toBeLessThan(
-    (await page.locator(".bottom-tabs").boundingBox())!.y,
+    page.viewportSize()!.height,
   );
   expect((await content.boundingBox())!.y).toBe(contentTop);
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));

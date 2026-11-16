@@ -178,7 +178,7 @@ function LevelUpEditor({
     ).matches;
     // Picking adds the note field and card before the deck, so calculate the
     // destination after React has committed the new layout. Keep the whole
-    // heading between the sticky editor controls and fixed bottom navigation.
+    // heading below the sticky editor controls and inside the viewport.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         // The action can come from a modal dialog. Wait until its close effect
@@ -193,13 +193,8 @@ function LevelUpEditor({
             ),
           ).map((element) => element.getBoundingClientRect().bottom),
         );
-        const bottomTabs = document.querySelector<HTMLElement>(".bottom-tabs");
-        const visibleBottom = Math.min(
-          window.innerHeight,
-          bottomTabs?.getBoundingClientRect().top ?? window.innerHeight,
-        );
         const safeTop = stickyBottom + 16;
-        const safeBottom = visibleBottom - 16;
+        const safeBottom = window.innerHeight - 16;
         if (safeBottom <= safeTop) {
           return;
         }

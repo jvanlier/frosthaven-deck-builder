@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { levelUpDestination } from "../navigation/build-destination";
+import { overviewPath } from "../navigation/paths";
 import { replayBuild } from "../../shared/rules/index.js";
 import { HealthIndicator, type HealthState } from "./health";
 import { useWorkspace, workspaceDeckPath } from "./workspace";
@@ -55,12 +56,21 @@ export function AppHeader({ health }: { health: HealthState }) {
         <h1 className="visually-hidden">Frosthaven Deck Builder</h1>
         <Link
           className="brand"
-          to={character ? `/c/${character.id}` : "/"}
-          aria-label={
-            character
-              ? "Frosthaven Deck Builder builds"
-              : "Frosthaven Deck Builder home"
+          to={
+            workspace.build
+              ? overviewPath(workspace.characterId!, workspace.buildId!)
+              : character
+                ? `/c/${character.id}`
+                : "/"
           }
+          aria-label={
+            workspace.build
+              ? "Overview"
+              : character
+                ? "Frosthaven Deck Builder builds"
+                : "Frosthaven Deck Builder home"
+          }
+          title={workspace.build ? "Build overview" : undefined}
         >
           {character ? <img src={`/icons/${character.icon}`} alt="" /> : null}
           <span>

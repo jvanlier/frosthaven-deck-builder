@@ -132,7 +132,7 @@ for (const character of characters) {
     await expect(page.locator(".overview-matrix")).toContainText(
       firstCard.name,
     );
-    await page.getByRole("link", { name: "Level up", exact: true }).click();
+    await page.getByRole("link", { name: "Plan level 2", exact: true }).click();
     await expect(page).toHaveURL(
       `/c/${character.id}/b/${build.id}/l/2/level-up`,
     );

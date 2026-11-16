@@ -179,19 +179,16 @@ test("offers the last valid deck on the picker and safely ignores invalid storag
   );
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
   await expect(page).toHaveURL(/\/l\/2$/);
-  await page
-    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
-    .click();
+  await page.getByRole("link", { name: "Characters", exact: true }).click();
+  await page.getByRole("link", { name: /^Snowdancer/ }).click();
   await expect(page).toHaveURL(`/c/SD`);
   await expect(
     page.getByRole("heading", { name: "Your builds" }),
   ).toBeVisible();
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/1/start`);
-  await page
-    .getByRole("link", { name: "Frosthaven Deck Builder builds" })
-    .click();
-  await expect(page).toHaveURL(`/c/SD`);
+  await page.getByRole("link", { name: "Overview", exact: true }).click();
+  await expect(page).toHaveURL(`/c/SD/b/${fixtureBuildId}/overview`);
 
   await page.goto(`/c/SD/b/${fixtureBuildId}/l/2`);
   await expect(page).toHaveURL(/\/l\/2$/);
@@ -320,9 +317,6 @@ test("keeps contextual level navigation within a narrow viewport", async ({
   await expect(
     page.getByRole("link", { name: "Level 9", exact: true }),
   ).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("link", { name: "Level up" })).toHaveAttribute(
-    "href",
-    `/c/SD/b/${fixtureBuildId}/l/1/start`,
-  );
+  await expect(page.getByRole("link", { name: /^Plan level/ })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Level up/i })).toHaveCount(0);
 });
